@@ -1,0 +1,26 @@
+@import "../../../variable.scss";
+
+.avatar-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  &:hover {
+    // border: 2px solid $blue-200;
+    cursor: pointer;
+  }
+
+  .avatar-user-name {
+    // font-family: $fontFamily-semi-bold;
+    // font-size: $font-size-new-10;
+    color: $color-18;
+    height: 28px;
+    width: 28px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}

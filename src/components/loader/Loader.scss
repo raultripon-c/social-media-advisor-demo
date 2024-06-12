@@ -1,0 +1,36 @@
+.loader {
+  position: fixed;
+  z-index: 1031;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  img {
+    width: 50px;
+    height: 50px;
+  }
+}
+
+.inline-loading {
+  padding: 20px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  .loader-msg {
+    color: #5a6872;
+    font-size: 14px;
+  }
+  width: 100%;
+  img {
+    height: 214px;
+    object-fit: contain;
+    vertical-align: middle;
+  }
+}

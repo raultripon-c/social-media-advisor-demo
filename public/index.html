@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en" manifest="cache.appcache">
+  <head>
+    <meta charset="utf-8" />
+    <!-- <script src="/hrit/env-config.js"></script> -->
+     <script src="/env-config.js"></script>
+    <link rel="icon" href="/hrit/public/phenom-favicon.ico" />
+    <link rel="stylesheet" href="/assets/fonts/Poppins.css" defer />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:wght@400;700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+      rel="stylesheet"
+     
+      defer
+    />
+    <link
+      rel="stylesheet"
+      href="/hrit/assets/fonts/Poppins-dev.css"
+     defer
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="Self service tools to manage Phenom TXM"
+    />
+
+    <meta http-equiv="expires" content="0" />
+    <meta http-equiv="pragma" content="no-cache" />
+
+    <!--
+      manifest.json provides metadata used when your web app is installed on a
+      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
+    -->
+    <!-- <link rel="manifest" href="/hrit/manifest.json" /> -->
+    <!--
+      Notice the use of %PUBLIC_URL% in the tags above.
+      It will be replaced with the URL of the `public` folder during the build.
+      Only files inside the `public` folder can be referenced from the HTML.
+
+      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
+      work correctly both with client-side routing and a non-root public URL.
+      Learn how to configure a non-root public URL by running `npm run build`.
+    -->
+    <title>Service Hub</title>
+    <script>
+      // Convert to JSON Obeject
+      window._env_.APP_REGION_WISE_ACCESS_API = JSON.parse(
+        window._env_.APP_REGION_WISE_ACCESS_API.replaceAll("*", '"')
+      );
+      window._env_.DC_CODES = JSON.parse(
+        window._env_.DC_CODES.replaceAll("*", '"')
+      );
+      /**
+       *  Getting the Hostname in dynamic way using window.location
+       *
+       */
+
+      if (!(window.location.hostname === "localhost")) {
+        var subDir = "/hrit/";
+
+        console.log("dynamicBaseName - in index.html:::" + subDir);
+        // if (window._env_.APP_DC != "US") {
+        //   window._env_.APP_API_URL = window._env_.APP_API_URL;
+        //   window._env_.APP_ACCESS_API_URL = window._env_.APP_ACCESS_API_URL;
+        // } else {
+        //   window._env_.APP_API_URL =
+        //     window.location.origin + subDir + window._env_.APP_API_URL;
+        //   window._env_.APP_ACCESS_API_URL =
+        //     window.location.origin + subDir + window._env_.APP_ACCESS_API_URL;
+        // }
+        window._env_.PUBLIC_URL = window.location.origin + subDir;
+      }
+    </script>
+    <!-- <script>
+       var script = document.createElement('script');
+      
+      if (window.location.hostname.includes("localhost")) {
+         
+          
+          script.src = "/env-config.js";
+          
+          
+      }else{
+        script.src = "/hrit/env-config.js";
+      }
+      document.head.appendChild(script);
+  </script> -->
+
+    <script
+      type="module"
+      src="https://servicehub-qa.phenompro.com/public/header/HeaderComponents.js"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+    <div id="portal-root"></div>
+    <!--
+      This HTML file is a template.
+      If you open it directly in the browser, you will see an empty page.
+
+      You can add webfonts, meta tags, or analytics to this file.
+      The build step will place the bundled scripts into the <body> tag.
+
+      To begin the development, run `npm start` or `yarn start`.
+      To create a production bundle, use `npm run build` or `yarn build`.
+    -->
+
+    <script>
+      (function (pendoHostUrl) {
+        (function (p, e, n, d, o) {
+          var v, w, x, y, z;
+          o = p[d] = p[d] || {};
+          o._q = [];
+          v = ["initialize", "identify", "updateOptions", "pageLoad", "track"];
+          for (w = 0, x = v.length; w < x; ++w)
+            (function (m) {
+              o[m] =
+                o[m] ||
+                function () {
+                  o._q[m === v[0] ? "unshift" : "push"](
+                    [m].concat([].slice.call(arguments, 0))
+                  );
+                };
+            })(v[w]);
+          y = e.createElement(n);
+          y.async = !0;
+          y.src = pendoHostUrl;
+          z = e.getElementsByTagName(n)[0];
+          z.parentNode.insertBefore(y, z);
+        })(window, document, "script", "pendo");
+        window.pendo = pendo;
+      })(window._env_.PENDO_HOST_URL);
+    </script>
+  </body>
+</html>

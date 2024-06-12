@@ -1,0 +1,100 @@
+@import "../../variables.scss";
+
+.tools-sidebar {
+  height: 100%;
+  //overflow-y: auto;
+
+ 
+  .sidebar-nav-button {
+    z-index: 1;
+  }
+  .menu-header {
+    justify-content: space-between;
+    height: 63px;
+    display: flex;
+    padding: 20px;
+    font-weight: 500;
+    font-size: 16px;
+    background: $white;
+    color: $side-bar-main;
+    font-family: "Poppins-Regular";
+
+    .menu-close-button {
+      border: none;
+      cursor: pointer;
+      line-height: 0;
+      background-color: $white;
+    }
+  }
+  .hris-summary {
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    // border-right:  solid rgb(209, 213, 220);
+    flex-shrink: 0;
+    background-color: #f1f3f4;
+    .content {
+      display: flex;
+      padding-left: 6px;
+      align-items: center;
+      gap: 8px;
+      align-self: stretch;
+      width: 280px;
+      border-radius: 10px;
+      &:hover {
+        cursor: pointer;
+      }
+      .label {
+        flex: 1 0 0;
+        overflow: hidden;
+        color: var(--neutrals-nn-400, #464f5e);
+        text-overflow: ellipsis;
+        /* Body 2 - Medium */
+        font-size: 14px;
+        width: 187px;
+        font-style: normal;
+        font-weight: 500;
+        line-height: 24px; /* 171.429% */
+        letter-spacing: 0.25px;
+        .label-description {
+          margin: 0 5px;
+        }
+      }
+      .icon {
+        // width: 24px;
+        // height: 24px;
+        margin-right: 4px;
+      }
+      .active-icon {
+        width: 39px;
+      }
+      .grey-icon {
+        height: 24px;
+        width: 24px;
+        margin-left: 7px;
+        margin-right: 7px;
+      }
+    }
+  }
+
+  &.sidebar-menu {
+    transition: width 5s ease; /* Add transition for width */
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 286px;
+    height: 100%;
+    z-index: 9;
+    background-color: $sidebar-bg;
+    .sidebar-nav-button {
+      display: none;
+    }
+  }
+}
+.sidebar-menu > div:nth-child(2) {
+  background-color: $white;
+}
+.sidebar-menu > div:nth-child(2) > div:nth-child(2) {
+  background-color: $white;
+}

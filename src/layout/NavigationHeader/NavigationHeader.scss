@@ -1,0 +1,44 @@
+@import "../../variables.scss";
+
+.module-federated-app-header-container {
+  height: 42px;
+  // position: fixed;
+  z-index: 8;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding-right: 24px;
+  background-color: #fff;
+  border-bottom: 1px solid #e8eaee;
+  border-radius: 16px 0 0;
+
+  // margin-top: 64px;
+  
+  .app-name {
+    padding-left: 50px;
+    color: #637085;
+    font-family: "Poppins";
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .mf-header-left {
+    display: flex;
+    cursor: pointer;
+    padding-left: 34px;
+    background-color: transparent;
+    border: none;
+  }
+  .back-arrow {
+    margin-top: 1px;
+    margin-right: 10px;
+    margin-left: 5px;
+    height: 21px;
+    transform: rotate(-90deg);
+  }
+  .back-navigation {
+    font-family: $font-family;
+    font-size: 14px;
+    color: $neutral-300;
+    margin-top: 2px;
+  }
+}

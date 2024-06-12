@@ -1,0 +1,982 @@
+{
+    "roles":[
+        {
+          "role": "Uber Admin",
+          "resources": [
+            {
+              "name": "partnerusers",
+              "type": "partnerusers",
+              "scopesMap": [
+                "view",
+                "edit",
+                "disable",
+                "enable",
+                "create",
+                "delete"
+              ],
+              "displayName": "partnerusers",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "customerusers",
+              "type": "customerusers",
+              "scopesMap": [
+                "view",
+                "edit",
+                "disable",
+                "enable",
+                "create",
+                "delete",
+                "deleteIdp"
+              ],
+              "displayName": "customerusers",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "access",
+              "type": "access",
+              "scopesMap": [
+                "add",
+                "view",
+                "change",
+                "revoke",
+                "grant",
+                "delete"
+              ],
+              "displayName": "access",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "profile",
+              "type": "profile",
+              "scopesMap": [
+                "view",
+                "changePassword all",
+                "changePassword"
+              ],
+              "displayName": "profile",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "role",
+              "type": "role",
+              "scopesMap": [
+                "view",
+                "edit",
+                "disable",
+                "enable",
+                "create",
+                "delete"
+              ],
+              "displayName": "role",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "lookups",
+              "type": "lookups",
+              "scopesMap": [
+                "view",
+                "create",
+                "update"
+              ],
+              "displayName": "lookups",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "customers",
+              "type": "customers",
+              "scopesMap": [
+                "view",
+                "create",
+                "update",
+                "migrationview"
+              ],
+              "displayName": "customers",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "tenants",
+              "type": "tenants",
+              "scopesMap": [
+                "view",
+                "create",
+                "update"
+              ],
+              "displayName": "tenants",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "integrations",
+              "type": "integrations",
+              "scopesMap": [
+                "view",
+                "create",
+                "update",
+                "delete",
+                "credentialupdate"
+              ],
+              "displayName": "integrations",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "products",
+              "type": "products",
+              "scopesMap": [
+                "view",
+                "create",
+                "update"
+              ],
+              "displayName": "products",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "partners",
+              "type": "partners",
+              "scopesMap": [
+                "view",
+                "create",
+                "update"
+              ],
+              "displayName": "partners",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "temporaryPasswordAccess",
+              "type": "temporaryPasswordAccess",
+              "scopesMap": [
+                "view",
+                "create",
+                "update"
+              ],
+              "displayName": "temporaryPasswordAccess",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "roleTabAccess",
+              "type": "roleTabAccess",
+              "scopesMap": [
+                "view",
+                "edit",
+                "disable",
+                "enable",
+                "create",
+                "delete"
+              ],
+              "displayName": "roleTabAccess",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "scopemanagement",
+              "type": "scopemanagement",
+              "scopesMap": [
+                "view"
+              ],
+              "displayName": "scopemanagement",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "ssoIdentityConfigurationAccess",
+              "type": "ssoIdentityConfigurationAccess",
+              "scopesMap": [
+                "view",
+                "create",
+                "update"
+              ],
+              "displayName": "ssoIdentityConfigurationAccess",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "ssoAdvancedSettingsAccess",
+              "type": "ssoAdvancedSettingsAccess",
+              "scopesMap": [
+                "view",
+                "create",
+                "update"
+              ],
+              "displayName": "ssoAdvancedSettingsAccess",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "serviceAccountClientAccess",
+              "type": "serviceAccountClientAccess",
+              "scopesMap": [
+                "view",
+                "create"
+              ],
+              "displayName": "serviceAccountClientAccess",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "offlineExportAccess",
+              "type": "offlineExportAccess",
+              "scopesMap": [
+                "viewcustomer",
+                "viewpartner"
+                
+              ],
+              "displayName": "offlineExportAccess",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "tenantActionAccess",
+              "type": "tenantActionAccess",
+              "scopesMap": [
+                "create",
+                "view",
+                "edit"                
+              ],
+              "displayName": "tenantActionAccess",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "updateEmailAccess",
+              "type": "updateEmailAccess",
+              "scopesMap": [
+                "create",
+                "bulkupdate"
+              ],
+              "displayName": "updateEmailAccess",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "bruteForceDetectionAccess",
+              "type": "bruteForceDetectionAccess",
+              "scopesMap": [
+                "edit"
+              ],
+              "displayName": "bruteForceDetectionAccess",
+              "enableAccessToOwner": true
+            }
+          ]
+        },
+        {
+          "role": "Uber User",
+          "resources": [
+            {
+              "name": "role",
+              "type": "role",
+              "scopesMap": [
+                "view",
+                "edit",
+                "disable",
+                "enable",
+                "create",
+                "delete"
+              ],
+              "displayName": "role",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "scopemanagement",
+              "type": "scopemanagement",
+              "scopesMap": [
+              
+              ],
+              "displayName": "scopemanagement",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "lookups",
+              "type": "lookups",
+              "scopesMap": [
+                "view",
+                "create",
+                "update"
+              ],
+              "displayName": "lookups",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "products",
+              "type": "products",
+              "scopesMap": [
+                "view",
+                "create",
+                "update"
+              ],
+              "displayName": "products",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "customers",
+              "type": "customers",
+              "scopesMap": [
+                "migrationview"
+              ],
+              "displayName": "customers",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "productserviceconfig",
+              "type": "productserviceconfig",
+              "scopesMap": [
+                "view",
+                "create",
+                "update"
+              ],
+              "displayName": "productserviceconfig",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "offlineExportAccess",
+              "type": "offlineExportAccess",
+              "scopesMap": [
+
+              ],
+              "displayName": "offlineExportAccess",
+              "enableAccessToOwner": true
+            }
+          ]
+        },
+        {
+          "role": "Config Admin",
+          "resources": [
+            {
+              "name": "partnerusers",
+              "type": "partnerusers",
+              "scopesMap": [
+                "view",
+                "edit",
+                "disable",
+                "enable",
+                "create",
+                "delete"
+              ],
+              "displayName": "partnerusers",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "scopemanagement",
+              "type": "scopemanagement",
+              "scopesMap": [
+                "view"
+              ],
+              "displayName": "scopemanagement",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "customerusers",
+              "type": "customerusers",
+              "scopesMap": [
+                "view",
+                "edit",
+                "disable",
+                "enable",
+                "create",
+                "delete",
+                "deleteIdp"
+              ],
+              "displayName": "customerusers",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "profile",
+              "type": "profile",
+              "scopesMap": [
+                "view",
+                "changePassword all",
+                "changePassword"
+              ],
+              "displayName": "profile",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "lookups",
+              "type": "lookups",
+              "scopesMap": [
+                "view"
+              ],
+              "displayName": "lookups",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "customers",
+              "type": "customers",
+              "scopesMap": [
+                "view",
+                "migrationview"
+              ],
+              "displayName": "customers",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "tenants",
+              "type": "tenants",
+              "scopesMap": [
+                "view"
+              ],
+              "displayName": "tenants",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "integrations",
+              "type": "integrations",
+              "scopesMap": [
+                "view",
+                "create",
+                "update",
+                "delete",
+                "credentialupdate"
+              ],
+              "displayName": "integrations",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "products",
+              "type": "products",
+              "scopesMap": [
+                "view"
+              ],
+              "displayName": "products",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "partners",
+              "type": "partners",
+              "scopesMap": [
+                "view"
+              ],
+              "displayName": "partners",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "temporaryPasswordAccess",
+              "type": "temporaryPasswordAccess",
+              "scopesMap": [
+                "view",
+                "create",
+                "update"
+              ],
+              "displayName": "temporaryPasswordAccess",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "roleTabAccess",
+              "type": "roleTabAccess",
+              "scopesMap": [
+                "view",
+                "edit",
+                "disable",
+                "enable",
+                "create",
+                "delete"
+              ],
+              "displayName": "roleTabAccess",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "ssoIdentityConfigurationAccess",
+              "type": "ssoIdentityConfigurationAccess",
+              "scopesMap": [
+                "view",
+                "create",
+                "update"
+              ],
+              "displayName": "ssoIdentityConfigurationAccess",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "ssoAdvancedSettingsAccess",
+              "type": "ssoAdvancedSettingsAccess",
+              "scopesMap": [
+                "view",
+                "create",
+                "update"
+              ],
+              "displayName": "ssoAdvancedSettingsAccess",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "serviceAccountClientAccess",
+              "type": "serviceAccountClientAccess",
+              "scopesMap": [
+                "view",
+                "create"
+              ],
+              "displayName": "serviceAccountClientAccess",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "offlineExportAccess",
+              "type": "offlineExportAccess",
+              "scopesMap": [
+                "viewcustomer",
+                "viewpartner"
+              ],
+              "displayName": "offlineExportAccess",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "updateEmailAccess",
+              "type": "updateEmailAccess",
+              "scopesMap": [
+                "create",
+                "bulkupdate"
+              ],
+              "displayName": "updateEmailAccess",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "bruteForceDetectionAccess",
+              "type": "bruteForceDetectionAccess",
+              "scopesMap": [
+                "edit"
+              ],
+              "displayName": "bruteForceDetectionAccess",
+              "enableAccessToOwner": true
+            }
+          ]
+        },
+        {
+          "role": "Config User",
+          "resources": [
+            {
+              "name": "customerusers",
+              "type": "customerusers",
+              "scopesMap": [
+                "view",
+                "edit",
+                "disable",
+                "enable",
+                "create",
+                "delete",
+                "deleteIdp"
+              ],
+              "displayName": "customerusers",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "scopemanagement",
+              "type": "scopemanagement",
+              "scopesMap": [
+                "view"
+              ],
+              "displayName": "scopemanagement",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "profile",
+              "type": "profile",
+              "scopesMap": [
+                "view",
+                "changePassword all",
+                "changePassword"
+              ],
+              "displayName": "profile",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "lookups",
+              "type": "lookups",
+              "scopesMap": [
+                "view"
+              ],
+              "displayName": "lookups",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "customers",
+              "type": "customers",
+              "scopesMap": [
+                "view",
+                "migrationview"
+              ],
+              "displayName": "customers",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "tenants",
+              "type": "tenants",
+              "scopesMap": [
+                "view"
+              ],
+              "displayName": "tenants",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "integrations",
+              "type": "integrations",
+              "scopesMap": [
+                "view",
+                "create",
+                "update",
+                "delete"
+              ],
+              "displayName": "integrations",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "products",
+              "type": "products",
+              "scopesMap": [
+                "view"
+              ],
+              "displayName": "products",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "temporaryPasswordAccess",
+              "type": "temporaryPasswordAccess",
+              "scopesMap": [
+                "view",
+                "create",
+                "update"
+              ],
+              "displayName": "temporaryPasswordAccess",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "roleTabAccess",
+              "type": "roleTabAccess",
+              "scopesMap": [
+                "view",
+                "edit",
+                "disable",
+                "enable",
+                "create",
+                "delete"
+              ],
+              "displayName": "roleTabAccess",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "ssoIdentityConfigurationAccess",
+              "type": "ssoIdentityConfigurationAccess",
+              "scopesMap": [
+                "view",
+                "create",
+                "update"
+              ],
+              "displayName": "ssoIdentityConfigurationAccess",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "ssoAdvancedSettingsAccess",
+              "type": "ssoAdvancedSettingsAccess",
+              "scopesMap": [
+                "view",
+                "create",
+                "update"
+              ],
+              "displayName": "ssoAdvancedSettingsAccess",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "serviceAccountClientAccess",
+              "type": "serviceAccountClientAccess",
+              "scopesMap": [
+                "view",
+                "create"
+              ],
+              "displayName": "serviceAccountClientAccess",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "offlineExportAccess",
+              "type": "offlineExportAccess",
+              "scopesMap": [
+                "viewcustomer"
+              ],
+              "displayName": "offlineExportAccess",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "updateEmailAccess",
+              "type": "updateEmailAccess",
+              "scopesMap": [
+                "create"              ],
+              "displayName": "updateEmailAccess",
+              "enableAccessToOwner": true
+            }
+          ]
+        },
+        {
+          "role": "Client Admin",
+          "resources": [
+            {
+              "name": "customerusers",
+              "type": "customerusers",
+              "scopesMap": [
+                "view",
+                "edit",
+                "disable",
+                "enable",
+                "create",
+                "delete",
+                "deleteIdp"
+              ],
+              "displayName": "customerusers",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "scopemanagement",
+              "type": "scopemanagement",
+              "scopesMap": [
+               
+              ],
+              "displayName": "scopemanagement",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "profile",
+              "type": "profile",
+              "scopesMap": [
+                "view",
+                "changePassword all",
+                "changePassword"
+              ],
+              "displayName": "profile",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "lookups",
+              "type": "lookups",
+              "scopesMap": [
+                "view"
+              ],
+              "displayName": "lookups",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "customers",
+              "type": "customers",
+              "scopesMap": [
+                "view"
+              ],
+              "displayName": "customers",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "tenants",
+              "type": "tenants",
+              "scopesMap": [
+                "view"
+              ],
+              "displayName": "tenants",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "integrations",
+              "type": "integrations",
+              "scopesMap": [
+                "view",
+                "update",
+                "credentialupdate"
+              ],
+              "displayName": "integrations",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "ssoIdentityConfigurationAccess",
+              "type": "ssoIdentityConfigurationAccess",
+              "scopesMap": [
+                "view",
+                "create",
+                "update"
+              ],
+              "displayName": "ssoIdentityConfigurationAccess",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "offlineExportAccess",
+              "type": "offlineExportAccess",
+              "scopesMap": [
+                "viewcustomer",
+                "viewpartner"
+              ],
+              "displayName": "offlineExportAccess",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "updateEmailAccess",
+              "type": "updateEmailAccess",
+              "scopesMap": [
+                "create"
+              ],
+              "displayName": "updateEmailAccess",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "bruteForceDetectionAccess",
+              "type": "bruteForceDetectionAccess",
+              "scopesMap": [
+                "edit"
+              ],
+              "displayName": "bruteForceDetectionAccess",
+              "enableAccessToOwner": true
+            }
+          ]
+        },
+        {
+          "role": "Client User",
+          "resources": [
+            {
+              "name": "profile",
+              "type": "profile",
+              "scopesMap": [
+                "view"
+              ],
+              "displayName": "profile",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "scopemanagement",
+              "type": "scopemanagement",
+              "scopesMap": [
+                
+              ],
+              "displayName": "scopemanagement",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "lookups",
+              "type": "lookups",
+              "scopesMap": [
+                "view"
+              ],
+              "displayName": "lookups",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "customers",
+              "type": "customers",
+              "scopesMap": [
+                "view"
+              ],
+              "displayName": "customers",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "tenants",
+              "type": "tenants",
+              "scopesMap": [
+                "view"
+              ],
+              "displayName": "tenants",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "integrations",
+              "type": "integrations",
+              "scopesMap": [
+                "view"
+              ],
+              "displayName": "integrations",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "offlineExportAccess",
+              "type": "offlineExportAccess",
+              "scopesMap": [
+                
+              ],
+              "displayName": "offlineExportAccess",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "customerusers",
+              "type": "customerusers",
+              "scopesMap": [
+                "view"
+              ],
+              "displayName": "customerusers",
+              "enableAccessToOwner": true
+            }
+          ]
+        },
+        {
+          "role": "Phenom App",
+          "resources": [
+            {
+              "name": "customerusers",
+              "type": "customerusers",
+              "scopesMap": [
+                "view",
+                "edit",
+                "disable",
+                "enable",
+                "create",
+                "delete"
+              ],
+              "displayName": "customerusers",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "lookups",
+              "type": "lookups",
+              "scopesMap": [
+                "view"
+              ],
+              "displayName": "lookups",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "customers",
+              "type": "customers",
+              "scopesMap": [
+                "view",
+                "migrationview"
+              ],
+              "displayName": "customers",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "tenants",
+              "type": "tenants",
+              "scopesMap": [
+                "view"
+              ],
+              "displayName": "tenants",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "integrations",
+              "type": "integrations",
+              "scopesMap": [
+                "view"
+              ],
+              "displayName": "integrations",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "products",
+              "type": "products",
+              "scopesMap": [
+                "view"
+              ],
+              "displayName": "products",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "partners",
+              "type": "partners",
+              "scopesMap": [
+                "view"
+              ],
+              "displayName": "partners",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "partnerusers",
+              "type": "partnerusers",
+              "scopesMap": [
+                "view"
+              ],
+              "displayName": "partnerusers",
+              "enableAccessToOwner": true
+            },
+            {
+              "name": "ssoIdentityConfigurationAccess",
+              "type": "ssoIdentityConfigurationAccess",
+              "scopesMap": [
+                "view",
+                "create",
+                "update"
+              ],
+              "displayName": "ssoIdentityConfigurationAccess",
+              "enableAccessToOwner": true
+            }
+          ]
+        }
+      ]
+  }

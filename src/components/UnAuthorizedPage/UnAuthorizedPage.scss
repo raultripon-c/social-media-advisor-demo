@@ -1,0 +1,38 @@
+.unauthorized-box {
+  display: flex;
+  background: #f8f9fa;
+  align-items: center;
+  height: 100vh;
+  justify-content: center;
+  img {
+    width: 289.9px;
+    height: 214px;
+    object-fit: contain;
+    vertical-align: middle;
+  }
+  .No-accounts-created {
+    width: 264px;
+    height: 24px;
+    font-size: 18px;
+    line-height: 1.33;
+    color: #5a6872;
+    font-weight: 400;
+    font-stretch: normal;
+    font-style: normal;
+    letter-spacing: normal;
+    text-align: center;
+  }
+  .small-text {
+    width: 267px;
+    height: 40px;
+    font-size: 14px;
+    line-height: 1.43;
+    color: #8c9ba5;
+    margin-top: 40px;
+    font-weight: 400;
+    font-stretch: normal;
+    font-style: normal;
+    letter-spacing: normal;
+    text-align: center;
+  }
+}

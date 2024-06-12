@@ -1,0 +1,19 @@
+@charset "utf-8";
+
+@import "./assets/fonts/ProximaNova.scss";
+// @import "./assets/fonts/Poppins.css";
+@import "~bootstrap/scss/bootstrap.scss";
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+@import "../variable.scss";
+
+body {
+    margin: 0;
+    font-family:$font-family;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    box-sizing: border-box;
+    position: relative;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }

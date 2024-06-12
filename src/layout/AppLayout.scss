@@ -1,0 +1,77 @@
+@import "../variables.scss";
+
+.unauthorized-box {
+  display: flex;
+  align-items: center;
+  height: 100vh;
+  justify-content: center;
+  img {
+    width: 289.9px;
+    height: 214px;
+    object-fit: contain;
+    vertical-align: middle;
+  }
+}
+.servicehub-tools {
+  overflow-x: hidden;
+  background: #f1f3f4;
+  .service-tools-app-header {
+    position: relative;
+  }
+}
+.cm-module-export {
+  thead {
+    z-index: 0;
+  }
+}
+.service-tools-app-layout {
+  width: 100vw;
+  height: calc(100vh - 64px);
+  margin: 0;
+  overflow: hidden;
+  .gray-layer {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: $color-32-BG;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    z-index: 1;
+    &.sidebar-menu {
+      opacity: 1;
+    }
+  }
+  .tools-body-container {
+    position: relative;
+    flex: 1;
+    overflow: hidden;
+    background-color: $color-5;
+    margin-right: 4px;
+  }
+  .service-tools-app-body {
+    // margin-top: 64px;
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+
+    ::-webkit-scrollbar-thumb {
+      // background: #d8d8d8;
+      background-color: #d1d5dc;
+      // margin-right: 2px;
+    }
+
+    ::-webkit-scrollbar {
+      padding: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+      padding: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background-color: rgb(174, 181, 194); /* Change thumb color on hover */
+      margin-right: 5px; /* Add margin to the right of the thumb */
+    }
+  }
+}

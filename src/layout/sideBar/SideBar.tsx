@@ -1,0 +1,146 @@
+import { SideBar } from "@phenom/react-ui-components";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { AppStore } from "store";
+import close from "../../assets/images/close.svg";
+import arrowRight from "../../assets/images/dashboard/arrowRight.svg";
+import dashboardGrey from "../../assets/images/dashboard/dashboardGrey.svg";
+import dashboardActive from "../../assets/images/dashboard/dashboard.svg";
+import dashboardInfo from "../../assets/images/dashboard/dashboardInfo.svg";
+import { setAppDetails } from "../../store/apps/actions";
+import { setCustomerDetails, setCustomerTenants, setSelectedTenant } from "../../store/customer/actions";
+import {
+  CUSTOMER_LEVEL,
+  PLATFORM,
+  TENANT,
+  noShowSideBar,
+} from "../../utils/constants";
+import "./SideBar.scss";
+import sessionTracker from "phenom-session-tracker";
+import { appSelectionHandler } from "../../utils/appUtils";
+
+function ToolsSideBar(props: any) {
+  const { categories, setCategories } = props;
+  const customerDetails = useSelector((state: AppStore) => state.customer);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [disableAutoClose, setDisableAutoClose] = useState(true);
+  const selectedApp = useSelector((state: any) => {
+    const selectedAppFromSession = JSON.parse(
+      sessionStorage.getItem("selectedApp") || "null"
+    );
+    return selectedAppFromSession || state.app?.selectedApp;
+  });
+
+  useEffect(() => {
+    let hideSideBar = noShowSideBar.some((path: string) => {
+      return window.location.pathname.endsWith(path);
+    });
+
+    if (hideSideBar) {
+      setDisableAutoClose(false);
+      setSidebarOpen(false);
+    }
+  }, [window.location.pathname]);
+
+  const currentContext = sessionStorage.getItem("currentContext") || "";
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const handleAppSelection = (app: any) => {
+    if (app.appType == "module-federation") {
+      setDisableAutoClose(false);
+    } else {
+      setSidebarOpen(true);
+      setDisableAutoClose(true);
+    }
+    app && sessionStorage.setItem("selectedApp", JSON.stringify(app));
+    dispatch(setAppDetails(app));
+    sessionTracker.setCustomEvent("App Selected", {
+      "App Name": app?.name,
+    });
+  };
+  console.log("Sidebar", new Date().toLocaleString());
+
+  
+  return (
+    <div className="tools-sidebar">
+      <div className="hris-summary">
+        <div
+          className="content"
+          onClick={() => {
+            const updatedCategories = categories?.map((eachCategory: any) => ({
+              ...eachCategory,
+              isOpen: false,
+            }));
+            setCategories(updatedCategories);
+            setSidebarOpen(false);
+            setDisableAutoClose(false);
+            dispatch(setAppDetails({}));
+            sessionStorage.removeItem("selectedApp");
+            sessionStorage.removeItem("currentContext");
+            if (currentContext !== PLATFORM) {
+              navigate(`${customerDetails?.data?.customerCode}/summary`);
+            } else {
+              dispatch(setSelectedTenant({}));
+              sessionStorage.removeItem("selectedApp");
+              dispatch(setCustomerTenants([]));
+              dispatch(setCustomerDetails({}));
+              navigate("/");
+              // navigate("/");
+            }
+          }}
+        >
+          <img
+            src={
+              Object.keys(selectedApp).length === 0
+                ? dashboardActive
+                : dashboardGrey
+            }
+            alt="img"
+            className={`${
+              Object.keys(selectedApp).length === 0
+                ? "active-icon"
+                : "grey-icon"
+            }`}
+          />
+          <div className="label">
+            <span className="label-description">
+              {currentContext !== PLATFORM ? "HRIT Summary" : "Go To Customers"}
+            </span>
+            <img
+              src={dashboardInfo}
+              alt="img"
+              className="icon"
+              title="Click to Go to Dashboard"
+            />
+          </div>
+          <img src={arrowRight} alt="img" className="icon" />
+        </div>
+      </div>
+
+      <SideBar
+        selectedApp={selectedApp}
+        sidebarOpen={sidebarOpen}
+        setSelectedApp={handleAppSelection}
+        categories={categories}
+        sideBarNavClass={"sidebar-nav-button"}
+        setCategories={setCategories}
+        disableAutoClose={disableAutoClose}
+        setDisableAutoClose={setDisableAutoClose}
+        placeholder="Search"
+        sideBarHeading={
+          currentContext === TENANT
+            ? "TENANT SETTINGS"
+            : currentContext === CUSTOMER_LEVEL
+            ? "ACCOUNT SETTINGS"
+            : null
+        }
+        onClose={(showSidebar: any) => {
+          setSidebarOpen(showSidebar);
+        }}
+      />
+    </div>
+  );
+}
+
+export default ToolsSideBar;
