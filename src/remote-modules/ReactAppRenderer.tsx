@@ -46,19 +46,28 @@ function loadComponent(scope: any, module: any, component: any) {
   };
   
 }
-
 export function ReactAppRenderer(props: Props) {
  
    
   
   const loadEnvs = (fileName: any) => {
-    if(props.module){
-    const script = document.createElement("script");
-    script.src = fileName;
-    document.body.appendChild(script);
+    const isEnvConfigAlreadyLoaded = (scriptSrc: string) => {
+      // Check if a script with the specified source already exists
+      const existingScript = document.querySelector(
+        `script[src="${scriptSrc}"]`
+      );
+      // If the script exists, return true
+      return !!existingScript;
+    };
+
+    if (props.module && !isEnvConfigAlreadyLoaded(fileName)) {
+      const script = document.createElement("script");
+      script.src = fileName;
+      document.body.appendChild(script);
     }
   };
 
+  // Assuming `props` is available in the current scope
   loadEnvs(props.envconfig);
  
   const navigate = useNavigate();

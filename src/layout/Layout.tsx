@@ -27,8 +27,6 @@ const Layout = () => {
   const app = useSelector((state: any) => state.app);
   let pendo = (window as any).pendo;
   const { subPath } = useSubPath();
-  console.log(subPath,window.location.pathname === `/${subPath}` ||
-    window.location.pathname === `/${subPath}/`,window.location.pathname, `/${subPath}/`,`/${subPath}`);
   
   const [allApps, setAllApps] = useState<any[]>([]);
   useEffect(() => {

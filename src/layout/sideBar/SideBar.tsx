@@ -59,7 +59,6 @@ function ToolsSideBar(props: any) {
       "App Name": app?.name,
     });
   };
-  console.log("Sidebar", new Date().toLocaleString());
 
   
   return (

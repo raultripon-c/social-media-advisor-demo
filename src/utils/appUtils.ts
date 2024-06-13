@@ -1,16 +1,17 @@
-import { isEmpty } from "lodash";
-import { RemoteModuleRenderer } from "../remote-modules/RemoteModuleRenderer";
-import { DATE_FORMAT, navigationHeaderApps, noShowSideBar } from "./constants";
 import moment from "moment";
 import { toast } from "react-toastify";
+import { isEmpty } from "lodash";
+
+import { RemoteModuleRenderer } from "../remote-modules/RemoteModuleRenderer";
+
+import { DATE_FORMAT, navigationHeaderApps, noShowSideBar } from "./constants";
+
 export const appSelectionHandler = (
   selectedApp: any,
   navigate: any,
   customerCode: string,
   refNum: string
 ) => {
-  console.log("appSelectionHandler", new Date().toLocaleString());
-
   let appType = selectedApp.appType;
   const mfRoute = selectedApp.appConfig?.route;
   const routeWithoutRefNum = mfRoute?.replace("/:refnum", "");
@@ -29,27 +30,12 @@ export const appSelectionHandler = (
     updatedRoute = `${customerCode}/${refNum}`;
   }
   switch (appType) {
-    case "app-studio":
-      selectedApp &&
-        sessionStorage.setItem("selectedApp", JSON.stringify(selectedApp));
-      sessionStorage.setItem("selectedProductId", selectedApp.appConfig.appId);
-      navigate(!isEmpty(updatedRoute) ? `/${updatedRoute}/apps` : "/");
-      break;
     case "module-federation":
       selectedApp &&
         sessionStorage.setItem("selectedApp", JSON.stringify(selectedApp));
       if (isEmpty(updatedRoute) && selectedApp?.context !== "platform") {
         sessionStorage.removeItem("selectedApp");
       }
-      navigate(
-        !isEmpty(updatedRoute)
-          ? `/${updatedRoute}${routeWithoutRefNum}`
-          : `${routeWithoutRefNum}`
-      );
-      break;
-    case "plugin":
-      selectedApp &&
-        sessionStorage.setItem("selectedApp", JSON.stringify(selectedApp));
       navigate(
         !isEmpty(updatedRoute)
           ? `/${updatedRoute}${routeWithoutRefNum}`
@@ -151,7 +137,6 @@ export const transformAppData = (data: any) => {
     })
     .filter(Boolean); // Filter out any null items
 
-
   const mainData = {
     customerTenantApps: sortAppsByOrder(customerTenantApps),
     platformApps: sortAppsByOrder(platformApps),
@@ -234,14 +219,13 @@ export const navigateToNewTab = (url: string) => {
   return window.open(url, "_blank");
 };
 
-export function findAppConfigByRoutes(
-  apps: any,
-  value: string
-): any {
+export function findAppConfigByRoutes(apps: any, value: string): any {
   try {
     return apps.filter((element: any) => {
       try {
-        return value.toLowerCase().includes((element.appConfig.route).toLowerCase());
+        return value
+          .toLowerCase()
+          .includes(element.appConfig.route.toLowerCase());
       } catch (error) {
         console.error("An error occurred while filtering: ", error);
         return false;

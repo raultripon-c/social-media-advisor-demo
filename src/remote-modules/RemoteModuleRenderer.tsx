@@ -9,7 +9,7 @@ import { AppStore } from "store";
 import { useSubPath } from "../SubPathContext";
 
 export const RemoteModuleRenderer = () => {
-  console.log("Entered RemoteModuleRenderer", new Date().toLocaleString());
+
 
   const selectedTenant = useSelector(
     (state: AppStore) => state.customer.selectedTenant

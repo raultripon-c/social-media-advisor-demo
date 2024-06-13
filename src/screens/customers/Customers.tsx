@@ -192,7 +192,7 @@ const Customers: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
               <div
                 className="tenant-card"
                 key={eachCustomer.id}
-                onClick={() => navigateToDashBoard("customer", eachCustomer)}
+                onClick={() =>  navigate(`/${eachCustomer.customerCode}/summary`)}
               >
                 <span>{eachCustomer.name}</span>
               </div>
