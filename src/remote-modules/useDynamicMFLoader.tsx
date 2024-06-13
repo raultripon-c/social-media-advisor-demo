@@ -34,7 +34,6 @@ export const useDynamicMFLoader = (args: any) => {
     }
   }, [args.url]);
 
-  console.log("dynamic loader",ready)
 
   return {
     ready,

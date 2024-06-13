@@ -206,7 +206,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
         allApps && allApps.length > 0
           ? allApps
           : await APIService.getAllApps(setAppsLoader);
-      console.log({ response });
 
       if (!response) return;
       dispatch(setAppsFromAPI(response));
@@ -224,7 +223,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   const emitEventsToChildApps = (output: any, currentEventData: any) => {
     Object.keys(allEvents?.inputs).forEach((app) => {
       const appInputs = allEvents.inputs[app];
-      console.log(app, appInputs);
       appInputs.forEach((input: any) => {
         if (input === output) {
           console.log(
