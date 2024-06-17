@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 
 import { useKeycloak } from "phenom-auth-react-adapter";
-
+import AngularApp from "../utils/Angular.json"
 import Toast from "../components/Toast/Toast";
 import RBAJson from "../utils/RBA.json";
 
@@ -23,7 +23,6 @@ import { EmptyState } from "@phenom/react-ui-components";
 import { isEmpty } from "lodash";
 import sessionTracker from "phenom-session-tracker";
 import { MessageService } from "../MessageService";
-import { useSubPath } from "../SubPathContext";
 import { setAppDetails, setAppsFromAPI } from "../store/apps/actions";
 import { APIService } from "../utils/api.service";
 import { PLATFORM } from "../utils/constants";
@@ -48,7 +47,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   const [appsLoader, setAppsLoader] = useState(true);
   const [rolesLoader, setRolesLoader] = useState(true);
   const userDetails = window?.keycloakInstance?.tokenParsed?.userDetails;
-  const { subPath } = useSubPath();
   const [showSidebarMenu, toggleSidebarMenu] = useState(false);
   const { selectedApp, allApps } = useSelector((state: any) => state.app);
   const totalAppDEtails = useSelector((state: any) => state);
@@ -96,11 +94,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
     { inputs: {}, outputs: {} } // Changed outputs to an object
   );
   useEffect(() => {
-    const customerCodeFromUrl = !isEmpty(subPath)
-      ? window.location.pathname.split("/")[2]
-      : window.location.pathname.split("/")[1];
-    const customerCode = customerCodeFromUrl;
-
+    const customerCode = window.location.pathname.split("/")[1];
+    
     if (userDetails?.userType?.toUpperCase() !== "PARTNER") {
       sessionStorage.setItem("currentContext", "customer");
       setSelectedTenant(primaryTenant);
@@ -122,7 +117,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       const filteredApps: any = transformAppData(response);
       setCustomerTenantApps(filteredApps?.customerTenantApps);
       setPlatformApps(filteredApps?.platformApps);
-      sessionStorage.setItem("allapps", JSON.stringify(response));
       setAllRoutes([...appRoutes, ...mfRoutes]);
     }
 
@@ -132,9 +126,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   }, []);
   useEffect(() => {
     if (selectedApp || selectedAppFromSession) {
-      const refNum = !isEmpty(subPath)
-        ? window.location.pathname.split("/")[3]
-        : window.location.pathname.split("/")[2];
+      const refNum = window.location.pathname.split("/")[2];
+      
       if (refNum != "summary") {
         const tenantsUrl = `${
           (window as any)._env_.APP_API_URL
@@ -208,13 +201,16 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
           : await APIService.getAllApps(setAppsLoader);
 
       if (!response) return;
-      dispatch(setAppsFromAPI(response));
-      const mfRoutes = getMfRoutes(response);
-      setTransformedAppData(transformAppData(response));
-      const filteredApps: any = transformAppData(response);
+      let res = [...response,...AngularApp.data]
+      console.log(res, "res")
+      dispatch(setAppsFromAPI(res));
+      const mfRoutes = getMfRoutes(res);
+      setTransformedAppData(transformAppData(res));
+      const filteredApps: any = transformAppData(res);
       setCustomerTenantApps(filteredApps?.customerTenantApps);
       setPlatformApps(filteredApps?.platformApps);
-      sessionStorage.setItem("allapps", JSON.stringify(response));
+      // console.log(filteredApps, "filteredApps")
+      sessionStorage.setItem("allapps", JSON.stringify(res));
       setAllRoutes([...appRoutes, ...mfRoutes]);
     } catch (error) {
       console.error("Error:", error);
@@ -223,6 +219,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   const emitEventsToChildApps = (output: any, currentEventData: any) => {
     Object.keys(allEvents?.inputs).forEach((app) => {
       const appInputs = allEvents.inputs[app];
+      console.log(app, appInputs);
       appInputs.forEach((input: any) => {
         if (input === output) {
           console.log(

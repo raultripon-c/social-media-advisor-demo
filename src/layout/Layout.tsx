@@ -3,7 +3,6 @@ import { useSelector } from "react-redux";
 import { useKeycloak } from "phenom-auth-react-adapter";
 import AppLayout from "./AppLayout";
 import { AppStore } from "store";
-import { useSubPath } from "../SubPathContext";
 import Header from "./header/Header";
 import Customers from "../screens/customers/Customers";
 import { GenericErrorBoundary } from "../remote-modules/ReactAppRenderer";
@@ -12,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { initializeFaro } from "@grafana/faro-web-sdk";
 
 const Layout = () => {
+  
   const navigate = useNavigate();
   const selectedTenant = useSelector(
     (state: AppStore) => state.customer.selectedTenant
@@ -26,8 +26,6 @@ const Layout = () => {
   window.orgInfo = orgInfo;
   const app = useSelector((state: any) => state.app);
   let pendo = (window as any).pendo;
-  const { subPath } = useSubPath();
-  
   const [allApps, setAllApps] = useState<any[]>([]);
   useEffect(() => {
     if (keycloak.authenticated && !initialized) {
@@ -62,16 +60,14 @@ const Layout = () => {
                 selectedTenant &&
                 Object.entries(selectedTenant)?.length === 0 &&
                 userDetails?.userType === "PARTNER" &&
-                (window.location.pathname === `/${subPath}` ||
-                  window.location.pathname === `/${subPath}/`)
+                (window.location.pathname === `/`)
               }
             />
           </div>
           {selectedTenant &&
           Object.entries(selectedTenant)?.length === 0 &&
           userDetails?.userType === "PARTNER" &&
-          (window.location.pathname === `/${subPath}` ||
-            window.location.pathname === `/${subPath}/`) ? (
+          (window.location.pathname === '/') ? (
             <Customers allApps={allApps} setAllApps={setAllApps} />
           ) : (
             <AppLayout allApps={allApps} />

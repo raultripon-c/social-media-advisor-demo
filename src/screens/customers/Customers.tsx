@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { EmptyState } from "@phenom/react-ui-components";
 import { AppStore } from "store";
 import { Search } from "../../components/TenantSearch/TenantsSearch";
-
+import AngularApp from "../../utils/Angular.json";
 import { setAppDetails, setAppsFromAPI } from "../../store/apps/actions";
 import {
   setAllCustomers,
@@ -55,8 +55,9 @@ const Customers: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
     try {
       const response = await APIService.getAllApps();
       if (!response) return;
-      sessionStorage.setItem("allapps", JSON.stringify(response));
-      dispatch(setAppsFromAPI(response));
+      let res = [...response,...AngularApp.data]
+      sessionStorage.setItem("allapps", JSON.stringify(res));
+      dispatch(setAppsFromAPI(res));
     } catch (error) {
       console.error("Error:", error);
     }

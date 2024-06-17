@@ -3,7 +3,6 @@ import * as ReactDOM from "react-dom";
 import { Provider } from "react-redux";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
-import { SubPathProvider } from "./SubPathContext";
 import "./index.scss";
 import store from "./store/index";
 
@@ -14,9 +13,7 @@ ReactDOM.render(
         window.location.hostname.includes("localhost") ? "" : "/hrit"
       }
     >
-      <SubPathProvider>
         <App />
-      </SubPathProvider>
     </BrowserRouter>
   </Provider>,
   document.getElementById("root")

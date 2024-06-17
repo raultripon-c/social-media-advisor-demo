@@ -6,7 +6,11 @@ export const useDynamicMFLoader = (args: any) => {
     // Check if a script with the specified source already exists
     const existingScript = document.querySelector(`script[src="${scriptSrc}"]`);
     // If the script exists, return true
-    return !!existingScript;
+    if (existingScript && existingScript.getAttribute("downloaded")) {
+      return true;
+    }
+    // If the script doesn't exist, return false
+    return false;
   };
   React.useEffect(() => {
     if (!args.url) {
@@ -20,6 +24,7 @@ export const useDynamicMFLoader = (args: any) => {
       setReady(false);
       setFailed(false);
       element.onload = () => {
+        element.setAttribute("downloaded" , "true" )
         setReady(true);
       };
       element.onerror = () => {
@@ -27,7 +32,11 @@ export const useDynamicMFLoader = (args: any) => {
         setReady(false);
         setFailed(true);
       };
-      document.head.appendChild(element);
+      if (!document.querySelector(`script[src="${args.url}"]`))
+        {
+          document.head.appendChild(element);
+        }
+        // document.head.appendChild(element);
     } else {
       setReady(true);
       setFailed(false);

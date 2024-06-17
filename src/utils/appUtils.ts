@@ -118,7 +118,7 @@ export const transformAppData = (data: any) => {
       return { ...item, children: sortAppsByOrder(filteredApps) };
     })
     .filter(Boolean);
-
+    
   const platformApps = categoryMap
     .map((item: any) => {
       const filteredApps = data?.filter((app: any) => {

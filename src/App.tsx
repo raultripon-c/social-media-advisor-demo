@@ -2,7 +2,6 @@ import React, { useEffect } from "react";
 import ReactKeycloakProvider from "phenom-auth-react-adapter";
 import { InitialLoader } from "./layout/Loader";
 import Layout from "./layout/Layout";
-import { useSubPath } from "./SubPathContext";
 import "react-toastify/dist/ReactToastify.css";
 import "../index.scss";
 import { isEmpty } from "lodash";
@@ -16,14 +15,6 @@ const App = (): JSX.Element => {
   };
   const tokenLogger = (tokens: any) => {
   };
-  const { subPath, setSubPath } = useSubPath();
-  useEffect(() => {
-    if (window.location.hostname.includes("localhost")) {
-      setSubPath("");
-    } else {
-      setSubPath("hrit");
-    }
-  }, []);
 
   return (
     <>

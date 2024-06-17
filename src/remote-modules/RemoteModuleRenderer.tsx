@@ -6,7 +6,6 @@ import { ReactAppRenderer } from "./ReactAppRenderer";
 import AngularAppRenderer from "./AngularAppRenderer";
 
 import { AppStore } from "store";
-import { useSubPath } from "../SubPathContext";
 
 export const RemoteModuleRenderer = () => {
 
@@ -30,7 +29,6 @@ export const RemoteModuleRenderer = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [moduleProps, setModuleProps] = useState(selectedApp.props);
-  const { subPath } = useSubPath();
 
   useEffect(() => {
     setModuleProps((prevModuleProps: any) => {
@@ -54,10 +52,10 @@ export const RemoteModuleRenderer = () => {
 
       if (selectedApp.isMfProduct) {
         if (!window.location.hostname.includes("localhost")) {
-          updatedProps.subPath = subPath;
+          updatedProps.subPath = ""; 
 
           if (selectedModuleAppObject?.context === "tenant") {
-            updatedProps.subPath = `${subPath}/${selectedTenant?.customerCode}`;
+            updatedProps.subPath = `/${selectedTenant?.customerCode}`;
           }
         } else if (selectedModuleAppObject?.context === "tenant") {
           updatedProps.subPath = selectedTenant?.customerCode;
@@ -115,9 +113,9 @@ export const RemoteModuleRenderer = () => {
         )}
         {selectedModuleAppObject.framework == "ANGULAR" && (
           <AngularAppRenderer
-            remoteName="cpui"
-            exposedModule="./CRMEvents"
-            url="https://localhost:4200/remoteEntry.js"
+            remoteName={selectedApp.appName}
+            exposedModule={selectedApp.module}
+            url={selectedApp.url}
           />
         )}
       </div>
