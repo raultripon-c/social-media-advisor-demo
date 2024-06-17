@@ -4,9 +4,11 @@ export const useDynamicMFLoader = (args: any) => {
   const [failed, setFailed] = React.useState(false);
   const isScriptAlreadyDownloaded = (scriptSrc: string) => {
     // Check if a script with the specified source already exists
-    const existingScript = document.querySelector(`script[src="${scriptSrc}"]`);
+    var existingScript = document.querySelector(
+      'script[src="' + scriptSrc + '"]'
+    );
     // If the script exists, return true
-    if (existingScript && existingScript.getAttribute("downloaded")) {
+    if (existingScript) {
       return true;
     }
     // If the script doesn't exist, return false
@@ -16,7 +18,7 @@ export const useDynamicMFLoader = (args: any) => {
     if (!args.url) {
       return;
     }
-    if (!isScriptAlreadyDownloaded(args.url)) {
+    // if (!isScriptAlreadyDownloaded(args.url)) {
       const element = document.createElement("script");
       element.src = args.url;
       element.type = "text/javascript";
@@ -24,7 +26,6 @@ export const useDynamicMFLoader = (args: any) => {
       setReady(false);
       setFailed(false);
       element.onload = () => {
-        element.setAttribute("downloaded" , "true" )
         setReady(true);
       };
       element.onerror = () => {
@@ -32,17 +33,14 @@ export const useDynamicMFLoader = (args: any) => {
         setReady(false);
         setFailed(true);
       };
-      if (!document.querySelector(`script[src="${args.url}"]`))
-        {
-          document.head.appendChild(element);
-        }
-        // document.head.appendChild(element);
-    } else {
-      setReady(true);
-      setFailed(false);
-    }
+      document.head.appendChild(element);
+    // } else {
+    //   setReady(true);
+    //   setFailed(false);
+    // }
   }, [args.url]);
 
+  console.log("dynamic loader",ready)
 
   return {
     ready,

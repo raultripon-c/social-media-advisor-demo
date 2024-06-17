@@ -36,11 +36,12 @@ export const appSelectionHandler = (
       if (isEmpty(updatedRoute) && selectedApp?.context !== "platform") {
         sessionStorage.removeItem("selectedApp");
       }
-      navigate(
-        !isEmpty(updatedRoute)
-          ? `/${updatedRoute}${routeWithoutRefNum}`
-          : `${routeWithoutRefNum}`
-      );
+      // navigate(
+      //   !isEmpty(updatedRoute)
+      //     ? `/${updatedRoute}${routeWithoutRefNum}`
+      //     : `${routeWithoutRefNum}`
+      // );
+      navigate("/events");
       break;
     case "external":
       const link = selectedApp.appConfig?.link;
@@ -118,7 +119,7 @@ export const transformAppData = (data: any) => {
       return { ...item, children: sortAppsByOrder(filteredApps) };
     })
     .filter(Boolean);
-    
+
   const platformApps = categoryMap
     .map((item: any) => {
       const filteredApps = data?.filter((app: any) => {
@@ -225,7 +226,7 @@ export function findAppConfigByRoutes(apps: any, value: string): any {
       try {
         return value
           .toLowerCase()
-          .includes(element.appConfig.route.toLowerCase());
+          .includes(element?.appConfig?.route?.toLowerCase());
       } catch (error) {
         console.error("An error occurred while filtering: ", error);
         return false;
