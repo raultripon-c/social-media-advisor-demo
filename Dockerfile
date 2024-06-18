@@ -1,5 +1,5 @@
 FROM node:16.3.0-alpine
-ARG PROJECT_NAME="forms-service"
+ARG PROJECT_NAME="txe-ui"
 COPY package.json ./
 COPY tsconfig.json ./
 COPY tsconfig.prod.json ./
