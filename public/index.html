@@ -44,34 +44,7 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
     <title>TXE</title>
-    <script>
-      // Convert to JSON Obeject
-      window._env_.APP_REGION_WISE_ACCESS_API = JSON.parse(
-        window._env_.APP_REGION_WISE_ACCESS_API.replaceAll("*", '"')
-      );
-      window._env_.DC_CODES = JSON.parse(
-        window._env_.DC_CODES.replaceAll("*", '"')
-      );
-      /**
-       *  Getting the Hostname in dynamic way using window.location
-       *
-       */
-
-      if (!(window.location.hostname === "localhost")) {
-        var subDir = "/hrit/";
-
-        // if (window._env_.APP_DC != "US") {
-        //   window._env_.APP_API_URL = window._env_.APP_API_URL;
-        //   window._env_.APP_ACCESS_API_URL = window._env_.APP_ACCESS_API_URL;
-        // } else {
-        //   window._env_.APP_API_URL =
-        //     window.location.origin + subDir + window._env_.APP_API_URL;
-        //   window._env_.APP_ACCESS_API_URL =
-        //     window.location.origin + subDir + window._env_.APP_ACCESS_API_URL;
-        // }
-        window._env_.PUBLIC_URL = window.location.origin + subDir;
-      }
-    </script>
+  
     <!-- <script>
        var script = document.createElement('script');
       
