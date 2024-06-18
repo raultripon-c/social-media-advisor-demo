@@ -64,64 +64,8 @@ export const APIService = {
     // setAppsLoader(true);
     return await API.get(`${(window as any)._env_.TOOLS_API_URL}api/apps`)
       .then((result: any) => {
-        let apps = [
-          {
-            id: "c809a871-b863-4be7-b269-89628221831b",
-            name: "CMS",
-            icon: "",
-            parentName: "CMS",
-            searchKeys: ["events"],
-            accessibility: null,
-            appType: "external",
-            hoverText: "CMS",
-            loadingText: "Loading CMS",
-            appConfig: {
-              link: "https://cms-qa1.phenompro.com/tier3",
-            },
-            rbacDetails: {
-              roles: [],
-              clientId: "",
-            },
-            isParent: false,
-            context: "customer",
-            showSidebar: null,
-            order: 2,
-            events: null,
-            framework: null,
-          },
-          {
-            id: "9e1b1a48-12e4-4799-bae4-29c3c9fd8508",
-            name: "CRM",
-            icon: "",
-            parentName: "CRM",
-            searchKeys: ["events", "events", "crm-events"],
-            accessibility: [],
-            appType: "module-federation",
-            hoverText: "Events",
-            loadingText: "Loading Events...",
-            appConfig: {
-              appName: "cpui",
-              module: "./CRMEvents",
-              route: "/events",
-              url: "https://qa3-candidates.phenompeople.com/remoteEntry.js",
-              envconfig:
-                "https://certificate-manager-qa.phenompro.com/env-config.js",
-              loadingMessage: "Loading",
-              accessType: "phenom",
-              showSideNav: "false",
-              isMfProduct: "true",
-            },
-            rbacDetails: {
-              clientId: "tls-automation-api",
-            },
-            isParent: false,
-            context: "tenant",
-            showSidebar: null,
-            order: 1,
-            events: null,
-            framework: "ANGULAR",
-          },
-        ];
+        // let apps = result?.data?.data;
+        let apps=[] as any[];
         let appNamesList = apps
           ?.filter((app: any) => {
             return app?.appType === "module-federation";
@@ -129,9 +73,8 @@ export const APIService = {
           .map((filteredApps: any) => {
             return filteredApps?.name;
           });
-
-        //sending the apps name list to chrome extension
         sessionStorage.setItem("allapps",JSON.stringify(apps))
+        //sending the apps name list to chrome extension
         window.postMessage({ action: "appsdata", appsList: appNamesList }, "*");
         return apps;
       })

@@ -3,13 +3,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 import { ReactAppRenderer } from "./ReactAppRenderer";
-import {AngularAppRenderer} from "./AngularAppRenderer";
+import { AngularAppRenderer } from "./AngularAppRenderer";
 
 import { AppStore } from "store";
 
 export const RemoteModuleRenderer = () => {
-
-
   const selectedTenant = useSelector(
     (state: AppStore) => state.customer.selectedTenant
   );
@@ -52,7 +50,7 @@ export const RemoteModuleRenderer = () => {
 
       if (selectedApp.isMfProduct) {
         if (!window.location.hostname.includes("localhost")) {
-          updatedProps.subPath = ""; 
+          updatedProps.subPath = "";
 
           if (selectedModuleAppObject?.context === "tenant") {
             updatedProps.subPath = `/${selectedTenant?.customerCode}`;
@@ -94,6 +92,7 @@ export const RemoteModuleRenderer = () => {
     }
     return null;
   };
+  console.log("lavanya", { selectedApp });
   return (
     <div>
       <div>
@@ -111,11 +110,17 @@ export const RemoteModuleRenderer = () => {
             key={key}
           />
         )}
-        {selectedModuleAppObject.framework == "ANGULAR" && (
-          <AngularAppRenderer
-          remoteName="cpui" exposedModule="./CRMEvents" url="https://localhost:8080/remoteEntry.js" selectedApp={selectedApp}
-          />
-        )}
+        {selectedModuleAppObject.framework == "ANGULAR" &&
+          selectedApp.scope &&
+          selectedApp && (
+            <AngularAppRenderer
+              scope={selectedApp.scope}
+              module={selectedApp.module}
+              url={selectedApp.url}
+              selectedApp={selectedApp}
+              component={selectedApp.component}
+            />
+          )}
       </div>
     </div>
   );
