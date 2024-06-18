@@ -4,7 +4,6 @@ import {  useSelector } from "react-redux";
 import { AppStore } from "store";
 import ReactDOM from 'react-dom';
 import { getSelectedApp } from "../layout/dashBoard/utils";
-import "./AngularApp.scss"
 export function AngularAppRenderer() {
   const containerRef = useRef(null);
   const selectedTenant = useSelector(
@@ -88,5 +87,5 @@ export function AngularAppRenderer() {
 // }
  
 
-  return <div className="crm-events-module" id="child-module-renderer"></div>;
+  return <div className="crm-events-module" id="child-module-renderer" ref={containerRef}></div>;
 };
