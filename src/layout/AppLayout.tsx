@@ -121,7 +121,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       setAllRoutes([...appRoutes, ...mfRoutes]);
     }
 
-    APIService.getLoggedInUserRoles(dispatch, setRolesLoader);
+    // APIService.getLoggedInUserRoles(dispatch, setRolesLoader);
     if (!window.keycloakInstance.bearer_token)
       window.keycloakInstance.bearer_token = "Bearer " + keycloak.token;
   }, []);
@@ -334,15 +334,16 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
 
   return (
     <>
-      {rolesLoader ? (
-        <InitialLoader show={true} />
-      ) : (transformedAppData &&
-          (transformedAppData as any[])?.length === 0 &&
-          !appsLoader) ||
-        !checkIfUserHasAccess() ? (
-        <div className="unauthorized-box font-14">
-          {<EmptyState text={"No apps Found"} />}
-        </div>
+      {false ? (
+        <div></div>
+      //   <InitialLoader show={true} />
+      // ) : (transformedAppData &&
+      //     (transformedAppData as any[])?.length === 0 &&
+        //   !appsLoader) ||
+        // !checkIfUserHasAccess() ? (
+      //   <div className="unauthorized-box font-14">
+      //     {<EmptyState text={"No apps Found"} />}
+      //   </div>
       ) : (
         <div className="service-tools-app-layout">
           <Toast />
