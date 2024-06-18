@@ -3,6 +3,8 @@ import { useSelector } from "react-redux";
 import { AppStore } from "store";
 import { getSelectedApp } from "../layout/dashBoard/utils";
 import { useDynamicMFLoader } from "./useDynamicMFLoader";
+import "./AngularApp.scss"
+
 export function AngularAppRenderer(props: any) {
   const containerRef = useRef(null);
   console.log({ props });

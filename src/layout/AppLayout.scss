@@ -45,7 +45,7 @@
   .tools-body-container {
     position: relative;
     flex: 1;
-    overflow: hidden;
+    overflow-y: scroll;
     background-color: $color-5;
     margin-right: 4px;
   }
