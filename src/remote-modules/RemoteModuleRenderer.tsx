@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 import { ReactAppRenderer } from "./ReactAppRenderer";
-import AngularAppRenderer from "./AngularAppRenderer";
+import {AngularAppRenderer} from "./AngularAppRenderer";
 
 import { AppStore } from "store";
 
@@ -113,9 +113,7 @@ export const RemoteModuleRenderer = () => {
         )}
         {selectedModuleAppObject.framework == "ANGULAR" && (
           <AngularAppRenderer
-            remoteName={selectedApp.appName}
-            exposedModule={selectedApp.module}
-            url={selectedApp.url}
+          remoteName="cpui" exposedModule="./CRMEvents" url="https://localhost:8080/remoteEntry.js" selectedApp={selectedApp}
           />
         )}
       </div>

@@ -31,6 +31,7 @@ import { InitialLoader } from "./Loader";
 import ToolsSideBar from "./sideBar/SideBar";
 import { log } from "console";
 import DashBoard from "./dashBoard/DashBoard";
+import { AngularAppRenderer } from "../remote-modules/AngularAppRenderer";
 
 interface AppLayoutProps {
   allApps: any;
@@ -369,6 +370,15 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
                 ></div>
               )}
               <Routes>
+              <Route
+                    key="events"
+                    path="/events"
+                    element={(
+                    
+                       <AngularAppRenderer></AngularAppRenderer>
+                    
+                    )}
+                  />
                 {!userDetails.userType && (
                   <Route
                     path="/"
@@ -376,6 +386,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
                       <Navigate to={`/${userDetails.userOrg}/summary`} />
                     }
                   />
+                  
                 )}
                 {allRoutes.map((route: IRoute) => (
                   <Route

@@ -63,7 +63,9 @@ function ToolsSideBar(props: any) {
   
   return (
     <div className="tools-sidebar">
+      
       <div className="hris-summary">
+        
         <div
           className="content"
           onClick={() => {
@@ -138,7 +140,9 @@ function ToolsSideBar(props: any) {
           setSidebarOpen(showSidebar);
         }}
       />
+      
     </div>
+
   );
 }
 

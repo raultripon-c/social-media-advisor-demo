@@ -2,6 +2,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ModuleFederationPlugin = require("webpack/lib/container/ModuleFederationPlugin");
 const webpack = require("webpack");
 const CopyPlugin = require("copy-webpack-plugin");
+
 const deps = require("./package.json").dependencies;
 module.exports = {
   entry: {
@@ -95,7 +96,6 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: "./public/index.html",
-      // publicPath: "/hrit/",
       publicPath: "/",
     }),
     new webpack.ProvidePlugin({
@@ -104,10 +104,26 @@ module.exports = {
     new ModuleFederationPlugin({
       name: "servicehub",
       filename: "servicehub.js",
-      remotes: {},
+   
       exposes: {},
       shared: {
-        ...deps,
+       
+        // rxjs: {
+        //   singleton: true,
+        //   eager: true,
+        //   requiredVersion: 'auto'
+        // },
+        jquery: {
+          singleton: true,
+          eager: true,
+          requiredVersion: deps["jquery"],
+        },
+       
+        datepicker: {
+          singleton: true,
+          eager: true,
+          requiredVersion: deps["datepicker"],
+        },
         react: {
           singleton: true,
           eager: true,
@@ -144,6 +160,7 @@ module.exports = {
       crypto: require.resolve("crypto-browserify"),
       stream: require.resolve("stream-browserify"),
     },
+   
   },
   target: "web",
 };

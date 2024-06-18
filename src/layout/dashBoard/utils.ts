@@ -9,7 +9,14 @@ export const API_METHOD = {
   PUT: "put",
   DELETE: "delete",
 };
-
+export const getSelectedApp = ( route: any) => {
+  return {
+    remoteName: "cpui",
+    module: "./CRMEvents",
+    route: "/events",
+    component: "app-events",
+  }
+}
 export const ALERT_TYPE_CODES = [
   "certificate_manager",
   "certificate_expiry",
