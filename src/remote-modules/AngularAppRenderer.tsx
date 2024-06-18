@@ -20,13 +20,13 @@ export function AngularAppRenderer() {
     const Module = factory();
     return Module;
   };
-//
+//  
     const { ready, failed } = useDynamicMFLoader({
-      url: "https://localhost:8080/remoteEntry.js",
+      url: "https://qa3-candidates.phenompeople.com/remoteEntry.js",
     });
     
     const element = document.createElement("script");
-    element.src = "https://localhost:8080/scripts.js";
+    element.src = "https://pie-dev-onephenom.phenompro.com/scripts.js";
     element.type = "text/javascript";
     element.async = true;
     document.head.appendChild(element);
