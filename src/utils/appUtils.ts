@@ -50,6 +50,13 @@ export const appSelectionHandler = (
         toast.error("Link is not provided for navigation");
       }
       break;
+    case "script":
+      navigate(
+        !isEmpty(updatedRoute)
+          ? `/${updatedRoute}${routeWithoutRefNum}`
+          : `${routeWithoutRefNum}`
+      );
+      break;
     default:
       navigate("/");
       sessionStorage.removeItem("currentContext");

@@ -113,16 +113,26 @@
     },
     {
       "id": "ChildContent9280jdhd09903098",
-      "name": "Child Content",
+      "name": "Content Hub",
       "icon": "",
       "parentName": "Content",
       "searchKeys": ["events"],
       "accessibility": null,
-      "appType": "external",
-      "hoverText": "Child Content",
+      "appType": "script",
+      "hoverText": "Content Hub",
       "loadingText": "Loading Experience Manager",
       "appConfig": {
-        "link": "https://cms-qa1.phenompro.com/tier3"
+        "module": "./Content",
+        "route": "/contenthub",
+        "component": "div",
+        "appName": "content",
+        "scope": "content",
+        "url": "http://localhost:3002/remoteEntry.js",
+        "envconfig": "https://certificate-manager-qa.phenompro.com/env-config.js",
+        "loadingMessage": "Loading",
+        "accessType": "phenom",
+        "showSideNav": "false",
+        "isMfProduct": "true"
       },
       "rbacDetails": {
         "roles": [],
@@ -133,7 +143,41 @@
       "showSidebar": null,
       "order": 2,
       "events": null,
-      "framework": null
+      "framework": "REACT"
+    },
+    {
+      "id": "ChildContent9280jdhd09903098",
+      "name": "Asset Manager",
+      "icon": "",
+      "parentName": "Content",
+      "searchKeys": ["events"],
+      "accessibility": null,
+      "appType": "script",
+      "hoverText": "Asset Manager",
+      "loadingText": "Loading Experience Manager",
+      "appConfig": {
+        "module": "./assets",
+        "route": "/assets",
+        "component": "div",
+        "appName": "content",
+        "scope": "content",
+        "url": "http://localhost:3002/remoteEntry.js",
+        "envconfig": "https://certificate-manager-qa.phenompro.com/env-config.js",
+        "loadingMessage": "Loading",
+        "accessType": "phenom",
+        "showSideNav": "false",
+        "isMfProduct": "true"
+      },
+      "rbacDetails": {
+        "roles": [],
+        "clientId": ""
+      },
+      "isParent": false,
+      "context": "customer",
+      "showSidebar": null,
+      "order": 2,
+      "events": null,
+      "framework": "REACT"
     },
     {
       "id": "9e1b1a48-12e4-4799-bae4-29c3c9fd8508",

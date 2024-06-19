@@ -25,7 +25,7 @@ export function AngularAppRenderer(props: any) {
   };
   //
   const { ready, failed } = useDynamicMFLoader({
-    url: "https://qa3-candidates.phenompeople.com/remoteEntry.js",
+    url: props.url,
   });
   const element = document.createElement("script");
   element.src = "https://pie-dev-onephenom.phenompro.com/scripts.js";
