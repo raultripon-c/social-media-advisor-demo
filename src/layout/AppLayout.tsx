@@ -331,7 +331,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   const checkIfUserHasAccess = () => {
     return USER_ROLES.some((role) => logedUserRoles.includes(role));
   };
-
+  
   return (
     <>
       {false ? (
