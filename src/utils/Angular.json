@@ -2,13 +2,34 @@
   "data": [
     {
       "id": "ksajdfs;dhfsdk;hfsdk",
-      "name": "TXE",
+      "name": "Experiences",
       "icon": "https://d3mmu8ebsgiyjr.cloudfront.net/images_test/Account circle.svg",
       "parentName": null,
       "searchKeys": ["events"],
       "accessibility": null,
       "appType": "",
-      "hoverText": "TXE",
+      "hoverText": "Experiences",
+      "loadingText": "",
+      "appConfig": {},
+      "rbacDetails": {
+        "roles": [],
+        "clientId": ""
+      },
+      "isParent": true,
+      "context": null,
+      "showSidebar": null,
+      "order": 10,
+      "events": null
+    },
+    {
+      "id": "skjf09knds93nks0kx",
+      "name": "People",
+      "icon": "https://d3mmu8ebsgiyjr.cloudfront.net/images_test/Account circle.svg",
+      "parentName": null,
+      "searchKeys": ["events"],
+      "accessibility": null,
+      "appType": "",
+      "hoverText": "People",
       "loadingText": "",
       "appConfig": {},
       "rbacDetails": {
@@ -23,14 +44,14 @@
     },
     {
       "id": "c809a871-b863-4be7-b269-89628221831b",
-      "name": "CMS",
+      "name": "Talent Community",
       "icon": "",
-      "parentName": "TXE",
+      "parentName": "People",
       "searchKeys": ["events"],
       "accessibility": null,
       "appType": "external",
-      "hoverText": "CMS",
-      "loadingText": "Loading CMS",
+      "hoverText": "Talent Community",
+      "loadingText": "Loading Talent Community",
       "appConfig": {
         "link": "https://cms-qa1.phenompro.com/tier3"
       },
@@ -47,9 +68,9 @@
     },
     {
       "id": "9e1b1a48-12e4-4799-bae4-29c3c9fd8508",
-      "name": "CRM",
+      "name": "Events",
       "icon": "",
-      "parentName": "TXE",
+      "parentName": "Experiences",
       "searchKeys": ["events", "events", "crm-events"],
       "accessibility": [],
       "appType": "module-federation",

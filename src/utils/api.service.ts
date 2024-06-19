@@ -88,39 +88,7 @@ export const APIService = {
             order: 2,
             events: null,
             framework: null,
-          },
-          {
-            id: "9e1b1a48-12e4-4799-bae4-29c3c9fd8508",
-            name: "CRM",
-            icon: "",
-            parentName: "CRM",
-            searchKeys: ["events", "events", "crm-events"],
-            accessibility: [],
-            appType: "module-federation",
-            hoverText: "Events",
-            loadingText: "Loading Events...",
-            appConfig: {
-              appName: "cpui",
-              module: "./CRMEvents",
-              route: "/events",
-              url: "https://qa3-candidates.phenompeople.com/remoteEntry.js",
-              envconfig:
-                "https://certificate-manager-qa.phenompro.com/env-config.js",
-              loadingMessage: "Loading",
-              accessType: "phenom",
-              showSideNav: "false",
-              isMfProduct: "true",
-            },
-            rbacDetails: {
-              clientId: "tls-automation-api",
-            },
-            isParent: false,
-            context: "tenant",
-            showSidebar: null,
-            order: 1,
-            events: null,
-            framework: "ANGULAR",
-          },
+          }
         ];
         let appNamesList = apps
           ?.filter((app: any) => {
