@@ -22,14 +22,35 @@
       "events": null
     },
     {
-      "id": "skjf09knds93nks0kx",
-      "name": "People",
+      "id": "slkdjflkjsdskjf09kndsweoriepwieqp93nks0kx",
+      "name": "WorkFlows",
       "icon": "https://d3mmu8ebsgiyjr.cloudfront.net/images_test/Account circle.svg",
       "parentName": null,
       "searchKeys": ["events"],
       "accessibility": null,
       "appType": "",
-      "hoverText": "People",
+      "hoverText": "WorkFlows",
+      "loadingText": "",
+      "appConfig": {},
+      "rbacDetails": {
+        "roles": [],
+        "clientId": ""
+      },
+      "isParent": true,
+      "context": null,
+      "showSidebar": null,
+      "order": 10,
+      "events": null
+    },
+    {
+      "id": "Contentskjf09kndsweoriepwieqp93nks0kx",
+      "name": "Content",
+      "icon": "https://d3mmu8ebsgiyjr.cloudfront.net/images_test/Account circle.svg",
+      "parentName": null,
+      "searchKeys": ["events"],
+      "accessibility": null,
+      "appType": "",
+      "hoverText": "Content",
       "loadingText": "",
       "appConfig": {},
       "rbacDetails": {
@@ -44,14 +65,62 @@
     },
     {
       "id": "c809a871-b863-4be7-b269-89628221831b",
-      "name": "Talent Community",
+      "name": "Experience Manager",
       "icon": "",
-      "parentName": "People",
+      "parentName": "Experiences",
       "searchKeys": ["events"],
       "accessibility": null,
       "appType": "external",
-      "hoverText": "Talent Community",
-      "loadingText": "Loading Talent Community",
+      "hoverText": "Experience Manager",
+      "loadingText": "Loading Experience Manager",
+      "appConfig": {
+        "link": "https://cms-qa1.phenompro.com/tier3"
+      },
+      "rbacDetails": {
+        "roles": [],
+        "clientId": ""
+      },
+      "isParent": false,
+      "context": "customer",
+      "showSidebar": null,
+      "order": 2,
+      "events": null,
+      "framework": null
+    },
+    {
+      "id": "campaign9280jdhd09903098",
+      "name": "Campaign",
+      "icon": "",
+      "parentName": "WorkFlows",
+      "searchKeys": ["events"],
+      "accessibility": null,
+      "appType": "external",
+      "hoverText": "Campaign",
+      "loadingText": "Loading Experience Manager",
+      "appConfig": {
+        "link": "https://cms-qa1.phenompro.com/tier3"
+      },
+      "rbacDetails": {
+        "roles": [],
+        "clientId": ""
+      },
+      "isParent": false,
+      "context": "customer",
+      "showSidebar": null,
+      "order": 2,
+      "events": null,
+      "framework": null
+    },
+    {
+      "id": "ChildContent9280jdhd09903098",
+      "name": "Child Content",
+      "icon": "",
+      "parentName": "Content",
+      "searchKeys": ["events"],
+      "accessibility": null,
+      "appType": "external",
+      "hoverText": "Child Content",
+      "loadingText": "Loading Experience Manager",
       "appConfig": {
         "link": "https://cms-qa1.phenompro.com/tier3"
       },
