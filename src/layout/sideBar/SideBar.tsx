@@ -106,7 +106,7 @@ function ToolsSideBar(props: any) {
           />
           <div className="label">
             <span className="label-description">
-              {currentContext !== PLATFORM ? "HRIT Summary" : "Go To Customers"}
+              {currentContext !== PLATFORM ? "TXE Home" : "Go To Customers"}
             </span>
             <img
               src={dashboardInfo}

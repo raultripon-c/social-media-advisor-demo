@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState,Suspense } from "react";
 import { useSelector } from "react-redux";
 import { AppStore } from "store";
+import { Loader } from "@phenom/react-ui-components";
 import { getSelectedApp } from "../layout/dashBoard/utils";
 import { useDynamicMFLoader } from "./useDynamicMFLoader";
 import "./AngularApp.scss"
@@ -51,6 +52,8 @@ export function AngularAppRenderer(props: any) {
     const newElement = document.createElement(props.component);
     //newElement.textContent = "This is a new child element.";
 
+ 
+    //newElement.textContent = "This is a new child element.";
     // Append the new element to the parent div
     if (parentDiv) {
       parentDiv.appendChild(newElement);
@@ -62,7 +65,6 @@ export function AngularAppRenderer(props: any) {
       (async () => {
         const scope = props.scope;
         const exposedModule = props.module;
-        debugger;
         const module = await loadRemoteModule(scope, exposedModule);
         if (module.mountEvents) {
           const props = {
@@ -95,10 +97,25 @@ export function AngularAppRenderer(props: any) {
   // }
 
   return (
-    <div
-      className="crm-events-module"
-      id="child-module-renderer"
-      ref={containerRef}
-    ></div>
-  );
+    <>
+      {ready ? (
+        <Suspense
+          fallback={
+            <div className="child-loading">
+              <Loader title={"loading"} />
+            </div>
+          }
+        >
+          <div
+            className="crm-events-module"
+            id="child-module-renderer"
+            ref={containerRef}
+          ></div>
+        </Suspense>
+      ) : (
+        <div className="child-loading">
+          <Loader title={"loading"} />
+        </div>
+      )}
+    </>);
 }

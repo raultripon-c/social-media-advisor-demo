@@ -8,12 +8,8 @@ import store from "./store/index";
 
 ReactDOM.render(
   <Provider store={store}>
-    <BrowserRouter
-      basename={
-        window.location.hostname.includes("localhost") ? "" : "/hrit"
-      }
-    >
-        <App />
+    <BrowserRouter>
+      <App />
     </BrowserRouter>
   </Provider>,
   document.getElementById("root")
