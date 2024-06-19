@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState,Suspense } from "react";
 import { useSelector } from "react-redux";
 import { AppStore } from "store";
+import { Loader } from "@phenom/react-ui-components";
 import { getSelectedApp } from "../layout/dashBoard/utils";
 import { useDynamicMFLoader } from "./useDynamicMFLoader";
 import "./AngularApp.scss"
@@ -24,11 +25,10 @@ export function AngularAppRenderer(props: any) {
   };
   //
   const { ready, failed } = useDynamicMFLoader({
-    url: "https://localhost:8080/remoteEntry.js",
+    url: "https://qa3-candidates.phenompeople.com/remoteEntry.js",
   });
-
   const element = document.createElement("script");
-  element.src = "https://localhost:8080/scripts.js";
+  element.src = "https://pie-dev-onephenom.phenompro.com/scripts.js";
   element.type = "text/javascript";
   element.async = true;
   document.head.appendChild(element);
@@ -51,6 +51,8 @@ export function AngularAppRenderer(props: any) {
     const newElement = document.createElement(props.component);
     //newElement.textContent = "This is a new child element.";
 
+ 
+    //newElement.textContent = "This is a new child element.";
     // Append the new element to the parent div
     if (parentDiv) {
       parentDiv.appendChild(newElement);
@@ -62,7 +64,6 @@ export function AngularAppRenderer(props: any) {
       (async () => {
         const scope = props.scope;
         const exposedModule = props.module;
-        debugger;
         const module = await loadRemoteModule(scope, exposedModule);
         if (module.mountEvents) {
           const props = {
@@ -71,10 +72,7 @@ export function AngularAppRenderer(props: any) {
             subPath: `/${selectedTenant.customerCode}/${selectedTenant.refNum}${selectedApp.route}`,
             userId: window.keycloakInstance.userInfo.userDetails.id,
           };
-          console.log("hello", props);
-
           module.mountEvents(props);
-          console.log("module.mountEvents", module.mountEvents);
         }
         // mountAngularComponent(ref.current, module.YourAngularModule);
       })();
@@ -95,10 +93,25 @@ export function AngularAppRenderer(props: any) {
   // }
 
   return (
-    <div
-      className="crm-events-module"
-      id="child-module-renderer"
-      ref={containerRef}
-    ></div>
-  );
+    <>
+      {ready ? (
+        <Suspense
+          fallback={
+            <div className="child-loading">
+              <Loader title={"loading"} />
+            </div>
+          }
+        >
+          <div
+            className="crm-events-module"
+            id="child-module-renderer"
+            ref={containerRef}
+          ></div>
+        </Suspense>
+      ) : (
+        <div className="child-loading">
+          <Loader title={"loading"} />
+        </div>
+      )}
+    </>);
 }

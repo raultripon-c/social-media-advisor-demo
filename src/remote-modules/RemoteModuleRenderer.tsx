@@ -92,7 +92,6 @@ export const RemoteModuleRenderer = () => {
     }
     return null;
   };
-  console.log("lavanya", { selectedApp });
   return (
     <div>
       <div>
