@@ -64,32 +64,8 @@ export const APIService = {
     // setAppsLoader(true);
     return await API.get(`${(window as any)._env_.TOOLS_API_URL}api/apps`)
       .then((result: any) => {
-        let apps = [
-          {
-            id: "c809a871-b863-4be7-b269-89628221831b",
-            name: "CMS",
-            icon: "",
-            parentName: "CMS",
-            searchKeys: ["events"],
-            accessibility: null,
-            appType: "external",
-            hoverText: "CMS",
-            loadingText: "Loading CMS",
-            appConfig: {
-              link: "https://cms-qa1.phenompro.com/tier3",
-            },
-            rbacDetails: {
-              roles: [],
-              clientId: "",
-            },
-            isParent: false,
-            context: "customer",
-            showSidebar: null,
-            order: 2,
-            events: null,
-            framework: null,
-          }
-        ];
+        // let apps = result?.data?.data;
+        let apps=[] as any[];
         let appNamesList = apps
           ?.filter((app: any) => {
             return app?.appType === "module-federation";
@@ -97,9 +73,8 @@ export const APIService = {
           .map((filteredApps: any) => {
             return filteredApps?.name;
           });
-
-        //sending the apps name list to chrome extension
         sessionStorage.setItem("allapps",JSON.stringify(apps))
+        //sending the apps name list to chrome extension
         window.postMessage({ action: "appsdata", appsList: appNamesList }, "*");
         return apps;
       })

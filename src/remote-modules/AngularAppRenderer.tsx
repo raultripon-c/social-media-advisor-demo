@@ -1,15 +1,14 @@
-import React, { useEffect, useRef, useState, Suspense } from "react";
-import { useDynamicMFLoader } from "./useDynamicMFLoader";
+import React, { useEffect, useRef, useState,Suspense } from "react";
 import { useSelector } from "react-redux";
 import { AppStore } from "store";
-import ReactDOM from "react-dom";
-import { getSelectedApp } from "../layout/dashBoard/utils";
-import { GenericErrorBoundary } from "../components/ErrorBoundary/GenericErrorBoundary";
 import { Loader } from "@phenom/react-ui-components";
+import { getSelectedApp } from "../layout/dashBoard/utils";
+import { useDynamicMFLoader } from "./useDynamicMFLoader";
+import "./AngularApp.scss"
 
-import "./AngularApp.scss";
-export function AngularAppRenderer() {
+export function AngularAppRenderer(props: any) {
   const containerRef = useRef(null);
+  console.log({ props });
   const selectedTenant = useSelector(
     (state: AppStore) => state.customer.selectedTenant
   );
@@ -28,7 +27,6 @@ export function AngularAppRenderer() {
   const { ready, failed } = useDynamicMFLoader({
     url: "https://qa3-candidates.phenompeople.com/remoteEntry.js",
   });
-
   const element = document.createElement("script");
   element.src = "https://pie-dev-onephenom.phenompro.com/scripts.js";
   element.type = "text/javascript";
@@ -50,7 +48,10 @@ export function AngularAppRenderer() {
 
   const loadComponent = () => {
     const parentDiv = document.querySelector("#child-module-renderer");
-    const newElement = document.createElement(selectedApp.component);
+    const newElement = document.createElement(props.component);
+    //newElement.textContent = "This is a new child element.";
+
+ 
     //newElement.textContent = "This is a new child element.";
     // Append the new element to the parent div
     if (parentDiv) {
@@ -61,20 +62,17 @@ export function AngularAppRenderer() {
     loadComponent();
     if (ready) {
       (async () => {
-        const remoteName = selectedApp.remoteName;
-        const exposedModule = selectedApp.module;
-        const module = await loadRemoteModule(remoteName, exposedModule);
+        const scope = props.scope;
+        const exposedModule = props.module;
+        const module = await loadRemoteModule(scope, exposedModule);
         if (module.mountEvents) {
           const props = {
             token: window.keycloakInstance.token,
             refNum: "WORKUS",
-            subPath: selectedApp.route,
+            subPath: `/${selectedTenant.customerCode}/${selectedTenant.refNum}${selectedApp.route}`,
             userId: window.keycloakInstance.userInfo.userDetails.id,
           };
-          console.log("hello", props);
-
-          module["mountEvents"](props);
-          console.log("module.mountEvents", module);
+          module.mountEvents(props);
         }
         // mountAngularComponent(ref.current, module.YourAngularModule);
       })();
@@ -94,7 +92,6 @@ export function AngularAppRenderer() {
   //     loadMountEvents();
   // }
 
-  // return <div className="crm-events-module" id="child-module-renderer" ref={containerRef}></div>;
   return (
     <>
       {ready ? (
@@ -116,6 +113,5 @@ export function AngularAppRenderer() {
           <Loader title={"loading"} />
         </div>
       )}
-    </>
-  );
+    </>);
 }

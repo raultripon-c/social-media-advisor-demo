@@ -146,9 +146,11 @@
       "hoverText": "Events",
       "loadingText": "Loading Events...",
       "appConfig": {
-        "appName": "cpui",
         "module": "./CRMEvents",
         "route": "/events",
+        "component": "app-events",
+        "appName": "cpui",
+        "scope": "cpui",
         "url": "https://qa3-candidates.phenompeople.com/remoteEntry.js",
         "envconfig": "https://certificate-manager-qa.phenompro.com/env-config.js",
         "loadingMessage": "Loading",

@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 
 import { useKeycloak } from "phenom-auth-react-adapter";
-import AngularApp from "../utils/Angular.json"
+import AngularApp from "../utils/Angular.json";
 import Toast from "../components/Toast/Toast";
 import RBAJson from "../utils/RBA.json";
 
@@ -96,7 +96,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   );
   useEffect(() => {
     const customerCode = window.location.pathname.split("/")[1];
-    
+
     if (userDetails?.userType?.toUpperCase() !== "PARTNER") {
       sessionStorage.setItem("currentContext", "customer");
       setSelectedTenant(primaryTenant);
@@ -128,7 +128,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   useEffect(() => {
     if (selectedApp || selectedAppFromSession) {
       const refNum = window.location.pathname.split("/")[2];
-      
+
       if (refNum != "summary") {
         const tenantsUrl = `${
           (window as any)._env_.APP_API_URL
@@ -202,8 +202,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
           : await APIService.getAllApps(setAppsLoader);
 
       if (!response) return;
-      let res = [...response,...AngularApp.data]
-      console.log(res, "res")
+      let res = [...response, ...AngularApp.data];
+      console.log(res, "res");
       dispatch(setAppsFromAPI(res));
       const mfRoutes = getMfRoutes(res);
       setTransformedAppData(transformAppData(res));
@@ -371,15 +371,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
                 ></div>
               )}
               <Routes>
-              <Route
-                    key="events"
-                    path="/events"
-                    element={(
-                    
-                       <AngularAppRenderer></AngularAppRenderer>
-                    
-                    )}
-                  />
                 {!userDetails.userType && (
                   <Route
                     path="/"
@@ -387,7 +378,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
                       <Navigate to={`/${userDetails.userOrg}/summary`} />
                     }
                   />
-                  
                 )}
                 {allRoutes.map((route: IRoute) => (
                   <Route

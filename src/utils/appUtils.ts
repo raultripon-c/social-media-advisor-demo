@@ -36,12 +36,11 @@ export const appSelectionHandler = (
       if (isEmpty(updatedRoute) && selectedApp?.context !== "platform") {
         sessionStorage.removeItem("selectedApp");
       }
-      // navigate(
-      //   !isEmpty(updatedRoute)
-      //     ? `/${updatedRoute}${routeWithoutRefNum}`
-      //     : `${routeWithoutRefNum}`
-      // );
-      navigate("/events");
+      navigate(
+        !isEmpty(updatedRoute)
+          ? `/${updatedRoute}${routeWithoutRefNum}`
+          : `${routeWithoutRefNum}`
+      );
       break;
     case "external":
       const link = selectedApp.appConfig?.link;
