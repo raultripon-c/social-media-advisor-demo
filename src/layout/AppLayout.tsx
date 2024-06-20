@@ -19,19 +19,13 @@ import {
   findAppConfigByRoutes,
 } from "../utils/appUtils";
 
-import { EmptyState } from "@phenom/react-ui-components";
-import { isEmpty } from "lodash";
+
 import sessionTracker from "phenom-session-tracker";
 import { MessageService } from "../MessageService";
 import { setAppDetails, setAppsFromAPI } from "../store/apps/actions";
 import { APIService } from "../utils/api.service";
-import { PLATFORM } from "../utils/constants";
 import "./AppLayout.scss";
-import { InitialLoader } from "./Loader";
 import ToolsSideBar from "./sideBar/SideBar";
-import { log } from "console";
-import DashBoard from "./dashBoard/DashBoard";
-import { AngularAppRenderer } from "../remote-modules/AngularAppRenderer";
 
 interface AppLayoutProps {
   allApps: any;

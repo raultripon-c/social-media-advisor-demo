@@ -3,7 +3,7 @@
     {
       "id": "ksajdfs;dhfsdk;hfsdk",
       "name": "Experiences",
-      "icon": "https://pie-dev-onephenom.phenompro.com/static/UI_Vector1_1718876189532%20circle.svg",
+      "icon": "https://pie-dev-onephenom.phenompro.com/static/UI_Vector1_1718886085009 circle.svg",
       "parentName": null,
       "searchKeys": ["events"],
       "accessibility": null,
@@ -24,7 +24,7 @@
     {
       "id": "slkdjflkjsdskjf09kndsweoriepwieqp93nks0kx",
       "name": "WorkFlows",
-      "icon": "https://pie-dev-onephenom.phenompro.com/static/UI_Workflow_1718876716019 circle.svg",
+      "icon": "https://pie-dev-onephenom.phenompro.com/static/UI_Workflow_1718881083853 circle.svg",
       "parentName": null,
       "searchKeys": ["events"],
       "accessibility": null,
@@ -94,22 +94,31 @@
       "parentName": "WorkFlows",
       "searchKeys": ["events"],
       "accessibility": null,
-      "appType": "external",
+      "appType": "module-federation",
       "hoverText": "Campaign",
-      "loadingText": "Loading Experience Manager",
+      "loadingText": "Loading Events...",
       "appConfig": {
-        "link": "https://cms-qa1.phenompro.com/tier3"
+        "module": "./CRMCampaigns",
+        "route": "/campaign",
+        "component": "app-events",
+        "appName": "Campaigns",
+        "scope": "Campaigns",
+        "url": "https://localhost:8080/campaigns.js",
+        "envconfig": "https://certificate-manager-qa.phenompro.com/env-config.js",
+        "loadingMessage": "Loading",
+        "accessType": "phenom",
+        "showSideNav": "false",
+        "isMfProduct": "true"
       },
       "rbacDetails": {
-        "roles": [],
-        "clientId": ""
+        "clientId": "tls-automation-api"
       },
       "isParent": false,
-      "context": "customer",
+      "context": "tenant",
       "showSidebar": null,
-      "order": 2,
+      "order": 1,
       "events": null,
-      "framework": null
+      "framework": "ANGULAR"
     },
     {
       "id": "ChildContent9280jdhd09903098",
