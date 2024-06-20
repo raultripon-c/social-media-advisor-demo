@@ -13,10 +13,9 @@ import {
 } from "../../store/customer/actions";
 import { API } from "../../utils/api";
 
-import { Button, Loader } from "@phenom/react-ui-components";
+import { Loader } from "@phenom/react-ui-components";
 import { APIService } from "../../utils/api.service";
-import { getAppByName } from "../../utils/appUtils";
-import { PLATFORM, apiUrl } from "../../utils/constants";
+import { apiUrl } from "../../utils/constants";
 import "./Customers.scss";
 
 interface TenantsProps {
@@ -26,9 +25,6 @@ interface TenantsProps {
 
 const Customers: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
   const { customers } = useSelector((state: AppStore) => state.customer);
-  const customerDetails = useSelector((state: AppStore) => state.customer);
-
-  const allMFApps = useSelector((state: AppStore) => state.app);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -45,10 +41,7 @@ const Customers: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
   ) as any);
   const [invalidCustomer, setInvalidCustomer] = useState(false);
   const API_URL = (window as any)._env_.APP_API_URL;
-  const APP_ENV = (window as any)._env_.APP_ENV;
 
-  const [partnerApp, setPartnerApp] = useState({} as any);
-  const [moduleProps, setModuleProps] = useState({} as any);
 
   const APP_DC_REGION = `${(window as any)._env_.APP_DC}`;
   const getAllApps = async () => {
