@@ -3,7 +3,7 @@
     {
       "id": "ksajdfs;dhfsdk;hfsdk",
       "name": "Experiences",
-      "icon": "https://d3mmu8ebsgiyjr.cloudfront.net/images_test/Account circle.svg",
+      "icon": "https://pie-dev-onephenom.phenompro.com/static/UI_Vector1_1718876189532%20circle.svg",
       "parentName": null,
       "searchKeys": ["events"],
       "accessibility": null,
@@ -24,7 +24,7 @@
     {
       "id": "slkdjflkjsdskjf09kndsweoriepwieqp93nks0kx",
       "name": "WorkFlows",
-      "icon": "https://d3mmu8ebsgiyjr.cloudfront.net/images_test/Account circle.svg",
+      "icon": "https://pie-dev-onephenom.phenompro.com/static/UI_Workflow_1718876716019 circle.svg",
       "parentName": null,
       "searchKeys": ["events"],
       "accessibility": null,
@@ -45,7 +45,7 @@
     {
       "id": "Contentskjf09kndsweoriepwieqp93nks0kx",
       "name": "Content",
-      "icon": "https://d3mmu8ebsgiyjr.cloudfront.net/images_test/Account circle.svg",
+      "icon": "https://pie-dev-onephenom.phenompro.com/static/UI_Doc_1718876467450 circle.svg",
       "parentName": null,
       "searchKeys": ["events"],
       "accessibility": null,

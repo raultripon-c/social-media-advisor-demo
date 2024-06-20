@@ -137,18 +137,12 @@ const Customers: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
   }, [customers]);
 
   const navigateToDashBoard = (
-    appContext: string,
     selectedCustomer: any = {}
   ) => {
     if (selectedCustomer?.tenantRefnums?.length === 0) {
       setInvalidCustomer(true);
-    } else if (appContext === PLATFORM) {
-      const partnerApp = getAppByName(allApps, "Partner Activity Logs");
-      navigate("/partner-activity-logs");
-      partnerApp &&
-        sessionStorage.setItem("selectedApp", JSON.stringify(partnerApp));
-      dispatch(setAppDetails(partnerApp));
-    } else {
+    } 
+    else {
       APIService.getCustomerTenants(
         selectedCustomer.id,
         dispatch,
@@ -193,7 +187,7 @@ const Customers: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
               <div
                 className="tenant-card"
                 key={eachCustomer.id}
-                onClick={() =>  navigate(`/${eachCustomer.customerCode}/summary`)}
+                onClick={() =>  navigateToDashBoard(eachCustomer)}
               >
                 <span>{eachCustomer.name}</span>
               </div>
