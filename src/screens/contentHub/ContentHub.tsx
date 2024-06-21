@@ -9,7 +9,7 @@ declare global {
 
 const loadCmsModule = (moduleToLoad: string, containerSelector: string) => {
     const scrElem = document.createElement('script');
-    scrElem.src = "https://assets.phenompeople.com/CareerConnectResources/qa1/txe/embed.js";
+    scrElem.src = "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/embed.js";
     scrElem.onload = function() {
         if (window.txEmbed) {
             window.txEmbed.embedModules(moduleToLoad, containerSelector);

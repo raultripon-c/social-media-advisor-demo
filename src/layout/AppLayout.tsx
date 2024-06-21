@@ -6,7 +6,7 @@ import { useKeycloak } from "phenom-auth-react-adapter";
 import AngularApp from "../utils/Angular.json";
 import Toast from "../components/Toast/Toast";
 import RBAJson from "../utils/RBA.json";
-
+import { EmptyState } from "@phenom/react-ui-components";
 import { AppStore } from "store";
 import { IRoute, appRoutes } from "../routes/AppRoutes";
 import { setSelectedTenant, setUserRoles } from "../store/customer/actions";
@@ -19,19 +19,14 @@ import {
   findAppConfigByRoutes,
 } from "../utils/appUtils";
 
-import { EmptyState } from "@phenom/react-ui-components";
-import { isEmpty } from "lodash";
+
 import sessionTracker from "phenom-session-tracker";
 import { MessageService } from "../MessageService";
 import { setAppDetails, setAppsFromAPI } from "../store/apps/actions";
 import { APIService } from "../utils/api.service";
-import { PLATFORM } from "../utils/constants";
 import "./AppLayout.scss";
 import { InitialLoader } from "./Loader";
 import ToolsSideBar from "./sideBar/SideBar";
-import { log } from "console";
-import DashBoard from "./dashBoard/DashBoard";
-import { AngularAppRenderer } from "../remote-modules/AngularAppRenderer";
 
 interface AppLayoutProps {
   allApps: any;
@@ -292,13 +287,26 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       };
     }
   };
+  useEffect(()=>{
+    if(customerDetails?.customerTenants?.length === 0)
+      {
+        console.log(customerDetails?.customerTenants,"customerTenants");
+        
+        setRolesLoader(true)
+      }
+      else{
+        setRolesLoader(false) 
+      }
+  })
   useEffect(() => {
     if (customerDetails?.data?.id && customerTenants.length === 0) {
+      setRolesLoader(true)
       APIService.getCustomerTenants(
         customerDetails?.data?.id,
         dispatch,
         selectedTenant
       );
+      setRolesLoader(false)
     }
   }, [customerDetails?.data?.id]);
   useEffect(() => {
@@ -331,19 +339,17 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   const checkIfUserHasAccess = () => {
     return USER_ROLES.some((role) => logedUserRoles.includes(role));
   };
-  
+  console.log(rolesLoader,"rolesLoader");
   return (
     <>
-      {false ? (
-        <div></div>
-      //   <InitialLoader show={true} />
-      // ) : (transformedAppData &&
-      //     (transformedAppData as any[])?.length === 0 &&
-        //   !appsLoader) ||
-        // !checkIfUserHasAccess() ? (
-      //   <div className="unauthorized-box font-14">
-      //     {<EmptyState text={"No apps Found"} />}
-      //   </div>
+      {rolesLoader ? (
+        <InitialLoader show={true} />
+      ) : (transformedAppData &&
+          (transformedAppData as any[])?.length === 0 &&
+          !appsLoader) ? (
+        <div className="unauthorized-box font-14">
+          {<EmptyState text={"No apps Found"} />}
+        </div>
       ) : (
         <div className="service-tools-app-layout">
           <Toast />

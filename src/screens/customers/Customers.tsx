@@ -13,10 +13,9 @@ import {
 } from "../../store/customer/actions";
 import { API } from "../../utils/api";
 
-import { Button, Loader } from "@phenom/react-ui-components";
+import { Loader } from "@phenom/react-ui-components";
 import { APIService } from "../../utils/api.service";
-import { getAppByName } from "../../utils/appUtils";
-import { PLATFORM, apiUrl } from "../../utils/constants";
+import { apiUrl } from "../../utils/constants";
 import "./Customers.scss";
 
 interface TenantsProps {
@@ -26,9 +25,6 @@ interface TenantsProps {
 
 const Customers: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
   const { customers } = useSelector((state: AppStore) => state.customer);
-  const customerDetails = useSelector((state: AppStore) => state.customer);
-
-  const allMFApps = useSelector((state: AppStore) => state.app);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -45,10 +41,7 @@ const Customers: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
   ) as any);
   const [invalidCustomer, setInvalidCustomer] = useState(false);
   const API_URL = (window as any)._env_.APP_API_URL;
-  const APP_ENV = (window as any)._env_.APP_ENV;
 
-  const [partnerApp, setPartnerApp] = useState({} as any);
-  const [moduleProps, setModuleProps] = useState({} as any);
 
   const APP_DC_REGION = `${(window as any)._env_.APP_DC}`;
   const getAllApps = async () => {
@@ -137,18 +130,12 @@ const Customers: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
   }, [customers]);
 
   const navigateToDashBoard = (
-    appContext: string,
     selectedCustomer: any = {}
   ) => {
     if (selectedCustomer?.tenantRefnums?.length === 0) {
       setInvalidCustomer(true);
-    } else if (appContext === PLATFORM) {
-      const partnerApp = getAppByName(allApps, "Partner Activity Logs");
-      navigate("/partner-activity-logs");
-      partnerApp &&
-        sessionStorage.setItem("selectedApp", JSON.stringify(partnerApp));
-      dispatch(setAppDetails(partnerApp));
-    } else {
+    } 
+    else {
       APIService.getCustomerTenants(
         selectedCustomer.id,
         dispatch,
@@ -193,7 +180,7 @@ const Customers: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
               <div
                 className="tenant-card"
                 key={eachCustomer.id}
-                onClick={() =>  navigate(`/${eachCustomer.customerCode}/summary`)}
+                onClick={() =>  navigateToDashBoard(eachCustomer)}
               >
                 <span>{eachCustomer.name}</span>
               </div>
