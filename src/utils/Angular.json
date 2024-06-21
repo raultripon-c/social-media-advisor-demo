@@ -76,6 +76,7 @@
       "appConfig": {
         "link": "https://cms-qa1.phenompro.com/tier3"
       },
+      "requestParam":{"lsrc":"txe","lsw":"txe-home","refNum":"", "customerCode":""},
       "rbacDetails": {
         "roles": [],
         "clientId": ""

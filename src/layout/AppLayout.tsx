@@ -289,9 +289,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   };
   useEffect(()=>{
     if(customerDetails?.customerTenants?.length === 0)
-      {
-        console.log(customerDetails?.customerTenants,"customerTenants");
-        
+      { 
         setRolesLoader(true)
       }
       else{
@@ -339,7 +337,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   const checkIfUserHasAccess = () => {
     return USER_ROLES.some((role) => logedUserRoles.includes(role));
   };
-  console.log(rolesLoader,"rolesLoader");
   return (
     <>
       {rolesLoader ? (

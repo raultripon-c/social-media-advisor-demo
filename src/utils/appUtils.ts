@@ -43,8 +43,9 @@ export const appSelectionHandler = (
       );
       break;
     case "external":
-      const link = selectedApp.appConfig?.link;
-      if (link && !isEmpty(link)) window.open(link, "_blank");
+      const link = getLink(selectedApp, {"refNum":refNum, "customerCode":customerCode});
+      console.log("External", link)
+      if (link && !isEmpty(link)) window.open(link, "_self");
       else {
         toast.dismiss();
         toast.error("Link is not provided for navigation");
@@ -243,3 +244,32 @@ export function findAppConfigByRoutes(apps: any, value: string): any {
     return [];
   }
 }
+export function getLink(selectedApp:any, request:any): any {
+  let link = selectedApp?.appConfig?.link;
+  let requestParam = selectedApp?.requestParam;
+  let setLink = "";
+  try {
+    Object.entries(requestParam).forEach(([key, value]) => {
+      if (setLink.length > 0) {
+        setLink += "&";
+      }
+      if (key in request) {
+        setLink += `${key}=${encodeURIComponent(request[key] as string)}`;
+      } else {
+        setLink += `${key}=${encodeURIComponent(value as string)}`;
+      }
+    });
+  
+    setLink = `${link}?${setLink}`;
+  
+  return setLink;
+    }
+    
+  
+   
+  catch (error) {
+    console.error("An error occurred: ", error);
+    return [];
+  }
+}
+
