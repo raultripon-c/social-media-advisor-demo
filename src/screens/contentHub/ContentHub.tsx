@@ -9,31 +9,33 @@ declare global {
 }
 
 
-const loadCmsModule = (moduleToLoad: string, containerSelector: string, props:any) => {
-    const scrElem = document.createElement('script');
-    scrElem.src = "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/embed.js";
-    scrElem.onload = function() {
+const loadCmsModule = (moduleToLoad: string, containerSelector: string, ctx: any) => {
+    const embedScriptId = 'txe-cms-embed-assets'
+    const existsScrElem = document.querySelector(`#${embedScriptId}`)
+    if(!existsScrElem){
+        const scrElem = document.createElement('script');
+        scrElem.id = embedScriptId
+        scrElem.src = "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/embed.js";
+        scrElem.onload = function() {
+            if (window.txEmbed) {
+                window.txEmbed.embedModules(moduleToLoad, containerSelector, ctx);
+            }
+        };
+        document.querySelector('head')?.appendChild(scrElem);
+    } else {
         if (window.txEmbed) {
-            window.txEmbed.embedModules(moduleToLoad, containerSelector, props);
+            window.txEmbed.embedModules(moduleToLoad, containerSelector, ctx);
         }
-    };
-    document.querySelector('head')?.appendChild(scrElem);
+    }
 };
 
 const ContentHub: React.FC = () => {
-    const selectedTenant = useSelector(
-        (state: AppStore) => state.customer.selectedTenant
-      );
-      const props = {
-        token: window.keycloakInstance.token,
-        refNum: selectedTenant?.refNum,
-        userId: window.keycloakInstance.userInfo.userDetails.id,
-      };
+    const storeData = useSelector((state: AppStore) => state.customer);
     useEffect(() => {
-        if(selectedTenant?.refNum){
-        loadCmsModule('content', '#tools-body-container' ,props);
-    }
-    }, [selectedTenant]);
+        if(storeData && storeData.selectedTenant && storeData.selectedTenant.refNum){
+            loadCmsModule('content', '#tools-body-container', {refNum: storeData.selectedTenant.refNum, token: window.keycloakInstance.token});
+        }
+    }, [storeData]);
 
     return <div id="tools-body-container"></div>;
 }
