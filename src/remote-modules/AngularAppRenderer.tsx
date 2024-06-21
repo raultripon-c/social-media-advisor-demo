@@ -1,10 +1,10 @@
-import React, { useEffect, useRef, useState,Suspense } from "react";
+import React, { useEffect, useRef, useState, Suspense } from "react";
 import { useSelector } from "react-redux";
 import { AppStore } from "store";
 import { Loader } from "@phenom/react-ui-components";
 import { getSelectedApp } from "../layout/dashBoard/utils";
 import { useDynamicMFLoader } from "./useDynamicMFLoader";
-import "./AngularApp.scss"
+import "./AngularApp.scss";
 
 export function AngularAppRenderer(props: any) {
   const containerRef = useRef(null);
@@ -51,7 +51,6 @@ export function AngularAppRenderer(props: any) {
     const newElement = document.createElement(props.component);
     //newElement.textContent = "This is a new child element.";
 
- 
     //newElement.textContent = "This is a new child element.";
     // Append the new element to the parent div
     if (parentDiv) {
@@ -68,7 +67,7 @@ export function AngularAppRenderer(props: any) {
         if (module.mountEvents) {
           const props = {
             token: window.keycloakInstance.token,
-            refNum: "WORKUS",
+            refNum: selectedTenant.refNum,
             subPath: `/${selectedTenant.customerCode}/${selectedTenant.refNum}${selectedApp.route}`,
             userId: window.keycloakInstance.userInfo.userDetails.id,
           };
@@ -113,5 +112,6 @@ export function AngularAppRenderer(props: any) {
           <Loader title={"loading"} />
         </div>
       )}
-    </>);
+    </>
+  );
 }
