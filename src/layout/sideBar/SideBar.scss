@@ -4,7 +4,6 @@
   height: 100%;
   //overflow-y: auto;
 
- 
   .sidebar-nav-button {
     z-index: 1;
   }
@@ -65,7 +64,7 @@
         // width: 24px;
         // height: 24px;
         margin-right: 4px;
-      }
+      }  
 
       .active-icon {
         width: 43px;
@@ -100,3 +99,8 @@
 .sidebar-menu > div:nth-child(2) > div:nth-child(2) {
   background-color: $white;
 }
+.Sidebar img {
+  width: 20px !important;
+  height: 20px !important;
+  margin-right: 20px !important;
+}  

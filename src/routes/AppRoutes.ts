@@ -14,11 +14,11 @@ const dashBoard = {
 };
 
 const ContenthubComponent = {
-  path: "/:customerCode/contenthub",
+  path: "/:customerCode/:refnum/contenthub",
   component: ContentHub,
 };
 const AssetManager = {
-  path: "/:customerCode/assets",
+  path: "/:customerCode/:refnum/assets",
   component: Assets,
 };
 

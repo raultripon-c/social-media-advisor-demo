@@ -118,7 +118,7 @@ function ToolsSideBar(props: any) {
           <img src={arrowRight} alt="img" className="icon" />
         </div>
       </div>
-
+    <div className="Sidebar">
       <SideBar
         selectedApp={selectedApp}
         sidebarOpen={sidebarOpen}
@@ -140,6 +140,7 @@ function ToolsSideBar(props: any) {
           setSidebarOpen(showSidebar);
         }}
       />
+      </div>
       
     </div>
 

@@ -148,7 +148,7 @@
         "clientId": ""
       },
       "isParent": false,
-      "context": "customer",
+      "context": "tenant",
       "showSidebar": null,
       "order": 2,
       "events": null,
@@ -182,7 +182,7 @@
         "clientId": ""
       },
       "isParent": false,
-      "context": "customer",
+      "context": "tenant",
       "showSidebar": null,
       "order": 2,
       "events": null,
