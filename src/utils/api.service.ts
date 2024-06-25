@@ -22,7 +22,8 @@ export const APIService = {
         if (response) {
           dispatch(setCustomerDetails(response));
           if (!selectedTenant || Object.keys(selectedTenant).length === 0) {
-            dispatch(setSelectedTenant({ refNum: response.tenantRefnums[0] }));
+            let tenantRefnum = window.location.pathname.split("/")[2]=="summary"?response.tenantRefnums[0]:window.location.pathname.split("/")[2]
+            dispatch(setSelectedTenant({ refNum: tenantRefnum }));
           }
           (window as any).customerRefnums = response?.tenantRefnums;
         } else {

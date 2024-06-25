@@ -6,7 +6,7 @@
     &.overflow-y-auto {
       // Override styles here
       overflow-y: scroll; // Example of overriding the overflow property
-      height: 400px; // Example of setting a max-height
+      height: calc(100vh - 48px); // Example of setting a max-height
       // Add any additional styles you need
     }
   }
