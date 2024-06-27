@@ -67,7 +67,7 @@ export function AngularAppRenderer(props: any) {
         if (module.mountEvents) {
           const props = {
             token: window.keycloakInstance.token,
-            refNum: "WORKUS",
+            refNum: selectedTenant?.refNum,
             subPath: `/${selectedTenant.customerCode}/${selectedTenant.refNum}${selectedApp.route}`,
             userId: window.keycloakInstance.userInfo.userDetails.id,
           };
