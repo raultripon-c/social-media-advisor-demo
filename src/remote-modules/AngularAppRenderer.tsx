@@ -64,14 +64,14 @@ export function AngularAppRenderer(props: any) {
         const scope = props.scope;
         const exposedModule = props.module;
         const module = await loadRemoteModule(scope, exposedModule);
-        if (module.mountEvents) {
+        if (module.mount) {
           const props = {
             token: window.keycloakInstance.token,
             refNum: "WORKUS",
             subPath: `/${selectedTenant.customerCode}/${selectedTenant.refNum}${selectedApp.route}`,
             userId: window.keycloakInstance.userInfo.userDetails.id,
           };
-          module.mountEvents(props);
+          module.mount(props);
         }
         // mountAngularComponent(ref.current, module.YourAngularModule);
       })();

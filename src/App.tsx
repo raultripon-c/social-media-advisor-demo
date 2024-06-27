@@ -1,14 +1,15 @@
+import React, { useEffect } from "react";
 import ReactKeycloakProvider from "phenom-auth-react-adapter";
-import React from "react";
-import "react-toastify/dist/ReactToastify.css";
-import "../index.scss";
-import Layout from "./layout/Layout";
 import { InitialLoader } from "./layout/Loader";
+import Layout from "./layout/Layout";
+import "react-toastify/dist/ReactToastify.css";
+import "../index.scss"; 
+import { isEmpty } from "lodash";
 
 const App = (): JSX.Element => {
   const keyCloakConfig = {
     loginHost: (window as any)._env_.APP_KEYCLOAK_URL,
-    clientId: "txe-ui",
+    clientId: "onephenom-ui",
   };
   const eventLogger = (event: any, error: any) => {
   };

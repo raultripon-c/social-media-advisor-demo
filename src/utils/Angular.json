@@ -101,7 +101,7 @@
       "appConfig": {
         "module": "./CRMCampaigns",
         "route": "/campaign",
-        "component": "app-events",
+        "component": "app-campaigns",
         "appName": "Campaigns",
         "scope": "Campaigns",
         "url": "https://localhost:8080/campaigns.js",
@@ -202,7 +202,7 @@
       "appConfig": {
         "module": "./CRMEvents",
         "route": "/events",
-        "component": "app-events",
+        "component": "app-campaigns",
         "appName": "cpui",
         "scope": "cpui",
         "url": "https://qa3-candidates.phenompeople.com/remoteEntry.js",

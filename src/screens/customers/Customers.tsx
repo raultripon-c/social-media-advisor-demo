@@ -136,43 +136,8 @@ const Customers: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
         selectedTenant
       );
       dispatch(setCustomerDetails(selectedCustomer));
-      const eventsApp = {
-        id: "9e1b1a48-12e4-4799-bae4-29c3c9fd8508",
-        name: "Events",
-        icon: "",
-        parentName: "Experiences",
-        searchKeys: ["events", "events", "crm-events"],
-        accessibility: [],
-        appType: "module-federation",
-        hoverText: "Events",
-        loadingText: "Loading Events...",
-        appConfig: {
-          module: "./CRMEvents",
-          route: "/events",
-          component: "app-events",
-          appName: "cpui",
-          scope: "cpui",
-          url: "https://qa3-candidates.phenompeople.com/remoteEntry.js",
-          envconfig:
-            "https://certificate-manager-qa.phenompro.com/env-config.js",
-          loadingMessage: "Loading",
-          accessType: "phenom",
-          showSideNav: "false",
-          isMfProduct: "true",
-        },
-        rbacDetails: {
-          clientId: "tls-automation-api",
-        },
-        isParent: false,
-        context: "tenant",
-        showSidebar: null,
-        order: 1,
-        events: null,
-        framework: "ANGULAR",
-      };
-      dispatch(setAppDetails(eventsApp))
-      sessionStorage.setItem("selectedApp",JSON.stringify(eventsApp))
-      navigate(`/${selectedCustomer.customerCode}/${selectedCustomer?.tenantRefnums[0]}/events`);
+      navigate(`/${selectedCustomer.customerCode}/summary`);
+
     }
   };
 
