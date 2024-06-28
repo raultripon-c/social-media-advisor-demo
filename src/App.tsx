@@ -8,7 +8,7 @@ import { InitialLoader } from "./layout/Loader";
 const App = (): JSX.Element => {
   const keyCloakConfig = {
     loginHost: (window as any)._env_.APP_KEYCLOAK_URL,
-    clientId: "txe-ui",
+    clientId: "onephenom-ui",
   };
   const eventLogger = (event: any, error: any) => {
   };
