@@ -13,7 +13,7 @@ export function AngularAppRenderer(props: any) {
     (state: AppStore) => state.customer.selectedTenant
   );
   const ref = useRef(null);
-
+  const approute=props?.selectedApp?.route;
   const [mountEvents, setMountEvents] = useState(null);
   const loadRemoteModule = async (scope: any, module: any) => {
     await __webpack_init_sharing__("default");
@@ -67,8 +67,8 @@ export function AngularAppRenderer(props: any) {
         if (module.mount) {
           const props = {
             token: window.keycloakInstance.token,
-            refNum: "WORKUS",
-            subPath: `/${selectedTenant.customerCode}/${selectedTenant.refNum}${selectedApp.route}`,
+            refNum: selectedTenant?.refNum,
+            subPath: `/${selectedTenant.customerCode}/${selectedTenant.refNum}${approute}`,
             userId: window.keycloakInstance.userInfo.userDetails.id,
           };
           module.mount(props);
