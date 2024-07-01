@@ -59,65 +59,34 @@ function ToolsSideBar(props: any) {
       "App Name": app?.name,
     });
   };
+  const summaryOnClick=() => {
+    const updatedCategories = categories?.map((eachCategory: any) => ({
+      ...eachCategory,
+      isOpen: false,
+    }));
+    setCategories(updatedCategories);
+    setSidebarOpen(false);
+    setDisableAutoClose(false);
+    dispatch(setAppDetails({}));
+    sessionStorage.removeItem("selectedApp");
+    sessionStorage.removeItem("currentContext");
+    if (currentContext !== PLATFORM) {
+      navigate(`${customerDetails?.data?.customerCode}/summary`);
+    } else {
+      dispatch(setSelectedTenant({}));
+      sessionStorage.removeItem("selectedApp");
+      dispatch(setCustomerTenants([]));
+      dispatch(setCustomerDetails({}));
+      navigate("/");
+      // navigate("/");
+    }
+  }
 
   
   return (
     <div className="tools-sidebar">
       
-      <div className="hris-summary">
-        
-        <div
-          className="content"
-          onClick={() => {
-            const updatedCategories = categories?.map((eachCategory: any) => ({
-              ...eachCategory,
-              isOpen: false,
-            }));
-            setCategories(updatedCategories);
-            setSidebarOpen(false);
-            setDisableAutoClose(false);
-            dispatch(setAppDetails({}));
-            sessionStorage.removeItem("selectedApp");
-            sessionStorage.removeItem("currentContext");
-            if (currentContext !== PLATFORM) {
-              navigate(`${customerDetails?.data?.customerCode}/summary`);
-            } else {
-              dispatch(setSelectedTenant({}));
-              sessionStorage.removeItem("selectedApp");
-              dispatch(setCustomerTenants([]));
-              dispatch(setCustomerDetails({}));
-              navigate("/");
-              // navigate("/");
-            }
-          }}
-        >
-          <img
-            src={
-              Object.keys(selectedApp).length === 0
-                ? dashboardActive
-                : dashboardGrey
-            }
-            alt="img"
-            className={`${
-              Object.keys(selectedApp).length === 0
-                ? "active-icon"
-                : "grey-icon"
-            }`}
-          />
-          <div className="label">
-            <span className="label-description">
-              {currentContext !== PLATFORM ? "TXE Home" : "Go To Customers"}
-            </span>
-            <img
-              src={dashboardInfo}
-              alt="img"
-              className="icon"
-              title="Click to Go to Dashboard"
-            />
-          </div>
-          <img src={arrowRight} alt="img" className="icon" />
-        </div>
-      </div>
+      
     <div className="Sidebar">
       <SideBar
         selectedApp={selectedApp}
@@ -129,6 +98,7 @@ function ToolsSideBar(props: any) {
         disableAutoClose={disableAutoClose}
         setDisableAutoClose={setDisableAutoClose}
         placeholder="Search"
+        summaryOnClick={summaryOnClick}
         sideBarHeading={
           currentContext === TENANT
             ? "TENANT SETTINGS"
@@ -139,6 +109,7 @@ function ToolsSideBar(props: any) {
         onClose={(showSidebar: any) => {
           setSidebarOpen(showSidebar);
         }}
+        dashboardIcons={{arrowRight:arrowRight,dashboardInfo:dashboardInfo,dashboardActive:dashboardActive,dashboardGrey:dashboardGrey}}
       />
       </div>
       

@@ -13,7 +13,7 @@ export function AngularAppRenderer(props: any) {
     (state: AppStore) => state.customer.selectedTenant
   );
   const ref = useRef(null);
-
+  const approute=props?.selectedApp?.route;
   const [mountEvents, setMountEvents] = useState(null);
   const loadRemoteModule = async (scope: any, module: any) => {
     await __webpack_init_sharing__("default");
@@ -64,14 +64,14 @@ export function AngularAppRenderer(props: any) {
         const scope = props.scope;
         const exposedModule = props.module;
         const module = await loadRemoteModule(scope, exposedModule);
-        if (module.mountEvents) {
+        if (module.mount) {
           const props = {
             token: window.keycloakInstance.token,
             refNum: selectedTenant?.refNum,
-            subPath: `/${selectedTenant.customerCode}/${selectedTenant.refNum}${selectedApp.route}`,
+            subPath: `/${selectedTenant.customerCode}/${selectedTenant.refNum}${approute}`,
             userId: window.keycloakInstance.userInfo.userDetails.id,
           };
-          module.mountEvents(props);
+          module.mount(props);
         }
         // mountAngularComponent(ref.current, module.YourAngularModule);
       })();
