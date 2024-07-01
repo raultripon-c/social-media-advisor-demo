@@ -100,7 +100,7 @@
       "loadingText": "Loading Events...",
       "appConfig": {
         "module": "./CRMCampaigns",
-        "route": "/email-management/campaigns",
+        "route": "/email-management",
         "component": "app-campaigns",
         "appName": "Campaigns",
         "scope": "Campaigns",
