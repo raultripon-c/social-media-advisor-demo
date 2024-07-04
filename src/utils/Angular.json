@@ -104,7 +104,7 @@
         "component": "app-campaigns",
         "appName": "Campaigns",
         "scope": "Campaigns",
-        "url": "https://localhost:8080/campaigns.js",
+        "url": "https://qa3-candidates.phenompeople.com/campaigns.js",
         "envconfig": "https://certificate-manager-qa.phenompro.com/env-config.js",
         "loadingMessage": "Loading",
         "accessType": "phenom",
