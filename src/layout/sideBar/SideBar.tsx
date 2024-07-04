@@ -32,34 +32,18 @@ function ToolsSideBar(props: any) {
     return selectedAppFromSession || state.app?.selectedApp;
   });
 
-  useEffect(() => {
-    let hideSideBar = noShowSideBar.some((path: string) => {
-      return window.location.pathname.endsWith(path);
-    });
-
-    if (hideSideBar) {
-      setDisableAutoClose(false);
-      setSidebarOpen(false);
-    }
-  }, [window.location.pathname]);
 
   const currentContext = sessionStorage.getItem("currentContext") || "";
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const handleAppSelection = (app: any) => {
-    if (app.appType == "module-federation") {
-      setDisableAutoClose(false);
-    } else {
-      setSidebarOpen(true);
-      setDisableAutoClose(true);
-    }
+    setSidebarOpen(true);
     app && sessionStorage.setItem("selectedApp", JSON.stringify(app));
     dispatch(setAppDetails(app));
     sessionTracker.setCustomEvent("App Selected", {
       "App Name": app?.name,
     });
   };
-
   
   return (
     <div className="tools-sidebar">
@@ -74,8 +58,6 @@ function ToolsSideBar(props: any) {
               isOpen: false,
             }));
             setCategories(updatedCategories);
-            setSidebarOpen(false);
-            setDisableAutoClose(false);
             dispatch(setAppDetails({}));
             sessionStorage.removeItem("selectedApp");
             sessionStorage.removeItem("currentContext");
