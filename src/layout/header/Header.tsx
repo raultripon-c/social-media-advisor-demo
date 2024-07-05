@@ -84,6 +84,10 @@ function Header({
 
   const handleLogoClick = () => {
     sessionStorage.removeItem("currentContext");
+    sessionStorage.removeItem("selectedApp");
+    dispatch(setSelectedTenant({}));
+    dispatch(setAppDetails({}))
+    dispatch(setCustomerDetails({}));
     if (userType === "PARTNER") {
       dispatch(setSelectedTenant({}));
       sessionStorage.removeItem("selectedApp");

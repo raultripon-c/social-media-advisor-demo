@@ -194,7 +194,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       const response =
         allApps && allApps.length > 0
           ? allApps
-          : await APIService.getAllApps(setAppsLoader);
+          : []
 
       if (!response) return;
       let res = [...response, ...AngularApp.data];

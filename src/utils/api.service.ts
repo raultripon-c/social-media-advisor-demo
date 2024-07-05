@@ -105,7 +105,7 @@ export const APIService = {
         }
         const primaryTenant = result.data.find((item: any) => item.isParent);
         if (Object.keys(selectedTenant)?.length === 0) {
-          dispatch(setSelectedTenant( response.data.data[0]));
+          dispatch(setSelectedTenant(primaryTenant || response.data.data[0]));
         }
       })
       .catch((error) => {
