@@ -24,7 +24,7 @@ import "./SideBar.scss";
 function ToolsSideBar(props: any) {
   const { categories, setCategories } = props;
   const customerDetails = useSelector((state: AppStore) => state.customer);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [disableAutoClose, setDisableAutoClose] = useState(true);
   const selectedApp = useSelector((state: any) => {
     const selectedAppFromSession = JSON.parse(
