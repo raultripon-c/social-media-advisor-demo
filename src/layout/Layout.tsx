@@ -16,6 +16,11 @@ const Layout = () => {
   const selectedTenant = useSelector(
     (state: AppStore) => state.customer.selectedTenant
   );
+
+  useEffect(()=>{
+    sessionStorage.removeItem("allapps")
+  },[])
+  
   const { keycloak, orgInfo } = useKeycloak();
   const userDetails = window?.keycloakInstance?.tokenParsed?.userDetails;
   const customerTenants = useSelector(
