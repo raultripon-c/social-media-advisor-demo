@@ -27,6 +27,9 @@ const Layout = () => {
   const app = useSelector((state: any) => state.app);
   let pendo = (window as any).pendo;
   const [allApps, setAllApps] = useState<any[]>([]);
+  useEffect(()=>{
+    sessionStorage.removeItem("allapps")
+  },[])
   useEffect(() => {
     if (keycloak.authenticated && !initialized) {
       pendo?.initialize({
