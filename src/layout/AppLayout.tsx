@@ -201,7 +201,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       dispatch(setAppsFromAPI(res));
       const mfRoutes = getMfRoutes(res);
       setTransformedAppData(transformAppData(res));
-      debugger
       const filteredApps: any = transformAppData(res);
       setCustomerTenantApps(filteredApps?.customerTenantApps);
       setPlatformApps(filteredApps?.platformApps);
