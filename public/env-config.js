@@ -1,6 +1,6 @@
 window._env_ = {
   PUBLIC_URL: "https://servicehub-qa.phenompro.com/hrit/",
-  TOOLS_API_URL: "https://servicehub-mf-qa.phenompro.com/",
+  TOOLS_API_URL: "https://txe-qa.phenompro.com/",
   APP_API_URL: "https://servicehub-qa.phenompro.com/api",
   IMG_URL: "http://servicehub-qa.phenompro.com/hrit/",
   APP_ACCESS_API_URL: "https://servicehub-qa.phenompro.com/access/api",

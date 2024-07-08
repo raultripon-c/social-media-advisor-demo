@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import { EmptyState } from "@phenom/react-ui-components";
 import { AppStore } from "store";
 import { Search } from "../../components/TenantSearch/TenantsSearch";
-import AngularApp from "../../utils/Angular.json";
 import { setAppDetails, setAppsFromAPI } from "../../store/apps/actions";
 import {
   setAllCustomers,
@@ -17,7 +16,6 @@ import { Loader } from "@phenom/react-ui-components";
 import { APIService } from "../../utils/api.service";
 import { apiUrl } from "../../utils/constants";
 import "./Customers.scss";
-import { getAppByName } from "utils/appUtils";
 
 interface TenantsProps {
   allApps: any;
@@ -46,9 +44,9 @@ const Customers: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
   const APP_DC_REGION = `${(window as any)._env_.APP_DC}`;
   const getAllApps = async () => {
     try {
-      // const response = await APIService.getAllApps();
-      // if (!response) return;
-      let res = [ ...AngularApp.data];
+      const response = await APIService.getAllApps();
+      if (!response) return;
+      let res = response
       sessionStorage.setItem("allapps", JSON.stringify(res));
       dispatch(setAppsFromAPI(res));
     } catch (error) {
