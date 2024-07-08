@@ -2,21 +2,20 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 
-import { useKeycloak } from "phenom-auth-react-adapter";
-import AngularApp from "../utils/Angular.json";
-import Toast from "../components/Toast/Toast";
-import RBAJson from "../utils/RBA.json";
 import { EmptyState } from "@phenom/react-ui-components";
+import { useKeycloak } from "phenom-auth-react-adapter";
 import { AppStore } from "store";
+import Toast from "../components/Toast/Toast";
 import { IRoute, appRoutes } from "../routes/AppRoutes";
 import { setSelectedTenant, setUserRoles } from "../store/customer/actions";
+import RBAJson from "../utils/RBA.json";
 import {
   appSelectionHandler,
+  findAppConfigByRoutes,
   getAppByName,
   getMfRoutes,
   showSidebar,
   transformAppData,
-  findAppConfigByRoutes,
 } from "../utils/appUtils";
 
 
@@ -197,7 +196,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
           : await APIService.getAllApps(setAppsLoader);
 
       if (!response) return;
-      let res = [...response, ...AngularApp.data];
+      let res = [...response];
       console.log(res, "res");
       dispatch(setAppsFromAPI(res));
       const mfRoutes = getMfRoutes(res);

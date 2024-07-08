@@ -66,7 +66,7 @@ export const APIService = {
     return await API.get(`${(window as any)._env_.TOOLS_API_URL}api/apps`)
       .then((result: any) => {
         // let apps = result?.data?.data;
-        let apps=[] as any[];
+        let apps = result?.data?.data;
         let appNamesList = apps
           ?.filter((app: any) => {
             return app?.appType === "module-federation";
@@ -105,7 +105,7 @@ export const APIService = {
         }
         const primaryTenant = result.data.find((item: any) => item.isParent);
         if (Object.keys(selectedTenant)?.length === 0) {
-          dispatch(setSelectedTenant( response.data.data[0]));
+          dispatch(setSelectedTenant(primaryTenant || response.data.data[0]));
         }
       })
       .catch((error) => {
