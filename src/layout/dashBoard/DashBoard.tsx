@@ -5,7 +5,6 @@ import { EmptyState, Loader } from "@phenom/react-ui-components";
 import { AppStore } from "store";
 import { Search } from "../../components/TenantSearch/TenantsSearch";
 import { setAppDetails, setAppsFromAPI } from "../../store/apps/actions";
-import { APIService } from "../../utils/api.service";
 import { appSelectionHandler } from "../../utils/appUtils";
 
 const DashBoard = () => {
@@ -22,9 +21,9 @@ const DashBoard = () => {
 
   const getAllApps = async () => {
     try {
-      const response = await APIService.getAllApps();
+      const response = useSelector((state: AppStore) => state.app.allApps);
       if (response) {
-        const sortedData = response.data.data.sort((a: any, b: any) =>
+        const sortedData = response.sort((a: any, b: any) =>
           a.name.localeCompare(b.name)
         );
         sessionStorage.setItem("allapps", JSON.stringify(sortedData));
@@ -43,7 +42,6 @@ const DashBoard = () => {
     sessionStorage.removeItem("currentContext");
     dispatch(setAppDetails({}));
     sessionStorage.removeItem("selectedApp");
-
     const apps = JSON.parse(sessionStorage.getItem("allapps") || "[]");
 
     if (apps.length === 0) {
