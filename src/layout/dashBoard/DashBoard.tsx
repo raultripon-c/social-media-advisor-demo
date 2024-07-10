@@ -77,7 +77,7 @@ const DashBoard = () => {
   if (isLoading) {
     return (
       <div className="tenants-loader">
-        <Loader title="Please Wait, Loading Customers" />
+        <Loader title="Please Wait, Loading Apps" />
       </div>
     );
   }
