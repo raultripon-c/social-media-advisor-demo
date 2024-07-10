@@ -8,6 +8,8 @@ import { AppStore } from "store";
 import Toast from "../components/Toast/Toast";
 import { IRoute, appRoutes } from "../routes/AppRoutes";
 import { setSelectedTenant, setUserRoles } from "../store/customer/actions";
+import AngularApp from "../utils/Angular.json";
+
 import RBAJson from "../utils/RBA.json";
 import {
   appSelectionHandler,
@@ -193,10 +195,10 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       const response =
         allApps && allApps.length > 0
           ? allApps
-          : await APIService.getAllApps(setAppsLoader);
+          : [];
 
       if (!response) return;
-      let res = [...response];
+      let res = [...response, ...AngularApp.data];
       console.log(res, "res");
       dispatch(setAppsFromAPI(res));
       const mfRoutes = getMfRoutes(res);
