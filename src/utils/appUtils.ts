@@ -246,7 +246,7 @@ export function findAppConfigByRoutes(apps: any, value: string): any {
 }
 export function getLink(selectedApp:any, request:any): any {
   let link = selectedApp?.appConfig?.link;
-  let requestParam = selectedApp?.requestParam;
+  let requestParam = selectedApp?.requestParams;
   let setLink = "";
   try {
     Object.entries(requestParam).forEach(([key, value]) => {
