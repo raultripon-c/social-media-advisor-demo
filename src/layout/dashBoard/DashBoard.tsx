@@ -85,7 +85,7 @@ const DashBoard = () => {
       <div className="tenants-header">
         <div className="search-container">
           <Search
-            placeholder="Search Customer"
+            placeholder="Search Apps"
             onValueChange={(e: any) => setSearchKey(e.target.value)}
             size="medium"
             at_id="tenant-search"
