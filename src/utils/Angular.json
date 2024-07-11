@@ -76,7 +76,7 @@
       "appConfig": {
         "link": "https://cms-qa1.phenompro.com/tier3"
       },
-      "requestParam":{"lsrc":"txe","lsw":"_self","refNum":"", "customerCode":""},
+      "requestParams":{"lsrc":"txe","lsw":"_self","refNum":"", "customerCode":""},
       "rbacDetails": {
         "roles": [],
         "clientId": ""
@@ -102,9 +102,9 @@
         "module": "./CRMCampaigns",
         "route": "/email-management",
         "component": "app-campaigns",
-        "appName": "Campaigns",
-        "scope": "Campaigns",
-        "url": "https://localhost:8080/campaigns.js",
+        "appName": "cpui",
+        "scope": "cpui",
+        "url": "https://localhost:8080/remoteEntry.js",
         "envconfig": "https://certificate-manager-qa.phenompro.com/env-config.js",
         "loadingMessage": "Loading",
         "accessType": "phenom",
