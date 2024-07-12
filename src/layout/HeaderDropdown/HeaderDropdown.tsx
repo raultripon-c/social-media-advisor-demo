@@ -45,7 +45,7 @@ const HeaderDropdown: React.FC<{
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
   return (
-    <div className={`${type} dropdown ${isOpen ? "open" : ""}`}>
+    <div className={`${type} tenant-header-dropdown ${isOpen ? "open" : ""}`}>
       <button
         className={`dropdown-button ${value ? "" : "no-value"}`}
         onMouseDown={toggleDropdown}
