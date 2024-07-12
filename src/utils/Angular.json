@@ -102,7 +102,7 @@
         "module": "./CRMCampaigns",
         "route": "/email-management",
         "component": "app-campaigns",
-        "appName": "cpui",
+        "appName": "campaigns",
         "scope": "cpui",
         "url": "https://localhost:8080/remoteEntry.js",
         "envconfig": "https://certificate-manager-qa.phenompro.com/env-config.js",
@@ -155,6 +155,44 @@
       "events": null,
       "framework": "REACT"
     },
+    {
+      "id": "669001f0a40b7e25860ffd11",
+      "name": "Email Templates",
+      "icon": "",
+      "parentName": "Experiences",
+      "searchKeys": [
+          "emails",
+          "templates",
+          "crm-emails"
+      ],
+      "accessibility": [],
+      "appType": "module-federation",
+      "hoverText": "Email Templates",
+      "loadingText": "Loading Email Templates...",
+      "appConfig": {
+          "module": "./CRMCampaigns",
+          "route": "/email-management",
+          "component": "app-campaigns",
+          "appName": "email-templates",
+          "scope": "cpui",
+          "url": "https://localhost:8080/remoteEntry.js",
+          "envconfig": "https://certificate-manager-qa.phenompro.com/env-config.js",
+          "loadingMessage": "Loading Email Templates",
+          "accessType": "phenom",
+          "showSideNav": "false",
+          "isMfProduct": "true"
+      },
+      "rbacDetails": {
+          "clientId": "tls-automation-api"
+      },
+      "requestParams": null,
+      "isParent": false,
+      "context": "tenant",
+      "showSidebar": null,
+      "order": 1,
+      "events": null,
+      "framework": "ANGULAR"
+  },
     {
       "id": "ChildContent9280jdhd09903098",
       "name": "Asset Manager",
