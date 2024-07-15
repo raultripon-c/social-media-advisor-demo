@@ -14,7 +14,8 @@ export function AngularAppRenderer(props: any) {
   );
   const ref = useRef(null);
   const approute=props?.selectedApp?.route;
-  const appName=props?.selectedApp?.appName;
+  const{ appName,moduleRoute}=props?.selectedApp;
+
   const [mountEvents, setMountEvents] = useState(null);
   const loadRemoteModule = async (scope: any, module: any) => {
     await __webpack_init_sharing__("default");
@@ -72,8 +73,10 @@ export function AngularAppRenderer(props: any) {
             subPath: `/${selectedTenant.customerCode}/${selectedTenant.refNum}${approute}`,
             userId: window.keycloakInstance.userInfo.userDetails.id,
             appName: appName,
+            moduleRoute:moduleRoute,
             
           };
+          console.log({props})
           module.mount(props);
         }
         // mountAngularComponent(ref.current, module.YourAngularModule);
