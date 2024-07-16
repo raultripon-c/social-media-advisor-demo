@@ -12,9 +12,10 @@ export function AngularAppRenderer(props: any) {
   const selectedTenant = useSelector(
     (state: AppStore) => state.customer.selectedTenant
   );
+  const [isReady, setReady] = useState(false);
   const ref = useRef(null);
-  const approute=props?.selectedApp?.route;
-  const{ appName,moduleRoute}=props?.selectedApp;
+  const approute = props?.selectedApp?.route;
+  const { appName, moduleRoute } = props?.selectedApp;
 
   const [mountEvents, setMountEvents] = useState(null);
   const loadRemoteModule = async (scope: any, module: any) => {
@@ -73,11 +74,12 @@ export function AngularAppRenderer(props: any) {
             subPath: `/${selectedTenant.customerCode}/${selectedTenant.refNum}${approute}`,
             userId: window.keycloakInstance.userInfo.userDetails.id,
             appName: appName,
-            moduleRoute:moduleRoute,
-            
+            moduleRoute: moduleRoute,
           };
-          console.log({props})
-          module.mount(props);
+          console.log({ props });
+          await module.mount(props);
+          console.log("module loaded");
+          setReady(true);
         }
         // mountAngularComponent(ref.current, module.YourAngularModule);
       })();
@@ -99,21 +101,14 @@ export function AngularAppRenderer(props: any) {
 
   return (
     <>
-      {ready ? (
-        <Suspense
-          fallback={
-            <div className="child-loading">
-              <Loader title={"loading"} />
-            </div>
-          }
-        >
-          <div
-            className="crm-events-module"
-            id="child-module-renderer"
-            ref={containerRef}
-          ></div>
-        </Suspense>
-      ) : (
+      <div
+        className="crm-events-module"
+        id="child-module-renderer"
+        ref={containerRef}
+        style={{ display: isReady ? "block" : "none" }}
+      ></div>
+
+      {!isReady && (
         <div className="child-loading">
           <Loader title={"loading"} />
         </div>
