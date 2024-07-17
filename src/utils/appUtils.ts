@@ -227,7 +227,7 @@ export const navigateToNewTab = (url: string) => {
   return window.open(url, "_blank");
 };
 
-export function findAppConfigByRoutes(apps: any, value: string): any {
+export function findAppConfigByRoutes(apps: any=[], value: string): any {
   try {
     return apps.filter((element: any) => {
       try {
