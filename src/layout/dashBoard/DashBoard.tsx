@@ -24,7 +24,8 @@ const DashBoard = () => {
   const [filteredData, setFilteredData] = useState<any[]>([]);
   const [totalAppsData, setTotalAppsData] = useState<any[]>([]);
 
-  const userName = window.localStorage.getItem("USER_FULL_NAME");
+  const userName = window.keycloakInstance.tokenParsed.name;
+  const userEmail = window.keycloakInstance.tokenParsed.userDetails.userName;
 
   const staticData = [
     {
