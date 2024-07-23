@@ -181,7 +181,7 @@ function Header({
               )}
           </div>
         )}
-        <div className="header-right">
+        <div className={`header-right ${sidebarOpen ? "logo-expanded" : ""}`}>
           <app-switcher
             env={(window as any)._env_.APP_ENV}
             kcObject={JSON.stringify(window.keycloakInstance)}
