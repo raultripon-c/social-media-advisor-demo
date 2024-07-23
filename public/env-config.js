@@ -7,6 +7,7 @@ window._env_ = {
   APP_REGION_WISE_ACCESS_API:
     "{ *US* : *https://servicehub-qa.phenompro.com/access/api* ,*IR* : *https://servicehub-qa.phenompro.com/ir/access/api*, *CA* : *https://servicehub-qa.phenompro.com/access/api*, *IN* : *https://servicehub-qa.phenompro.com/access/api*, *US_AZ* : *https://servicehub-az-qa.phenompro.com/access/api*, *IN_LI* : *https://servicehub-qa.phenompro.com/access/api* }",
   APP_KEYCLOAK_URL: "https://login-qa.phenompro.com/login",
+  APP_CLIENT_ID:"txe-ui",
   APP_DC: "US",
   APP_ENV: "QA",
   APP_DISABLE_EXPORT_CUSTOMERS_LIST: "[*one*, *two*]",

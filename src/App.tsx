@@ -9,7 +9,7 @@ import { isEmpty } from "lodash";
 const App = (): JSX.Element => {
   const keyCloakConfig = {
     loginHost: (window as any)._env_.APP_KEYCLOAK_URL,
-    clientId: "onephenom-ui",
+    clientId: "txe-ui",
   };
   const eventLogger = (event: any, error: any) => {
   };
