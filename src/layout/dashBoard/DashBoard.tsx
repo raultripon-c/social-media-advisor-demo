@@ -1,11 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { EmptyState, Loader } from "@phenom/react-ui-components";
+import {
+  EmptyState,
+  Button,
+  Loader,
+  GreetingCard,
+} from "@phenom/react-ui-components";
 import { AppStore } from "store";
-import { Search } from "../../components/TenantSearch/TenantsSearch";
 import { setAppDetails, setAppsFromAPI } from "../../store/apps/actions";
 import { appSelectionHandler } from "../../utils/appUtils";
+import profileImage from "../../assets/images/image.jpg";
+import "./DashBoard.scss";
 
 const DashBoard = () => {
   const navigate = useNavigate();
@@ -15,9 +21,37 @@ const DashBoard = () => {
   );
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [searchKey, setSearchKey] = useState<string>("");
   const [filteredData, setFilteredData] = useState<any[]>([]);
   const [totalAppsData, setTotalAppsData] = useState<any[]>([]);
+
+  const userName = window.localStorage.getItem("USER_FULL_NAME");
+
+  const staticData = [
+    {
+      text: "Page",
+      icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Generic.svg",
+    },
+    {
+      text: "Article",
+      icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Company_notification.svg",
+    },
+    {
+      text: "Campaigns",
+      icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/campaign.svg",
+    },
+    {
+      text: "Events",
+      icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Generic.svg",
+    },
+    {
+      text: "Email templates",
+      icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Generic.svg",
+    },
+    {
+      text: "SMS templates",
+      icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Generic.svg",
+    },
+  ];
 
   const getAllApps = async () => {
     try {
@@ -38,6 +72,17 @@ const DashBoard = () => {
     }
   };
 
+  const handleButtonClick = (text: string) => {
+    const matchedApp = totalAppsData.find(
+      (app) => app.name.toLowerCase() === text.toLowerCase()
+    );
+    if (matchedApp) {
+      navigateToApp(matchedApp);
+    } else {
+      console.log(`Clicked on ${text}`);
+    }
+  };
+
   useEffect(() => {
     sessionStorage.removeItem("currentContext");
     dispatch(setAppDetails({}));
@@ -53,14 +98,6 @@ const DashBoard = () => {
       setIsLoading(false);
     }
   }, []);
-
-  useEffect(() => {
-    const data = totalAppsData.filter((eachCustomer: any) =>
-      eachCustomer.name.toLowerCase().includes(searchKey.toLowerCase())
-    );
-    setFilteredData(data);
-  }, [searchKey, totalAppsData]);
-
   const navigateToApp = (selectedApp: any) => {
     sessionStorage.setItem("selectedApp", JSON.stringify(selectedApp));
     dispatch(setAppDetails(selectedApp));
@@ -81,37 +118,32 @@ const DashBoard = () => {
   }
 
   return (
-    <div className="tenants-container">
-      <div className="tenants-header">
-        <div className="search-container">
-          <Search
-            placeholder="Search Apps"
-            onValueChange={(e: any) => setSearchKey(e.target.value)}
-            size="medium"
-            at_id="tenant-search"
-          />
-        </div>
+    <div>
+      <div className="greeting-container">
+        <GreetingCard
+          greetingMessage="Good morning"
+          subMessage="Create the future of Talent Experience"
+          name={userName}
+          profileImage={profileImage}
+        />
       </div>
-      {totalAppsData.length !== 0 ? (
-        <div className="tenant-list">
-          {filteredData
-            .filter((app: any) => !app.isParent)
-            .map((eachApp: any) => (
-              <div
-                className="tenant-card"
-                key={eachApp.name}
-                onClick={() => navigateToApp(eachApp)}
-              >
-                <span>{eachApp.name}</span>
-              </div>
-            ))}
-          {filteredData.length === 0 && (
-            <div className="no-customer-found">No Apps found</div>
-          )}
-        </div>
-      ) : (
-        <EmptyState displayText="No Apps found" />
-      )}
+      <div className="button-row">
+        {staticData.length !== 0 ? (
+          staticData.map((item, index) => (
+            <Button
+              key={index}
+              size="small"
+              buttonType="primary"
+              text={item.text}
+              iconLeft={item.icon}
+              className="primary-button-grey"
+              onClick={() => handleButtonClick(item.text)}
+            />
+          ))
+        ) : (
+          <EmptyState displayText="No Apps found" />
+        )}
+      </div>
     </div>
   );
 };
