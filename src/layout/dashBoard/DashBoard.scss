@@ -158,3 +158,25 @@
     color: #637085;
   }
 }
+
+.button-row {
+  margin-left: 30px;
+  .primary-button-grey {
+    color: black;
+    background-color: #f4f6fa;
+
+    &:hover,
+    &:active,
+    &:focus {
+      background-color: #f4f6fa;
+    }
+  }
+}
+
+.greeting-container {
+  position: relative;
+  width: 100%;
+  margin-bottom: 50px;
+  margin-left: 50px;
+  padding-top: 40px;
+}
