@@ -2,7 +2,7 @@ export const apiUrl = {
   getCustomerAccounts: "customers",
   getLoggedInUserRoles: "me/roles",
   tenantsByCustomerId: "customers/{customerid}/tenants",
- 
+  getUserBySearch: "users/byusername/{username}",
 
 };
 export const REQUEST_TYPE_KEY = "request_type";

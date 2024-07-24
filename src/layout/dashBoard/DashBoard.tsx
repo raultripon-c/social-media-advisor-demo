@@ -10,8 +10,9 @@ import {
 import { AppStore } from "store";
 import { setAppDetails, setAppsFromAPI } from "../../store/apps/actions";
 import { appSelectionHandler } from "../../utils/appUtils";
-import profileImage from "../../assets/images/image.jpg";
 import "./DashBoard.scss";
+import { apiUrl } from "../../utils/constants";
+import { API } from "../../utils/api";
 
 const DashBoard = () => {
   const navigate = useNavigate();
@@ -23,8 +24,8 @@ const DashBoard = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [filteredData, setFilteredData] = useState<any[]>([]);
   const [totalAppsData, setTotalAppsData] = useState<any[]>([]);
-
-  const userName = window.localStorage.getItem("USER_FULL_NAME");
+  const userName = window.keycloakInstance.tokenParsed.name;
+  const [userDetails, setDetails] = useState<any>();
 
   const staticData = [
     {
@@ -97,7 +98,33 @@ const DashBoard = () => {
       dispatch(setAppsFromAPI(apps));
       setIsLoading(false);
     }
+  }, [dispatch]);
+
+  useEffect(() => {
+    const getLoggedInUserInfo = async () => {
+      try {
+        const loggedInUserEmail =
+          window.keycloakInstance?.tokenParsed?.userDetails?.userName;
+
+        if (!loggedInUserEmail) return;
+
+        const endPoint = apiUrl.getUserBySearch.replace(
+          "{username}",
+          loggedInUserEmail
+        );
+
+        const response = await API.get(
+          `${(window as any)._env_.APP_API_URL}/${endPoint}`
+        );
+        setDetails(response?.data?.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    getLoggedInUserInfo();
   }, []);
+
   const navigateToApp = (selectedApp: any) => {
     sessionStorage.setItem("selectedApp", JSON.stringify(selectedApp));
     dispatch(setAppDetails(selectedApp));
@@ -124,7 +151,7 @@ const DashBoard = () => {
           greetingMessage="Good morning"
           subMessage="Create the future of Talent Experience"
           name={userName}
-          profileImage={profileImage}
+          profileImage={userDetails?.profileImage}
         />
       </div>
       <div className="button-row">
