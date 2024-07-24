@@ -194,7 +194,7 @@
       "framework": "ANGULAR"
   },
     {
-      "id": "ChildContent9280jdhd09903098",
+      "id": "280jdhd0990309843",
       "name": "Asset Manager",
       "icon": "",
       "parentName": "Content",
@@ -259,6 +259,74 @@
       "order": 1,
       "events": null,
       "framework": "ANGULAR"
+    },
+    {
+      "id": "ChildContent9280jdhd09903074773",
+      "name": "Blog",
+      "icon": "",
+      "parentName": "Experiences",
+      "searchKeys": ["blog"],
+      "accessibility": null,
+      "appType": "script",
+      "hoverText": "Blog",
+      "loadingText": "Loading Blogs",
+      "appConfig": {
+        "module": "./blogs",
+        "route": "/blogs",
+        "component": "div",
+        "appName": "content",
+        "scope": "content",
+        "url": "http://localhost:3002/remoteEntry.js",
+        "envconfig": "https://certificate-manager-qa.phenompro.com/env-config.js",
+        "loadingMessage": "Loading",
+        "accessType": "phenom",
+        "showSideNav": "false",
+        "isMfProduct": "true"
+      },
+      "rbacDetails": {
+        "roles": [],
+        "clientId": ""
+      },
+      "isParent": false,
+      "context": "tenant",
+      "showSidebar": null,
+      "order": 2,
+      "events": null,
+      "framework": ""
+    },
+    {
+      "id": "ChildContent9280jdhd987",
+      "name": "Banners",
+      "icon": "",
+      "parentName": "Experiences",
+      "searchKeys": ["banners"],
+      "accessibility": null,
+      "appType": "script",
+      "hoverText": "Banners",
+      "loadingText": "Loading Banners",
+      "appConfig": {
+        "module": "./banners",
+        "route": "/banners",
+        "component": "div",
+        "appName": "content",
+        "scope": "content",
+        "url": "http://localhost:3002/remoteEntry.js",
+        "envconfig": "https://certificate-manager-qa.phenompro.com/env-config.js",
+        "loadingMessage": "Loading",
+        "accessType": "phenom",
+        "showSideNav": "false",
+        "isMfProduct": "true"
+      },
+      "rbacDetails": {
+        "roles": [],
+        "clientId": ""
+      },
+      "isParent": false,
+      "context": "tenant",
+      "showSidebar": null,
+      "order": 2,
+      "events": null,
+      "framework": ""
     }
   ],
   "status": true

@@ -22,7 +22,7 @@ const Assets = () => {
                 if (!existsScrElem) {
                     const scrElem = document.createElement("script");
                     scrElem.id = embedScriptId;
-                    scrElem.src = "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/embed.js";
+                    scrElem.src = "http://127.0.0.1:5500/embed.js";
                     scrElem.onload = () => {
                         resolve();
                     };
@@ -33,7 +33,7 @@ const Assets = () => {
             });
         };
 
-        if (storeData && storeData.selectedTenant && storeData.selectedTenant.refNum) {
+        if (storeData && storeData.selectedTenant && storeData.selectedTenant.refNum) { 
             loadScript().then(() => {
                 if (window.txEmbed) {
                     window.txEmbed.embedModules("assets", "#tools-body-container", {refNum: storeData.selectedTenant.refNum, token: window.keycloakInstance.token });

@@ -8,12 +8,12 @@ declare global {
         txEmbed: any;
     }
 }
-const Blogs = () => {
+const Banners = () => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const storeData = useSelector((state: AppStore) => state.customer);
 
     useEffect(() => {
-        const embedScriptId = "txe-cms-embed-blogs";
+        const embedScriptId = "txe-cms-embed-banners";
         const existsScrElem = document.querySelector(`#${embedScriptId}`);
 
         const loadScript = () => {
@@ -35,7 +35,7 @@ const Blogs = () => {
         if (storeData && storeData.selectedTenant && storeData.selectedTenant.refNum) { 
             loadScript().then(() => {
                 if (window.txEmbed) {
-                    window.txEmbed.embedModules("blogs", "#tools-body-container", {refNum: storeData.selectedTenant.refNum, token: window.keycloakInstance.token });
+                    window.txEmbed.embedModules("banners", "#tools-body-container", {refNum: storeData.selectedTenant.refNum, token: window.keycloakInstance.token });
                 }
                 setIsLoading(false);
             });
@@ -52,4 +52,4 @@ const Blogs = () => {
         </div>
     );
 }
-export default Blogs;
+export default Banners;
