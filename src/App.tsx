@@ -9,7 +9,7 @@ import { isEmpty } from "lodash";
 const App = (): JSX.Element => {
   const keyCloakConfig = {
     loginHost: (window as any)._env_.APP_KEYCLOAK_URL,
-    clientId: "txe-ui",
+    clientId: (window as any)._env_.APP_CLIENT_ID,
   };
   const eventLogger = (event: any, error: any) => {
   };
