@@ -10,8 +10,6 @@ interface Props {
 
 export const ErrorBoundary: React.FC<Props> = (props: Props) => {
 
-  console.log("errorCode,errorMessage",props?.errorCode,props?.errorMessage)
-
   const dispatch = useDispatch();
   const backNavigation = () => {
     props.navigate("/");

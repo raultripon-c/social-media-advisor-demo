@@ -76,7 +76,6 @@ export function ReactAppRenderer(props: Props) {
     url: props.module && props.url,
   });
 
-  console.log("ready",ready)
 
   if (!props.module) {
     return <p>Failed to Load Application </p>;
