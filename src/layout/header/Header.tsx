@@ -159,7 +159,7 @@ function Header({
       <div
         className={`header-com col-md-12 ${
           isCustomerPage ? "customers-page-header" : ""
-        }`}
+        } ${sidebarOpen ? "logo-expanded" : ""}`}
       >
         {customerDetails?.data?.name && app && app?.context !== "platform" && (
           <div className="tenant-selection col-md-6">
@@ -181,7 +181,7 @@ function Header({
               )}
           </div>
         )}
-        <div className={`header-right ${sidebarOpen ? "logo-expanded" : ""}`}>
+        <div className={`header-right`}>
           <app-switcher
             env={(window as any)._env_.APP_ENV}
             kcObject={JSON.stringify(window.keycloakInstance)}
