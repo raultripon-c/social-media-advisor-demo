@@ -44,7 +44,6 @@ export const appSelectionHandler = (
       break;
     case "external":
       const link = getLink(selectedApp, {"refNum":refNum, "customerCode":customerCode});
-      console.log("External", link)
       if (link && !isEmpty(link)) window.open(link, "_self");
       else {
         toast.dismiss();

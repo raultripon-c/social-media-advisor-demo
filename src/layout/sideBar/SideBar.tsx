@@ -89,7 +89,6 @@ function ToolsSideBar(props: any) {
               : null
           }
           onClose={(showSidebar: any) => {
-            console.log("hlo");
             setSidebarOpen(showSidebar);
           }}
           dashboardIcons={{
