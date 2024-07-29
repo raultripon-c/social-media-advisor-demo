@@ -31,6 +31,7 @@ export const APIService = {
         }
       })
       .catch((error) => {
+        toast.error("Error in getting customer details");
         console.log("Error in getting customer details : " + error);
         dispatch(setCustomerDetails({}));
       });
@@ -55,6 +56,7 @@ export const APIService = {
       })
       .catch((error) => {
         dispatch(setLogedUserRoles({}));
+        toast.error("Error in fetching roles");
         console.log("Error in getting roles : " + error);
       })
       .finally(() => {
@@ -109,6 +111,7 @@ export const APIService = {
         }
       })
       .catch((error) => {
+        toast.error("Error in fetching tenants");
         console.log("Error in getting tenants : " + error);
         setCustomerTenants([]);
       });
@@ -119,6 +122,7 @@ export const APIService = {
         dispatch(setSelectedTenant(response.data.data));
       })
       .catch((error: any) => {
+        toast.error("Error in fetching tenants");
         console.log("Error in getting tenants : " + error);
       });
   },

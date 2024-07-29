@@ -8,7 +8,6 @@ import "./AngularApp.scss";
 
 export function AngularAppRenderer(props: any) {
   const containerRef = useRef(null);
-  console.log({ props });
   const selectedTenant = useSelector(
     (state: AppStore) => state.customer.selectedTenant
   );
@@ -76,9 +75,8 @@ export function AngularAppRenderer(props: any) {
             appName: appName,
             moduleRoute: moduleRoute,
           };
-          console.log({ props });
+          console.log('angular app props',{ props });
           await module.mount(props);
-          console.log("module loaded");
           setReady(true);
         }
         // mountAngularComponent(ref.current, module.YourAngularModule);

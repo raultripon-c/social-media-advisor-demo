@@ -30,6 +30,11 @@
       background-color: white;
       min-height: 56px;
     }
+    &.title-logo-container{
+      min-width: 272px;
+      justify-content: left;
+      margin-left: 15px;
+    }
   }
   .header-right {
     display: flex;
@@ -38,8 +43,12 @@
     padding-right: 15px;
   }
   .header-logo {
-    width: 12px;
-    height: 16px;
+    width: 19px;
+    height: 24px;
+  }
+  .header-title-logo{
+    width: 78px;
+    height: 28px;
   }
   .vertical-line {
     border-left: 1px solid #e8eaee; /* Change color/width as needed */
@@ -49,10 +58,12 @@
   .header-com {
     display: flex;
     position: relative;
-    border-radius: 10px 0 0 0;
     background-color: #fff;
     &.customers-page-header {
       border-radius: 0px;
+    }
+    &.logo-expanded{
+      max-width: 84.7%;
     }
   }
   .tenant-selection {

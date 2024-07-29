@@ -195,14 +195,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
 
       if (!response) return;
       let res = [...response];
-      console.log(res, "res");
       dispatch(setAppsFromAPI(res));
       const mfRoutes = getMfRoutes(res);
       setTransformedAppData(transformAppData(res));
       const filteredApps: any = transformAppData(res);
       setCustomerTenantApps(filteredApps?.customerTenantApps);
       setPlatformApps(filteredApps?.platformApps);
-      // console.log(filteredApps, "filteredApps")
       sessionStorage.setItem("allapps", JSON.stringify(res));
       setAllRoutes([...appRoutes, ...mfRoutes]);
     } catch (error) {
@@ -212,7 +210,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   const emitEventsToChildApps = (output: any, currentEventData: any) => {
     Object.keys(allEvents?.inputs).forEach((app) => {
       const appInputs = allEvents.inputs[app];
-      console.log(app, appInputs);
       appInputs.forEach((input: any) => {
         if (input === output) {
           console.log(
