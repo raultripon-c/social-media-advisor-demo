@@ -57,7 +57,7 @@ const ContentHub: React.FC = () => {
         }
       });
     }
-  }, [storeData,selectedApp]);
+  }, [storeData]);
 
   return (
     <div>
