@@ -6,6 +6,7 @@ import {
   Button,
   Loader,
   GreetingCard,
+  OverviewCard,
 } from "@phenom/react-ui-components";
 import { AppStore } from "store";
 import { setAppDetails, setAppsFromAPI } from "../../store/apps/actions";
@@ -52,6 +53,15 @@ const DashBoard = () => {
       text: "SMS templates",
       icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Generic.svg",
     },
+  ];
+
+  const data = [
+    { title: "Recent Leads", value: "150", change: "+10%" },
+    { title: "New Applicants", value: "75", change: "-2.4" },
+    { title: "Career Site Visits", value: "1200", change: "+2%" },
+    { title: "Conversion Rate", value: "6.25%", change: "+10" },
+    { title: "Avg. Time on Page", value: "1min 45sec", change: "+10" },
+    { title: "My active campaigns", value: "47", change: "+10" },
   ];
 
   const getAllApps = async () => {
@@ -154,6 +164,22 @@ const DashBoard = () => {
           profileImage={userDetails?.profileImage}
         />
       </div>
+      <div className="overview-container">
+        <h2 className="overview-heading">Overview</h2>
+        {[0, 1].map((rowIndex) => (
+          <div className="grid-container" key={rowIndex}>
+            {data.slice(rowIndex * 3, (rowIndex + 1) * 3).map((item, index) => (
+              <OverviewCard
+                key={index}
+                title={item.title}
+                value={item.value}
+                change={item.change}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+      <h2 className="overview-heading">Create</h2>
       <div className="button-row">
         {staticData.length !== 0 ? (
           staticData.map((item, index) => (
