@@ -44,7 +44,7 @@ export const appSelectionHandler = (
       break;
     case "external":
       const link = getLink(selectedApp, {"refNum":refNum, "customerCode":customerCode});
-      if (link && !isEmpty(link)) window.open(link, "_self");
+      if (link && !isEmpty(link)) window.open(link, "_blank");
       else {
         toast.dismiss();
         toast.error("Link is not provided for navigation");
