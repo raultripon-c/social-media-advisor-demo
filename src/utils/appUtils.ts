@@ -43,7 +43,10 @@ export const appSelectionHandler = (
       );
       break;
     case "external":
-      const link = getLink(selectedApp, {"refNum":refNum, "customerCode":customerCode});
+      const link = getLink(selectedApp, {
+        refNum: refNum,
+        customerCode: customerCode,
+      });
       if (link && !isEmpty(link)) window.open(link, "_blank");
       else {
         toast.dismiss();
@@ -144,8 +147,16 @@ export const transformAppData = (data: any) => {
     })
     .filter(Boolean); // Filter out any null items
 
+  const individualApps = data?.filter((app: any) => {
+    return !app.isParent && !app.parentName;
+  });
+  const combinedCustomerTenantApps = sortAppsByOrder([
+    ...customerTenantApps,
+    ...individualApps,
+  ]);
+
   const mainData = {
-    customerTenantApps: sortAppsByOrder(customerTenantApps),
+    customerTenantApps: combinedCustomerTenantApps,
     platformApps: sortAppsByOrder(platformApps),
   };
   return mainData;
@@ -226,7 +237,7 @@ export const navigateToNewTab = (url: string) => {
   return window.open(url, "_blank");
 };
 
-export function findAppConfigByRoutes(apps: any=[], value: string): any {
+export function findAppConfigByRoutes(apps: any = [], value: string): any {
   try {
     return apps.filter((element: any) => {
       try {
@@ -243,7 +254,7 @@ export function findAppConfigByRoutes(apps: any=[], value: string): any {
     return [];
   }
 }
-export function getLink(selectedApp:any, request:any): any {
+export function getLink(selectedApp: any, request: any): any {
   let link = selectedApp?.appConfig?.link;
   let requestParam = selectedApp?.requestParams;
   let setLink = "";
@@ -258,17 +269,12 @@ export function getLink(selectedApp:any, request:any): any {
         setLink += `${key}=${encodeURIComponent(value as string)}`;
       }
     });
-  
+
     setLink = `${link}?${setLink}`;
-  
-  return setLink;
-    }
-    
-  
-   
-  catch (error) {
+
+    return setLink;
+  } catch (error) {
     console.error("An error occurred: ", error);
     return [];
   }
 }
-
