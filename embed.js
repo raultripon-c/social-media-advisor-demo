@@ -12,11 +12,11 @@ var txEmbed = (function(){
             tier: 'tier2',
         },
         blogs:  {
-            component : 'components/txe/txe-component/txe-component',
+            component : 'components/txe2/txe-component2/txe-component',
             tier: 'tier3',
         },
         banners:  {
-            component : 'components/txe/txe-component/txe-component',
+            component : 'components/txe2/txe-component2/txe-component',
             tier: 'tier3',
         },
     }
@@ -69,7 +69,10 @@ var txEmbed = (function(){
 
     function loadStyles(platformModuleCfg, tier){
         const txeCmsStyleId = 'txe-cms-style'
-        const existsStyleElem = document.querySelector(`#${txeCmsStyleId}-${tier}-main`)
+        const existsStyleElem = document.querySelector(`#${txeCmsStyleId}-main`)
+        if(existsStyleElem){
+            existsStyleElem.remove();
+        }
         if(!existsStyleElem){
             require(platformModuleCfg.styles, function(css, maincss){
                 const styleElem1 = document.createElement('style')
@@ -86,11 +89,19 @@ var txEmbed = (function(){
     }
 
     function embedModules(moduleToLoad, containerSelector, txeContext){
-        window.___req___ = window.require = undefined
-        if(window.___define___){
-            window.dfn = window.___define___
+        if(!window.___prmise___){
+            window.___prmise___ = window.Promise
         }
-        window.___define___ = window.define = undefined
+
+        window.___req___ = undefined
+        window.require = undefined
+        window.define = undefined
+        window.___define___ = undefined
+        window.requirejs = undefined
+        // if(window.___define___){
+        //     window.dfn = window.___define___
+        // }
+        // window.___define___ = window.define = undefined
         
         window.__txeCms = window.__txeCms || {}
         if(!window.__txeCms[moduleToLoad]){
@@ -101,21 +112,20 @@ var txEmbed = (function(){
             loadScript(moduleSpecificPlatformConfig.vendor.id, moduleSpecificPlatformConfig.vendor.src, function(){    
                 loadScript(moduleSpecificPlatformConfig.app.id, moduleSpecificPlatformConfig.app.src, function(){
                     if(!window.___req___){
-                        window.___req___ = window.require || window.requirejs
+                        window.___define___ = window.define
+                        window.define = function (name, deps, callback) {
+                            console.log(name, deps, callback)
+                            window.___define___(name, deps, callback)
+                        }
+                        
+                        window.___req___ = window.require
                         window.require = function(arr, cb){
                             console.log(arr, cb)
                             if(cb){
                                 window.___req___(arr, cb)
                             }
                         }
-                        if(!window.define){
-                            window.define = window.dfn
-                        }
-                        window.___define___ = window.define
-                        window.define = function (name, deps, callback) {
-                            console.log(name, deps, callback)
-                            window.___define___(name, deps, callback)
-                        }
+                        
                     }
                     if(window.require1){
                         window.require = window.require1
@@ -171,7 +181,7 @@ var txEmbed = (function(){
                         var aStart = aurelia.start();
                         aStart.then(function () {
                             //return aurelia.setRoot('components/content-management/content-management', document.querySelector('#cms-au'));
-                            const auHosted = aurelia.setRoot('components/txe/txe-component/txe-component', document.querySelector(containerSelector));
+                            const auHosted = aurelia.setRoot(moduleCfg[moduleToLoad].component, document.querySelector(containerSelector));
                             auHosted.then(() => {
                                 if(aurelia.root && aurelia.root.viewModel.setTxeContext){
                                     if(window.orgInfo){

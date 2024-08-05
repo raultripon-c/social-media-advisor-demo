@@ -15,6 +15,9 @@ const Blogs = () => {
     useEffect(() => {
         const embedScriptId = "txe-cms-embed-blogs";
         const existsScrElem = document.querySelector(`#${embedScriptId}`);
+        if(existsScrElem) {
+            existsScrElem.remove();
+        }
 
         const loadScript = () => {
             return new Promise<void>((resolve) => {

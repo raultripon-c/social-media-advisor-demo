@@ -15,6 +15,9 @@ const Banners = () => {
     useEffect(() => {
         const embedScriptId = "txe-cms-embed-banners";
         const existsScrElem = document.querySelector(`#${embedScriptId}`);
+        if(existsScrElem) {
+            existsScrElem.remove();
+        }
 
         const loadScript = () => {
             return new Promise<void>((resolve) => {

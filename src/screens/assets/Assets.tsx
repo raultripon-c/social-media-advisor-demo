@@ -16,9 +16,13 @@ const Assets = () => {
     useEffect(() => {
         const embedScriptId = "txe-cms-embed-assets";
         const existsScrElem = document.querySelector(`#${embedScriptId}`);
+        if(existsScrElem) {
+            existsScrElem.remove();
+        }
 
         const loadScript = () => {
             return new Promise<void>((resolve) => {
+                
                 if (!existsScrElem) {
                     const scrElem = document.createElement("script");
                     scrElem.id = embedScriptId;
