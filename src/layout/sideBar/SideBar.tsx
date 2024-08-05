@@ -1,6 +1,6 @@
 import { SideBar } from "@phenom/react-ui-components";
 import sessionTracker from "phenom-session-tracker";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { AppStore } from "store";
@@ -8,23 +8,19 @@ import arrowRight from "../../assets/images/dashboard/arrowRight.svg";
 import dashboardInfo from "../../assets/images/dashboard/dashboardInfo.svg";
 import dashboardActive from "../../assets/svg/HomeVector.svg";
 import dashboardGrey from "../../assets/svg/HomeVectorGrey.svg";
-import { setAppDetails } from "../../store/apps/actions";
+import { setAppDetails, setSidebarState } from "../../store/apps/actions";
 import {
   setCustomerDetails,
   setCustomerTenants,
   setSelectedTenant,
 } from "../../store/customer/actions";
-import {
-  CUSTOMER_LEVEL,
-  PLATFORM,
-  TENANT
-} from "../../utils/constants";
+import { CUSTOMER_LEVEL, PLATFORM, TENANT } from "../../utils/constants";
 import "./SideBar.scss";
 
 function ToolsSideBar(props: any) {
   const { categories, setCategories } = props;
   const customerDetails = useSelector((state: AppStore) => state.customer);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [disableAutoClose, setDisableAutoClose] = useState(true);
   const selectedApp = useSelector((state: any) => {
     const selectedAppFromSession = JSON.parse(
@@ -58,6 +54,9 @@ function ToolsSideBar(props: any) {
       // navigate("/");
     }
   };
+  useEffect(() => {
+    dispatch(setSidebarState(sidebarOpen));
+  }, [sidebarOpen]);
   const handleAppSelection = (app: any) => {
     setSidebarOpen(true);
     app && sessionStorage.setItem("selectedApp", JSON.stringify(app));
@@ -77,10 +76,11 @@ function ToolsSideBar(props: any) {
           categories={categories}
           sideBarNavClass={"sidebar-nav-button"}
           setCategories={setCategories}
-          disableAutoClose={disableAutoClose}
+          disableAutoClose={true}
           setDisableAutoClose={setDisableAutoClose}
           summaryOnClick={summaryOnClick}
-          placeholder="Search"
+          dashboardSelected={window.location.pathname.includes("summary")}
+          placeholder="Search Navigation"
           sideBarHeading={
             currentContext === TENANT
               ? "TENANT SETTINGS"

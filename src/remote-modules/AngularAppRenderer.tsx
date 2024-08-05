@@ -8,13 +8,14 @@ import "./AngularApp.scss";
 
 export function AngularAppRenderer(props: any) {
   const containerRef = useRef(null);
-  console.log({ props });
   const selectedTenant = useSelector(
     (state: AppStore) => state.customer.selectedTenant
   );
+  const [isReady, setReady] = useState(false);
   const ref = useRef(null);
-  const approute=props?.selectedApp?.route;
-  const appName=props?.selectedApp?.appName;
+  const approute = props?.selectedApp?.route;
+  const { appName, moduleRoute } = props?.selectedApp;
+
   const [mountEvents, setMountEvents] = useState(null);
   const loadRemoteModule = async (scope: any, module: any) => {
     await __webpack_init_sharing__("default");
@@ -72,9 +73,11 @@ export function AngularAppRenderer(props: any) {
             subPath: `/${selectedTenant.customerCode}/${selectedTenant.refNum}${approute}`,
             userId: window.keycloakInstance.userInfo.userDetails.id,
             appName: appName,
-            
+            moduleRoute: moduleRoute,
           };
-          module.mount(props);
+          console.log('angular app props',{ props });
+          await module.mount(props);
+          setReady(true);
         }
         // mountAngularComponent(ref.current, module.YourAngularModule);
       })();
@@ -96,21 +99,14 @@ export function AngularAppRenderer(props: any) {
 
   return (
     <>
-      {ready ? (
-        <Suspense
-          fallback={
-            <div className="child-loading">
-              <Loader title={"loading"} />
-            </div>
-          }
-        >
-          <div
-            className="crm-events-module"
-            id="child-module-renderer"
-            ref={containerRef}
-          ></div>
-        </Suspense>
-      ) : (
+      <div
+        className="crm-events-module"
+        id="child-module-renderer"
+        ref={containerRef}
+        style={{ display: isReady ? "block" : "none" }}
+      ></div>
+
+      {!isReady && (
         <div className="child-loading">
           <Loader title={"loading"} />
         </div>

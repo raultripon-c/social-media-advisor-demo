@@ -20,7 +20,6 @@ import {
   transformAppData,
 } from "../utils/appUtils";
 
-
 import sessionTracker from "phenom-session-tracker";
 import { MessageService } from "../MessageService";
 import { setAppDetails, setAppsFromAPI } from "../store/apps/actions";
@@ -135,10 +134,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   }, []);
 
   useEffect(() => {
-    let detailsApp = findAppConfigByRoutes(
-      JSON.parse(sessionStorage.getItem("allapps") || "null"),
-      window.location.pathname
-    )[0];
+    let detailsApp =
+      fetchedApps &&
+      findAppConfigByRoutes(fetchedApps, window.location.pathname)[0];
     if (
       detailsApp &&
       Object.keys(detailsApp).length != 0 &&
@@ -148,9 +146,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       sessionStorage.setItem("currentContext", detailsApp.context);
       selectedAppFromSession = detailsApp;
     } else {
-      sessionStorage.removeItem("selectedApp");
+      // sessionStorage.removeItem("selectedApp");
     }
-  }, []);
+  }, [fetchedApps]);
   useEffect(() => {
     if (userId) {
       sessionTracker.initiate(
@@ -206,7 +204,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       const filteredApps: any = transformAppData(res);
       setCustomerTenantApps(filteredApps?.customerTenantApps);
       setPlatformApps(filteredApps?.platformApps);
-      // console.log(filteredApps, "filteredApps")
       sessionStorage.setItem("allapps", JSON.stringify(res));
       setAllRoutes([...appRoutes, ...mfRoutes]);
     } catch (error) {
@@ -216,7 +213,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   const emitEventsToChildApps = (output: any, currentEventData: any) => {
     Object.keys(allEvents?.inputs).forEach((app) => {
       const appInputs = allEvents.inputs[app];
-      console.log(app, appInputs);
       appInputs.forEach((input: any) => {
         if (input === output) {
           console.log(
@@ -288,24 +284,22 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       };
     }
   };
-  useEffect(()=>{
-    if(customerDetails?.customerTenants?.length === 0)
-      { 
-        setRolesLoader(true)
-      }
-      else{
-        setRolesLoader(false) 
-      }
-  })
+  useEffect(() => {
+    if (customerDetails?.customerTenants?.length === 0) {
+      setRolesLoader(true);
+    } else {
+      setRolesLoader(false);
+    }
+  });
   useEffect(() => {
     if (customerDetails?.data?.id && customerTenants.length === 0) {
-      setRolesLoader(true)
+      setRolesLoader(true);
       APIService.getCustomerTenants(
         customerDetails?.data?.id,
         dispatch,
         selectedTenant
       );
-      setRolesLoader(false)
+      setRolesLoader(false);
     }
   }, [customerDetails?.data?.id]);
   useEffect(() => {
@@ -342,9 +336,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
     <>
       {rolesLoader ? (
         <InitialLoader show={true} />
-      ) : (transformedAppData &&
-          (transformedAppData as any[])?.length === 0 &&
-          !appsLoader) ? (
+      ) : transformedAppData &&
+        (transformedAppData as any[])?.length === 0 &&
+        !appsLoader ? (
         <div className="unauthorized-box font-14">
           {<EmptyState text={"No apps Found"} />}
         </div>

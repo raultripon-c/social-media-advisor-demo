@@ -65,7 +65,7 @@ export const RemoteModuleRenderer = () => {
   }, [selectedTenant]);
   const [key, setKey] = useState(0); // Initialize key state
 
-  useEffect(() => {
+ useEffect(() => {
     // Update key whenever subPath or refNum changes
     setKey((prevKey) => prevKey + 1);
   }, [moduleProps?.subPath, moduleProps?.refNum,selectedModuleAppObject?.name]);

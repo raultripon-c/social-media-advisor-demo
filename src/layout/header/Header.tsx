@@ -7,6 +7,8 @@ import { AppStore } from "store";
 import dashboardHome from "../../assets/images/dashboard/dashboardHome.svg";
 import tenantIcon from "../../assets/images/dashboard/tenantIcon.svg";
 import phenomLogo from "../../assets/images/phenom-logo.svg";
+import phenomTitleLogo from "../../assets/images/Phenom-title-logo.svg";
+
 import {
   setCustomerDetails,
   setCustomerTenants,
@@ -14,7 +16,7 @@ import {
 } from "../../store/customer/actions";
 import HeaderDropdown from "../HeaderDropdown/HeaderDropdown";
 
-import { setAppDetails } from "../../store/apps/actions";
+import { setAppDetails, setSidebarState } from "../../store/apps/actions";
 import { getAppByName } from "../../utils/appUtils";
 import { CUSTOMER_LEVEL, TENANT } from "../../utils/constants";
 import "./Header.scss";
@@ -66,6 +68,7 @@ function Header({
   const selectedTenant = useSelector(
     (state: AppStore) => state.customer.selectedTenant
   );
+  const { sidebarOpen } = useSelector((state: AppStore) => state.app);
   const currentContext = sessionStorage.getItem("currentContext");
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -86,7 +89,8 @@ function Header({
     sessionStorage.removeItem("currentContext");
     sessionStorage.removeItem("selectedApp");
     dispatch(setSelectedTenant({}));
-    dispatch(setAppDetails({}))
+    dispatch(setSidebarState(false));
+    dispatch(setAppDetails({}));
     dispatch(setCustomerDetails({}));
     if (userType === "PARTNER") {
       dispatch(setSelectedTenant({}));
@@ -137,23 +141,25 @@ function Header({
   const [initialized, setInitialized] = useState(false);
   let pendo = (window as any).pendo;
 
-
-
   return (
     <div className="header-container">
       <button
         className={`header-logo-container  ${
           isCustomerPage ? "logo-white" : ""
-        }`}
+        } ${sidebarOpen ? "title-logo-container" : ""}`}
         onClick={handleLogoClick}
       >
-        <img src={phenomLogo} alt="" className={`header-logo`}></img>
+        <img
+          src={sidebarOpen ? phenomTitleLogo : phenomLogo}
+          alt=""
+          className={sidebarOpen ? "header-title-logo" : `header-logo`}
+        ></img>
       </button>
       {isCustomerPage && <div className="vertical-line"></div>}
       <div
         className={`header-com col-md-12 ${
           isCustomerPage ? "customers-page-header" : ""
-        }`}
+        } ${sidebarOpen ? "logo-expanded" : ""}`}
       >
         {customerDetails?.data?.name && app && app?.context !== "platform" && (
           <div className="tenant-selection col-md-6">
@@ -175,7 +181,7 @@ function Header({
               )}
           </div>
         )}
-        <div className="header-right">
+        <div className={`header-right`}>
           <app-switcher
             env={(window as any)._env_.APP_ENV}
             kcObject={JSON.stringify(window.keycloakInstance)}

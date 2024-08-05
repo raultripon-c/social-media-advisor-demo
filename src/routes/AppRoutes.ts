@@ -1,6 +1,6 @@
 
 import DashBoard from "../layout/dashBoard/DashBoard";
-import ContentHub from "../screens/contentHub/ContentHub"
+import ContentHub from "../layout/dynamicScripts/dynamicScriptLoader"
 import Assets from "../screens/assets/Assets"
 import Blogs from "../screens/blogs/Blogs";
 import Banners from "../screens/banners/Banners";

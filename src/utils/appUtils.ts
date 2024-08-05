@@ -44,8 +44,7 @@ export const appSelectionHandler = (
       break;
     case "external":
       const link = getLink(selectedApp, {"refNum":refNum, "customerCode":customerCode});
-      console.log("External", link)
-      if (link && !isEmpty(link)) window.open(link, "_self");
+      if (link && !isEmpty(link)) window.open(link, "_blank");
       else {
         toast.dismiss();
         toast.error("Link is not provided for navigation");
@@ -227,7 +226,7 @@ export const navigateToNewTab = (url: string) => {
   return window.open(url, "_blank");
 };
 
-export function findAppConfigByRoutes(apps: any, value: string): any {
+export function findAppConfigByRoutes(apps: any=[], value: string): any {
   try {
     return apps.filter((element: any) => {
       try {
