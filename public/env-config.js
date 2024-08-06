@@ -7,7 +7,7 @@ window._env_ = {
   APP_REGION_WISE_ACCESS_API:
     "{ *US* : *https://servicehub-qa.phenompro.com/access/api* ,*IR* : *https://servicehub-qa.phenompro.com/ir/access/api*, *CA* : *https://servicehub-qa.phenompro.com/access/api*, *IN* : *https://servicehub-qa.phenompro.com/access/api*, *US_AZ* : *https://servicehub-az-qa.phenompro.com/access/api*, *IN_LI* : *https://servicehub-qa.phenompro.com/access/api* }",
   APP_KEYCLOAK_URL: "https://login-qa.phenompro.com/login",
-  APP_CLIENT_ID:"txe-ui",
+  APP_CLIENT_ID:"onephenom-ui",
   APP_DC: "US",
   APP_ENV: "QA",
   APP_DISABLE_EXPORT_CUSTOMERS_LIST: "[*one*, *two*]",
@@ -32,4 +32,5 @@ window._env_ = {
   APM_ALERTS_ENDPOINT: "https://apm-dev.phenom.com/api",
   SERVICENOW_TICKETS: "https://phenomdev.service-now.com",
   CERTIFICATE_MANAGER_ENDPOINT: "https://certificate-manager-qa.phenompro.com",
+  CMS_PREPROD_API_URL: "https://cms-qa1.phenompro.com/api",
 };

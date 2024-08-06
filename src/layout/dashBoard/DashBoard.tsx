@@ -14,6 +14,7 @@ import { appSelectionHandler } from "../../utils/appUtils";
 import "./DashBoard.scss";
 import { apiUrl } from "../../utils/constants";
 import { API } from "../../utils/api";
+import { RecommendedPages } from "../../components/recommendedPages/RecommendedPages";
 
 const DashBoard = () => {
   const navigate = useNavigate();
@@ -167,7 +168,7 @@ const DashBoard = () => {
       <div className="overview-container">
         <h2 className="overview-heading">Overview</h2>
         {[0, 1].map((rowIndex) => (
-          <div className="grid-container" key={rowIndex}>
+          <div className="overview-grid-container" key={rowIndex}>
             {data.slice(rowIndex * 3, (rowIndex + 1) * 3).map((item, index) => (
               <OverviewCard
                 key={index}
@@ -197,6 +198,7 @@ const DashBoard = () => {
           <EmptyState displayText="No Apps found" />
         )}
       </div>
+      <RecommendedPages />
     </div>
   );
 };
