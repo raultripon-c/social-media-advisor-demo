@@ -8,7 +8,6 @@ import { AppStore } from "store";
 import Toast from "../components/Toast/Toast";
 import { IRoute, appRoutes } from "../routes/AppRoutes";
 import { setSelectedTenant, setUserRoles } from "../store/customer/actions";
-import AngularApp from "../utils/Angular.json";
 
 import RBAJson from "../utils/RBA.json";
 import {
@@ -196,7 +195,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
           : [];
 
       if (!response) return;
-      let res = [...response, ...AngularApp.data]
+      let res = [...response]
       dispatch(setAppsFromAPI(res));
       const mfRoutes = getMfRoutes(res);
       setTransformedAppData(transformAppData(res));

@@ -24,7 +24,7 @@ const Banners = () => {
                 if (!existsScrElem) {
                     const scrElem = document.createElement("script");
                     scrElem.id = embedScriptId;
-                    scrElem.src = "http://127.0.0.1:5500/embed.js";
+                    scrElem.src = "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/embed.js";
                     scrElem.onload = () => {
                         resolve();
                     };
