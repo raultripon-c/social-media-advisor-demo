@@ -17,7 +17,6 @@ import { APIService } from "../../utils/api.service";
 import { apiUrl } from "../../utils/constants";
 import "./Customers.scss";
 
-
 interface TenantsProps {
   allApps: any;
   setAllApps: (apps: any) => void;
@@ -47,7 +46,7 @@ const Customers: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
     try {
       const response = await APIService.getAllApps();
       if (!response) return;
-      let res = response;
+      let res = response
       sessionStorage.setItem("allapps", JSON.stringify(res));
       dispatch(setAppsFromAPI(res));
     } catch (error) {
