@@ -196,8 +196,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
           : [];
 
       if (!response) return;
-      let res = [...response, ...AngularApp.data];
-      console.log(res, "res");
+      let res = [...response, ...AngularApp.data]
       dispatch(setAppsFromAPI(res));
       const mfRoutes = getMfRoutes(res);
       setTransformedAppData(transformAppData(res));

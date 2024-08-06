@@ -12,11 +12,11 @@ var txEmbed = (function(){
             tier: 'tier2',
         },
         blogs:  {
-            component : 'components/txe2/txe-component2/txe-component',
+            component : 'components/txe/txe-component/txe-component',
             tier: 'tier3',
         },
         banners:  {
-            component : 'components/txe2/txe-component2/txe-component',
+            component : 'components/txe/txe-component/txe-component',
             tier: 'tier3',
         },
     }
@@ -98,6 +98,8 @@ var txEmbed = (function(){
         window.define = undefined
         window.___define___ = undefined
         window.requirejs = undefined
+        window.CKEDITOR = undefined
+        
         // if(window.___define___){
         //     window.dfn = window.___define___
         // }
@@ -117,7 +119,7 @@ var txEmbed = (function(){
                             console.log(name, deps, callback)
                             window.___define___(name, deps, callback)
                         }
-                        
+
                         window.___req___ = window.require
                         window.require = function(arr, cb){
                             console.log(arr, cb)
