@@ -312,7 +312,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
         currentApp,
         navigate,
         selectedTenant?.customerCode || customerDetails?.data?.customerCode,
-        selectedTenant?.refNum
+        selectedTenant?.refNum,
+        dispatch
       );
     }
   }, [selectedApp, selectedTenant, selectedTenant?.refNum]);

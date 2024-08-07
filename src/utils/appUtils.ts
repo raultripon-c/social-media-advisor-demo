@@ -5,12 +5,15 @@ import { isEmpty } from "lodash";
 import { RemoteModuleRenderer } from "../remote-modules/RemoteModuleRenderer";
 
 import { DATE_FORMAT, navigationHeaderApps, noShowSideBar } from "./constants";
+import { setCustomerDetails, setCustomerTenants, setSelectedTenant } from "../store/customer/actions";
+import { setAppDetails, setDashboardSelected } from "../store/apps/actions";
 
 export const appSelectionHandler = (
   selectedApp: any,
   navigate: any,
   customerCode: string,
-  refNum: string
+  refNum: string,
+  dispatch?: any
 ) => {
   let appType = selectedApp.appType;
   const mfRoute = selectedApp.appConfig?.route;
@@ -44,11 +47,17 @@ export const appSelectionHandler = (
       break;
     case "external":
       const link = getLink(selectedApp, {"refNum":refNum, "customerCode":customerCode});
-      if (link && !isEmpty(link)) window.open(link, "_blank");
+      if (link && !isEmpty(link)) {
+        window.open(link, "_blank");
+      }
       else {
         toast.dismiss();
         toast.error("Link is not provided for navigation");
       }
+      dispatch(setAppDetails({}));
+      dispatch(setDashboardSelected(false));
+      sessionStorage.removeItem("selectedApp");
+      navigate(customerCode ? `${customerCode}/summary` : "/");
       break;
     case "script":
       navigate(

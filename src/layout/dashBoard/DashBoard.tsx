@@ -167,7 +167,7 @@ const DashBoard = () => {
       <div className="overview-container">
         <h2 className="overview-heading">Overview</h2>
         {[0, 1].map((rowIndex) => (
-          <div className="grid-container" key={rowIndex}>
+          <div className="overview-grid-container" key={rowIndex}>
             {data.slice(rowIndex * 3, (rowIndex + 1) * 3).map((item, index) => (
               <OverviewCard
                 key={index}

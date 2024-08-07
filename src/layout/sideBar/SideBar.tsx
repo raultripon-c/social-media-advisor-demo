@@ -8,7 +8,7 @@ import arrowRight from "../../assets/images/dashboard/arrowRight.svg";
 import dashboardInfo from "../../assets/images/dashboard/dashboardInfo.svg";
 import dashboardActive from "../../assets/svg/HomeVector.svg";
 import dashboardGrey from "../../assets/svg/HomeVectorGrey.svg";
-import { setAppDetails, setSidebarState } from "../../store/apps/actions";
+import { setAppDetails, setSidebarState, setDashboardSelected } from "../../store/apps/actions";
 import {
   setCustomerDetails,
   setCustomerTenants,
@@ -19,6 +19,7 @@ import "./SideBar.scss";
 
 function ToolsSideBar(props: any) {
   const { categories, setCategories } = props;
+  const dashboardSelected = false;
   const customerDetails = useSelector((state: AppStore) => state.customer);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [disableAutoClose, setDisableAutoClose] = useState(true);
@@ -28,7 +29,8 @@ function ToolsSideBar(props: any) {
     );
     return selectedAppFromSession || state.app?.selectedApp;
   });
-  const [dashboardSelected, setDashboardSelected] = useState(false);
+  // const [dashboardSelected, setDashboardSelected] = useState(false);
+
   const currentContext = sessionStorage.getItem("currentContext") || "";
   const navigate = useNavigate();
   const dispatch = useDispatch();
