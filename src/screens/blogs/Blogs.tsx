@@ -8,13 +8,12 @@ declare global {
         txEmbed: any;
     }
 }
-
-const Assets = () => {
+const Blogs = () => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const storeData = useSelector((state: AppStore) => state.customer);
 
     useEffect(() => {
-        const embedScriptId = "txe-cms-embed-assets";
+        const embedScriptId = "txe-cms-embed-blogs";
         const existsScrElem = document.querySelector(`#${embedScriptId}`);
         if(existsScrElem) {
             existsScrElem.remove();
@@ -22,7 +21,6 @@ const Assets = () => {
 
         const loadScript = () => {
             return new Promise<void>((resolve) => {
-                
                 if (!existsScrElem) {
                     const scrElem = document.createElement("script");
                     scrElem.id = embedScriptId;
@@ -40,13 +38,12 @@ const Assets = () => {
         if (storeData && storeData.selectedTenant && storeData.selectedTenant.refNum) { 
             loadScript().then(() => {
                 if (window.txEmbed) {
-                    window.txEmbed.embedModules("assets", "#tools-body-container", {refNum: storeData.selectedTenant.refNum, token: window.keycloakInstance.token });
+                    window.txEmbed.embedModules("blogs", "#tools-body-container", {refNum: storeData.selectedTenant.refNum, token: window.keycloakInstance.token });
                 }
                 setIsLoading(false);
             });
         }
     }, [storeData]);
-
     return (
         <div>
             <div id="tools-body-container"></div>
@@ -57,6 +54,5 @@ const Assets = () => {
             )}
         </div>
     );
-};
-
-export default Assets;
+}
+export default Blogs;

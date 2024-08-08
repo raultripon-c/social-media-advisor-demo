@@ -28,17 +28,12 @@ function ToolsSideBar(props: any) {
     );
     return selectedAppFromSession || state.app?.selectedApp;
   });
-
+  const [dashboardSelected, setDashboardSelected] = useState(false);
   const currentContext = sessionStorage.getItem("currentContext") || "";
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const summaryOnClick = () => {
-    const updatedCategories = categories?.map((eachCategory: any) => ({
-      ...eachCategory,
-      isOpen: false,
-    }));
-    setCategories(updatedCategories);
-    setSidebarOpen(false);
+    setDashboardSelected(true);
     setDisableAutoClose(false);
     dispatch(setAppDetails({}));
     sessionStorage.removeItem("selectedApp");
@@ -54,10 +49,16 @@ function ToolsSideBar(props: any) {
       // navigate("/");
     }
   };
+  useEffect(()=>{
+    if(window.location.pathname.includes("summary")){
+      setDashboardSelected(true)
+    }
+  },[])
   useEffect(() => {
     dispatch(setSidebarState(sidebarOpen));
   }, [sidebarOpen]);
   const handleAppSelection = (app: any) => {
+    setDashboardSelected(false)
     setSidebarOpen(true);
     app && sessionStorage.setItem("selectedApp", JSON.stringify(app));
     dispatch(setAppDetails(app));
@@ -79,7 +80,7 @@ function ToolsSideBar(props: any) {
           disableAutoClose={true}
           setDisableAutoClose={setDisableAutoClose}
           summaryOnClick={summaryOnClick}
-          dashboardSelected={window.location.pathname.includes("summary")}
+          dashboardSelected={dashboardSelected}
           placeholder="Search Navigation"
           sideBarHeading={
             currentContext === TENANT
