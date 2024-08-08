@@ -7,6 +7,7 @@ import {
   Loader,
   GreetingCard,
   OverviewCard,
+  Table,
 } from "@phenom/react-ui-components";
 import { AppStore } from "store";
 import { setAppDetails, setAppsFromAPI } from "../../store/apps/actions";
@@ -62,6 +63,51 @@ const DashBoard = () => {
     { title: "Conversion Rate", value: "6.25%", change: "+10" },
     { title: "Avg. Time on Page", value: "1min 45sec", change: "+10" },
     { title: "My active campaigns", value: "47", change: "+10" },
+  ];
+
+  const campaignsList = ["Campaign Name", "Status", "Channel", "Conversion", "Audience"];
+
+  const campaignData = [
+    {
+      "Campaign Name": {
+        icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Insta_circle.svg",
+        name: "Instagram advertising campaign",
+      },
+      Status: "Active",
+      Channel: "Instagram",
+      Conversion: "6,546",
+      Audience: "12% +3%",
+    },
+    {
+      "Campaign Name": {
+        icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Facebook.svg",
+        name: "Facebook outreach campaign",
+      },
+      Status: "Active",
+      Channel: "Facebook",
+      Conversion: "4,750",
+      Audience: "8%",
+    },
+    {
+      "Campaign Name": {
+        icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Analytics.svg",
+        name: "Referral program campaign",
+      },
+      Status: "On hold",
+      Channel: "Email",
+      Conversion: "5,775",
+      Audience: "2%",
+    },
+    {
+      "Campaign Name": {
+        icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/🟢Inbox.svg",
+        name: "Talent community promotion",
+      },
+      Status: "Completed",
+      Channel: "Newsletter",
+      Conversion: "3,422",
+      Audience: "5% +2%",
+    },
   ];
 
   const getAllApps = async () => {
@@ -196,6 +242,10 @@ const DashBoard = () => {
         ) : (
           <EmptyState displayText="No Apps found" />
         )}
+      </div>
+      <h2 className="overview-heading">Campaigns</h2>
+      <div className="table-container">
+        <Table columns={campaignsList} data={campaignData} />
       </div>
     </div>
   );
