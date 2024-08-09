@@ -1,59 +1,70 @@
 import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import React from "react";
 import { API } from "../../utils/api";
 import "./RecommendedPages.scss";
 import { Button } from "@phenom/react-ui-components";
+import { AppStore } from "store";
 
 export const RecommendedPages = (props: any) => {
   const {} = props;
   const companyNotificationIcon = ``;
+  const selectedTenant = useSelector(
+    (state: any) => state.customer.selectedTenant
+  );
+  const [showAll, setShowAll] = useState(false); // State to toggle visibility
 
-  const mockGetPageRecommendationPagesResponse = require("./getPageRecommendations.json");
+//   const mockGetPageRecommendationPagesResponse = require("./getPageRecommendations.json");
   let [pageRecommendation, setRecommendedPagesData] = useState<any>(null);
   const CMS_PREPROD_API_URL = (window as any)._env_.CMS_PREPROD_API_URL;
   const { code, type } = window.orgInfo;
   useEffect(() => {
-    API.post(
-      `${CMS_PREPROD_API_URL}/txeLogin`,
-      {
-        "ph-org-code": code,
-        "ph-org-type": type,
-        token: window.keycloakInstance.token,
-        expires_in: window?.keycloakInstance?.tokenParsed?.exp,
-      },
-      {
-        withCredentials: true,
+    const loginAndFetchRecommendations = async () => {
+      try {
+        const loginResponse = await API.post(
+          `${CMS_PREPROD_API_URL}/txeLogin`,
+          {
+            "ph-org-code": code,
+            "ph-org-type": type,
+            token: window.keycloakInstance.token,
+            expires_in: window?.keycloakInstance?.tokenParsed?.exp,
+          },
+          { withCredentials: true }
+        );
+        console.log(loginResponse);
+  
+        const refNum = selectedTenant?.refNum;
+        const locale = sessionStorage.getItem("locale") || "en_us";
+  
+        const recommendationsResponse = await API.post(
+          `${CMS_PREPROD_API_URL}/getPageRecommendations`,
+          {
+            batchSize: 6,
+            isSVRequired: false,
+            locale,
+            offset: 0,
+            refNum,
+            siteVariant: "external",
+          },
+          { withCredentials: true }
+        );
+  
+        if (recommendationsResponse && recommendationsResponse.data) {
+          setRecommendedPagesData(recommendationsResponse.data);
+        }
+        console.log("response from the get tenant variants", recommendationsResponse);
+      } catch (error) {
+        console.error("Error fetching data", error);
       }
-    ).then((response) => {
-      // const site = JSON.parse(sessionStorage.getItem("site") || "[]");
-      const refNum = sessionStorage.getItem("site");
-      const locale = sessionStorage.getItem("locale") || "en_us";
-      console.log(response);
-      API.post(
-        `${CMS_PREPROD_API_URL}/getPageRecommendations`,
-        {
-          batchSize: 20,
-          isSVRequired: false,
-          locale: locale,
-          offset: 0,
-          refNum: refNum,
-          siteVariant: "external",
-        },
-        {
-          withCredentials: true,
-        }
-      ).then((response) => {
-        if (response != null && response.data != null) {
-          setRecommendedPagesData(response.data);
-        }
-        console.log("response from the get tenant variants " + response);
-      });
-    });
-  }, []);
+    };
+  
+    loginAndFetchRecommendations();
+  }, [selectedTenant, code, type]);
   //   let mockResponse: Array<any> = [];
   //   mockResponse = pageRecommendation && pageRecommendation.data
 
-  const getRecommendedPages = (recommendedData: any) => {
+  const getRecommendedPages = (visibleData: any) => {
+    const recommendedData = showAll ? visibleData : visibleData.slice(0, 4);
     for (let i = 0; i < recommendedData.length; i++) {
       const values = Object.entries(recommendedData[i].value)
         .filter(
@@ -143,6 +154,16 @@ export const RecommendedPages = (props: any) => {
           </div>
         )}
       </div>
+      {/* <div>{pageRecommendation &&
+        pageRecommendation.data &&
+        pageRecommendation.data.length > 6 && (
+          <Button
+            size="small"
+            buttonType="primary"
+            text={showAll ? "Show Less" : "Show More"}
+            onClick={() => setShowAll(!showAll)}
+          />
+        )}</div> */}
     </div>
   );
 };
