@@ -80,7 +80,7 @@ const DashBoard = () => {
     },
     {
       "Campaign Name": {
-        icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Facebook.svg",
+        icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/FB.svg",
         name: "Facebook outreach campaign",
       },
       Status: "Active",
@@ -90,7 +90,7 @@ const DashBoard = () => {
     },
     {
       "Campaign Name": {
-        icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Analytics.svg",
+        icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Email.svg",
         name: "Referral program campaign",
       },
       Status: "On hold",
@@ -100,7 +100,7 @@ const DashBoard = () => {
     },
     {
       "Campaign Name": {
-        icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/🟢Inbox.svg",
+        icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Inbox.svg",
         name: "Talent community promotion",
       },
       Status: "Completed",
