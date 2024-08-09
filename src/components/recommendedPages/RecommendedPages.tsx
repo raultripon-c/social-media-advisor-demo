@@ -3,7 +3,6 @@ import React from "react";
 import { API } from "../../utils/api";
 import "./RecommendedPages.scss";
 import { Button } from "@phenom/react-ui-components";
-import noRecomPage from  '../../assets/images/noRecomPage.svg'
 
 export const RecommendedPages = (props: any) => {
   const {} = props;
