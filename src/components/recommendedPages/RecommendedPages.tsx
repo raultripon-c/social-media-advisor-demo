@@ -11,7 +11,7 @@ export const RecommendedPages = (props: any) => {
     const companyNotificationIcon = ``;
 
     const mockGetPageRecommendationPagesResponse = require('./getPageRecommendations.json');
-    let [pageRecommendation, setRecommendedPagesData] = useState(null);
+    let [pageRecommendation, setRecommendedPagesData] = useState<any>(null);
     const [error, setError] = useState(null);
     const CMS_PREPROD_API_URL = (window as any)._env_.CMS_PREPROD_API_URL;
     const { code, type } = window.orgInfo;
@@ -31,20 +31,24 @@ export const RecommendedPages = (props: any) => {
             }, {
                 withCredentials: true,
             }).then((response) => {
+                if(response != null && response.data != null) {
+                    setRecommendedPagesData(response.data);
+                }
                 console.log("response from the get tenant variants "+response)
             })
         });
       }, []); 
 
-    let mockResponse: any = mockGetPageRecommendationPagesResponse.data;
-    for (let i = 0; i < mockResponse.length; i++) {         
-        const values = Object.entries(mockResponse[i].value)
-        .filter(([key]) => !['category', 'city', 'cityState', 'location', 'citylocation', 'cityLocation'].includes(key))
-        .map(([key, value]) => [key, value[0]]);
-        mockResponse[i]['valuesUpdated'] = values;
-    }
+    let mockData = mockGetPageRecommendationPagesResponse.data;
     const recommendedPagesElement = [];
-    for (let cardContent of mockResponse){
+    if(mockData != null) {
+        for (let i = 0; i < mockData.length; i++) {         
+            const values = Object.entries(mockData[i].value)
+            .filter(([key]) => !['category', 'city', 'cityState', 'location', 'citylocation', 'cityLocation'].includes(key))
+            .map(([key, value]) => [key, mockData[0]]);
+            mockData[i]['valuesUpdated'] = values;
+        }
+    for (let cardContent of mockData){
         recommendedPagesElement.push(
             <div className="recommended-pages-card">
                 <div className="card-header">
@@ -88,13 +92,22 @@ export const RecommendedPages = (props: any) => {
             </div>
         )
     }
+    }
+    
+    
     return (
         <div className="recommended-pages-container">
             <div className="recommended-pages-name-container">
                 <span className="container-name">Recommended pages</span>
             </div>
             <div className="recommended-pages-cards">
-                {recommendedPagesElement}
+                {
+                    mockData ? recommendedPagesElement: 
+                    <div className="no-recommended-pages-card">
+                        <span>Great Job!</span>
+                        <span>You already created the most relevant pages</span>
+                    </div>
+                }
             </div>
         </div>
     );
