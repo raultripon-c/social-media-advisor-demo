@@ -5,6 +5,7 @@ import { Loader } from "@phenom/react-ui-components";
 import { getSelectedApp } from "../layout/dashBoard/utils";
 import { useDynamicMFLoader } from "./useDynamicMFLoader";
 import "./AngularApp.scss";
+import { MessageService } from "../MessageService";
 
 export function AngularAppRenderer(props: any) {
   const containerRef = useRef(null);
@@ -73,6 +74,7 @@ export function AngularAppRenderer(props: any) {
             subPath: `/${selectedTenant.customerCode}/${selectedTenant.refNum}${approute}`,
             userId: window.keycloakInstance.userInfo.userDetails.id,
             appName: appName,
+            MessageService:JSON.stringify(MessageService),
             moduleRoute: moduleRoute,
           };
           console.log('angular app props',{ props });

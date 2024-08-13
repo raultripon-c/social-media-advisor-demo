@@ -67,26 +67,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   }`;
   const userId = userDetails?.userName;
   const fetchedApps = useSelector((state: any) => state.app.allApps);
-  const allEvents = fetchedApps.reduce(
-    (acc: any, app: any) => {
-      const { id, events } = app;
-      if (events?.inputs) {
-        const appInputs = events.inputs.map((input: any) => input);
-        if (!acc.inputs[id]) {
-          acc.inputs[id] = [];
-        }
-        acc.inputs[id].push(...appInputs);
-      }
-      if (events?.outputs) {
-        if (!acc.outputs[id]) {
-          acc.outputs[id] = [];
-        }
-        acc.outputs[id].push(...events.outputs);
-      }
-      return acc;
-    },
-    { inputs: {}, outputs: {} } // Changed outputs to an object
-  );
+  
   useEffect(() => {
     const customerCode = window.location.pathname.split("/")[1];
 
@@ -207,70 +188,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       console.error("Error:", error);
     }
   };
-  const emitEventsToChildApps = (output: any, currentEventData: any) => {
-    Object.keys(allEvents?.inputs).forEach((app) => {
-      const appInputs = allEvents.inputs[app];
-      appInputs.forEach((input: any) => {
-        if (input === output) {
-          console.log(
-            "Output matched with input, dispatching event...",
-            app + "_" + input,
-            currentEventData
-          );
-          MessageService.dispatchEvent(app + "_" + input, currentEventData);
-        }
-      });
-    });
-  };
-  const handleOutputs = (
-    output: any,
-    eventData: any,
-    currentEventData: any
-  ) => {
-    switch (output) {
-      case "NAVIGATE":
-        console.log("navigating to other app", eventData?.appName);
-        const navigatingApp = getAppByName(fetchedApps, eventData.appName);
-        navigatingApp &&
-          sessionStorage.setItem("selectedApp", JSON.stringify(navigatingApp));
-        dispatch(setAppDetails(navigatingApp));
-        appSelectionHandler(
-          navigatingApp,
-          navigate,
-          customerDetails?.customerCode,
-          selectedTenant?.refNum
-        );
-        break;
-      //add any other cases which has to be handled parent level
-      default:
-        console.log("Unhandled event at parent level:", eventData);
-        emitEventsToChildApps(output, currentEventData);
-        break;
-    }
-  };
-
-  useEffect(() => {
-    const subscriptions = [] as any;
-    Object.keys(allEvents?.outputs)?.forEach((appId: string) => {
-      const appOutputs = allEvents?.outputs[appId];
-      appOutputs.forEach((output: any) => {
-        let currentEventData = {};
-        console.log("listening output", output);
-        const subscription = MessageService.on(appId + "_" + output).subscribe(
-          (eventData: any) => {
-            currentEventData = eventData;
-            handleOutputs(output, eventData, currentEventData);
-          }
-        );
-        subscriptions.push(subscription);
-      });
-    });
-
-    return () => {
-      // Unsubscribe all subscriptions when component is unmounted
-      subscriptions.forEach((subscription: any) => subscription.unsubscribe());
-    };
-  }, [fetchedApps]);
+  
   const getCategoriesByContext = (context: any) => {
     if (context == "platform") {
       return { categories: platformApps, setCategories: setPlatformApps };
