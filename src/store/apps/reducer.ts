@@ -5,7 +5,7 @@ const initialState: AppState = {
   selectedApp: {},
   allApps: [],
   sidebarOpen:false,
-  setDashboardSelected: false,
+  dashboardSelected: false,
 };
 
 export const appReducer = (
@@ -36,7 +36,7 @@ export const appReducer = (
     case SET_DASHBOARD_SELECTED:{
       return {
         ...state,
-        setDashboardSelected: data,
+        dashboardSelected: data,
       };
     }
     default:

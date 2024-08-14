@@ -19,7 +19,7 @@ import "./SideBar.scss";
 
 function ToolsSideBar(props: any) {
   const { categories, setCategories } = props;
-  const dashboardSelected = false;
+  const dashboardSelected = useSelector((state: any) => state.app.dashboardSelected);
   const customerDetails = useSelector((state: AppStore) => state.customer);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [disableAutoClose, setDisableAutoClose] = useState(true);
@@ -29,13 +29,12 @@ function ToolsSideBar(props: any) {
     );
     return selectedAppFromSession || state.app?.selectedApp;
   });
-  // const [dashboardSelected, setDashboardSelected] = useState(false);
 
   const currentContext = sessionStorage.getItem("currentContext") || "";
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const summaryOnClick = () => {
-    setDashboardSelected(true);
+    dispatch(setDashboardSelected(true));
     setDisableAutoClose(false);
     dispatch(setAppDetails({}));
     sessionStorage.removeItem("selectedApp");
@@ -53,14 +52,14 @@ function ToolsSideBar(props: any) {
   };
   useEffect(()=>{
     if(window.location.pathname.includes("summary")){
-      setDashboardSelected(true)
+      dispatch(setDashboardSelected(true));
     }
   },[])
   useEffect(() => {
     dispatch(setSidebarState(sidebarOpen));
   }, [sidebarOpen]);
   const handleAppSelection = (app: any) => {
-    setDashboardSelected(false)
+    dispatch(setDashboardSelected(false));
     setSidebarOpen(true);
     app && sessionStorage.setItem("selectedApp", JSON.stringify(app));
     dispatch(setAppDetails(app));
