@@ -1,10 +1,9 @@
-import moment from "moment";
-import { toast } from "react-toastify";
 import { isEmpty } from "lodash";
+import { toast } from "react-toastify";
 
 import { RemoteModuleRenderer } from "../remote-modules/RemoteModuleRenderer";
 
-import { DATE_FORMAT, navigationHeaderApps, noShowSideBar } from "./constants";
+import { navigationHeaderApps, noShowSideBar } from "./constants";
 
 export const appSelectionHandler = (
   selectedApp: any,
@@ -21,12 +20,8 @@ export const appSelectionHandler = (
     return;
   }
   if (selectedApp.context == "customer") {
-    !sessionStorage.getItem("currentContext") &&
-      sessionStorage.setItem("currentContext", "customer");
     updatedRoute = customerCode;
   } else if (selectedApp.context == "tenant") {
-    !sessionStorage.getItem("currentContext") &&
-      sessionStorage.setItem("currentContext", "tenant");
     updatedRoute = `${customerCode}/${refNum}`;
   }
   switch (appType) {
@@ -43,7 +38,10 @@ export const appSelectionHandler = (
       );
       break;
     case "external":
-      const link = getLink(selectedApp, {"refNum":refNum, "customerCode":customerCode});
+      const link = getLink(selectedApp, {
+        refNum: refNum,
+        customerCode: customerCode,
+      });
       if (link && !isEmpty(link)) window.open(link, "_blank");
       else {
         toast.dismiss();
@@ -59,7 +57,6 @@ export const appSelectionHandler = (
       break;
     default:
       navigate("/");
-      sessionStorage.removeItem("currentContext");
       break;
   }
 };
@@ -219,14 +216,12 @@ export const showNavigationHeader = (selectedApp: any) => {
     return true;
   } else return false;
 };
-export const lastWeekDate = () => {
-  return moment().subtract(7, "days").format(DATE_FORMAT);
-};
+
 export const navigateToNewTab = (url: string) => {
   return window.open(url, "_blank");
 };
 
-export function findAppConfigByRoutes(apps: any=[], value: string): any {
+export function findAppConfigByRoutes(apps: any = [], value: string): any {
   try {
     return apps.filter((element: any) => {
       try {
@@ -243,7 +238,7 @@ export function findAppConfigByRoutes(apps: any=[], value: string): any {
     return [];
   }
 }
-export function getLink(selectedApp:any, request:any): any {
+export function getLink(selectedApp: any, request: any): any {
   let link = selectedApp?.appConfig?.link;
   let requestParam = selectedApp?.requestParams;
   let setLink = "";
@@ -258,17 +253,12 @@ export function getLink(selectedApp:any, request:any): any {
         setLink += `${key}=${encodeURIComponent(value as string)}`;
       }
     });
-  
+
     setLink = `${link}?${setLink}`;
-  
-  return setLink;
-    }
-    
-  
-   
-  catch (error) {
+
+    return setLink;
+  } catch (error) {
     console.error("An error occurred: ", error);
     return [];
   }
 }
-

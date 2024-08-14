@@ -29,7 +29,6 @@ function ToolsSideBar(props: any) {
     return selectedAppFromSession || state.app?.selectedApp;
   });
   const [dashboardSelected, setDashboardSelected] = useState(false);
-  const currentContext = sessionStorage.getItem("currentContext") || "";
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const summaryOnClick = () => {
@@ -37,28 +36,18 @@ function ToolsSideBar(props: any) {
     setDisableAutoClose(false);
     dispatch(setAppDetails({}));
     sessionStorage.removeItem("selectedApp");
-    sessionStorage.removeItem("currentContext");
-    if (currentContext !== PLATFORM) {
-      navigate(`${customerDetails?.data?.customerCode}/summary`);
-    } else {
-      dispatch(setSelectedTenant({}));
-      sessionStorage.removeItem("selectedApp");
-      dispatch(setCustomerTenants([]));
-      dispatch(setCustomerDetails({}));
-      navigate("/");
-      // navigate("/");
-    }
+    navigate(`${customerDetails?.data?.customerCode}/summary`);
   };
-  useEffect(()=>{
-    if(window.location.pathname.includes("summary")){
-      setDashboardSelected(true)
+  useEffect(() => {
+    if (window.location.pathname.includes("summary")) {
+      setDashboardSelected(true);
     }
-  },[])
+  }, []);
   useEffect(() => {
     dispatch(setSidebarState(sidebarOpen));
   }, [sidebarOpen]);
   const handleAppSelection = (app: any) => {
-    setDashboardSelected(false)
+    setDashboardSelected(false);
     setSidebarOpen(true);
     app && sessionStorage.setItem("selectedApp", JSON.stringify(app));
     dispatch(setAppDetails(app));
@@ -82,13 +71,7 @@ function ToolsSideBar(props: any) {
           summaryOnClick={summaryOnClick}
           dashboardSelected={dashboardSelected}
           placeholder="Search Navigation"
-          sideBarHeading={
-            currentContext === TENANT
-              ? "TENANT SETTINGS"
-              : currentContext === CUSTOMER_LEVEL
-              ? "ACCOUNT SETTINGS"
-              : null
-          }
+          sideBarHeading={null}
           onClose={(showSidebar: any) => {
             setSidebarOpen(showSidebar);
           }}
