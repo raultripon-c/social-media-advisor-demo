@@ -3,13 +3,15 @@ import { toast } from "react-toastify";
 
 import { RemoteModuleRenderer } from "../remote-modules/RemoteModuleRenderer";
 
-import { navigationHeaderApps, noShowSideBar } from "./constants";
+import { DATE_FORMAT, navigationHeaderApps, noShowSideBar } from "./constants";
+import { setAppDetails, setDashboardSelected } from "../store/apps/actions";
 
 export const appSelectionHandler = (
   selectedApp: any,
   navigate: any,
   customerCode: string,
-  refNum: string
+  refNum: string,
+  dispatch?: any
 ) => {
   let appType = selectedApp.appType;
   const mfRoute = selectedApp.appConfig?.route;
@@ -47,6 +49,10 @@ export const appSelectionHandler = (
         toast.dismiss();
         toast.error("Link is not provided for navigation");
       }
+      dispatch(setAppDetails({}));
+      dispatch(setDashboardSelected(false));
+      sessionStorage.removeItem("selectedApp");
+      navigate(customerCode ? `${customerCode}/summary` : "/");
       break;
     case "script":
       navigate(

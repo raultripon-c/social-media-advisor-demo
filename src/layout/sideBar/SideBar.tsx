@@ -8,7 +8,7 @@ import arrowRight from "../../assets/images/dashboard/arrowRight.svg";
 import dashboardInfo from "../../assets/images/dashboard/dashboardInfo.svg";
 import dashboardActive from "../../assets/svg/HomeVector.svg";
 import dashboardGrey from "../../assets/svg/HomeVectorGrey.svg";
-import { setAppDetails, setSidebarState } from "../../store/apps/actions";
+import { setAppDetails, setSidebarState, setDashboardSelected } from "../../store/apps/actions";
 import {
   setCustomerDetails,
   setCustomerTenants,
@@ -19,6 +19,7 @@ import "./SideBar.scss";
 
 function ToolsSideBar(props: any) {
   const { categories, setCategories } = props;
+  const dashboardSelected = useSelector((state: any) => state.app.dashboardSelected);
   const customerDetails = useSelector((state: AppStore) => state.customer);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [disableAutoClose, setDisableAutoClose] = useState(true);
@@ -28,26 +29,25 @@ function ToolsSideBar(props: any) {
     );
     return selectedAppFromSession || state.app?.selectedApp;
   });
-  const [dashboardSelected, setDashboardSelected] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const summaryOnClick = () => {
-    setDashboardSelected(true);
+    dispatch(setDashboardSelected(true));
     setDisableAutoClose(false);
     dispatch(setAppDetails({}));
     sessionStorage.removeItem("selectedApp");
     navigate(`${customerDetails?.data?.customerCode}/summary`);
   };
-  useEffect(() => {
-    if (window.location.pathname.includes("summary")) {
-      setDashboardSelected(true);
+  useEffect(()=>{
+    if(window.location.pathname.includes("summary")){
+      dispatch(setDashboardSelected(true));
     }
   }, []);
   useEffect(() => {
     dispatch(setSidebarState(sidebarOpen));
   }, [sidebarOpen]);
   const handleAppSelection = (app: any) => {
-    setDashboardSelected(false);
+    dispatch(setDashboardSelected(false));
     setSidebarOpen(true);
     app && sessionStorage.setItem("selectedApp", JSON.stringify(app));
     dispatch(setAppDetails(app));
