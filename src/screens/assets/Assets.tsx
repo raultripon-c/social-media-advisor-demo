@@ -12,9 +12,16 @@ declare global {
 const Assets = () => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const storeData = useSelector((state: AppStore) => state.customer);
+    const selectedModuleAppObject = useSelector((state: any) => {
+        const selectedAppFromSession = JSON.parse(
+          sessionStorage.getItem("selectedApp") || "null"
+        );
+        return selectedAppFromSession || state.app?.selectedApp;
+      });
+    var selectedApp = selectedModuleAppObject?.appConfig || {};
 
     useEffect(() => {
-        const embedScriptId = "txe-cms-embed-assets";
+        const embedScriptId = selectedApp?.scriptId;
         const existsScrElem = document.querySelector(`#${embedScriptId}`);
         if(existsScrElem) {
             existsScrElem.remove();
@@ -26,7 +33,7 @@ const Assets = () => {
                 if (!existsScrElem) {
                     const scrElem = document.createElement("script");
                     scrElem.id = embedScriptId;
-                    scrElem.src = "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/embed.js";
+                    scrElem.src = selectedApp?.url;
                     scrElem.onload = () => {
                         resolve();
                     };

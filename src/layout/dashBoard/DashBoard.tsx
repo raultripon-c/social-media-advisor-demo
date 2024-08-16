@@ -96,7 +96,6 @@ const DashBoard = () => {
   };
 
   useEffect(() => {
-    sessionStorage.removeItem("currentContext");
     dispatch(setAppDetails({}));
     sessionStorage.removeItem("selectedApp");
     const apps = JSON.parse(sessionStorage.getItem("allapps") || "[]");
