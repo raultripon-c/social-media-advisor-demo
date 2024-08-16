@@ -99,31 +99,14 @@ module.exports = {
       publicPath: "/",
     }),
     new webpack.ProvidePlugin({
-      React: 'react', 
+      React: "react",
     }),
     new ModuleFederationPlugin({
       name: "servicehub",
       filename: "servicehub.js",
-   
+
       exposes: {},
       shared: {
-       
-        // rxjs: {
-        //   singleton: true,
-        //   eager: true,
-        //   requiredVersion: 'auto'
-        // },
-        jquery: {
-          singleton: true,
-          eager: true,
-          requiredVersion: deps["jquery"],
-        },
-       
-        datepicker: {
-          singleton: true,
-          eager: true,
-          requiredVersion: deps["datepicker"],
-        },
         react: {
           singleton: true,
           eager: true,
@@ -146,7 +129,6 @@ module.exports = {
         { from: "src/assets", to: "assets" },
         { from: "public", to: "public" },
         { from: "src/assets", to: "public/assets" },
-     
       ],
       options: {
         concurrency: 100,
@@ -160,7 +142,6 @@ module.exports = {
       crypto: require.resolve("crypto-browserify"),
       stream: require.resolve("stream-browserify"),
     },
-   
   },
   target: "web",
 };

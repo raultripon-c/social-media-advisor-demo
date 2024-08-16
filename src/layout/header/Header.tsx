@@ -4,10 +4,9 @@ import { useNavigate } from "react-router-dom";
 
 import { useKeycloak } from "phenom-auth-react-adapter";
 import { AppStore } from "store";
-import dashboardHome from "../../assets/images/dashboard/dashboardHome.svg";
+import phenomTitleLogo from "../../assets/images/Phenom-title-logo.svg";
 import tenantIcon from "../../assets/images/dashboard/tenantIcon.svg";
 import phenomLogo from "../../assets/images/phenom-logo.svg";
-import phenomTitleLogo from "../../assets/images/Phenom-title-logo.svg";
 
 import {
   setCustomerDetails,
@@ -17,8 +16,7 @@ import {
 import HeaderDropdown from "../HeaderDropdown/HeaderDropdown";
 
 import { setAppDetails, setSidebarState } from "../../store/apps/actions";
-import { getAppByName } from "../../utils/appUtils";
-import { CUSTOMER_LEVEL, TENANT } from "../../utils/constants";
+import { TENANT } from "../../utils/constants";
 import "./Header.scss";
 
 declare global {
@@ -69,7 +67,6 @@ function Header({
     (state: AppStore) => state.customer.selectedTenant
   );
   const { sidebarOpen } = useSelector((state: AppStore) => state.app);
-  const currentContext = sessionStorage.getItem("currentContext");
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { keycloak } = useKeycloak();
@@ -86,7 +83,6 @@ function Header({
   );
 
   const handleLogoClick = () => {
-    sessionStorage.removeItem("currentContext");
     sessionStorage.removeItem("selectedApp");
     dispatch(setSelectedTenant({}));
     dispatch(setSidebarState(false));
@@ -114,22 +110,10 @@ function Header({
     keycloak?.loadUserInfo();
   }, []);
 
-  const customerDropdownOptions = [
-    {
-      value: customerDetails?.data?.name,
-      label: customerDetails?.data?.name?.toUpperCase(),
-      icon: dashboardHome,
-      link: {
-        label: "View Account Settings",
-        type: "link",
-      },
-    },
-  ];
   const handleTenantSelectionChange = (selectedValue: any) => {
     const selectedTenant = customerTenants.find(
       (tenant: any) => tenant.tenantName === selectedValue
     );
-    sessionStorage.setItem("currentContext", TENANT);
 
     dispatch(setSelectedTenant(selectedTenant));
   };

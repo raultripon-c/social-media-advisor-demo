@@ -20,7 +20,7 @@ export const MessageService = {
   unsubscribeEvent: (event: any) => {
     if (event) {
       event.unsubscribe();
-      console.log("unsubscrbing" + event);
+      console.log("unsubscribing" + event);
     }
   },
 };

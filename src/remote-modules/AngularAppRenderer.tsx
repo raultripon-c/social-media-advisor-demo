@@ -1,11 +1,10 @@
-import React, { useEffect, useRef, useState, Suspense } from "react";
+import { Loader } from "@phenom/react-ui-components";
+import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { AppStore } from "store";
-import { Loader } from "@phenom/react-ui-components";
-import { getSelectedApp } from "../layout/dashBoard/utils";
-import { useDynamicMFLoader } from "./useDynamicMFLoader";
-import "./AngularApp.scss";
 import { MessageService } from "../MessageService";
+import "./AngularApp.scss";
+import { useDynamicMFLoader } from "./useDynamicMFLoader";
 
 export function AngularAppRenderer(props: any) {
   const containerRef = useRef(null);
@@ -46,8 +45,7 @@ export function AngularAppRenderer(props: any) {
   //     ReactDOM.unmountComponentAtNode(shadowRoot);
   //   };
   // }, []);
-  const app = getSelectedApp(window.location.pathname);
-  const [selectedApp, setSelectedApp] = useState(app);
+
 
   const loadComponent = () => {
     const parentDiv = document.querySelector("#child-module-renderer");
