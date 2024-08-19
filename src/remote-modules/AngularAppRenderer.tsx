@@ -49,13 +49,17 @@ export function AngularAppRenderer(props: any) {
 
   const loadComponent = () => {
     const parentDiv = document.querySelector("#child-module-renderer");
+    const appRoot=document.createElement("app-root");
     const newElement = document.createElement(props.component);
+    if(appRoot){
+      appRoot.appendChild(newElement);
+    }
     //newElement.textContent = "This is a new child element.";
 
     //newElement.textContent = "This is a new child element.";
     // Append the new element to the parent div
     if (parentDiv) {
-      parentDiv.appendChild(newElement);
+      parentDiv.appendChild(appRoot);
     }
   };
   useEffect(() => {
