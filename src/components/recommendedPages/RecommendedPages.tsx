@@ -16,13 +16,13 @@ export const RecommendedPages = (props: any) => {
 
 //   const mockGetPageRecommendationPagesResponse = require("./getPageRecommendations.json");
   let [pageRecommendation, setRecommendedPagesData] = useState<any>(null);
-  const CMS_PREPROD_API_URL = (window as any)._env_.CMS_PREPROD_API_URL;
+  const CMS_URL = (window as any)._env_.CMS_URL;
   const { code, type } = window.orgInfo;
   useEffect(() => {
     const loginAndFetchRecommendations = async () => {
       try {
         const loginResponse = await API.post(
-          `${CMS_PREPROD_API_URL}/txeLogin`,
+          `${CMS_URL}/api/txeLogin`,
           {
             "ph-org-code": code,
             "ph-org-type": type,
@@ -37,7 +37,7 @@ export const RecommendedPages = (props: any) => {
         const locale = sessionStorage.getItem("locale") || "en_us";
   
         const recommendationsResponse = await API.post(
-          `${CMS_PREPROD_API_URL}/getPageRecommendations`,
+          `${CMS_URL}/api/getPageRecommendations`,
           {
             batchSize: 6,
             isSVRequired: false,
