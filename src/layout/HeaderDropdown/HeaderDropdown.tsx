@@ -28,21 +28,21 @@ const HeaderDropdown: React.FC<{
     };
   const dropdownContentRef = useRef(null);
 
-  useEffect(() => {
-    const handleClickOutside = (event: any) => {
-      if (
-        isOpen &&
-        dropdownContentRef.current &&
-        !dropdownContentRef.current?.contains(event.target)
-      ) {
-        setIsOpen(false);
-      }
-    };
+  // useEffect(() => {
+  //   const handleClickOutside = (event: any) => {
+  //     if (
+  //       isOpen &&
+  //       dropdownContentRef.current &&
+  //       !dropdownContentRef.current?.contains(event.target)
+  //     ) {
+  //       setIsOpen(false);
+  //     }
+  //   };
 
-    document.addEventListener("mousedown", handleClickOutside);
+  //   document.addEventListener("mousedown", handleClickOutside);
 
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isOpen]);
+  //   return () => document.removeEventListener("mousedown", handleClickOutside);
+  // }, [isOpen]);
   return (
     <div className={`${type} tenant-header-dropdown ${isOpen ? "open" : ""}`}>
       <button

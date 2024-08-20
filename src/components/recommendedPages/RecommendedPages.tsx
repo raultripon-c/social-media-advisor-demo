@@ -4,18 +4,18 @@ import React from "react";
 import { API } from "../../utils/api";
 import "./RecommendedPages.scss";
 import { Button } from "@phenom/react-ui-components";
-import { AppStore } from "store";
+import noRecommIcon from "../../assets/images/dashboard/noRecommIcon.svg";
+import { Loader } from "@phenom/react-ui-components";
 
 export const RecommendedPages = (props: any) => {
   const {} = props;
-  const companyNotificationIcon = ``;
   const selectedTenant = useSelector(
     (state: any) => state.customer.selectedTenant
   );
-  const [showAll, setShowAll] = useState(false); // State to toggle visibility
 
-//   const mockGetPageRecommendationPagesResponse = require("./getPageRecommendations.json");
   let [pageRecommendation, setRecommendedPagesData] = useState<any>(null);
+  let [isRecommendationsReady, setRecommendationsReady] =
+    useState<boolean>(false);
   const CMS_URL = (window as any)._env_.CMS_URL;
   const { code, type } = window.orgInfo;
   useEffect(() => {
@@ -32,10 +32,10 @@ export const RecommendedPages = (props: any) => {
           { withCredentials: true }
         );
         console.log(loginResponse);
-  
+
         const refNum = selectedTenant?.refNum;
         const locale = sessionStorage.getItem("locale") || "en_us";
-  
+
         const recommendationsResponse = await API.post(
           `${CMS_URL}/api/getPageRecommendations`,
           {
@@ -48,23 +48,27 @@ export const RecommendedPages = (props: any) => {
           },
           { withCredentials: true }
         );
-  
+
         if (recommendationsResponse && recommendationsResponse.data) {
           setRecommendedPagesData(recommendationsResponse.data);
+          setRecommendationsReady(true);
         }
-        console.log("response from the get tenant variants", recommendationsResponse);
+        console.log(
+          "response from the get tenant variants",
+          recommendationsResponse
+        );
       } catch (error) {
         console.error("Error fetching data", error);
       }
     };
-  
+
     loginAndFetchRecommendations();
   }, [selectedTenant, code, type]);
-  //   let mockResponse: Array<any> = [];
-  //   mockResponse = pageRecommendation && pageRecommendation.data
+
+  useEffect(() => {}, [isRecommendationsReady]);
 
   const getRecommendedPages = (visibleData: any) => {
-    const recommendedData = showAll ? visibleData : visibleData.slice(0, 4);
+    const recommendedData = visibleData.slice(0, 4);
     for (let i = 0; i < recommendedData.length; i++) {
       const values = Object.entries(recommendedData[i].value)
         .filter(
@@ -88,9 +92,6 @@ export const RecommendedPages = (props: any) => {
         <div className="recommended-pages-card">
           <div className="card-header">
             <div className="card-type">
-              <div
-                dangerouslySetInnerHTML={{ __html: companyNotificationIcon }}
-              ></div>
               <span className="card-category-name">
                 {cardContent.value.city ||
                   cardContent.value.cityState ||
@@ -140,30 +141,34 @@ export const RecommendedPages = (props: any) => {
   return (
     <div className="recommended-pages-container">
       <div className="recommended-pages-name-container">
+        <img src={noRecommIcon} alt="" />
         <span className="container-name">Recommended pages</span>
       </div>
-      <div className="recommended-pages-cards">
-        {pageRecommendation &&
-        pageRecommendation.data &&
-        pageRecommendation.data.length > 0 ? (
-          getRecommendedPages(pageRecommendation.data)
-        ) : (
-          <div className="no-recommended-pages-card">
-            <span>Great Job!</span>
-            <span>You already created the most relevant pages </span>
+      {!isRecommendationsReady ? (
+        <div className="no-recommended-pages-card">
+          <div className="no-recommended-pages-card-body">
+            <Loader title="Please Wait, Loading..." />
           </div>
-        )}
-      </div>
-      {/* <div>{pageRecommendation &&
-        pageRecommendation.data &&
-        pageRecommendation.data.length > 6 && (
-          <Button
-            size="small"
-            buttonType="primary"
-            text={showAll ? "Show Less" : "Show More"}
-            onClick={() => setShowAll(!showAll)}
-          />
-        )}</div> */}
+        </div>
+      ) : pageRecommendation?.data?.length > 0 ? (
+        <div className="recommended-pages-cards">
+          {getRecommendedPages(pageRecommendation.data)}
+        </div>
+      ) : (
+        <div className="no-recommended-pages-card">
+          <div className="no-recommended-pages-icon">
+            <img
+              src="https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/svgexport-49.svg"
+              className="search-icon-img"
+              alt="search-icon"
+            />
+          </div>
+          <div className="no-recommended-pages-card-body">
+            <span>Great Job!</span>
+            <span>You already created the most relevant pages</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

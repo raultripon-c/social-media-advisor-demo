@@ -33,6 +33,12 @@ const DashBoard = () => {
     {
       text: "Page",
       icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Generic.svg",
+      config: {
+        appType : "external",
+        appConfig: {"link":"https://cms-qa1.phenompro.com/tier3"},
+        context: "customer",
+        requestParams: {"lsrc":"txe","lsw":"_self","refNum":"","customerCode":"", "route":"pages"}
+      }
     },
     {
       text: "Article",
@@ -84,12 +90,20 @@ const DashBoard = () => {
     }
   };
 
-  const handleButtonClick = (text: string) => {
+  const handleButtonClick = (text: string, config?: object) => {
     const matchedApp = totalAppsData.find(
       (app) => app.name.toLowerCase() === text.toLowerCase()
     );
     if (matchedApp) {
       navigateToApp(matchedApp);
+    } else if(config){
+      appSelectionHandler(
+        config,
+        navigate,
+        selectedTenant?.customerCode,
+        selectedTenant?.refNum,
+        dispatch
+      );
     } else {
       console.log(`Clicked on ${text}`);
     }
@@ -190,7 +204,9 @@ const DashBoard = () => {
               text={item.text}
               iconLeft={item.icon}
               className="primary-button-grey"
-              onClick={() => handleButtonClick(item.text)}
+              onClick={() => {
+                handleButtonClick(item.text, item?.config);
+              }}
             />
           ))
         ) : (

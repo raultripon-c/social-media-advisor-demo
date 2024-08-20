@@ -151,7 +151,7 @@ function Header({
               {customerDetails?.data?.name}
             </p>
             {customerTenants.length > 1 &&
-              window.location.pathname.includes("summary") && (
+              !window.location.pathname.includes("summary") && (
                 <div className="header-selected-tenant ">
                   <HeaderDropdown
                     options={transformedCustomerTenants}
