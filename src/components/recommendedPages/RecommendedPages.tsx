@@ -5,7 +5,7 @@ import { API } from "../../utils/api";
 import "./RecommendedPages.scss";
 import { Button } from "@phenom/react-ui-components";
 import noRecommIcon from "../../assets/images/dashboard/noRecommIcon.svg";
-import { Loader } from "@phenom/react-ui-components";
+import { Loader, JobPageRecommendationCard } from "@phenom/react-ui-components";
 
 export const RecommendedPages = (props: any) => {
   const {} = props;
@@ -89,51 +89,13 @@ export const RecommendedPages = (props: any) => {
     const recommendedPagesElement = [];
     for (let cardContent of recommendedData) {
       recommendedPagesElement.push(
-        <div className="recommended-pages-card">
-          <div className="card-header">
-            <div className="card-type">
-              <span className="card-category-name">
-                {cardContent.value.city ||
-                  cardContent.value.cityState ||
-                  cardContent.value.location ||
-                  cardContent.value.citylocation ||
-                  cardContent.value.cityLocation}
-              </span>
-            </div>
-            <div className="card-jobs">
-              <span className="card-jobs-count">
-                {cardContent.jobCount} jobs
-              </span>
-            </div>
-          </div>
-          <div className="card-content">
-            <div className="card-title">{cardContent.value.category}</div>
-            <div className="card-description">
-              Persona:{" "}
-              {cardContent.siteVariant !== "external" &&
-              cardContent.siteVariant !== "internal"
-                ? cardContent.siteVariant
-                : cardContent.siteVariant === "external"
-                ? "Career Site"
-                : "Employee Experience"}
-            </div>
-            {cardContent.valuesUpdated.map((val: any, index: number) => (
-              <span className="component-type-bg-au" key={index}>
-                <span className="component-type-text-au">
-                  {val[0]}: {val[1]}
-                </span>
-              </span>
-            ))}
-          </div>
-          <Button
-            size="small"
-            buttonType="naked"
-            text="Generate Page"
-            iconLeft="https://pp-cdn.phenompeople.com/CareerConnectResources/eq/pcs/common/Sparkles.svg"
-            className="primary-sparkles-button"
-            onClick={() => console.log("user clicked generate page")}
-          />
-        </div>
+        <JobPageRecommendationCard
+          category = {cardContent.value.category}
+          cardLocation = {cardContent.value.city || cardContent.value.cityState || cardContent.value.location || cardContent.value.citylocation || cardContent.value.cityLocation}
+          jobCount =  {cardContent.jobCount}
+          persona  = {cardContent.siteVariant !== "external" && cardContent.siteVariant !== "internal" ? cardContent.siteVariant : cardContent.siteVariant === "external" ? "Career Site" : "Employee Experience"}
+          cardUpdatedValues = {cardContent.valuesUpdated}
+        />
       );
     }
     return recommendedPagesElement;
