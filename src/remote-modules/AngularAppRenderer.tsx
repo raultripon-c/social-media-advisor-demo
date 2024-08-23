@@ -73,6 +73,7 @@ export function AngularAppRenderer(props: any) {
             refNum: selectedTenant?.refNum,
             subPath: `/${selectedTenant.customerCode}/${selectedTenant.refNum}${approute}`,
             userId: window.keycloakInstance.userInfo.userDetails.id,
+            userEmail: window.keycloakInstance.userInfo.userDetails.email,
             appName: appName,
             MessageService:JSON.stringify(MessageService),
             moduleRoute: moduleRoute,

@@ -15,8 +15,15 @@ import { appSelectionHandler } from "../../utils/appUtils";
 import "./DashBoard.scss";
 import { apiUrl } from "../../utils/constants";
 import { API } from "../../utils/api";
+import { APIService } from "../../utils/api.service";
+import { getFullDate } from "./utils";
 
 const DashBoard = () => {
+  interface MetricData {
+    title: string;
+    value: string;
+    change: string;
+  }
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const selectedTenant = useSelector(
@@ -28,6 +35,9 @@ const DashBoard = () => {
   const [totalAppsData, setTotalAppsData] = useState<any[]>([]);
   const userName = window.keycloakInstance.tokenParsed.name;
   const [userDetails, setDetails] = useState<any>();
+  const [analyticsMetaData, setAnalyticsMetaData] = useState<any>(null);
+  const [isJobTrackerEnabled, setIsJobTrackerEnabled] = useState<boolean>(false);
+  const [metricsData, setMetricsData] = useState<MetricData[]>([]);
 
   const staticData = [
     {
@@ -54,15 +64,6 @@ const DashBoard = () => {
       text: "SMS templates",
       icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Generic.svg",
     },
-  ];
-
-  const data = [
-    { title: "Recent Leads", value: "150", change: "+10%" },
-    { title: "New Applicants", value: "75", change: "-2.4" },
-    { title: "Career Site Visits", value: "1200", change: "+2%" },
-    { title: "Conversion Rate", value: "6.25%", change: "+10" },
-    { title: "Avg. Time on Page", value: "1min 45sec", change: "+10" },
-    { title: "My active campaigns", value: "47", change: "+10" },
   ];
 
   const campaignsList = ["Campaign Name", "Status", "Channel", "Conversion", "Audience"];
@@ -140,6 +141,60 @@ const DashBoard = () => {
     }
   };
 
+  const checkJobTrackerEnabled = (startDate: string) => {
+    if (analyticsMetaData?.jobTrackersStartDate) {
+      const actualDate = new Date(analyticsMetaData.jobTrackersStartDate).toJSON();
+      const jobTrackingDate = getFullDate(actualDate);
+      const selectedStartDate = getFullDate(startDate);
+      return selectedStartDate >= jobTrackingDate;
+    }
+    return false;
+  };
+
+  useEffect(() => {
+    if (selectedTenant?.refNum) {
+      const fetchMetrics = async () => {
+        try {
+          const metaData = await APIService.getMetaDataByRefNum(selectedTenant.refNum);
+          setAnalyticsMetaData(metaData);
+
+          const isTrackerEnabled = checkJobTrackerEnabled(new Date().toString());
+          setIsJobTrackerEnabled(isTrackerEnabled);
+
+          const metrics = [
+            { name: "visitsKpi", title: "Career Site Visits" },
+            { name: "applicationsConversionKpi", title: "Conversion Rate" },
+            { name: "completedCareerSiteApplies", title: "Recent Leads" },
+            { name: "uniqueLeads", title: "New Applicants" },
+            { name: "avgTimeOnPage", title: "Avg. Time on Page" }
+          ];
+
+          const metricResponses = await Promise.all(
+            metrics.map(metric =>
+              APIService.getMetrics(metric.name, metaData, isTrackerEnabled).then(response => ({
+                title: metric.title,
+                previous: response.data[0]?.previous,
+                current: response.data[0]?.current,
+                rate: response.data[0]?.rate
+              }))
+            )
+          );
+
+          const formattedData = metricResponses.map(metric => ({
+            title: metric.title,
+            value: metric.current ? `${metric.current}` : "N/A", 
+            change: metric.rate !== undefined ? `${metric.rate}%` : "N/A"
+          }));
+
+          setMetricsData(formattedData); 
+        } catch (error) {
+          console.error("Error fetching metrics:", error);
+        }
+      };
+      fetchMetrics();
+    }
+  }, [selectedTenant]);
+
   useEffect(() => {
     sessionStorage.removeItem("currentContext");
     dispatch(setAppDetails({}));
@@ -214,7 +269,7 @@ const DashBoard = () => {
         <h2 className="overview-heading">Overview</h2>
         {[0, 1].map((rowIndex) => (
           <div className="grid-container" key={rowIndex}>
-            {data.slice(rowIndex * 3, (rowIndex + 1) * 3).map((item, index) => (
+            {(metricsData || []).slice(rowIndex * 3, (rowIndex + 1) * 3).map((item, index) => (
               <OverviewCard
                 key={index}
                 title={item.title}
