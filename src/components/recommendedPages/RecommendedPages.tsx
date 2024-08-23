@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import { isEmpty } from "lodash";
+import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import React from "react";
 import { API } from "../../utils/api";
 import "./RecommendedPages.scss";
-import { Button } from "@phenom/react-ui-components";
+import { getLink } from "../../utils/appUtils"; 
 import noRecommIcon from "../../assets/images/dashboard/noRecommIcon.svg";
 import { Loader, JobPageRecommendationCard } from "@phenom/react-ui-components";
 
@@ -34,7 +36,7 @@ export const RecommendedPages = (props: any) => {
         console.log(loginResponse);
 
         const refNum = selectedTenant?.refNum;
-        const locale = sessionStorage.getItem("locale") || "en_us";
+        const locale = "en_us";
 
         const recommendationsResponse = await API.post(
           `${CMS_URL}/api/getPageRecommendations`,
@@ -84,6 +86,25 @@ export const RecommendedPages = (props: any) => {
         )
         .map(([key, value]) => [key, value[0]]);
       recommendedData[i]["valuesUpdated"] = values;
+    }    
+
+    const navigateOnClick = (cardContent: object) => {
+      const config = {
+        appType : "external",
+        appConfig: {"link":"https://cms-qa1.phenompro.com/tier3"},
+        context: "customer",
+        requestParams: {"lsrc":"txe","lsw":"_self","refNum":"","customerCode":"", "route":"generatePages", "payload": ""}
+      }
+      const link = getLink(config, {
+        refNum: selectedTenant?.refNum,
+        customerCode: selectedTenant?.customerCode,
+        payload: btoa(JSON.stringify(cardContent))
+      });
+      if (link && !isEmpty(link)) window.open(link, "_blank");
+      else {
+        toast.dismiss();
+        toast.error("Link is not provided for navigation");
+      }
     }
 
     const recommendedPagesElement = [];
@@ -95,6 +116,10 @@ export const RecommendedPages = (props: any) => {
           jobCount =  {cardContent.jobCount}
           persona  = {cardContent.siteVariant !== "external" && cardContent.siteVariant !== "internal" ? cardContent.siteVariant : cardContent.siteVariant === "external" ? "Career Site" : "Employee Experience"}
           cardUpdatedValues = {cardContent.valuesUpdated}
+          cardContent = {cardContent}
+          navigateOnClick = {(cardContent: object) => {
+            navigateOnClick(cardContent)
+          }}
         />
       );
     }
