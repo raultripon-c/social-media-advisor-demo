@@ -17,6 +17,7 @@ import { apiUrl } from "../../utils/constants";
 import { API } from "../../utils/api";
 import { APIService } from "../../utils/api.service";
 import { getFullDate } from "./utils";
+import { RecommendedPages } from "../../components/recommendedPages/RecommendedPages";
 
 const DashBoard = () => {
   interface MetricData {
@@ -38,11 +39,18 @@ const DashBoard = () => {
   const [analyticsMetaData, setAnalyticsMetaData] = useState<any>(null);
   const [isJobTrackerEnabled, setIsJobTrackerEnabled] = useState<boolean>(false);
   const [metricsData, setMetricsData] = useState<MetricData[]>([]);
+  const CMS_URL = (window as any)._env_.CMS_URL;
 
   const staticData = [
     {
       text: "Page",
       icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Generic.svg",
+      config: {
+        appType : "external",
+        appConfig: {"link": CMS_URL + "/tier3"},
+        context: "customer",
+        requestParams: {"lsrc":"txe","lsw":"_self","refNum":"","customerCode":"", "route":"pages"}
+      }
     },
     {
       text: "Article",
@@ -130,12 +138,20 @@ const DashBoard = () => {
     }
   };
 
-  const handleButtonClick = (text: string) => {
+  const handleButtonClick = (text: string, config?: object) => {
     const matchedApp = totalAppsData.find(
       (app) => app.name.toLowerCase() === text.toLowerCase()
     );
     if (matchedApp) {
       navigateToApp(matchedApp);
+    } else if(config){
+      appSelectionHandler(
+        config,
+        navigate,
+        selectedTenant?.customerCode,
+        selectedTenant?.refNum,
+        dispatch
+      );
     } else {
       console.log(`Clicked on ${text}`);
     }
@@ -290,13 +306,16 @@ const DashBoard = () => {
               text={item.text}
               iconLeft={item.icon}
               className="primary-button-grey"
-              onClick={() => handleButtonClick(item.text)}
+              onClick={() => {
+                handleButtonClick(item.text, item?.config);
+              }}
             />
           ))
         ) : (
           <EmptyState displayText="No Apps found" />
         )}
       </div>
+      <RecommendedPages />
       <h2 className="overview-heading">Campaigns</h2>
       <div className="table-container">
         <Table columns={campaignsList} data={campaignData} />

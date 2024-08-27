@@ -52,7 +52,6 @@ export const appSelectionHandler = (
       dispatch(setAppDetails({}));
       dispatch(setDashboardSelected(false));
       sessionStorage.removeItem("selectedApp");
-      navigate(customerCode ? `${customerCode}/summary` : "/");
       break;
     case "script":
       navigate(
