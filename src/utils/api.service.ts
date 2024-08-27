@@ -126,4 +126,65 @@ export const APIService = {
         console.log("Error in getting tenants : " + error);
       });
   },
+
+  getMetaDataByRefNum: async (refNum: string): Promise<any> => {
+    try {
+      const url = `${(window as any)._env_.ANALYTICS_SF_URL}/getMetaData?refNum=${refNum}`;
+      const response = await API.get(url, {
+        headers: {
+          Authorization: `${window.keycloakInstance.token}`,
+        },
+      });
+
+      if (response?.data) {
+        return response.data.data.tenatConfig;
+      } else {
+        throw new Error("No metadata found for the provided refNum.");
+      }
+    } catch (error) {
+      toast.error("Error fetching metadata");
+      console.error("Error in getMetaDataByRefNum: ", error);
+      return null;
+    }
+  },
+
+  getDateRanges() {
+    const currentEndDate = new Date();
+    const currentStartDate = new Date(currentEndDate);
+    currentStartDate.setDate(currentEndDate.getDate() - 90); 
+    const previousEndDate = new Date(currentStartDate);
+    previousEndDate.setDate(currentStartDate.getDate() - 1); 
+    const previousStartDate = new Date(previousEndDate);
+    previousStartDate.setDate(previousEndDate.getDate() - 90);
+  
+    return {
+      current_start: currentStartDate.toISOString().split('T')[0],
+      current_end: currentEndDate.toISOString().split('T')[0],
+      previous_start: previousStartDate.toISOString().split('T')[0],
+      previous_end: previousEndDate.toISOString().split('T')[0],
+    };
+  },
+  
+    getMetrics: async (metric: string, analyticsMetaData: any, isJobTrackerEnabled: boolean) => {
+      const dateRanges = APIService.getDateRanges();
+      const data = {
+        filters: {
+          refNum: analyticsMetaData?.refNum,
+          dateRange: dateRanges,
+          region: analyticsMetaData?.regions[0] || "us",
+          siteType: "external",
+          jobTrackerFlag: isJobTrackerEnabled,
+        },
+        metric: metric,
+      };
+      try {
+        const url = `${(window as any)._env_.ANALYTICS_SB_URL}/analytics-data` 
+        const response = await API.post(url, data);
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching metrics:', error);
+        throw error;
+      }
+    }
+
 };

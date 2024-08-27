@@ -75,6 +75,7 @@ export function AngularAppRenderer(props: any) {
             refNum: selectedTenant?.refNum,
             subPath: `/${selectedTenant.customerCode}/${selectedTenant.refNum}${approute}`,
             userId: window.keycloakInstance.userInfo.userDetails.id,
+            userEmail: window.keycloakInstance.userInfo.userDetails.email,
             appName: appName,
             MessageService:JSON.stringify(MessageService),
             moduleRoute: moduleRoute,
@@ -104,7 +105,7 @@ export function AngularAppRenderer(props: any) {
   return (
     <>
       <div
-        className="crm-events-module"
+        className="angular-module"
         id="child-module-renderer"
         ref={containerRef}
         style={{ display: isReady ? "block" : "none" }}

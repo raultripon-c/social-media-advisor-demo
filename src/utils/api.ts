@@ -35,7 +35,12 @@ API.interceptors.request.use(async (config: any) => {
   await waitForToken();
   const token = keycloak.token;
   if (token) {
-    config.headers.Authorization = token ? `Bearer ${token}` : "";
+    if (config.url.includes('/getMetaData') || config.url.includes('/analytics')) {
+      config.headers.Authorization = token ? `${token}` : "";
+      config.headers.Logintype = 'keycloak';
+    } else {
+      config.headers.Authorization = token ? `Bearer ${token}` : "";
+    }
     config.headers["ph-org-type"] = type;
     config.headers["ph-org-code"] = code;
     return config;
