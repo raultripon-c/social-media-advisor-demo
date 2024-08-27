@@ -3,9 +3,12 @@ FROM node:16.10.0 as build
 
 WORKDIR /app
 
-COPY . ./
+COPY package.json ./package.json
+COPY package-lock.json ./package-lock.json
 # install dependecies
 RUN npm install --legacy-peer-deps
+
+COPY . ./
 
 # build the apllication in prod mode
 RUN npm run build
