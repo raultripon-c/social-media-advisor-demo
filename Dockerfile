@@ -3,8 +3,8 @@ FROM node:16.10.0 as build
 
 WORKDIR /app
 
+COPY .npmrc ./.npmrc
 COPY package.json ./package.json
-COPY package-lock.json ./package-lock.json
 # install dependecies
 RUN npm install --legacy-peer-deps
 
