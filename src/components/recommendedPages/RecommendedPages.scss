@@ -59,5 +59,10 @@
         border-radius: 8px;
         border: 1px solid #D1D5DC;
         margin-bottom: 20px;
+
+        .no-recommended-pages-card-body {
+            display: flex;
+            gap: 6px;
+        }
     }
 }

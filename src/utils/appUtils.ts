@@ -146,8 +146,16 @@ export const transformAppData = (data: any) => {
     })
     .filter(Boolean); // Filter out any null items
 
+  const individualApps = data?.filter((app: any) => {
+    return !app.isParent && !app.parentName;
+  });
+  const combinedCustomerTenantApps = sortAppsByOrder([
+    ...customerTenantApps,
+    ...individualApps,
+  ]);
+
   const mainData = {
-    customerTenantApps: sortAppsByOrder(customerTenantApps),
+    customerTenantApps: combinedCustomerTenantApps,
     platformApps: sortAppsByOrder(platformApps),
   };
   return mainData;

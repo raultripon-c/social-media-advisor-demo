@@ -7,6 +7,7 @@ import {
   Loader,
   GreetingCard,
   OverviewCard,
+  Table,
 } from "@phenom/react-ui-components";
 import { AppStore } from "store";
 import { setAppDetails, setAppsFromAPI } from "../../store/apps/actions";
@@ -14,9 +15,16 @@ import { appSelectionHandler } from "../../utils/appUtils";
 import "./DashBoard.scss";
 import { apiUrl } from "../../utils/constants";
 import { API } from "../../utils/api";
+import { APIService } from "../../utils/api.service";
+import { getFullDate } from "./utils";
 import { RecommendedPages } from "../../components/recommendedPages/RecommendedPages";
 
 const DashBoard = () => {
+  interface MetricData {
+    title: string;
+    value: string;
+    change: string;
+  }
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const selectedTenant = useSelector(
@@ -28,6 +36,9 @@ const DashBoard = () => {
   const [totalAppsData, setTotalAppsData] = useState<any[]>([]);
   const userName = window.keycloakInstance.tokenParsed.name;
   const [userDetails, setDetails] = useState<any>();
+  const [analyticsMetaData, setAnalyticsMetaData] = useState<any>(null);
+  const [isJobTrackerEnabled, setIsJobTrackerEnabled] = useState<boolean>(false);
+  const [metricsData, setMetricsData] = useState<MetricData[]>([]);
 
   const staticData = [
     {
@@ -62,13 +73,49 @@ const DashBoard = () => {
     },
   ];
 
-  const data = [
-    { title: "Recent Leads", value: "150", change: "+10%" },
-    { title: "New Applicants", value: "75", change: "-2.4" },
-    { title: "Career Site Visits", value: "1200", change: "+2%" },
-    { title: "Conversion Rate", value: "6.25%", change: "+10" },
-    { title: "Avg. Time on Page", value: "1min 45sec", change: "+10" },
-    { title: "My active campaigns", value: "47", change: "+10" },
+  const campaignsList = ["Campaign Name", "Status", "Channel", "Conversion", "Audience"];
+
+  const campaignData = [
+    {
+      "Campaign Name": {
+        icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Insta_circle.svg",
+        name: "Instagram advertising campaign",
+      },
+      Status: "Active",
+      Channel: "Instagram",
+      Conversion: "6,546",
+      Audience: "12% +3%",
+    },
+    {
+      "Campaign Name": {
+        icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/FB.svg",
+        name: "Facebook outreach campaign",
+      },
+      Status: "Active",
+      Channel: "Facebook",
+      Conversion: "4,750",
+      Audience: "8%",
+    },
+    {
+      "Campaign Name": {
+        icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Email.svg",
+        name: "Referral program campaign",
+      },
+      Status: "On hold",
+      Channel: "Email",
+      Conversion: "5,775",
+      Audience: "2%",
+    },
+    {
+      "Campaign Name": {
+        icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Inbox.svg",
+        name: "Talent community promotion",
+      },
+      Status: "Completed",
+      Channel: "Newsletter",
+      Conversion: "3,422",
+      Audience: "5% +2%",
+    },
   ];
 
   const getAllApps = async () => {
@@ -108,6 +155,60 @@ const DashBoard = () => {
       console.log(`Clicked on ${text}`);
     }
   };
+
+  const checkJobTrackerEnabled = (startDate: string) => {
+    if (analyticsMetaData?.jobTrackersStartDate) {
+      const actualDate = new Date(analyticsMetaData.jobTrackersStartDate).toJSON();
+      const jobTrackingDate = getFullDate(actualDate);
+      const selectedStartDate = getFullDate(startDate);
+      return selectedStartDate >= jobTrackingDate;
+    }
+    return false;
+  };
+
+  useEffect(() => {
+    if (selectedTenant?.refNum) {
+      const fetchMetrics = async () => {
+        try {
+          const metaData = await APIService.getMetaDataByRefNum(selectedTenant.refNum);
+          setAnalyticsMetaData(metaData);
+
+          const isTrackerEnabled = checkJobTrackerEnabled(new Date().toString());
+          setIsJobTrackerEnabled(isTrackerEnabled);
+
+          const metrics = [
+            { name: "visitsKpi", title: "Career Site Visits" },
+            { name: "applicationsConversionKpi", title: "Conversion Rate" },
+            { name: "completedCareerSiteApplies", title: "Recent Leads" },
+            { name: "uniqueLeads", title: "New Applicants" },
+            { name: "avgTimeOnPage", title: "Avg. Time on Page" }
+          ];
+
+          const metricResponses = await Promise.all(
+            metrics.map(metric =>
+              APIService.getMetrics(metric.name, metaData, isTrackerEnabled).then(response => ({
+                title: metric.title,
+                previous: response.data[0]?.previous,
+                current: response.data[0]?.current,
+                rate: response.data[0]?.rate
+              }))
+            )
+          );
+
+          const formattedData = metricResponses.map(metric => ({
+            title: metric.title,
+            value: metric.current ? `${metric.current}` : "N/A", 
+            change: metric.rate !== undefined ? `${metric.rate}%` : "N/A"
+          }));
+
+          setMetricsData(formattedData); 
+        } catch (error) {
+          console.error("Error fetching metrics:", error);
+        }
+      };
+      fetchMetrics();
+    }
+  }, [selectedTenant]);
 
   useEffect(() => {
     dispatch(setAppDetails({}));
@@ -182,7 +283,7 @@ const DashBoard = () => {
         <h2 className="overview-heading">Overview</h2>
         {[0, 1].map((rowIndex) => (
           <div className="overview-grid-container" key={rowIndex}>
-            {data.slice(rowIndex * 3, (rowIndex + 1) * 3).map((item, index) => (
+            {(metricsData || []).slice(rowIndex * 3, (rowIndex + 1) * 3).map((item, index) => (
               <OverviewCard
                 key={index}
                 title={item.title}
@@ -214,6 +315,10 @@ const DashBoard = () => {
         )}
       </div>
       <RecommendedPages />
+      <h2 className="overview-heading">Campaigns</h2>
+      <div className="table-container">
+        <Table columns={campaignsList} data={campaignData} />
+      </div>
     </div>
   );
 };

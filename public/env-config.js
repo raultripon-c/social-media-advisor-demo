@@ -2,6 +2,8 @@ window._env_ = {
   PUBLIC_URL: "https://servicehub-qa.phenompro.com/hrit/",
   TOOLS_API_URL: "https://txe-qa.phenompro.com/",
   APP_API_URL: "https://servicehub-qa.phenompro.com/api",
+  ANALYTICS_SB_URL: "https://qa-analytics-spring-boot-services.phenompro.com",
+  ANALYTICS_SF_URL: "https://qa-snowflake-analyticspro.phenompro.com",
   IMG_URL: "http://servicehub-qa.phenompro.com/hrit/",
   APP_ACCESS_API_URL: "https://servicehub-qa.phenompro.com/access/api",
   APP_REGION_WISE_ACCESS_API:

@@ -10,6 +10,8 @@ import noRecommIcon from "../../assets/images/dashboard/noRecommIcon.svg";
 import { Loader, JobPageRecommendationCard } from "@phenom/react-ui-components";
 
 export const RecommendedPages = (props: any) => {
+  const userHasCmsAccess = window?.keycloakInstance?.userInfo?.resources['cms'] && 
+    window?.keycloakInstance?.userInfo?.resources['cms'].roles.length > 0;
   const {} = props;
   const selectedTenant = useSelector(
     (state: any) => state.customer.selectedTenant
@@ -64,7 +66,7 @@ export const RecommendedPages = (props: any) => {
       }
     };
 
-    loginAndFetchRecommendations();
+    userHasCmsAccess && loginAndFetchRecommendations();
   }, [selectedTenant, code, type]);
 
   useEffect(() => {}, [isRecommendationsReady]);
@@ -89,9 +91,10 @@ export const RecommendedPages = (props: any) => {
     }    
 
     const navigateOnClick = (cardContent: object) => {
+      const cmsUrl = (window as any)['_env_'].CMS_URL
       const config = {
         appType : "external",
-        appConfig: {"link":"https://cms-qa1.phenompro.com/tier3"},
+        appConfig: {"link": cmsUrl + '/tier3'},
         context: "customer",
         requestParams: {"lsrc":"txe","lsw":"_self","refNum":"","customerCode":"", "route":"generatePages", "payload": ""}
       }
@@ -126,36 +129,38 @@ export const RecommendedPages = (props: any) => {
     return recommendedPagesElement;
   };
   return (
-    <div className="recommended-pages-container">
-      <div className="recommended-pages-name-container">
-        <img src={noRecommIcon} alt="" />
-        <span className="container-name">Recommended pages</span>
+    userHasCmsAccess && (
+        <div className="recommended-pages-container">
+        <div className="recommended-pages-name-container">
+          <img src={noRecommIcon} alt="" />
+          <span className="container-name">Recommended pages</span>
+        </div>
+        {!isRecommendationsReady ? (
+          <div className="no-recommended-pages-card">
+            <div className="no-recommended-pages-card-body">
+              <Loader title="Please Wait, Loading..." />
+            </div>
+          </div>
+        ) : pageRecommendation?.data?.length > 0 ? (
+          <div className="recommended-pages-cards">
+            {getRecommendedPages(pageRecommendation.data)}
+          </div>
+        ) : (
+          <div className="no-recommended-pages-card">
+            <div className="no-recommended-pages-icon">
+              <img
+                src="https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/svgexport-49.svg"
+                className="search-icon-img"
+                alt="search-icon"
+              />
+            </div>
+            <div className="no-recommended-pages-card-body">
+              <span>Great Job!</span>
+              <span>You already created the most relevant pages</span>
+            </div>
+          </div>
+        )}
       </div>
-      {!isRecommendationsReady ? (
-        <div className="no-recommended-pages-card">
-          <div className="no-recommended-pages-card-body">
-            <Loader title="Please Wait, Loading..." />
-          </div>
-        </div>
-      ) : pageRecommendation?.data?.length > 0 ? (
-        <div className="recommended-pages-cards">
-          {getRecommendedPages(pageRecommendation.data)}
-        </div>
-      ) : (
-        <div className="no-recommended-pages-card">
-          <div className="no-recommended-pages-icon">
-            <img
-              src="https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/svgexport-49.svg"
-              className="search-icon-img"
-              alt="search-icon"
-            />
-          </div>
-          <div className="no-recommended-pages-card-body">
-            <span>Great Job!</span>
-            <span>You already created the most relevant pages</span>
-          </div>
-        </div>
-      )}
-    </div>
+    )
   );
 };
