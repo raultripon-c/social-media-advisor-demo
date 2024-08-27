@@ -39,6 +39,7 @@ const DashBoard = () => {
   const [analyticsMetaData, setAnalyticsMetaData] = useState<any>(null);
   const [isJobTrackerEnabled, setIsJobTrackerEnabled] = useState<boolean>(false);
   const [metricsData, setMetricsData] = useState<MetricData[]>([]);
+  const CMS_URL = (window as any)._env_.CMS_URL;
 
   const staticData = [
     {
@@ -46,7 +47,7 @@ const DashBoard = () => {
       icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Generic.svg",
       config: {
         appType : "external",
-        appConfig: {"link":"https://cms-qa1.phenompro.com/tier3"},
+        appConfig: {"link": CMS_URL + "/tier3"},
         context: "customer",
         requestParams: {"lsrc":"txe","lsw":"_self","refNum":"","customerCode":"", "route":"pages"}
       }
