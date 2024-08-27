@@ -1,14 +1,12 @@
+import { useKeycloak } from "phenom-auth-react-adapter";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { useKeycloak } from "phenom-auth-react-adapter";
-import AppLayout from "./AppLayout";
-import { AppStore } from "store";
-import Header from "./header/Header";
-import Customers from "../screens/customers/Customers";
-import { GenericErrorBoundary } from "../remote-modules/ReactAppRenderer";
-import { ErrorBoundary } from "../remote-modules/error-component/ErrorBoundary";
 import { useNavigate } from "react-router-dom";
-import { initializeFaro } from "@grafana/faro-web-sdk";
+import { AppStore } from "store";
+import { GenericErrorBoundary } from "../remote-modules/ReactAppRenderer";
+import Customers from "../screens/customers/Customers";
+import AppLayout from "./AppLayout";
+import Header from "./header/Header";
 
 const Layout = () => {
   

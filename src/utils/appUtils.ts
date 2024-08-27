@@ -1,16 +1,17 @@
-import moment from "moment";
-import { toast } from "react-toastify";
 import { isEmpty } from "lodash";
+import { toast } from "react-toastify";
 
 import { RemoteModuleRenderer } from "../remote-modules/RemoteModuleRenderer";
 
 import { DATE_FORMAT, navigationHeaderApps, noShowSideBar } from "./constants";
+import { setAppDetails, setDashboardSelected } from "../store/apps/actions";
 
 export const appSelectionHandler = (
   selectedApp: any,
   navigate: any,
   customerCode: string,
-  refNum: string
+  refNum: string,
+  dispatch?: any
 ) => {
   let appType = selectedApp.appType;
   const mfRoute = selectedApp.appConfig?.route;
@@ -21,12 +22,8 @@ export const appSelectionHandler = (
     return;
   }
   if (selectedApp.context == "customer") {
-    !sessionStorage.getItem("currentContext") &&
-      sessionStorage.setItem("currentContext", "customer");
     updatedRoute = customerCode;
   } else if (selectedApp.context == "tenant") {
-    !sessionStorage.getItem("currentContext") &&
-      sessionStorage.setItem("currentContext", "tenant");
     updatedRoute = `${customerCode}/${refNum}`;
   }
   switch (appType) {
@@ -52,6 +49,10 @@ export const appSelectionHandler = (
         toast.dismiss();
         toast.error("Link is not provided for navigation");
       }
+      dispatch(setAppDetails({}));
+      dispatch(setDashboardSelected(false));
+      sessionStorage.removeItem("selectedApp");
+      navigate(customerCode ? `${customerCode}/summary` : "/");
       break;
     case "script":
       navigate(
@@ -62,7 +63,6 @@ export const appSelectionHandler = (
       break;
     default:
       navigate("/");
-      sessionStorage.removeItem("currentContext");
       break;
   }
 };
@@ -230,9 +230,7 @@ export const showNavigationHeader = (selectedApp: any) => {
     return true;
   } else return false;
 };
-export const lastWeekDate = () => {
-  return moment().subtract(7, "days").format(DATE_FORMAT);
-};
+
 export const navigateToNewTab = (url: string) => {
   return window.open(url, "_blank");
 };

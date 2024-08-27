@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import "./HeaderDropdown.scss"; // Import the CSS file
-import expand from "../../assets/images/expand.svg";
-import dashBoardIcon from "../../assets/images/dashboard/dashboard_left_menu_item.svg";
 import arrowRight from "../../assets/images/dashboard/arrowRight.svg";
+import expand from "../../assets/images/expand.svg";
+import "./HeaderDropdown.scss"; // Import the CSS file
 
 interface Option {
   value: string;

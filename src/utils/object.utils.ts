@@ -20,32 +20,3 @@ export function getValueByKey(agencyData:any,atrtributekey:any){
   });
   return atrtributekey
 }
-
-export const converMaptoArrayObjects = (scopes: any[]) => {
-  return scopes?.map((scope: any) => {
-      let arrayobjectList: any =[];
-      let attributes = scope.attributes;
-
-      for (let key in attributes) {            
-          if(attributes[key]?.length>0)
-          { attributes[key]?.forEach((val: any) => {
-              let obj:any={};
-            obj.name=key;
-            obj.value=val;              
-              arrayobjectList.push(obj)
-          })
-      }
-      }
-          scope.attributes=arrayobjectList;
-          return scope;
-  })
-}
-
-export function getKeyByValue(agencyData:any, atrtributevalue:any){
-  Object.entries(agencyData).forEach(([key, value]) => { 
-    if(value===atrtributevalue){
-    atrtributevalue=key
-    }
-  });
-  return atrtributevalue
-}

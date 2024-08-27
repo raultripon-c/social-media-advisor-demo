@@ -12,15 +12,13 @@ import RBAJson from "../utils/RBA.json";
 import {
   appSelectionHandler,
   findAppConfigByRoutes,
-  getAppByName,
   getMfRoutes,
   showSidebar,
   transformAppData,
 } from "../utils/appUtils";
 
 import sessionTracker from "phenom-session-tracker";
-import { MessageService } from "../MessageService";
-import { setAppDetails, setAppsFromAPI } from "../store/apps/actions";
+import { setAppsFromAPI } from "../store/apps/actions";
 import { APIService } from "../utils/api.service";
 import "./AppLayout.scss";
 import { InitialLoader } from "./Loader";
@@ -37,17 +35,14 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   const [allRoutes, setAllRoutes] = useState<IRoute[]>([]);
   const [transformedAppData, setTransformedAppData] = useState({});
   const [customerTenantApps, setCustomerTenantApps] = useState();
-  const [platformApps, setPlatformApps] = useState();
   const [appsLoader, setAppsLoader] = useState(true);
   const [rolesLoader, setRolesLoader] = useState(true);
   const userDetails = window?.keycloakInstance?.tokenParsed?.userDetails;
   const [showSidebarMenu, toggleSidebarMenu] = useState(false);
   const { selectedApp, allApps } = useSelector((state: any) => state.app);
-  const totalAppDEtails = useSelector((state: any) => state);
   let selectedAppFromSession = JSON.parse(
     sessionStorage.getItem("selectedApp") || "null"
   );
-  const currentContext = sessionStorage.getItem("currentContext") || "";
   const customerTenants = useSelector(
     (state: AppStore) => state.customer.customerTenants
   );
@@ -67,12 +62,11 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   }`;
   const userId = userDetails?.userName;
   const fetchedApps = useSelector((state: any) => state.app.allApps);
-  
+
   useEffect(() => {
     const customerCode = window.location.pathname.split("/")[1];
 
     if (userDetails?.userType?.toUpperCase() !== "PARTNER") {
-      sessionStorage.setItem("currentContext", "customer");
       setSelectedTenant(primaryTenant);
       APIService.getCustomerDetails(
         userDetails?.userOrg,
@@ -91,11 +85,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       setTransformedAppData(transformAppData(response));
       const filteredApps: any = transformAppData(response);
       setCustomerTenantApps(filteredApps?.customerTenantApps);
-      setPlatformApps(filteredApps?.platformApps);
       setAllRoutes([...appRoutes, ...mfRoutes]);
     }
 
-    // APIService.getLoggedInUserRoles(dispatch, setRolesLoader);
     if (!window.keycloakInstance.bearer_token)
       window.keycloakInstance.bearer_token = "Bearer " + keycloak.token;
   }, []);
@@ -122,7 +114,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       !window.location.pathname.includes("summmary")
     ) {
       sessionStorage.setItem("selectedApp", JSON.stringify(detailsApp));
-      sessionStorage.setItem("currentContext", detailsApp.context);
       selectedAppFromSession = detailsApp;
     } else {
       // sessionStorage.removeItem("selectedApp");
@@ -181,24 +172,13 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       setTransformedAppData(transformAppData(res));
       const filteredApps: any = transformAppData(res);
       setCustomerTenantApps(filteredApps?.customerTenantApps);
-      setPlatformApps(filteredApps?.platformApps);
       sessionStorage.setItem("allapps", JSON.stringify(res));
       setAllRoutes([...appRoutes, ...mfRoutes]);
     } catch (error) {
       console.error("Error:", error);
     }
   };
-  
-  const getCategoriesByContext = (context: any) => {
-    if (context == "platform") {
-      return { categories: platformApps, setCategories: setPlatformApps };
-    } else {
-      return {
-        categories: customerTenantApps,
-        setCategories: setCustomerTenantApps,
-      };
-    }
-  };
+
   useEffect(() => {
     if (customerDetails?.customerTenants?.length === 0) {
       setRolesLoader(true);
@@ -230,23 +210,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
         currentApp,
         navigate,
         selectedTenant?.customerCode || customerDetails?.data?.customerCode,
-        selectedTenant?.refNum
+        selectedTenant?.refNum,
+        dispatch
       );
     }
   }, [selectedApp, selectedTenant, selectedTenant?.refNum]);
 
-  let USER_ROLES = [
-    "Uber User",
-    "Config User",
-    "Config Admin",
-    "Uber Admin",
-    "Client User",
-    "Client Admin",
-  ];
-
-  const checkIfUserHasAccess = () => {
-    return USER_ROLES.some((role) => logedUserRoles.includes(role));
-  };
   return (
     <>
       {rolesLoader ? (
@@ -264,10 +233,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
             <ToolsSideBar
               showSidebarMenu={showSidebarMenu}
               toggleSidebarMenu={toggleSidebarMenu}
-              categories={getCategoriesByContext(currentContext).categories}
-              setCategories={
-                getCategoriesByContext(currentContext).setCategories
-              }
+              categories={customerTenantApps}
+              setCategories={setCustomerTenantApps}
               refNum={selectedTenant?.refNum}
               showSummaryNavigator={
                 !window.location.pathname.includes("summary")

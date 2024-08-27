@@ -196,7 +196,6 @@ const DashBoard = () => {
   }, [selectedTenant]);
 
   useEffect(() => {
-    sessionStorage.removeItem("currentContext");
     dispatch(setAppDetails({}));
     sessionStorage.removeItem("selectedApp");
     const apps = JSON.parse(sessionStorage.getItem("allapps") || "[]");
@@ -268,7 +267,7 @@ const DashBoard = () => {
       <div className="overview-container">
         <h2 className="overview-heading">Overview</h2>
         {[0, 1].map((rowIndex) => (
-          <div className="grid-container" key={rowIndex}>
+          <div className="overview-grid-container" key={rowIndex}>
             {(metricsData || []).slice(rowIndex * 3, (rowIndex + 1) * 3).map((item, index) => (
               <OverviewCard
                 key={index}
