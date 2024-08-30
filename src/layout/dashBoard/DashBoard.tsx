@@ -186,23 +186,29 @@ const DashBoard = () => {
           ];
 
           const metricResponses = await Promise.all(
-            metrics.map(metric =>
-              APIService.getMetrics(metric.name, metaData, isTrackerEnabled).then(response => ({
-                title: metric.title,
-                previous: response.data[0]?.previous,
-                current: response.data[0]?.current,
-                rate: response.data[0]?.rate
-              }))
-            )
+            metrics.map(async metric => {
+              try {
+                const response = await APIService.getMetrics(metric.name, metaData, isTrackerEnabled);
+                return {
+                  title: metric.title,
+                  previous: response.data[0]?.previous,
+                  current: response.data[0]?.current || response.data[0]?.CURRENT_VALUE,
+                  rate: response.data[0]?.rate || response.data[0]?.PERC_CHANGE
+                };
+              } catch (error) {
+                console.error(`Error fetching ${metric.name}:`, error);
+                return null;
+              }
+            })
           );
-
-          const formattedData = metricResponses.map(metric => ({
+          const filteredMetricResponses = metricResponses.filter(metric => metric !== null);
+          const formattedData = filteredMetricResponses.map(metric => ({
             title: metric.title,
-            value: metric.current ? `${metric.current}` : "N/A", 
+            value: metric.current ? `${metric.current}` : "N/A",
             change: metric.rate !== undefined ? `${metric.rate}%` : "N/A"
           }));
 
-          setMetricsData(formattedData); 
+          setMetricsData(formattedData);
         } catch (error) {
           console.error("Error fetching metrics:", error);
         }
@@ -281,10 +287,12 @@ const DashBoard = () => {
         />
       </div>
       <div className="overview-container">
-        <h2 className="overview-heading">Overview</h2>
+        {metricsData.length > 0 && (
+          <h2 className="overview-heading">Overview</h2>
+        )}
         {[0, 1].map((rowIndex) => (
           <div className="overview-grid-container" key={rowIndex}>
-            {(metricsData || []).slice(rowIndex * 3, (rowIndex + 1) * 3).map((item, index) => (
+            {(metricsData).slice(rowIndex * 3, (rowIndex + 1) * 3).map((item, index) => (
               <OverviewCard
                 key={index}
                 title={item.title}
