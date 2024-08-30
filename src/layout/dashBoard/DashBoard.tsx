@@ -181,17 +181,12 @@ const DashBoard = () => {
                 };
               } catch (error) {
                 console.error(`Error fetching ${metric.name}:`, error);
-                return {
-                  title: metric.title,
-                  previous: undefined,
-                  current: undefined,
-                  rate: undefined
-                };
+                return null;
               }
             })
           );
-
-          const formattedData = metricResponses.map(metric => ({
+          const filteredMetricResponses = metricResponses.filter(metric => metric !== null);
+          const formattedData = filteredMetricResponses.map(metric => ({
             title: metric.title,
             value: metric.current ? `${metric.current}` : "N/A",
             change: metric.rate !== undefined ? `${metric.rate}%` : "N/A"
@@ -276,7 +271,9 @@ const DashBoard = () => {
         />
       </div>
       <div className="overview-container">
-        <h2 className="overview-heading">Overview</h2>
+        {metricsData.length > 0 && (
+          <h2 className="overview-heading">Overview</h2>
+        )}
         {[0, 1].map((rowIndex) => (
           <div className="overview-grid-container" key={rowIndex}>
             {(metricsData).slice(rowIndex * 3, (rowIndex + 1) * 3).map((item, index) => (
