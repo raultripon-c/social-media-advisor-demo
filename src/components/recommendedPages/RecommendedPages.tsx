@@ -1,0 +1,166 @@
+import { useEffect, useState } from "react";
+import { isEmpty } from "lodash";
+import { toast } from "react-toastify";
+import { useDispatch, useSelector } from "react-redux";
+import React from "react";
+import { API } from "../../utils/api";
+import "./RecommendedPages.scss";
+import { getLink } from "../../utils/appUtils"; 
+import noRecommIcon from "../../assets/images/dashboard/noRecommIcon.svg";
+import { Loader, JobPageRecommendationCard } from "@phenom/react-ui-components";
+
+export const RecommendedPages = (props: any) => {
+  const userHasCmsAccess = window?.keycloakInstance?.userInfo?.resources['cms'] && 
+    window?.keycloakInstance?.userInfo?.resources['cms'].roles.length > 0;
+  const {} = props;
+  const selectedTenant = useSelector(
+    (state: any) => state.customer.selectedTenant
+  );
+
+  let [pageRecommendation, setRecommendedPagesData] = useState<any>(null);
+  let [isRecommendationsReady, setRecommendationsReady] =
+    useState<boolean>(false);
+  const CMS_URL = (window as any)._env_.CMS_URL;
+  const { code, type } = window.orgInfo;
+  useEffect(() => {
+    const loginAndFetchRecommendations = async () => {
+      try {
+        const loginResponse = await API.post(
+          `${CMS_URL}/api/txeLogin`,
+          {
+            "ph-org-code": code,
+            "ph-org-type": type,
+            token: window.keycloakInstance.token,
+            expires_in: window?.keycloakInstance?.tokenParsed?.exp,
+          },
+          { withCredentials: true }
+        );
+        console.log(loginResponse);
+
+        const refNum = selectedTenant?.refNum;
+        const locale = "en_us";
+
+        const recommendationsResponse = await API.post(
+          `${CMS_URL}/api/getPageRecommendations`,
+          {
+            batchSize: 6,
+            isSVRequired: false,
+            locale,
+            offset: 0,
+            refNum,
+            siteVariant: "external",
+          },
+          { withCredentials: true }
+        );
+
+        if (recommendationsResponse && recommendationsResponse.data) {
+          setRecommendedPagesData(recommendationsResponse.data);
+          setRecommendationsReady(true);
+        }
+        console.log(
+          "response from the get tenant variants",
+          recommendationsResponse
+        );
+      } catch (error) {
+        console.error("Error fetching data", error);
+      }
+    };
+
+    userHasCmsAccess && loginAndFetchRecommendations();
+  }, [selectedTenant, code, type]);
+
+  useEffect(() => {}, [isRecommendationsReady]);
+
+  const getRecommendedPages = (visibleData: any) => {
+    const recommendedData = visibleData.slice(0, 4);
+    for (let i = 0; i < recommendedData.length; i++) {
+      const values = Object.entries(recommendedData[i].value)
+        .filter(
+          ([key]) =>
+            ![
+              "category",
+              "city",
+              "cityState",
+              "location",
+              "citylocation",
+              "cityLocation",
+            ].includes(key)
+        )
+        .map(([key, value]) => [key, value[0]]);
+      recommendedData[i]["valuesUpdated"] = values;
+    }    
+
+    const navigateOnClick = (cardContent: object) => {
+      const cmsUrl = (window as any)['_env_'].CMS_URL
+      const config = {
+        appType : "external",
+        appConfig: {"link": cmsUrl + '/tier3'},
+        context: "customer",
+        requestParams: {"lsrc":"txe","lsw":"_self","refNum":"","customerCode":"", "route":"generatePages", "payload": ""}
+      }
+      const link = getLink(config, {
+        refNum: selectedTenant?.refNum,
+        customerCode: selectedTenant?.customerCode,
+        payload: btoa(JSON.stringify(cardContent))
+      });
+      if (link && !isEmpty(link)) window.open(link, "_blank");
+      else {
+        toast.dismiss();
+        toast.error("Link is not provided for navigation");
+      }
+    }
+
+    const recommendedPagesElement = [];
+    for (let cardContent of recommendedData) {
+      recommendedPagesElement.push(
+        <JobPageRecommendationCard
+          category = {cardContent.value.category}
+          cardLocation = {cardContent.value.city || cardContent.value.cityState || cardContent.value.location || cardContent.value.citylocation || cardContent.value.cityLocation}
+          jobCount =  {cardContent.jobCount}
+          persona  = {cardContent.siteVariant !== "external" && cardContent.siteVariant !== "internal" ? cardContent.siteVariant : cardContent.siteVariant === "external" ? "Career Site" : "Employee Experience"}
+          cardUpdatedValues = {cardContent.valuesUpdated}
+          cardContent = {cardContent}
+          navigateOnClick = {(cardContent: object) => {
+            navigateOnClick(cardContent)
+          }}
+        />
+      );
+    }
+    return recommendedPagesElement;
+  };
+  return (
+    userHasCmsAccess && (
+        <div className="recommended-pages-container">
+        <div className="recommended-pages-name-container">
+          <img src={noRecommIcon} alt="" />
+          <span className="container-name">Recommended pages</span>
+        </div>
+        {!isRecommendationsReady ? (
+          <div className="no-recommended-pages-card">
+            <div className="no-recommended-pages-card-body">
+              <Loader title="Please Wait, Loading..." />
+            </div>
+          </div>
+        ) : pageRecommendation?.data?.length > 0 ? (
+          <div className="recommended-pages-cards">
+            {getRecommendedPages(pageRecommendation.data)}
+          </div>
+        ) : (
+          <div className="no-recommended-pages-card">
+            <div className="no-recommended-pages-icon">
+              <img
+                src="https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/svgexport-49.svg"
+                className="search-icon-img"
+                alt="search-icon"
+              />
+            </div>
+            <div className="no-recommended-pages-card-body">
+              <span>Great Job!</span>
+              <span>You already created the most relevant pages</span>
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  );
+};

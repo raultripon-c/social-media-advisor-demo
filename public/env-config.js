@@ -34,4 +34,6 @@ window._env_ = {
   APM_ALERTS_ENDPOINT: "https://apm-dev.phenom.com/api",
   SERVICENOW_TICKETS: "https://phenomdev.service-now.com",
   CERTIFICATE_MANAGER_ENDPOINT: "https://certificate-manager-qa.phenompro.com",
+  CMS_URL: "https://cms-qa1.phenompro.com",
+  CMS_CAAS_URL: "https://caas-qa1.phenompro.com",
 };
