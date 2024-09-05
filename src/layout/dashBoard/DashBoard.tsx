@@ -201,12 +201,35 @@ const DashBoard = () => {
               }
             })
           );
+          const formatAvgTimeOnPage = (value: any) => {
+            const totalSeconds = parseFloat(value);
+            const minutes = Math.floor(totalSeconds);
+            const seconds = Math.round((totalSeconds - minutes) * 100);
+            return `${minutes} min ${seconds} sec`;
+          };
+          const formatConversionRate = (value: any) => `${value}%`;
+
+          const formatChange = (rate: any) => {
+            if (rate === undefined) return "N/A";
+            return rate >= 0 ? `+${rate}%` : `${rate}%`;
+          };
           const filteredMetricResponses = metricResponses.filter(metric => metric !== null);
-          const formattedData = filteredMetricResponses.map(metric => ({
-            title: metric.title,
-            value: metric.current ? `${metric.current}` : "N/A",
-            change: metric.rate !== undefined ? `${metric.rate}%` : "N/A"
-          }));
+          const formattedData = filteredMetricResponses.map(metric => {
+            let value = metric.current ? `${metric.current}` : "N/A";
+            let change = formatChange(metric.rate);
+
+            if (metric.title === 'Avg. Time on Page' && metric.current) {
+              value = formatAvgTimeOnPage(metric.current);
+            } else if (metric.title === 'Conversion Rate' && metric.current) {
+              value = formatConversionRate(value);
+            }
+
+            return {
+              title: metric.title,
+              value: value,
+              change: change
+            };
+          });
 
           setMetricsData(formattedData);
         } catch (error) {
