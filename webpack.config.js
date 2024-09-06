@@ -13,6 +13,9 @@ module.exports = {
   },
   mode: "development",
   devServer: {
+    headers: {
+      'Access-Control-Allow-Origin': '*',  // Allow cross-origin access
+    },
     hot: true,
     liveReload: true,
     allowedHosts: [
