@@ -24,6 +24,7 @@ const DashBoard = () => {
     title: string;
     value: string;
     change: string;
+    tooltipText: string;
   }
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -178,11 +179,11 @@ const DashBoard = () => {
           setIsJobTrackerEnabled(isTrackerEnabled);
 
           const metrics = [
-            { name: "visitsKpi", title: "Career Site Visits" },
-            { name: "applicationsConversionKpi", title: "Conversion Rate" },
-            { name: "completedCareerSiteApplies", title: "Recent Leads" },
-            { name: "uniqueLeads", title: "New Applicants" },
-            { name: "avgTimeOnPage", title: "Avg. Time on Page" }
+            { name: "visitsKpi", title: "Career Site Visits", text: "Total number of career site visits with daily delta percentage" },
+            { name: "applicationsConversionKpi", title: "Conversion Rate", text: "Total number of Talent Community, Job Alert, and Similar Job Alert subscriptions with daily delta percentage"},
+            { name: "completedCareerSiteApplies", title: "Recent Leads", text: "Total number of job seekers who clicked the Apply button"},
+            { name: "uniqueLeads", title: "New Applicants", text: "Total number of unique leads generated" },
+            { name: "avgTimeOnPage", title: "Avg. Time on Page", text: "Average time a visitor spends on the career site with daily delta percentage" }
           ];
 
           const metricResponses = await Promise.all(
@@ -193,7 +194,8 @@ const DashBoard = () => {
                   title: metric.title,
                   previous: response.data[0]?.previous,
                   current: response.data[0]?.current || response.data[0]?.CURRENT_VALUE,
-                  rate: response.data[0]?.rate || response.data[0]?.PERC_CHANGE
+                  rate: response.data[0]?.rate || response.data[0]?.PERC_CHANGE,
+                  text: metric.text
                 };
               } catch (error) {
                 console.error(`Error fetching ${metric.name}:`, error);
@@ -227,7 +229,8 @@ const DashBoard = () => {
             return {
               title: metric.title,
               value: value,
-              change: change
+              change: change,
+              tooltipText: metric.text
             };
           });
 
@@ -321,6 +324,7 @@ const DashBoard = () => {
                 title={item.title}
                 value={item.value}
                 change={item.change}
+                tooltipText={item.tooltipText}
               />
             ))}
           </div>
