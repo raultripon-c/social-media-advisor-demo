@@ -19,6 +19,18 @@ import { APIService } from "../../utils/api.service";
 import { getFullDate } from "./utils";
 import { RecommendedPages } from "../../components/recommendedPages/RecommendedPages";
 
+const getGreetingMessage = () => {
+  const now = new Date();
+  const hour = now.getHours();
+  if (hour < 12) {
+    return "Good morning";
+  } else if (hour < 18) {
+    return "Good afternoon";
+  } else {
+    return "Good evening";
+  }
+};
+
 const DashBoard = () => {
   interface MetricData {
     title: string;
@@ -47,10 +59,10 @@ const DashBoard = () => {
       text: "Page",
       icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Generic.svg",
       config: {
-        appType : "external",
-        appConfig: {"link": CMS_URL + "/tier3"},
+        appType: "external",
+        appConfig: { "link": CMS_URL + "/tier3" },
         context: "customer",
-        requestParams: {"lsrc":"txe","lsw":"_self","refNum":"","customerCode":"", "route":"pages"}
+        requestParams: { "lsrc": "txe", "lsw": "_self", "refNum": "", "customerCode": "", "route": "pages" }
       }
     },
     {
@@ -145,7 +157,7 @@ const DashBoard = () => {
     );
     if (matchedApp) {
       navigateToApp(matchedApp);
-    } else if(config){
+    } else if (config) {
       appSelectionHandler(
         config,
         navigate,
@@ -174,18 +186,15 @@ const DashBoard = () => {
         try {
           const metaData = await APIService.getMetaDataByRefNum(selectedTenant.refNum);
           setAnalyticsMetaData(metaData);
-
           const isTrackerEnabled = checkJobTrackerEnabled(new Date().toString());
           setIsJobTrackerEnabled(isTrackerEnabled);
-
           const metrics = [
             { name: "visitsKpi", title: "Career Site Visits", text: "Total number of career site visits with daily delta percentage" },
-            { name: "applicationsConversionKpi", title: "Conversion Rate", text: "Total number of Talent Community, Job Alert, and Similar Job Alert subscriptions with daily delta percentage"},
-            { name: "completedCareerSiteApplies", title: "Recent Leads", text: "Total number of job seekers who clicked the Apply button"},
+            { name: "applicationsConversionKpi", title: "Conversion Rate", text: "Total number of Talent Community, Job Alert, and Similar Job Alert subscriptions with daily delta percentage" },
+            { name: "completedCareerSiteApplies", title: "Recent Leads", text: "Total number of job seekers who clicked the Apply button" },
             { name: "uniqueLeads", title: "New Applicants", text: "Total number of unique leads generated" },
             { name: "avgTimeOnPage", title: "Avg. Time on Page", text: "Average time a visitor spends on the career site with daily delta percentage" }
           ];
-
           const metricResponses = await Promise.all(
             metrics.map(async metric => {
               try {
@@ -210,7 +219,6 @@ const DashBoard = () => {
             return `${minutes} min ${seconds} sec`;
           };
           const formatConversionRate = (value: any) => `${value}%`;
-
           const formatChange = (rate: any) => {
             if (rate === undefined) return "N/A";
             return rate >= 0 ? `+${rate}%` : `${rate}%`;
@@ -219,7 +227,6 @@ const DashBoard = () => {
           const formattedData = filteredMetricResponses.map(metric => {
             let value = metric.current ? `${metric.current}` : "N/A";
             let change = formatChange(metric.rate);
-
             if (metric.title === 'Avg. Time on Page' && metric.current) {
               value = formatAvgTimeOnPage(metric.current);
             } else if (metric.title === 'Conversion Rate' && metric.current) {
@@ -306,7 +313,7 @@ const DashBoard = () => {
     <div>
       <div className="greeting-container">
         <GreetingCard
-          greetingMessage="Good morning"
+          greetingMessage={getGreetingMessage()}
           subMessage="Create the future of Talent Experience"
           name={userName}
           profileImage={userDetails?.profileImage}
