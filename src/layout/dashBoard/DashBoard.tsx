@@ -18,7 +18,6 @@ import { API } from "../../utils/api";
 import { APIService } from "../../utils/api.service";
 import { getFullDate } from "./utils";
 import { RecommendedPages } from "../../components/recommendedPages/RecommendedPages";
-
 const getGreetingMessage = () => {
   const now = new Date();
   const hour = now.getHours();
@@ -30,7 +29,6 @@ const getGreetingMessage = () => {
     return "Good evening";
   }
 };
-
 const DashBoard = () => {
   interface MetricData {
     title: string;
@@ -43,7 +41,6 @@ const DashBoard = () => {
   const selectedTenant = useSelector(
     (state: AppStore) => state.customer.selectedTenant
   );
-
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [filteredData, setFilteredData] = useState<any[]>([]);
   const [totalAppsData, setTotalAppsData] = useState<any[]>([]);
@@ -86,7 +83,6 @@ const DashBoard = () => {
       icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Generic.svg",
     },
   ];
-
   const campaignsList = ["Campaign Name", "Status", "Channel", "Conversion", "Audience"];
 
   const campaignData = [
@@ -150,7 +146,6 @@ const DashBoard = () => {
       setIsLoading(false);
     }
   };
-
   const handleButtonClick = (text: string, config?: object) => {
     const matchedApp = totalAppsData.find(
       (app) => app.name.toLowerCase() === text.toLowerCase()
@@ -169,7 +164,6 @@ const DashBoard = () => {
       console.log(`Clicked on ${text}`);
     }
   };
-
   const checkJobTrackerEnabled = (startDate: string) => {
     if (analyticsMetaData?.jobTrackersStartDate) {
       const actualDate = new Date(analyticsMetaData.jobTrackersStartDate).toJSON();
@@ -179,7 +173,6 @@ const DashBoard = () => {
     }
     return false;
   };
-
   useEffect(() => {
     if (selectedTenant?.refNum) {
       const fetchMetrics = async () => {
@@ -232,7 +225,6 @@ const DashBoard = () => {
             } else if (metric.title === 'Conversion Rate' && metric.current) {
               value = formatConversionRate(value);
             }
-
             return {
               title: metric.title,
               value: value,
@@ -240,7 +232,6 @@ const DashBoard = () => {
               tooltipText: metric.text
             };
           });
-
           setMetricsData(formattedData);
         } catch (error) {
           console.error("Error fetching metrics:", error);
@@ -249,12 +240,10 @@ const DashBoard = () => {
       fetchMetrics();
     }
   }, [selectedTenant]);
-
   useEffect(() => {
     dispatch(setAppDetails({}));
     sessionStorage.removeItem("selectedApp");
     const apps = JSON.parse(sessionStorage.getItem("allapps") || "[]");
-
     if (apps.length === 0) {
       getAllApps();
     } else {
@@ -264,20 +253,16 @@ const DashBoard = () => {
       setIsLoading(false);
     }
   }, [dispatch]);
-
   useEffect(() => {
     const getLoggedInUserInfo = async () => {
       try {
         const loggedInUserEmail =
           window.keycloakInstance?.tokenParsed?.userDetails?.userName;
-
         if (!loggedInUserEmail) return;
-
         const endPoint = apiUrl.getUserBySearch.replace(
           "{username}",
           loggedInUserEmail
         );
-
         const response = await API.get(
           `${(window as any)._env_.APP_API_URL}/${endPoint}`
         );
@@ -286,10 +271,8 @@ const DashBoard = () => {
         console.log(error);
       }
     };
-
     getLoggedInUserInfo();
   }, []);
-
   const navigateToApp = (selectedApp: any) => {
     sessionStorage.setItem("selectedApp", JSON.stringify(selectedApp));
     dispatch(setAppDetails(selectedApp));
@@ -297,10 +280,11 @@ const DashBoard = () => {
       selectedApp,
       navigate,
       selectedTenant?.customerCode,
-      selectedTenant?.refNum
+      selectedTenant?.refNum,
+      dispatch,
+      true
     );
   };
-
   if (isLoading) {
     return (
       <div className="tenants-loader">
@@ -308,7 +292,6 @@ const DashBoard = () => {
       </div>
     );
   }
-
   return (
     <div>
       <div className="greeting-container">
