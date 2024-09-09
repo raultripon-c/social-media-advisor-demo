@@ -11,3 +11,18 @@
     }
   }
 }
+ul#spotlight-list {
+  list-style-type: none;
+  padding: 0px;
+}
+.page {
+  margin-top: 0px !important;
+}
+#paginationList {
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+}
+#crmUITxtNavigationPageLeftArrow {
+  position: initial !important;
+}

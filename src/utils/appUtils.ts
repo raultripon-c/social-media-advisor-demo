@@ -51,6 +51,10 @@ export const appSelectionHandler = (
       }
       break;
     case "external":
+      dispatch(setAppDetails({}));
+      dispatch(setDashboardSelected(false));
+      sessionStorage.removeItem("selectedApp");
+      
       const link = getLink(selectedApp, {
         refNum: refNum,
         customerCode: customerCode,
@@ -60,9 +64,6 @@ export const appSelectionHandler = (
         toast.dismiss();
         toast.error("Link is not provided for navigation");
       }
-      dispatch(setAppDetails({}));
-      dispatch(setDashboardSelected(false));
-      sessionStorage.removeItem("selectedApp");
       break;
     case "script":
       navigate(
