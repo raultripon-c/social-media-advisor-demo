@@ -186,11 +186,18 @@
 .greeting-container {
   position: relative;
   width: 100%;
-  padding-bottom: 50px;
+  padding-bottom: 34px;
   padding-left: 50px;
   padding-top: 40px;
 }
 
+.tenant-details-container {
+  position: relative;
+  width: 100%;
+  padding-bottom: 34px;
+  padding-left: 50px;
+  padding-right: 24px;
+}
 .create {
   color: var(--neutrals-nn-400, #464F5E);
   font-family: "Poppins";
@@ -224,7 +231,7 @@
 
 .table-container {
   margin-top: 20px;
-  width: 94%;
+  width: 96%;
   margin-left: 45px;
   margin-bottom: 40px;
 }

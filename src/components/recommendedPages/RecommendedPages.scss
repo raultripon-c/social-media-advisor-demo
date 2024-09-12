@@ -5,9 +5,11 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;
-    margin-left: 48px;
-    padding-top: 25px;
-    width: 96%;
+    padding-left: 50px;
+    position: relative;
+    padding-right: 24px;
+    width: 100%;
+    padding-bottom: 34px;
 
 
     .recommended-pages-name-container{
@@ -38,7 +40,6 @@
         display: flex;
         align-items: flex-start;
         gap: 16px;
-        margin-bottom: 20px;
 
         .launch-card {
             display: flex;
@@ -58,7 +59,6 @@
         background: #FFFFFF;
         border-radius: 8px;
         border: 1px solid #D1D5DC;
-        margin-bottom: 20px;
 
         .no-recommended-pages-card-body {
             display: flex;
