@@ -55,7 +55,7 @@ const Customers: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
   };
   const getAllCustomers = async () => {
     setIsLoading(true);
-    let getCustomersUrl = `${API_URL}/${apiUrl.getCustomerAccounts}`;
+    let getCustomersUrl = `${API_URL}/${apiUrl.getTenantDetails}`;
     if (APP_DC_REGION?.toLocaleUpperCase() !== "US".toLocaleUpperCase()) {
       getCustomersUrl = `${getCustomersUrl}?dc_region=${APP_DC_REGION}`;
     }
@@ -66,7 +66,7 @@ const Customers: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
           setTotalCustomersData(response.data.data);
           setFilteredData(
             response.data.data.sort((a: any, b: any) =>
-              a.name.localeCompare(b.name)
+              a.tenantName.localeCompare(b.tenantName)
             )
           );
           dispatch(setAllCustomers(response.data.data));
@@ -99,7 +99,7 @@ const Customers: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
   useEffect(() => {
     if (searchKey.trim().length >= 0) {
       let data = totalCustomersData?.filter((eachCustomer: any) =>
-        eachCustomer.name.toLowerCase().includes(searchKey.toLowerCase())
+        eachCustomer.tenantName.toLowerCase().includes(searchKey.toLowerCase())
       );
       setFilteredData(data);
     }
@@ -128,7 +128,7 @@ const Customers: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
       setInvalidCustomer(true);
     } else {
       APIService.getCustomerTenants(
-        selectedCustomer.id,
+        selectedCustomer.customerId,
         dispatch,
         selectedTenant
       );
@@ -167,14 +167,14 @@ const Customers: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
       {totalCustomersData?.length !== 0 ? (
         <div className="tenant-list">
           {filteredData
-            ?.filter((customer: any) => customer?.realmName)
+            ?.filter((customer: any) => customer?.tenantName)
             ?.map((eachCustomer: any) => (
               <div
                 className="tenant-card"
                 key={eachCustomer.id}
                 onClick={() => navigateToDashBoard(eachCustomer)}
               >
-                <span>{eachCustomer.name}</span>
+                <span>{eachCustomer.tenantName}</span>
               </div>
             ))}
           {filteredData?.length === 0 && (

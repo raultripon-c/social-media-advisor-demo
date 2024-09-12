@@ -16,6 +16,9 @@ export const RecommendedPages = (props: any) => {
   const selectedTenant = useSelector(
     (state: any) => state.customer.selectedTenant
   );
+  const customerDetails = useSelector(
+    (state: any) => state.customer
+  );
 
   let [pageRecommendation, setRecommendedPagesData] = useState<any>(null);
   let [isRecommendationsReady, setRecommendationsReady] =
@@ -100,7 +103,7 @@ export const RecommendedPages = (props: any) => {
       }
       const link = getLink(config, {
         refNum: selectedTenant?.refNum,
-        customerCode: selectedTenant?.customerCode,
+        customerCode: selectedTenant?.customerCode || customerDetails?.data?.customerCode,
         payload: btoa(JSON.stringify(cardContent))
       });
       if (link && !isEmpty(link)) window.open(link, "_blank");

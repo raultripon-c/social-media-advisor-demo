@@ -43,6 +43,9 @@ const DashBoard = () => {
   const selectedTenant = useSelector(
     (state: AppStore) => state.customer.selectedTenant
   );
+  const customerDetails = useSelector(
+    (state: AppStore) => state.customer
+  );
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [filteredData, setFilteredData] = useState<any[]>([]);
@@ -161,7 +164,7 @@ const DashBoard = () => {
       appSelectionHandler(
         config,
         navigate,
-        selectedTenant?.customerCode,
+        selectedTenant?.customerCode || customerDetails?.data?.customerCode,
         selectedTenant?.refNum,
         dispatch
       );
@@ -296,7 +299,7 @@ const DashBoard = () => {
     appSelectionHandler(
       selectedApp,
       navigate,
-      selectedTenant?.customerCode,
+      selectedTenant?.customerCode  || customerDetails?.data?.customerCode,
       selectedTenant?.refNum
     );
   };
