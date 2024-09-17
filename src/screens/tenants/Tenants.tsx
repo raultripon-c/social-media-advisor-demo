@@ -7,41 +7,58 @@ import { AppStore } from "store";
 import { Search } from "../../components/TenantSearch/TenantsSearch";
 import { setAppDetails, setAppsFromAPI } from "../../store/apps/actions";
 import {
-  setAllCustomers,
-  setCustomerDetails,
+  setAllTenants,
+  setSelectedTenant,
 } from "../../store/customer/actions";
 import { API } from "../../utils/api";
 
 import { Loader } from "@phenom/react-ui-components";
 import { APIService } from "../../utils/api.service";
 import { apiUrl } from "../../utils/constants";
-import "./Customers.scss";
+import "./Tenants.scss";
+
+/**
+ * The `Tenants` component is responsible for fetching and displaying a list of tenants.
+ * It interacts with the Redux store to manage state and uses session storage to cache data.
+ * 
+ * Props:
+ * - `allApps`: An array containing all applications.
+ * - `setAllApps`: A function to set the applications.
+ * 
+ * The component performs the following tasks:
+ * - Fetches all applications and tenants from the API.
+ * - Stores the fetched data in session storage and updates the Redux store.
+ * - Filters tenants based on the search key entered by the user.
+ * - Displays a loading indicator while data is being fetched.
+ * - Shows a list of tenants or an empty state if no tenants are configured.
+ * - Handles navigation to the tenant's dashboard when a tenant is selected.
+ * 
+ * @param {TenantsProps} param0 - The props for the component.
+ * @returns {JSX.Element} The rendered component.
+ */
 
 interface TenantsProps {
   allApps: any;
   setAllApps: (apps: any) => void;
 }
 
-const Customers: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
-  const { customers } = useSelector((state: AppStore) => state.customer);
+const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
 
+  const { customers } = useSelector((state: AppStore) => state.customer);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const selectedTenant = useSelector(
-    (state: AppStore) => state.customer.selectedTenant
-  );
+  
   const [isLoading, setIsLoading] = useState<boolean>();
   const [searchKey, setSearchKey] = useState<string>("");
   const [filteredData, setFilteredData] = useState(
-    JSON.parse(sessionStorage.getItem("customers") || "[]") as any
+    JSON.parse(sessionStorage.getItem("tenants") || "[]") as any
   );
-  const [totalCustomersData, setTotalCustomersData] = useState(
-    JSON.parse(sessionStorage.getItem("customers") || "[]") as any
+  const [totalTenantsData, setTotalTenantsData] = useState(
+    JSON.parse(sessionStorage.getItem("tenants") || "[]") as any
   );
-  const [invalidCustomer, setInvalidCustomer] = useState(false);
   const API_URL = (window as any)._env_.APP_API_URL;
-
   const APP_DC_REGION = `${(window as any)._env_.APP_DC}`;
+
   const getAllApps = async () => {
     try {
       const response = await APIService.getAllApps();
@@ -53,38 +70,52 @@ const Customers: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
       console.error("Error:", error);
     }
   };
-  const getAllCustomers = async () => {
+
+  const getAllTenants = async () => {
     setIsLoading(true);
-    let getCustomersUrl = `${API_URL}/${apiUrl.getTenantDetails}`;
+    let getTenantUrl = `${API_URL}/${apiUrl.getTenantDetails}`;
     if (APP_DC_REGION?.toLocaleUpperCase() !== "US".toLocaleUpperCase()) {
-      getCustomersUrl = `${getCustomersUrl}?dc_region=${APP_DC_REGION}`;
+      getTenantUrl = `${getTenantUrl}?dc_region=${APP_DC_REGION}`;
     }
-    await API.get(getCustomersUrl)
+    await API.get(getTenantUrl)
       .then((response: any) => {
         const result = response.data;
         if (response.status == 200 && result.status) {
-          setTotalCustomersData(response.data.data);
+          setTotalTenantsData(response.data.data);
           setFilteredData(
             response.data.data.sort((a: any, b: any) =>
               a.tenantName.localeCompare(b.tenantName)
             )
           );
-          dispatch(setAllCustomers(response.data.data));
+          dispatch(setAllTenants(response.data.data));
           sessionStorage.setItem(
-            "customers",
+            "tenants",
             JSON.stringify(response.data.data)
           );
         } else {
-          setTotalCustomersData([]);
+          setTotalTenantsData([]);
         }
       })
       .catch((err: any) => {
-        setTotalCustomersData([]);
+        setTotalTenantsData([]);
       })
       .finally(() => {
         setIsLoading(false);
       });
   };
+
+  useEffect(() => {
+    let storedTenants = JSON.parse(
+      sessionStorage.getItem("tenants") || "[]"
+    );
+
+    if (storedTenants.length === 0) {
+      getAllTenants();
+    } else {
+      dispatch(setAllTenants(storedTenants));
+    }
+  }, []);
+
   useEffect(() => {
     dispatch(setAppDetails({}));
     sessionStorage.removeItem("selectedApp");
@@ -98,50 +129,31 @@ const Customers: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
   }, []);
   useEffect(() => {
     if (searchKey.trim().length >= 0) {
-      let data = totalCustomersData?.filter((eachCustomer: any) =>
+      let data = totalTenantsData?.filter((eachCustomer: any) =>
         eachCustomer.tenantName.toLowerCase().includes(searchKey.toLowerCase())
       );
       setFilteredData(data);
     }
   }, [searchKey]);
 
-  useEffect(() => {
-    let storedCustomers = JSON.parse(
-      sessionStorage.getItem("customers") || "[]"
-    );
-
-    if (storedCustomers.length === 0) {
-      getAllCustomers();
-    } else {
-      dispatch(setAllCustomers(storedCustomers));
-    }
-  }, []);
+  
   useEffect(() => {
     if (customers?.length > 0) {
-      setTotalCustomersData(customers);
+      setTotalTenantsData(customers);
       setFilteredData(customers);
     }
   }, [customers]);
 
-  const navigateToDashBoard = (selectedCustomer: any = {}) => {
-    if (selectedCustomer?.tenantRefnums?.length === 0) {
-      setInvalidCustomer(true);
-    } else {
-      APIService.getCustomerTenants(
-        selectedCustomer.customerId,
-        dispatch,
-        selectedTenant
-      );
-      dispatch(setCustomerDetails(selectedCustomer));
-      navigate(`/${selectedCustomer.customerCode}/summary`);
-
-    }
+  const navigateToDashBoard = (selectedTenant: any = {}) => {
+    dispatch(setSelectedTenant(selectedTenant));
+    sessionStorage.setItem("selectedTenant", JSON.stringify(selectedTenant))
+    navigate(`/${selectedTenant.customerCode}/${selectedTenant.refNum}/summary`);
   };
 
   if (isLoading) {
     return (
       <div className="tenants-loader">
-        <Loader title="Please Wait, Loading Customers" />
+        <Loader title="Please Wait, Loading " />
       </div>
     );
   }
@@ -158,34 +170,27 @@ const Customers: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
           />
         </div>
       </div>
-      {invalidCustomer && (
-        <div className="invalid-customer">
-          No Tenants Configured for this Customer, Please Select an other
-          Customer
-        </div>
-      )}
-      {totalCustomersData?.length !== 0 ? (
+      {totalTenantsData?.length !== 0 ? (
         <div className="tenant-list">
           {filteredData
-            ?.filter((customer: any) => customer?.tenantName)
-            ?.map((eachCustomer: any) => (
+            ?.map((eachTenant: any) => (
               <div
                 className="tenant-card"
-                key={eachCustomer.id}
-                onClick={() => navigateToDashBoard(eachCustomer)}
+                key={eachTenant.id}
+                onClick={() => navigateToDashBoard(eachTenant)}
               >
-                <span>{eachCustomer.tenantName}</span>
+                <span>{eachTenant.tenantName}</span>
               </div>
             ))}
           {filteredData?.length === 0 && (
-            <div className="no-customer-found">No Customers found</div>
+            <div className="no-tenant-found">No Tenants found</div>
           )}
         </div>
       ) : (
-        <EmptyState displayText="No Customers Configured" />
+        <EmptyState displayText="No Tenants Configured" />
       )}
     </div>
   );
 };
 
-export default Customers;
+export default Tenants;

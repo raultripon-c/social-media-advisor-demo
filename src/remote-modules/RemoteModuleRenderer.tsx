@@ -18,9 +18,6 @@ export const RemoteModuleRenderer = () => {
   const { data, user, allTenants, customerTenants } = useSelector(
     (state: AppStore) => state.customer
   );  
-  const customerDetails = useSelector(
-    (state: AppStore) => state.customer
-  );
 
   useEffect(()=>{
     (window as any).TXEMessageService=MessageService;
@@ -88,7 +85,7 @@ export const RemoteModuleRenderer = () => {
         appSelectionHandler(
           navigatingApp,
           navigate,
-          selectedTenant?.customerCode  || customerDetails?.data?.customerCode,
+          selectedTenant?.customerCode,
           selectedTenant?.refNum
         );
         break;
@@ -134,7 +131,6 @@ export const RemoteModuleRenderer = () => {
         selectedApp: selectedModuleAppObject,
         customerRegion: data?.dcRegion || "US",
         logedUserRoles: user,
-        selectedCustomerDetails: data,
         selectedTenants: selectedTenant,
         totalTenants: allTenants,
         totalCustomerTenants: customerTenants,

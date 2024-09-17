@@ -9,7 +9,6 @@ import tenantIcon from "../../assets/images/dashboard/tenantIcon.svg";
 import phenomLogo from "../../assets/images/phenom-logo.svg";
 
 import {
-  setCustomerDetails,
   setCustomerTenants,
   setSelectedTenant,
 } from "../../store/customer/actions";
@@ -62,7 +61,6 @@ function Header({
   const customerTenants = useSelector(
     (state: AppStore) => state.customer.customerTenants
   );
-  const customerDetails = useSelector((state: AppStore) => state.customer);
   const selectedTenant = useSelector(
     (state: AppStore) => state.customer.selectedTenant
   );
@@ -76,23 +74,18 @@ function Header({
     );
     return selectedAppFromSession || state.app?.selectedApp;
   });
-  const userType = window?.keycloakInstance?.userInfo?.userDetails?.userType;
 
-  const [selectedValue, setSelectedPage] = useState(
-    customerDetails?.data?.name
-  );
 
   const handleLogoClick = () => {
+    const userType = window?.keycloakInstance?.userInfo?.userDetails?.userType;
     sessionStorage.removeItem("selectedApp");
     dispatch(setSelectedTenant({}));
     dispatch(setSidebarState(false));
     dispatch(setAppDetails({}));
-    dispatch(setCustomerDetails({}));
-    if (userType === "PARTNER") {
+    if (userType && userType === "PARTNER") {
       dispatch(setSelectedTenant({}));
       sessionStorage.removeItem("selectedApp");
       dispatch(setCustomerTenants([]));
-      dispatch(setCustomerDetails({}));
       navigate("/");
     } else {
       const customerCode =
@@ -101,29 +94,25 @@ function Header({
     }
   };
 
-  useEffect(() => {
-    if (window.location.pathname.includes("summary"))
-      setSelectedPage(customerDetails?.data?.name);
-  }, [customerDetails?.data?.id, window.location.pathname]);
 
   useEffect(() => {
     keycloak?.loadUserInfo();
   }, []);
 
-  const handleTenantSelectionChange = (selectedValue: any) => {
-    const selectedTenant = customerTenants.find(
-      (tenant: any) => tenant.tenantName === selectedValue
-    );
+  // const handleTenantSelectionChange = (selectedValue: any) => {
+  //   const selectedTenant = customerTenants.find(
+  //     (tenant: any) => tenant.tenantName === selectedValue
+  //   );
 
-    dispatch(setSelectedTenant(selectedTenant));
-  };
-  const transformedCustomerTenants = customerTenants.map((tenant: any) => ({
-    value: tenant?.tenantName,
-    label: tenant?.tenantName,
-    icon: tenantIcon,
-  }));
-  const [initialized, setInitialized] = useState(false);
-  let pendo = (window as any).pendo;
+  //   dispatch(setSelectedTenant(selectedTenant));
+  // };
+  // const transformedCustomerTenants = customerTenants.map((tenant: any) => ({
+  //   value: tenant?.tenantName,
+  //   label: tenant?.tenantName,
+  //   icon: tenantIcon,
+  // }));
+  // const [initialized, setInitialized] = useState(false);
+  // let pendo = (window as any).pendo;
 
   return (
     <div className="header-container">
@@ -145,12 +134,12 @@ function Header({
           isCustomerPage ? "customers-page-header" : ""
         } ${sidebarOpen ? "logo-expanded" : ""}`}
       >
-        {customerDetails?.data?.name && app && app?.context !== "platform" && (
+        {selectedTenant?.customerName && app && app?.context !== "platform" && (
           <div className="tenant-selection col-md-6">
             <p className="header-selected-customer">
-              {customerDetails?.data?.name}
-            </p>
-            {customerTenants.length > 1 &&
+              {selectedTenant?.customerName}
+            </p>        
+            {/* {customerTenants.length > 1 &&
               !window.location.pathname.includes("summary") && (
                 <div className="header-selected-tenant ">
                   <HeaderDropdown
@@ -162,7 +151,7 @@ function Header({
                     type="tenant"
                   />
                 </div>
-              )}
+              )} */}
           </div>
         )}
         <div className={`header-right`}>

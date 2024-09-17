@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { AppStore } from "store";
 import { GenericErrorBoundary } from "../remote-modules/ReactAppRenderer";
-import Customers from "../screens/customers/Customers";
+import Tenants from "../screens/tenants/Tenants";
 import AppLayout from "./AppLayout";
 import Header from "./header/Header";
 
@@ -74,7 +74,7 @@ const Layout = () => {
           Object.entries(selectedTenant)?.length === 0 &&
           userDetails?.userType === "PARTNER" &&
           (window.location.pathname === '/') ? (
-            <Customers allApps={allApps} setAllApps={setAllApps} />
+            <Tenants allApps={allApps} setAllApps={setAllApps} />
           ) : (
             <AppLayout allApps={allApps} />
           )}

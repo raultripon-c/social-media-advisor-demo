@@ -11,9 +11,6 @@ export function AngularAppRenderer(props: any) {
   const selectedTenant = useSelector(
     (state: AppStore) => state.customer.selectedTenant
   );
-  const customerDetails = useSelector(
-    (state: AppStore) => state.customer
-  );
   const [isReady, setReady] = useState(false);
   const ref = useRef(null);
   const approute = props?.selectedApp?.route;
@@ -76,7 +73,7 @@ export function AngularAppRenderer(props: any) {
           const props = {
             token: window.keycloakInstance.token,
             refNum: selectedTenant?.refNum,
-            subPath: `/${customerDetails?.data?.customerCode}/${selectedTenant.refNum}${approute}`,
+            subPath: `/${selectedTenant?.customercode}/${selectedTenant?.refNum}${approute}`,
             userId: window.keycloakInstance.userInfo.userDetails.id,
             userEmail: window.keycloakInstance.userInfo.userDetails.email,
             appName: appName,
