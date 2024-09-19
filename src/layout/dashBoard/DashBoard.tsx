@@ -8,6 +8,7 @@ import {
   GreetingCard,
   OverviewCard,
   Table,
+  TenantDetailCard
 } from "@phenom/react-ui-components";
 import { AppStore } from "store";
 import { setAppDetails, setAppsFromAPI } from "../../store/apps/actions";
@@ -55,7 +56,8 @@ const DashBoard = () => {
 
   const staticData = [
     {
-      text: "Page",
+      displayText: "Page",
+      value: "Page",
       icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Generic.svg",
       config: {
         appType: "external",
@@ -65,23 +67,28 @@ const DashBoard = () => {
       }
     },
     {
-      text: "Article",
+      displayText: "Article",
+      value: "Blog",
       icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Company_notification.svg",
     },
     {
-      text: "Campaigns",
+      displayText: "Campaigns",
+      value: "Campaigns",
       icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/campaign.svg",
     },
     {
-      text: "Events",
+      displayText: "Events",
+      value: "Events",
       icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Generic.svg",
     },
     {
-      text: "Email templates",
+      displayText: "Email templates",
+      value: "Email templates",
       icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Generic.svg",
     },
     {
-      text: "SMS templates",
+      displayText: "SMS templates",
+      value: "SMS templates",
       icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Generic.svg",
     },
   ];
@@ -129,6 +136,21 @@ const DashBoard = () => {
   //     Audience: "5% +2%",
   //   },
   // ];
+
+  const tenantData = [
+    {
+      tenantLink: "https://phenompeople-qa.phenompro.com/us/en",
+      lastUpdated: "2 days",
+      imageSrc: "https://s3-alpha-sig.figma.com/img/fdb8/3a8a/00d7fa64d276ad2883a094aaebd7c90c?Expires=1727049600&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=BM-NZiwqOvW-EgEZS~lKAs4~xCrH8IYOmbZWorSlkfHwOgCQ2RJMyGbLKMZEOGTnIGhqYFcl~91~hHTPeItC0SLZJlmta2SJdDXNfEzY5ZPrBZ02d1Cud~lKv1s7AbpXThH-TwtFR~qEvThCW8uPLgm75hnRSkXWmMoFuxBuXywUQy7iRdEpe~Gq9OHZFOp8PYpEe8I91NQHftOamcXrkOwTugtJ~XF6ZvIzAknDQQoxf4QID~Eu73ziGvWE2sJ7fX7EWLDMhhiBMYFMmbNRQUe2NO11V0lnkFJXuLMXVOxdueEXdyGo~8-bLpDlOcmUOdK6IMMSy2EBVs5P1MPxig__",
+      refNum: "PHENA0059",
+      config: {
+        appType: "external",
+        appConfig: { "link": CMS_URL + "/tier3" },
+        context: "customer",
+        requestParams: { "lsrc": "txe", "lsw": "_self", "refNum": "", "customerCode": ""}
+      }
+    },
+  ];
 
   const getAllApps = async () => {
     try {
@@ -304,6 +326,22 @@ const DashBoard = () => {
           profileImage={userDetails?.profileImage}
         />
       </div>
+      <div className="tenant-details-container">
+        <TenantDetailCard
+          tenantLink= {tenantData[0].tenantLink}
+          lastUpdated= {tenantData[0].lastUpdated}
+          imageSrc= {tenantData[0].imageSrc}
+          navigateOnClick={() => {
+            appSelectionHandler(
+              tenantData[0].config,
+              navigate,
+              selectedTenant?.customerCode,
+              selectedTenant?.refNum,
+              dispatch
+            );
+          }}
+      />
+      </div>
       <div className="overview-container">
         {metricsData.length > 0 && (
           <h2 className="overview-heading">Overview</h2>
@@ -330,11 +368,11 @@ const DashBoard = () => {
               key={index}
               size="small"
               buttonType="primary"
-              text={item.text}
+              text={item.displayText}
               iconLeft={item.icon}
               className="primary-button-grey"
               onClick={() => {
-                handleButtonClick(item.text, item?.config);
+                handleButtonClick(item.value, item?.config);
               }}
             />
           ))

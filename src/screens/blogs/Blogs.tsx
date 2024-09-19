@@ -53,8 +53,8 @@ const Blogs = () => {
         }
     }, [storeData]);
     return (
-        <div>
-            <div id="tools-body-container"></div>
+        <div style={{ height: "100%"}}>
+            <div id="tools-body-container" style={{ height: "100%" }}></div>
             {isLoading && (
                 <div>
                     <Loader title="Please Wait, Loading..." />
