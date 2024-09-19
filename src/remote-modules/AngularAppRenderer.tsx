@@ -73,7 +73,7 @@ export function AngularAppRenderer(props: any) {
           const props = {
             token: window.keycloakInstance.token,
             refNum: selectedTenant?.refNum,
-            subPath: `/${selectedTenant.customerCode}/${selectedTenant.refNum}${approute}`,
+            subPath: `/${selectedTenant?.customercode}/${selectedTenant?.refNum}${approute}`,
             userId: window.keycloakInstance.userInfo.userDetails.id,
             userEmail: window.keycloakInstance.userInfo.userDetails.email,
             appName: appName,

@@ -53,6 +53,8 @@ const DashBoard = () => {
   const [isJobTrackerEnabled, setIsJobTrackerEnabled] = useState<boolean>(false);
   const [metricsData, setMetricsData] = useState<MetricData[]>([]);
   const CMS_URL = (window as any)._env_.CMS_URL;
+  const userHasCmsAccess = window?.keycloakInstance?.userInfo?.resources['cms'] && 
+    window?.keycloakInstance?.userInfo?.resources['cms'].roles.length > 0;
 
   const staticData = [
     {
@@ -357,8 +359,8 @@ const DashBoard = () => {
           <EmptyState displayText="No Apps found" />
         )}
       </div>
-      <RecommendedPages />
-      {/* <h2 className="overview-heading">Campaigns</h2>
+      {userHasCmsAccess && <RecommendedPages />}
+      <h2 className="overview-heading">Campaigns</h2>
       <div className="table-container">
         <Table columns={campaignsList} data={campaignData} />
       </div> */}

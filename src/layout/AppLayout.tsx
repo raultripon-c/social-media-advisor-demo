@@ -7,7 +7,7 @@ import { useKeycloak } from "phenom-auth-react-adapter";
 import { AppStore } from "store";
 import Toast from "../components/Toast/Toast";
 import { IRoute, appRoutes } from "../routes/AppRoutes";
-import { setSelectedTenant, setUserRoles } from "../store/customer/actions";
+import { setSelectedTenant, setUserRoles, setAllTenants } from "../store/customer/actions";
 import RBAJson from "../utils/RBA.json";
 import {
   appSelectionHandler,
@@ -23,11 +23,31 @@ import { APIService } from "../utils/api.service";
 import "./AppLayout.scss";
 import { InitialLoader } from "./Loader";
 import ToolsSideBar from "./sideBar/SideBar";
+import { filter } from "lodash";
+import { apiUrl } from "../utils/constants";
+import { API } from "../utils/api";
 
 interface AppLayoutProps {
   allApps: any;
 }
 
+/**
+ * AppLayout component is the main layout for the application.
+ * It handles the initialization and management of various states and effects
+ * related to user authentication, application data, and navigation.
+ *
+ * @component
+ * @param {AppLayoutProps} props - The properties for the AppLayout component.
+ *
+ * @returns {JSX.Element} The rendered AppLayout component.
+ * 
+ * The component performs the following tasks:
+ * - Fetches and sets application data.
+ * - Manages user roles and tenant information.
+ * - Handles navigation and routing.
+ * - Initializes session tracking.
+ * - Manages sidebar visibility and state.
+ */
 const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -46,8 +66,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   const customerTenants = useSelector(
     (state: AppStore) => state.customer.customerTenants
   );
-  const primaryTenant = customerTenants.find((item: any) => item.isParent);
-  const customerDetails = useSelector((state: AppStore) => state.customer);
   const selectedTenant = useSelector(
     (state: AppStore) => state.customer.selectedTenant
   );
@@ -64,33 +82,57 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   const fetchedApps = useSelector((state: any) => state.app.allApps);
 
   useEffect(() => {
-    const customerCode = window.location.pathname.split("/")[1];
+    // const selectedTenantFromSession = JSON.parse(sessionStorage.getItem("selectedTenant") || "null");    
+  if(!selectedTenant.length){
+    const refNum = window.location.pathname.split("/")[2];
 
-    if (userDetails?.userType?.toUpperCase() !== "PARTNER") {
-      setSelectedTenant(primaryTenant);
-      APIService.getCustomerDetails(
-        userDetails?.userOrg,
-        dispatch,
-        selectedTenant
-      );
-    } else if (customerDetails?.data?.length === 0) {
-      APIService.getCustomerDetails(customerCode, dispatch, selectedTenant);
-    }
+      if (!window.location.pathname.includes("summary")) {
+        const tenantsUrl = `${
+          (window as any)._env_.APP_API_URL
+        }/customers/tenants/${refNum}`;
+        APIService.getTenants(tenantsUrl, dispatch);
+      }
+  }
+
     let response = JSON.parse(sessionStorage.getItem("allapps") || "[]");
     if (response.length == 0) {
       getAllApps();
     } else {
       dispatch(setAppsFromAPI(response));
       const mfRoutes = getMfRoutes(response);
-      setTransformedAppData(transformAppData(response));
-      const filteredApps: any = transformAppData(response);
-      setCustomerTenantApps(filteredApps?.customerTenantApps);
+      const filteredApps: any = transformAppData(response); // filters customerTenantApps and platformApps
+      setTransformedAppData(filteredApps);
+      setCustomerTenantApps(filteredApps?.customerTenantApps); // customerTenantApps 
       setAllRoutes([...appRoutes, ...mfRoutes]);
     }
 
     if (!window.keycloakInstance.bearer_token)
       window.keycloakInstance.bearer_token = "Bearer " + keycloak.token;
   }, []);
+
+  // const getAllTenants = async () => {
+  //   const API_URL = (window as any)._env_.APP_API_URL; 
+  //   const APP_DC_REGION = `${(window as any)._env_.APP_DC}`;
+  //   let getTenantUrl = `${API_URL}/${apiUrl.getTenantDetails}`;
+
+  //   if (APP_DC_REGION?.toLocaleUpperCase() !== "US".toLocaleUpperCase()) {
+  //     getTenantUrl = `${getTenantUrl}?dc_region=${APP_DC_REGION}`;
+  //   }
+  //   await API.get(getTenantUrl)
+  //   .then((response: any) => {
+  //     const result = response.data;
+  //     if (response.status == 200 && result.status) {
+  //       dispatch(setAllTenants(response.data.data));
+  //       sessionStorage.setItem(
+  //         "tenants",
+  //         JSON.stringify(response.data.data)
+  //       );
+  //     } else {
+        
+  //     }
+  //   })
+  // };
+
   useEffect(() => {
     if (selectedApp || selectedAppFromSession) {
       const refNum = window.location.pathname.split("/")[2];
@@ -104,6 +146,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
     }
   }, []);
 
+  //for setting selectedApp in session
   useEffect(() => {
     let detailsApp =
       fetchedApps &&
@@ -155,9 +198,13 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       );
     }
   }, [logedUserRoles?.length > 0]);
+
+  // if selectedApp is changed then close the sidebar
   useEffect(() => {
     toggleSidebarMenu(false);
   }, [selectedApp]);
+
+
   const getAllApps = async () => {
     try {
       const response =
@@ -180,36 +227,23 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   };
 
   useEffect(() => {
-    if (customerDetails?.customerTenants?.length === 0) {
-      setRolesLoader(true);
-    } else {
+    if (selectedTenant?.customerId) {
       setRolesLoader(false);
     }
-  });
-  useEffect(() => {
-    if (customerDetails?.data?.id && customerTenants.length === 0) {
-      setRolesLoader(true);
-      APIService.getCustomerTenants(
-        customerDetails?.data?.id,
-        dispatch,
-        selectedTenant
-      );
-      setRolesLoader(false);
-    }
-  }, [customerDetails?.data?.id]);
+  }, [selectedTenant?.customerId]);
   useEffect(() => {
     const currentApp =
       selectedApp.length > 0 ? selectedApp : selectedAppFromSession;
     if (
       currentApp &&
       currentApp?.name &&
-      ((customerDetails?.data?.customerCode && selectedTenant?.refNum) ||
+      ((selectedTenant?.customerCode && selectedTenant?.refNum) ||
         currentApp.context === "platform")
     ) {
       appSelectionHandler(
         currentApp,
         navigate,
-        selectedTenant?.customerCode || customerDetails?.data?.customerCode,
+        selectedTenant?.customerCode,
         selectedTenant?.refNum,
         dispatch
       );

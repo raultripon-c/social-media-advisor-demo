@@ -10,7 +10,6 @@ import dashboardActive from "../../assets/svg/HomeVector.svg";
 import dashboardGrey from "../../assets/svg/HomeVectorGrey.svg";
 import { setAppDetails, setSidebarState, setDashboardSelected } from "../../store/apps/actions";
 import {
-  setCustomerDetails,
   setCustomerTenants,
   setSelectedTenant,
 } from "../../store/customer/actions";
@@ -20,7 +19,9 @@ import "./SideBar.scss";
 function ToolsSideBar(props: any) {
   const { categories, setCategories } = props;
   const dashboardSelected = useSelector((state: any) => state.app.dashboardSelected);
-  const customerDetails = useSelector((state: AppStore) => state.customer);
+  const selectedTenant = useSelector(
+    (state: AppStore) => state.customer.selectedTenant
+  );
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [disableAutoClose, setDisableAutoClose] = useState(true);
   const selectedApp = useSelector((state: any) => {
@@ -36,7 +37,7 @@ function ToolsSideBar(props: any) {
     setDisableAutoClose(false);
     dispatch(setAppDetails({}));
     sessionStorage.removeItem("selectedApp");
-    navigate(`${customerDetails?.data?.customerCode}/summary`);
+    navigate(`${selectedTenant?.customerCode}/${selectedTenant?.refNum}/summary`);
   };
   useEffect(()=>{
     if(window.location.pathname.includes("summary")){

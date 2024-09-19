@@ -11,7 +11,7 @@ export interface IRoute {
 
 
 const dashBoard = {
-  path: "/:customerCode/summary",
+  path: "/:customerCode/:refnum/summary",
   component: DashBoard,
 };
 
