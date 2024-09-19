@@ -137,7 +137,7 @@ function Header({
         {selectedTenant?.customerName && app && app?.context !== "platform" && (
           <div className="tenant-selection col-md-6">
             <p className="header-selected-customer">
-              {selectedTenant?.customerName}
+              {selectedTenant?.tenantName}
             </p>        
             {/* {customerTenants.length > 1 &&
               !window.location.pathname.includes("summary") && (
