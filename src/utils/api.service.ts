@@ -8,6 +8,15 @@ import {
   setSelectedTenant,
 } from "../store/customer/actions";
 import { toast } from "react-toastify";
+// import('../../txe_apps.json')
+// .then((data) => {
+//   const txeApps = data;
+//   sessionStorage.setItem("allapps",JSON.stringify(txeApps))
+//   console.log("txeApps"+JSON.stringify(txeApps));
+// })
+// .catch((error) => {
+//   console.error("Error loading txe_apps.json:", error);
+// });
 
 export const APIService = {
   getCustomerDetails: async (
@@ -76,7 +85,6 @@ export const APIService = {
           .map((filteredApps: any) => {
             return filteredApps?.name;
           });
-        sessionStorage.setItem("allapps",JSON.stringify(apps))
         //sending the apps name list to chrome extension
         window.postMessage({ action: "appsdata", appsList: appNamesList }, "*");
         return apps;

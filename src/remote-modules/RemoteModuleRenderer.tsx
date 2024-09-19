@@ -18,7 +18,6 @@ export const RemoteModuleRenderer = () => {
   const { data, user, allTenants, customerTenants } = useSelector(
     (state: AppStore) => state.customer
   );  
-  const customerDetails = useSelector((state: AppStore) => state.customer);
 
   useEffect(()=>{
     (window as any).TXEMessageService=MessageService;
@@ -79,7 +78,6 @@ export const RemoteModuleRenderer = () => {
     switch (output) {
       case "NAVIGATE":
         console.log("navigating to other app", eventData?.appName);
-        debugger
         const navigatingApp = getAppByName(fetchedApps, eventData.appName);
         navigatingApp &&
           sessionStorage.setItem("selectedApp", JSON.stringify(navigatingApp));
@@ -87,7 +85,7 @@ export const RemoteModuleRenderer = () => {
         appSelectionHandler(
           navigatingApp,
           navigate,
-          customerDetails?.customerCode,
+          selectedTenant?.customerCode,
           selectedTenant?.refNum
         );
         break;
@@ -133,7 +131,6 @@ export const RemoteModuleRenderer = () => {
         selectedApp: selectedModuleAppObject,
         customerRegion: data?.dcRegion || "US",
         logedUserRoles: user,
-        selectedCustomerDetails: data,
         selectedTenants: selectedTenant,
         totalTenants: allTenants,
         totalCustomerTenants: customerTenants,

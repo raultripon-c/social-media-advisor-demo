@@ -11,7 +11,8 @@ export const appSelectionHandler = (
   navigate: any,
   customerCode: string,
   refNum: string,
-  dispatch?: any
+  dispatch?: any,
+  openInNewTab?: boolean
 ) => {
   let appType = selectedApp.appType;
   const mfRoute = selectedApp.appConfig?.route;
@@ -28,16 +29,26 @@ export const appSelectionHandler = (
   }
   switch (appType) {
     case "module-federation":
-      selectedApp &&
-        sessionStorage.setItem("selectedApp", JSON.stringify(selectedApp));
-      if (isEmpty(updatedRoute) && selectedApp?.context !== "platform") {
-        sessionStorage.removeItem("selectedApp");
-      }
-      navigate(
-        !isEmpty(updatedRoute)
+      if (openInNewTab) {
+        const route = !isEmpty(updatedRoute)
           ? `/${updatedRoute}${routeWithoutRefNum}`
-          : `${routeWithoutRefNum}`
-      );
+          : `${routeWithoutRefNum}`;
+        const link = `${window.location.origin}${route}`;
+        window.open(link, "_blank");
+        sessionStorage.removeItem("selectedApp");
+        dispatch(setAppDetails({}));
+      } else {
+        selectedApp &&
+          sessionStorage.setItem("selectedApp", JSON.stringify(selectedApp));
+        if (isEmpty(updatedRoute) && selectedApp?.context !== "platform") {
+          sessionStorage.removeItem("selectedApp");
+        }
+        navigate(
+          !isEmpty(updatedRoute)
+            ? `/${updatedRoute}${routeWithoutRefNum}`
+            : `${routeWithoutRefNum}`
+        );
+      }
       break;
     case "external":
       dispatch(setAppDetails({}));
