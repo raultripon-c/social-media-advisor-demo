@@ -91,48 +91,48 @@ const DashBoard = () => {
 
   const campaignsList = ["Campaign Name", "Status", "Channel", "Conversion", "Audience"];
 
-  const campaignData = [
-    {
-      "Campaign Name": {
-        icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Insta_circle.svg",
-        name: "Instagram advertising campaign",
-      },
-      Status: "Active",
-      Channel: "Instagram",
-      Conversion: "6,546",
-      Audience: "12% +3%",
-    },
-    {
-      "Campaign Name": {
-        icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/FB.svg",
-        name: "Facebook outreach campaign",
-      },
-      Status: "Active",
-      Channel: "Facebook",
-      Conversion: "4,750",
-      Audience: "8%",
-    },
-    {
-      "Campaign Name": {
-        icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Email.svg",
-        name: "Referral program campaign",
-      },
-      Status: "On hold",
-      Channel: "Email",
-      Conversion: "5,775",
-      Audience: "2%",
-    },
-    {
-      "Campaign Name": {
-        icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Inbox.svg",
-        name: "Talent community promotion",
-      },
-      Status: "Completed",
-      Channel: "Newsletter",
-      Conversion: "3,422",
-      Audience: "5% +2%",
-    },
-  ];
+  // const campaignData = [
+  //   {
+  //     "Campaign Name": {
+  //       icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Insta_circle.svg",
+  //       name: "Instagram advertising campaign",
+  //     },
+  //     Status: "Active",
+  //     Channel: "Instagram",
+  //     Conversion: "6,546",
+  //     Audience: "12% +3%",
+  //   },
+  //   {
+  //     "Campaign Name": {
+  //       icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/FB.svg",
+  //       name: "Facebook outreach campaign",
+  //     },
+  //     Status: "Active",
+  //     Channel: "Facebook",
+  //     Conversion: "4,750",
+  //     Audience: "8%",
+  //   },
+  //   {
+  //     "Campaign Name": {
+  //       icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Email.svg",
+  //       name: "Referral program campaign",
+  //     },
+  //     Status: "On hold",
+  //     Channel: "Email",
+  //     Conversion: "5,775",
+  //     Audience: "2%",
+  //   },
+  //   {
+  //     "Campaign Name": {
+  //       icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Inbox.svg",
+  //       name: "Talent community promotion",
+  //     },
+  //     Status: "Completed",
+  //     Channel: "Newsletter",
+  //     Conversion: "3,422",
+  //     Audience: "5% +2%",
+  //   },
+  // ];
 
   const getAllApps = async () => {
     try {
@@ -363,7 +363,7 @@ const DashBoard = () => {
       <h2 className="overview-heading">Campaigns</h2>
       <div className="table-container">
         <Table columns={campaignsList} data={campaignData} />
-      </div>
+      </div> */}
     </div>
   );
 };
