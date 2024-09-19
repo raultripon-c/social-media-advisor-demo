@@ -153,7 +153,7 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
   if (isLoading) {
     return (
       <div className="tenants-loader">
-        <Loader title="Please Wait, Loading " />
+        <Loader title="Please Wait, Loading Tenants" />
       </div>
     );
   }
@@ -163,7 +163,7 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
       <div className="tenants-header">
         <div className="search-container">
           <Search
-            placeholder={"Search Customer"}
+            placeholder={"Search Tenant"}
             onValueChange={(e: any) => setSearchKey(e.target.value)}
             size="medium"
             at_id="tenant-search"
