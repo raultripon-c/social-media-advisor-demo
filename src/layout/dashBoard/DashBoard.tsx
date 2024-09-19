@@ -85,7 +85,7 @@ const DashBoard = () => {
       icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Generic.svg",
     },
   ];
-  const campaignsList = ["Campaign Name", "Status", "Channel", "Conversion", "Audience"];
+  // const campaignsList = ["Campaign Name", "Status", "Channel", "Conversion", "Audience"];
 
   // const campaignData = [
   //   {
@@ -344,9 +344,9 @@ const DashBoard = () => {
       </div>
       {userHasCmsAccess && <RecommendedPages />}
       <h2 className="overview-heading">Campaigns</h2>
-      <div className="table-container">
+      {/* <div className="table-container">
         <Table columns={campaignsList} data={campaignData} />
-      </div> */}
+      </div>  */}
     </div>
   );
 };
