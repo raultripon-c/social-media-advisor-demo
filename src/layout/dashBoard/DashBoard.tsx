@@ -343,8 +343,8 @@ const DashBoard = () => {
         )}
       </div>
       {userHasCmsAccess && <RecommendedPages />}
-      <h2 className="overview-heading">Campaigns</h2>
-      {/* <div className="table-container">
+      {/* <h2 className="overview-heading">Campaigns</h2>
+      <div className="table-container">
         <Table columns={campaignsList} data={campaignData} />
       </div>  */}
     </div>
