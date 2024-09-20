@@ -18,7 +18,7 @@ export const useDynamicMFLoader = (args: any) => {
     if (!args.url) {
       return;
     }
-    if (!isScriptAlreadyDownloaded(args.url)) {
+    // if (!isScriptAlreadyDownloaded(args.url)) {
       const element = document.createElement("script");
       element.src = args.url;
       element.type = "text/javascript";
@@ -34,10 +34,10 @@ export const useDynamicMFLoader = (args: any) => {
         setFailed(true);
       };
       document.head.appendChild(element);
-    } else {
-      setReady(true);
-      setFailed(false);
-    }
+    // } else {
+    //   setReady(true);
+    //   setFailed(false);
+    // }
   }, [args.url]);
 
 
