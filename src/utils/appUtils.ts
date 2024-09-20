@@ -111,7 +111,7 @@ export const transformAppData = (data: any) => {
         hoverText: item.hoverText,
         apps: [],
         context: item.context,
-        isOpen: false,
+        isOpen: true,
         parentName: item.parentName,
         order: item.order,
       };
