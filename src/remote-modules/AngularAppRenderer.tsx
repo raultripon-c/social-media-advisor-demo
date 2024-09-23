@@ -105,7 +105,7 @@ export function AngularAppRenderer(props: any) {
   return (
     <>
       <div
-        className="page crm-events-module"
+        className="page crm-module"
         id="child-module-renderer"
         ref={containerRef}
         style={{ display: isReady ? "block" : "none" }}
