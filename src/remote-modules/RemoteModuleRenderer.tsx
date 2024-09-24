@@ -155,7 +155,28 @@ export const RemoteModuleRenderer = () => {
     });
   }, [selectedTenant]);
   const [key, setKey] = useState(0); // Initialize key state
+  useEffect(() => {
+    const title = "TXE";
+    document.title = title;
 
+    // Safely get the title element
+    const titleElement = document.querySelector('title');
+
+    if (titleElement) {
+      // Observer to revert any title changes
+      const observer = new MutationObserver(() => {
+        if (document.title !== title) {
+          document.title = title;
+        }
+      });
+
+      // Observe the title element for changes
+      observer.observe(titleElement, { childList: true });
+
+      // Cleanup the observer on component unmount
+      return () => observer.disconnect();
+    }
+  }, []);
  useEffect(() => {
     // Update key whenever subPath or refNum changes
     setKey((prevKey) => prevKey + 1);
