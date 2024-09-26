@@ -20,10 +20,9 @@ export function AngularAppRenderer(props: any) {
   const [mountEvents, setMountEvents] = useState(null);
 
   useEffect(() => {
-    if (props.appWindowConfig && Array.isArray(props.appWindowConfig)) {
-      props.appWindowConfig.forEach((variable: { keyPath: string; value: any }) => {
-        setObjectReferenceFromString(window, variable.keyPath, variable.value);
-      });
+    if (props?.appWindowConfig) {
+      const appWindowConfig = JSON.parse(props.appWindowConfig);
+        setObjectReferenceFromString(window, appWindowConfig?.keyPath, appWindowConfig?.value);
     }
   }, [props.appWindowConfig]);
 
