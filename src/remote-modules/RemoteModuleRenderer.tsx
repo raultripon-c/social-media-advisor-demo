@@ -30,6 +30,7 @@ export const RemoteModuleRenderer = () => {
     return selectedAppFromSession || state.app?.selectedApp;
   });
   var selectedApp = selectedModuleAppObject?.appConfig || {};
+  var selectedAppTitle = selectedModuleAppObject?.hoverText || null;
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [moduleProps, setModuleProps] = useState(selectedApp.props);
@@ -232,6 +233,7 @@ export const RemoteModuleRenderer = () => {
               component={selectedApp.component}
               appWindowConfig={selectedApp.appWindowConfig}
               key={key}
+              selectedAppTitle={selectedAppTitle}
             />
           )}
       </div>
