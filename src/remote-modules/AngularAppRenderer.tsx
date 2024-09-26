@@ -16,6 +16,7 @@ export function AngularAppRenderer(props: any) {
   const ref = useRef(null);
   const approute = props?.selectedApp?.route;
   const { appName, moduleRoute } = props?.selectedApp;
+  const appTitle = (props?.selectedAppTitle === 'SMS Templates' || props?.selectedAppTitle === 'Email Templates') ? props.selectedAppTitle : null;
 
   const [mountEvents, setMountEvents] = useState(null);
 
@@ -109,6 +110,7 @@ export function AngularAppRenderer(props: any) {
             appName: appName,
             MessageService:JSON.stringify(MessageService),
             moduleRoute: moduleRoute,
+            txeAppHeader: appTitle
           };
           console.log('angular app props',{ props });
           await module.mount(props);
@@ -135,7 +137,7 @@ export function AngularAppRenderer(props: any) {
   return (
     <div className="page">
       <div
-        className="page crm-module main-page"
+        className="crm-module main-page"
         id="child-module-renderer"
         ref={containerRef}
         style={{ display: isReady ? "block" : "none" }}
