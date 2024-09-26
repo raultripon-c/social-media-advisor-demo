@@ -134,9 +134,9 @@ export function AngularAppRenderer(props: any) {
   // }
 
   return (
-    <>
+    <div className="page">
       <div
-        className="page crm-module"
+        className="page crm-module main-page"
         id="child-module-renderer"
         ref={containerRef}
         style={{ display: isReady ? "block" : "none" }}
@@ -147,6 +147,6 @@ export function AngularAppRenderer(props: any) {
           <Loader title={"loading"} />
         </div>
       )}
-    </>
+    </div>
   );
 }

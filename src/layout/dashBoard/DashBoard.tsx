@@ -141,7 +141,7 @@ const DashBoard = () => {
     {
       tenantLink: "https://phenompeople-qa.phenompro.com/us/en",
       lastUpdated: "2 days",
-      imageSrc: "https://s3-alpha-sig.figma.com/img/fdb8/3a8a/00d7fa64d276ad2883a094aaebd7c90c?Expires=1727049600&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=BM-NZiwqOvW-EgEZS~lKAs4~xCrH8IYOmbZWorSlkfHwOgCQ2RJMyGbLKMZEOGTnIGhqYFcl~91~hHTPeItC0SLZJlmta2SJdDXNfEzY5ZPrBZ02d1Cud~lKv1s7AbpXThH-TwtFR~qEvThCW8uPLgm75hnRSkXWmMoFuxBuXywUQy7iRdEpe~Gq9OHZFOp8PYpEe8I91NQHftOamcXrkOwTugtJ~XF6ZvIzAknDQQoxf4QID~Eu73ziGvWE2sJ7fX7EWLDMhhiBMYFMmbNRQUe2NO11V0lnkFJXuLMXVOxdueEXdyGo~8-bLpDlOcmUOdK6IMMSy2EBVs5P1MPxig__",
+      imageSrc: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/sample-image.jpg",
       refNum: "PHENA0059",
       config: {
         appType: "external",
