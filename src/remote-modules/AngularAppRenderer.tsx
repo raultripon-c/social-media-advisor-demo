@@ -5,6 +5,7 @@ import { AppStore } from "store";
 import { MessageService } from "../MessageService";
 import "./AngularApp.scss";
 import { useDynamicMFLoader } from "./useDynamicMFLoader";
+import { setObjectReferenceFromString } from "../utils/appUtils";
 
 export function AngularAppRenderer(props: any) {
   const containerRef = useRef(null);
@@ -17,6 +18,15 @@ export function AngularAppRenderer(props: any) {
   const { appName, moduleRoute } = props?.selectedApp;
 
   const [mountEvents, setMountEvents] = useState(null);
+
+  useEffect(() => {
+    if (props.appWindowConfig && Array.isArray(props.appWindowConfig)) {
+      props.appWindowConfig.forEach((variable: { keyPath: string; value: any }) => {
+        setObjectReferenceFromString(window, variable.keyPath, variable.value);
+      });
+    }
+  }, [props.appWindowConfig]);
+
   const loadRemoteModule = async (scope: any, module: any) => {
     await __webpack_init_sharing__("default");
     const container = window[scope];

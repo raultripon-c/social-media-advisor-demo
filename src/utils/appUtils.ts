@@ -287,3 +287,11 @@ export function getLink(selectedApp: any, request: any): any {
     return [];
   }
 }
+
+export function setObjectReferenceFromString(obj: any, str: string, value: any) {
+	if (!str.length) return;
+	const keys = str.split(".");
+	const lastKey = keys.pop();
+	const lastObj = keys.reduce((a, i) => (a[i] = a[i] || {}), obj);
+	if (lastKey) lastObj[lastKey] = value;
+}

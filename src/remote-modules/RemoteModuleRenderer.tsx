@@ -209,6 +209,7 @@ export const RemoteModuleRenderer = () => {
               url={selectedApp.url}
               selectedApp={selectedApp}
               component={selectedApp.component}
+              appWindowConfig={selectedApp.appWindowConfig}
               key={key}
             />
           )}
