@@ -66,11 +66,21 @@ export const appSelectionHandler = (
       }
       break;
     case "script":
-      navigate(
-        !isEmpty(updatedRoute)
-          ? `/${updatedRoute}${routeWithoutRefNum}`
-          : `${routeWithoutRefNum}`
-      );
+      if (openInNewTab) {
+        const route = !isEmpty(updatedRoute)
+        ? `/${updatedRoute}${routeWithoutRefNum}`
+        : `${routeWithoutRefNum}`;
+
+        const link = `${window.location.origin}${route}`;
+        window.open(link, "_blank");
+      } else {
+        navigate(
+          !isEmpty(updatedRoute)
+            ? `/${updatedRoute}${routeWithoutRefNum}`
+            : `${routeWithoutRefNum}`
+        );
+      }
+      
       break;
     default:
       navigate("/");
