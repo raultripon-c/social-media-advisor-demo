@@ -8,15 +8,6 @@ import {
   setSelectedTenant,
 } from "../store/customer/actions";
 import { toast } from "react-toastify";
-// import('../../txe_apps.json')
-// .then((data) => {
-//   const txeApps = data;
-//   sessionStorage.setItem("allapps",JSON.stringify(txeApps))
-//   console.log("txeApps"+JSON.stringify(txeApps));
-// })
-// .catch((error) => {
-//   console.error("Error loading txe_apps.json:", error);
-// });
 
 export const APIService = {
   getCustomerDetails: async (
@@ -31,7 +22,7 @@ export const APIService = {
         if (response) {
           dispatch(setCustomerDetails(response));
           if (!selectedTenant || Object.keys(selectedTenant).length === 0) {
-            let tenantRefnum = window.location.pathname.split("/")[2]=="summary"?response.tenantRefnums[0]:window.location.pathname.split("/")[2]
+            const tenantRefnum = window.location.pathname.split("/")[2] == "summary" ? response.tenantRefnums[0] : window.location.pathname.split("/")[2]
             dispatch(setSelectedTenant({ refNum: tenantRefnum }));
           }
           (window as any).customerRefnums = response?.tenantRefnums;
@@ -73,10 +64,8 @@ export const APIService = {
       });
   },
   getAllApps: async (setAppsLoader?: any) => {
-    // setAppsLoader(true);
     return await API.get(`${(window as any)._env_.TOOLS_API_URL}api/apps`)
       .then((result: any) => {
-        // let apps = result?.data?.data;
         let apps = result?.data?.data;
         let appNamesList = apps
           ?.filter((app: any) => {
@@ -94,9 +83,6 @@ export const APIService = {
         console.log("Error in fetching apps : " + error);
         return null;
       })
-      .finally(() => {
-        // setAppsLoader(false);
-      });
   },
   getCustomerTenants: async (
     id: string,
@@ -159,12 +145,12 @@ export const APIService = {
   getDateRanges() {
     const currentEndDate = new Date();
     const currentStartDate = new Date(currentEndDate);
-    currentStartDate.setDate(currentEndDate.getDate() - 90); 
+    currentStartDate.setDate(currentEndDate.getDate() - 90);
     const previousEndDate = new Date(currentStartDate);
-    previousEndDate.setDate(currentStartDate.getDate() - 1); 
+    previousEndDate.setDate(currentStartDate.getDate() - 1);
     const previousStartDate = new Date(previousEndDate);
     previousStartDate.setDate(previousEndDate.getDate() - 90);
-  
+
     return {
       current_start: currentStartDate.toISOString().split('T')[0],
       current_end: currentEndDate.toISOString().split('T')[0],
@@ -172,27 +158,40 @@ export const APIService = {
       previous_end: previousEndDate.toISOString().split('T')[0],
     };
   },
-  
-    getMetrics: async (metric: string, analyticsMetaData: any, isJobTrackerEnabled: boolean) => {
-      const dateRanges = APIService.getDateRanges();
-      const data = {
-        filters: {
-          refNum: analyticsMetaData?.refNum,
-          dateRange: dateRanges,
-          region: analyticsMetaData?.regions[0] || "us",
-          siteType: "external",
-          jobTrackerFlag: isJobTrackerEnabled,
-        },
-        metric: metric,
-      };
-      try {
-        const url = `${(window as any)._env_.ANALYTICS_SB_URL}/analytics-data` 
-        const response = await API.post(url, data);
-        return response.data;
-      } catch (error) {
-        console.error('Error fetching metrics:', error);
-        throw error;
-      }
+
+  getMetrics: async (metric: string, analyticsMetaData: any, isJobTrackerEnabled: boolean) => {
+    const dateRanges = APIService.getDateRanges();
+    const data = {
+      filters: {
+        refNum: analyticsMetaData?.refNum,
+        dateRange: dateRanges,
+        region: analyticsMetaData?.regions[0] || "us",
+        siteType: "external",
+        jobTrackerFlag: isJobTrackerEnabled,
+      },
+      metric: metric,
+    };
+    try {
+      const url = `${(window as any)._env_.ANALYTICS_SB_URL}/analytics-data`
+      const response = await API.post(url, data);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching metrics:', error);
+      throw error;
     }
+  },
+
+  getTenantDetails: async (refNum: string) => {
+    try {
+      const url = `${(window as any)._env_.CMS_URL}/api/getTenantSearchSuggestion`;
+      const response = await API.post(url, {
+        refNum: refNum,
+      }, { withCredentials: true });
+      return response;
+    } catch (error) {
+      console.error('Error fetching tenant details:', error);
+      throw error;
+    }
+  }
 
 };

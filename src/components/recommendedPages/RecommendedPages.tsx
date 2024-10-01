@@ -36,6 +36,9 @@ export const RecommendedPages = (props: any) => {
         );
         console.log(loginResponse);
 
+        const txeLoginCustomEvent = new CustomEvent('txeLoginEvent');
+        window.dispatchEvent(txeLoginCustomEvent);
+
         const refNum = selectedTenant?.refNum;
         const locale = "en_us";
 
