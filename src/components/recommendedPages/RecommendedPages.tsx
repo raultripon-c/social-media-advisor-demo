@@ -57,14 +57,16 @@ export const RecommendedPages = (props: any) => {
 
         if (recommendationsResponse?.status) {
           setRecommendationsLoader(false);
-          if (recommendationsResponse.status === "success") {
-            setRecommendedPagesData(recommendationsResponse.data);
-          } else {
+            const { status, data } = recommendationsResponse;
+            if (status === 200 && data?.status === "success" && Array.isArray(data.data)) {
+            setRecommendedPagesData(data.data);
+            } else {
             setRecommendedPagesData([]);
-          }
+            }
         }
       } catch (error) {
         setRecommendationsLoader(false);
+        toast.error("Failed to fetch recommendations");
         console.error("Error fetching data", error);
       }
     };
@@ -168,9 +170,9 @@ export const RecommendedPages = (props: any) => {
             <Loader title="Please Wait, Loading..." />
           </div>
         </div>
-      ) : pageRecommendation?.data?.length > 0 ? (
+      ) : pageRecommendation?.length > 0 ? (
         <div className="recommended-pages-cards">
-          {getRecommendedPages(pageRecommendation.data)}
+          {getRecommendedPages(pageRecommendation)}
         </div>
       ) : (
         <div className="no-recommended-pages-card">
