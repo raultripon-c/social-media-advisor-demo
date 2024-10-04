@@ -21,10 +21,9 @@ export function AngularAppRenderer(props: any) {
   const [mountEvents, setMountEvents] = useState(null);
 
   useEffect(() => {
-    if (props.appWindowConfig && Array.isArray(props.appWindowConfig)) {
-      props.appWindowConfig.forEach((variable: { keyPath: string; value: any }) => {
-        setObjectReferenceFromString(window, variable.keyPath, variable.value);
-      });
+    if (props?.appWindowConfig) {
+      const appWindowConfig = JSON.parse(props.appWindowConfig);
+        setObjectReferenceFromString(window, appWindowConfig?.keyPath, appWindowConfig?.value);
     }
   }, [props.appWindowConfig]);
 
@@ -75,13 +74,13 @@ export function AngularAppRenderer(props: any) {
   };
   async function fetchAndLoadScript() {
     try {
-        const response = await fetch(`https://candidates-intqa.phenompro.com/en/assets-manifest.json`);
+        const response = await fetch(`${(window as any)._env_.CRM_URL}/en/assets-manifest.json`);
         if (!response.ok) {
             throw new Error('Failed to fetch assets manifest');
         }
         const data = await response.json();
   
-       const cssUrl = `https://candidates-intqa.phenompro.com/${data["styles.css"]}`;
+       const cssUrl = `${(window as any)._env_.CRM_URL}/${data["styles.css"]}`;
         
        const link = document.createElement('link');
        link.rel = 'stylesheet';
@@ -94,7 +93,7 @@ export function AngularAppRenderer(props: any) {
     }
   }
   useEffect(() => {
-     fetchAndLoadScript()    
+    fetchAndLoadScript()    
     loadComponent();
     if (ready) {
       (async () => {
