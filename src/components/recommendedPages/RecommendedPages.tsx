@@ -3,76 +3,56 @@ import { isEmpty } from "lodash";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import React from "react";
-import { API } from "../../utils/api";
 import "./RecommendedPages.scss";
 import { getLink } from "../../utils/appUtils";
 import noRecommIcon from "../../assets/images/dashboard/noRecommIcon.svg";
+import {APIService} from "../../utils/api.service"
 import { Loader, JobPageRecommendationCard } from "@phenom/react-ui-components";
+import { AppStore } from "store";
 
 export const RecommendedPages = (props: any) => {
-  const {} = props;
   const selectedTenant = useSelector(
     (state: any) => state.customer.selectedTenant
   );
   const customerDetails = useSelector((state: any) => state.customer);
 
   let [pageRecommendation, setRecommendedPagesData] = useState<any>(null);
-  let [recommendationsLoader, setRecommendationsLoader] =
-    useState<boolean>(true);
-  const CMS_URL = (window as any)._env_.CMS_URL;
+  let [recommendationsLoader, setRecommendationsLoader] = useState<boolean>(true);
   const { code, type } = window.orgInfo;
+  
   useEffect(() => {
-    const loginAndFetchRecommendations = async () => {
-      try {
-        const loginResponse = await API.post(
-          `${CMS_URL}/api/txeLogin`,
-          {
-            "ph-org-code": code,
-            "ph-org-type": type,
-            token: window.keycloakInstance.token,
-            expires_in: window?.keycloakInstance?.tokenParsed?.exp,
-          },
-          { withCredentials: true }
-        );
-        console.log(loginResponse);
+    loginAndFetchRecommendations();
+  }, [selectedTenant, code, type]);
 
+  const loginAndFetchRecommendations = async () => {
+    try {
+      const txeLoginResponse = await APIService.triggerTxeLogin(code, type)
+      console.log('TXELogin Response:', txeLoginResponse);
+      if(txeLoginResponse.status === 200 && txeLoginResponse.data.status === 'success') {
         const txeLoginCustomEvent = new CustomEvent('txeLoginEvent');
         window.dispatchEvent(txeLoginCustomEvent);
 
         const refNum = selectedTenant?.refNum;
         const locale = "en_us";
-
-        const recommendationsResponse: any = await API.post(
-          `${CMS_URL}/api/getPageRecommendations`,
-          {
-            batchSize: 6,
-            isSVRequired: false,
-            locale,
-            offset: 0,
-            refNum,
-            siteVariant: "external",
-          },
-          { withCredentials: true }
-        );
+        const recommendationsResponse = await APIService.getPageRecommendations(locale, refNum);
 
         if (recommendationsResponse?.status) {
           setRecommendationsLoader(false);
-            const { status, data } = recommendationsResponse;
-            if (status === 200 && data?.status === "success" && Array.isArray(data.data)) {
+          const { status, data } = recommendationsResponse;
+          if (status === 200 && data?.status === "success" && Array.isArray(data.data)) {
             setRecommendedPagesData(data.data);
-            } else {
+          } else {
             setRecommendedPagesData([]);
-            }
+          }
         }
-      } catch (error) {
-        setRecommendationsLoader(false);
-        toast.error("Failed to fetch recommendations");
-        console.error("Error fetching data", error);
       }
-    };
 
-    loginAndFetchRecommendations();
-  }, [selectedTenant, code, type]);
+    } catch (error) {
+      setRecommendationsLoader(false);
+      toast.error("Failed to fetch recommendations");
+      console.error("Error fetching recommendations data", error);
+    }
+  };
 
 
   const getRecommendedPages = (visibleData: any) => {
@@ -110,15 +90,15 @@ export const RecommendedPages = (props: any) => {
           lsw: "_self",
           refNum: "",
           customerCode: "",
-          route: "generatePages",
+          route: "pages",
           payload: "",
         },
       };
       const link = getLink(config, {
         refNum: selectedTenant?.refNum,
-        customerCode:
-          selectedTenant?.customerCode || customerDetails?.data?.customerCode,
+        customerCode: selectedTenant?.customerCode || customerDetails?.data?.customerCode,
         payload: btoa(JSON.stringify(cardContent)),
+        data: useSelector((state: AppStore) => state.customer.siteMetaData)
       });
       if (link && !isEmpty(link)) window.open(link, "_blank");
       else {

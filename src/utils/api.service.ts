@@ -2,40 +2,12 @@ import { API } from "./api";
 import { getRegionWiseAccessApi } from "./object.utils";
 import { apiUrl } from "./constants";
 import {
-  setCustomerDetails,
-  setCustomerTenants,
   setLogedUserRoles,
   setSelectedTenant,
 } from "../store/customer/actions";
 import { toast } from "react-toastify";
 
 export const APIService = {
-  getCustomerDetails: async (
-    orgCode: any,
-    dispatch: any,
-    selectedTenant: any
-  ) => {
-    const APP_API_URL = (window as any)._env_.APP_API_URL;
-    await API.get(`${APP_API_URL}/customers/code/${orgCode}`)
-      .then((result: any) => {
-        const response = result.data.data;
-        if (response) {
-          dispatch(setCustomerDetails(response));
-          if (!selectedTenant || Object.keys(selectedTenant).length === 0) {
-            const tenantRefnum = window.location.pathname.split("/")[2] == "summary" ? response.tenantRefnums[0] : window.location.pathname.split("/")[2]
-            dispatch(setSelectedTenant({ refNum: tenantRefnum }));
-          }
-          (window as any).customerRefnums = response?.tenantRefnums;
-        } else {
-          dispatch(setCustomerDetails({}));
-        }
-      })
-      .catch((error) => {
-        toast.error("Error in getting customer details");
-        console.log("Error in getting customer details : " + error);
-        dispatch(setCustomerDetails({}));
-      });
-  },
   getLoggedInUserRoles: async (dispatch: any, setRolesLoader: any) => {
     setRolesLoader(true);
     const DC_REGION: any = (window as any)._env_.APP_DC;
@@ -84,32 +56,7 @@ export const APIService = {
         return null;
       })
   },
-  getCustomerTenants: async (
-    id: string,
-    dispatch: any,
-    selectedTenant?: any
-  ) => {
-    const url = apiUrl?.tenantsByCustomerId.replace("{customerid}", id);
-    const APP_API_URL = (window as any)._env_.APP_API_URL;
-    await API.get(`${APP_API_URL}/${url}`)
-      .then((response: any) => {
-        const result = response.data;
-        if (result.data != null && result.status) {
-          dispatch(setCustomerTenants(result.data));
-        } else {
-          setCustomerTenants([]);
-        }
-        const primaryTenant = result.data.find((item: any) => item.isParent);
-        if (Object.keys(selectedTenant)?.length === 0) {
-          dispatch(setSelectedTenant(primaryTenant || response.data.data[0]));
-        }
-      })
-      .catch((error) => {
-        toast.error("Error in fetching tenants");
-        console.log("Error in getting tenants : " + error);
-        setCustomerTenants([]);
-      });
-  },
+ 
   getTenants: async (url: string, dispatch: any) => {
     API.get(url)
       .then((response: any) => {
@@ -192,6 +139,60 @@ export const APIService = {
       console.error('Error fetching tenant details:', error);
       throw error;
     }
-  }
+  },
 
+  getSiteMetaData: async (refNum: string) => {
+    try {
+      const url = `${(window as any)._env_.CMS_URL}/api/getSiteMetaData`;
+      const response = await API.post(url, {
+        refNum: refNum,
+      }, { withCredentials: true });
+      return response;
+    } catch (error) {
+      console.error('Error fetching site meta data:', error);
+      throw error;
+    }
+  },
+
+  triggerTxeLogin:  async(code: string, type: string) => {
+    try {
+      const res = await API.post(
+        `${(window as any)._env_.CMS_URL}/api/txeLogin`,
+        {
+          "ph-org-code": code,
+          "ph-org-type": type,
+          token: window.keycloakInstance.token,
+          expires_in: window?.keycloakInstance?.tokenParsed?.exp,
+        },
+        { withCredentials: true }
+      );
+      return res;
+    }
+    catch(err) {
+      console.error('Error triggering TXE login:', err);
+      throw err;
+    }
+  },
+
+  getPageRecommendations: async(locale: string, refNum: string) => {
+    try{
+      const res = await API.post(
+        `${(window as any)._env_.CMS_URL}/api/getPageRecommendations`,
+        {
+          batchSize: 6,
+          isSVRequired: false,
+          locale,
+          offset: 0,
+          refNum,
+          siteVariant: "external",
+        },
+        { withCredentials: true }
+      );
+      return res;
+    }
+    catch(err) {
+      console.error('Error fetching page recommendations:', err);
+      throw err;
+    }
+  }
 };

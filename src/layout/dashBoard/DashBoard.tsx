@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { EmptyState, Button, Loader, GreetingCard, OverviewCard, TenantDetailCard } from "@phenom/react-ui-components";
 import { AppStore } from "store";
 import { setAppDetails, setAppsFromAPI } from "../../store/apps/actions";
+import {setSiteMetaData} from "../../store/customer/actions"
 import { appSelectionHandler } from "../../utils/appUtils";
 import "./DashBoard.scss";
 import { apiUrl } from "../../utils/constants";
@@ -39,9 +40,9 @@ const DashBoard = () => {
 
 
   const fetchCurrentTenantData = async () => {
-    const response: any = await APIService.getTenantDetails(selectedTenant.refNum);
-    if (response.data.status === "success") {
-      setCurrentTenantData(response.data.data.docs);
+    const tenantResp: any = await APIService.getTenantDetails(selectedTenant.refNum);
+    if (tenantResp.data.status === "success") {
+      setCurrentTenantData(tenantResp.data.data.docs);
     }
   };
 
@@ -89,92 +90,109 @@ const DashBoard = () => {
     appSelectionHandler(selectedApp, navigate, selectedTenant?.customerCode, selectedTenant?.refNum, dispatch, true);
   };
 
-  useEffect(() => {
-    if (selectedTenant?.refNum) {
-      const fetchMetrics = async () => {
-        try {
-          const metaData = await APIService.getMetaDataByRefNum(selectedTenant.refNum);
-          setAnalyticsMetaData(metaData);
-          const isTrackerEnabled = checkJobTrackerEnabled(new Date().toString());
-          setIsJobTrackerEnabled(isTrackerEnabled);
-          const metrics = [
-            {
-              name: "visitsKpi",
-              title: "Career Site Visits",
-              text: "Total number of career site visits with daily delta percentage",
-            },
-            {
-              name: "applicationsConversionKpi",
-              title: "Conversion Rate",
-              text: "Total number of Talent Community, Job Alert, and Similar Job Alert subscriptions with daily delta percentage",
-            },
-            {
-              name: "completedCareerSiteApplies",
-              title: "Recent Leads",
-              text: "Total number of job seekers who clicked the Apply button",
-            },
-            { name: "uniqueLeads", title: "New Applicants", text: "Total number of unique leads generated" },
-            {
-              name: "avgTimeOnPage",
-              title: "Avg. Time on Page",
-              text: "Average time a visitor spends on the career site with daily delta percentage",
-            },
-          ];
-          const metricResponses = await Promise.all(
-            metrics.map(async (metric) => {
-              try {
-                const response = await APIService.getMetrics(metric.name, metaData, isTrackerEnabled);
-                return {
-                  title: metric.title,
-                  previous: response.data[0]?.previous,
-                  current: response.data[0]?.current || response.data[0]?.CURRENT_VALUE,
-                  rate: response.data[0]?.rate || response.data[0]?.PERC_CHANGE,
-                  text: metric.text,
-                };
-              } catch (error) {
-                console.error(`Error fetching ${metric.name}:`, error);
-                return null;
-              }
-            })
-          );
-          const formatAvgTimeOnPage = (value: any) => {
-            const totalSeconds = parseFloat(value);
-            const minutes = Math.floor(totalSeconds);
-            const seconds = Math.round((totalSeconds - minutes) * 100);
-            return `${minutes} min ${seconds} sec`;
-          };
-          const formatConversionRate = (value: any) => `${value}%`;
-          const formatChange = (rate: any) => {
-            if (rate === undefined) return "N/A";
-            return rate >= 0 ? `+${rate}%` : `${rate}%`;
-          };
-          const filteredMetricResponses = metricResponses.filter((metric) => metric !== null);
-          const formattedData = filteredMetricResponses.map((metric) => {
-            let value = metric.current ? `${metric.current}` : "N/A";
-            let change = formatChange(metric.rate);
-            if (metric.title === "Avg. Time on Page" && metric.current) {
-              value = formatAvgTimeOnPage(metric.current);
-            } else if (metric.title === "Conversion Rate" && metric.current) {
-              value = formatConversionRate(value);
-            }
+  const handleDomainUrlForSite = async () => {
+    const siteMetaDataResp: any = await APIService.getSiteMetaData(selectedTenant.refNum);
+    if(siteMetaDataResp.data.status === "success") {
+      if(currentTenantData.length === 1) {
+        currentTenantData[0].domain = siteMetaDataResp.data.data.domain;
+      }
+    }
+    // TODO: Need to dispatch this in store for using in future
+    // dispatch(setSiteMetaData(siteMetaDataResp.data.data));
+    console.log('Site Meta Data is',useSelector((state: AppStore) => state.customer.siteMetaData))
+  }
+
+  const fetchMetrics = async () => {
+    try {
+      const metaData = await APIService.getMetaDataByRefNum(selectedTenant.refNum);
+      setAnalyticsMetaData(metaData);
+      const isTrackerEnabled = checkJobTrackerEnabled(new Date().toString());
+      setIsJobTrackerEnabled(isTrackerEnabled);
+      const metrics = [
+        {
+          name: "visitsKpi",
+          title: "Career Site Visits",
+          text: "Total number of career site visits with daily delta percentage",
+        },
+        {
+          name: "applicationsConversionKpi",
+          title: "Conversion Rate",
+          text: "Total number of Talent Community, Job Alert, and Similar Job Alert subscriptions with daily delta percentage",
+        },
+        {
+          name: "completedCareerSiteApplies",
+          title: "Recent Leads",
+          text: "Total number of job seekers who clicked the Apply button",
+        },
+        { name: "uniqueLeads", title: "New Applicants", text: "Total number of unique leads generated" },
+        {
+          name: "avgTimeOnPage",
+          title: "Avg. Time on Page",
+          text: "Average time a visitor spends on the career site with daily delta percentage",
+        },
+      ];
+      const metricResponses = await Promise.all(
+        metrics.map(async (metric) => {
+          try {
+            const response = await APIService.getMetrics(metric.name, metaData, isTrackerEnabled);
             return {
               title: metric.title,
-              value: value,
-              change: change,
-              tooltipText: metric.text,
+              previous: response.data[0]?.previous,
+              current: response.data[0]?.current || response.data[0]?.CURRENT_VALUE,
+              rate: response.data[0]?.rate || response.data[0]?.PERC_CHANGE,
+              text: metric.text,
             };
-          });
-          setMetricsData(formattedData);
-        } catch (error) {
-          console.error("Error fetching metrics:", error);
-        }
+          } catch (error) {
+            console.error(`Error fetching ${metric.name}:`, error);
+            return null;
+          }
+        })
+      );
+      const formatAvgTimeOnPage = (value: any) => {
+        const totalSeconds = parseFloat(value);
+        const minutes = Math.floor(totalSeconds);
+        const seconds = Math.round((totalSeconds - minutes) * 100);
+        return `${minutes} min ${seconds} sec`;
       };
+      const formatConversionRate = (value: any) => `${value}%`;
+      const formatChange = (rate: any) => {
+        if (rate === undefined) return "N/A";
+        return rate >= 0 ? `+${rate}%` : `${rate}%`;
+      };
+      const filteredMetricResponses = metricResponses.filter((metric) => metric !== null);
+      const formattedData = filteredMetricResponses.map((metric) => {
+        let value = metric.current ? `${metric.current}` : "N/A";
+        let change = formatChange(metric.rate);
+        if (metric.title === "Avg. Time on Page" && metric.current) {
+          value = formatAvgTimeOnPage(metric.current);
+        } else if (metric.title === "Conversion Rate" && metric.current) {
+          value = formatConversionRate(value);
+        }
+        return {
+          title: metric.title,
+          value: value,
+          change: change,
+          tooltipText: metric.text,
+        };
+      });
+      setMetricsData(formattedData);
+    } catch (error) {
+      console.error("Error fetching metrics:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedTenant?.refNum) {
       fetchMetrics();
       window.addEventListener('txeLoginEvent', () => {
         fetchCurrentTenantData();
       })
     }
   }, [selectedTenant]);
+
+  useEffect(() => {
+   handleDomainUrlForSite();
+  }, [currentTenantData])
 
   useEffect(() => {
     dispatch(setAppDetails({}));
@@ -203,6 +221,11 @@ const DashBoard = () => {
       }
     };
     getLoggedInUserInfo();
+    
+    // Cleanup actions when component unmounts
+    return () => {
+      window.removeEventListener('txeLoginEvent', () => {});
+    };
   }, []);
 
   if (isLoading) {

@@ -21,6 +21,8 @@ export const SET_ALL_PARTNER = "SET_ALL_PARTNER"
 
 export const SET_ALL_TENANTS = "ALL_TENANTS" 
 
+export const SET_SITE_META_DATA = "SET_SITE_META_DATA"
+
 interface SetCustomer {
   type: typeof SET_CUSTOMER_DETAILS;
   data: Customer;
@@ -73,6 +75,11 @@ interface SetAllTenants {
   data: any;
 }
 
+interface SetSiteMetaData {
+  type: typeof SET_SITE_META_DATA;
+  data: any;
+}
+
 export type CustomersActions =
   | SetCustomer
   | SetUserDetails
@@ -83,7 +90,8 @@ export type CustomersActions =
   | SetAllCustomers
   | SetSelectedPartner
   | SetAllTenants
-  | SetAllPartners;
+  | SetAllPartners 
+  | SetSiteMetaData;
 
 export function setCustomerDetails(customer: any) {
   return {
@@ -152,6 +160,13 @@ export function setAllPartners(data: any) {
 export function setAllTenants(data: any) {
   return {
     type: SET_ALL_TENANTS,
+    data: data,
+  };
+}
+
+export function setSiteMetaData(data: any) {
+  return {
+    type: SET_SITE_META_DATA,
     data: data,
   };
 }

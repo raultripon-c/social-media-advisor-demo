@@ -10,6 +10,7 @@ import {
   SET_PARTNER_DETAILS,
   SET_ALL_TENANTS,
   SET_ALL_PARTNER,
+  SET_SITE_META_DATA
 } from "./actions";
 import { CustomerState } from "./type";
 
@@ -22,7 +23,8 @@ const initialState: CustomerState = {
   customers:[],
   selectedPartner:[],
   allTenants:[],
-  partners:[]
+  partners:[],
+  siteMetaData: {}
 };
 
 const customerReducer = (
@@ -53,6 +55,14 @@ const customerReducer = (
       return {
         ...newState,
         partners: data,
+      };
+    }
+
+    case SET_SITE_META_DATA: {
+      const newState = JSON.parse(JSON.stringify(state));
+      return {
+        ...newState,
+        siteMetaData: data,
       };
     }
 

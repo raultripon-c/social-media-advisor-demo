@@ -7,7 +7,7 @@ import { useKeycloak } from "phenom-auth-react-adapter";
 import { AppStore } from "store";
 import Toast from "../components/Toast/Toast";
 import { IRoute, appRoutes } from "../routes/AppRoutes";
-import { setSelectedTenant, setUserRoles, setAllTenants } from "../store/customer/actions";
+import { setUserRoles } from "../store/customer/actions";
 import RBAJson from "../utils/RBA.json";
 import {
   appSelectionHandler,
@@ -23,9 +23,6 @@ import { APIService } from "../utils/api.service";
 import "./AppLayout.scss";
 import { InitialLoader } from "./Loader";
 import ToolsSideBar from "./sideBar/SideBar";
-import { filter } from "lodash";
-import { apiUrl } from "../utils/constants";
-import { API } from "../utils/api";
 
 interface AppLayoutProps {
   allApps: any;
