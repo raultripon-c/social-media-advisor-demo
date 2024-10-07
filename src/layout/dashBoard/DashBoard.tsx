@@ -24,6 +24,7 @@ const DashBoard = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const selectedTenant = useSelector((state: AppStore) => state.customer.selectedTenant);
+  const siteMetaData = useSelector((state: AppStore) => state.customer.siteMetaData);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [filteredData, setFilteredData] = useState<any[]>([]);
   const [totalAppsData, setTotalAppsData] = useState<any[]>([]);
@@ -91,15 +92,20 @@ const DashBoard = () => {
   };
 
   const handleDomainUrlForSite = async () => {
-    const siteMetaDataResp: any = await APIService.getSiteMetaData(selectedTenant.refNum);
-    if(siteMetaDataResp.data.status === "success") {
-      if(currentTenantData.length === 1) {
-        currentTenantData[0].domain = siteMetaDataResp.data.data.domain;
+    try{
+      const siteMetaDataResp: any = await APIService.getSiteMetaData(selectedTenant.refNum);
+      if(siteMetaDataResp.data.status === "success") {
+        if(currentTenantData.length === 1) {
+          currentTenantData[0].domain = siteMetaDataResp.data.data.domain;
+        }
       }
+      if(!Object.keys(siteMetaData).length)
+        dispatch(setSiteMetaData(siteMetaDataResp.data.data));
     }
-    // TODO: Need to dispatch this in store for using in future
-    // dispatch(setSiteMetaData(siteMetaDataResp.data.data));
-    console.log('Site Meta Data is',useSelector((state: AppStore) => state.customer.siteMetaData))
+    catch(error) {
+      console.error('Error fetching domain URL for site', error)
+    }
+    
   }
 
   const fetchMetrics = async () => {
