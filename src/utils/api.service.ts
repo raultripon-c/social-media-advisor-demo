@@ -56,7 +56,7 @@ export const APIService = {
         return null;
       })
   },
- 
+
   getTenants: async (url: string, dispatch: any) => {
     API.get(url)
       .then((response: any) => {
@@ -154,7 +154,7 @@ export const APIService = {
     }
   },
 
-  triggerTxeLogin:  async(code: string, type: string) => {
+  triggerTxeLogin: async (code: string, type: string) => {
     try {
       const res = await API.post(
         `${(window as any)._env_.CMS_URL}/api/txeLogin`,
@@ -168,14 +168,14 @@ export const APIService = {
       );
       return res;
     }
-    catch(err) {
+    catch (err) {
       console.error('Error triggering TXE login:', err);
       throw err;
     }
   },
 
-  getPageRecommendations: async(locale: string, refNum: string) => {
-    try{
+  getPageRecommendations: async (locale: string, refNum: string) => {
+    try {
       const res = await API.post(
         `${(window as any)._env_.CMS_URL}/api/getPageRecommendations`,
         {
@@ -190,8 +190,23 @@ export const APIService = {
       );
       return res;
     }
-    catch(err) {
+    catch (err) {
       console.error('Error fetching page recommendations:', err);
+      throw err;
+    }
+  },
+
+  getSupportedLangs: async (refNum: string) => {
+    try {
+      const res = await API.post(
+        `${(window as any)._env_.CMS_URL}/api/tenantLangs`,
+        { refNum: refNum },
+        { withCredentials: true }
+      );
+      return res;
+    }
+    catch (err) {
+      console.error('Error fetching supported langs:', err);
       throw err;
     }
   }

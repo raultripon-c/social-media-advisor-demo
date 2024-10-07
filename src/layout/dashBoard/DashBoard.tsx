@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { EmptyState, Button, Loader, GreetingCard, OverviewCard, TenantDetailCard } from "@phenom/react-ui-components";
 import { AppStore } from "store";
 import { setAppDetails, setAppsFromAPI } from "../../store/apps/actions";
-import {setSiteMetaData} from "../../store/customer/actions"
+import { setSiteMetaData } from "../../store/customer/actions";
 import { appSelectionHandler } from "../../utils/appUtils";
 import "./DashBoard.scss";
 import { apiUrl } from "../../utils/constants";
@@ -39,11 +39,10 @@ const DashBoard = () => {
     window?.keycloakInstance?.userInfo?.resources["cms"] &&
     window?.keycloakInstance?.userInfo?.resources["cms"].roles.length > 0;
 
-
   const fetchCurrentTenantData = async () => {
     const tenantResp: any = await APIService.getTenantDetails(selectedTenant.refNum);
     if (tenantResp.data.status === "success") {
-      setCurrentTenantData(tenantResp.data.data.docs);
+      return tenantResp.data.data.docs;
     }
   };
 
@@ -92,21 +91,20 @@ const DashBoard = () => {
   };
 
   const handleDomainUrlForSite = async () => {
-    try{
+    try {
+      let domainUrl;
       const siteMetaDataResp: any = await APIService.getSiteMetaData(selectedTenant.refNum);
-      if(siteMetaDataResp.data.status === "success") {
-        if(currentTenantData.length === 1) {
-          currentTenantData[0].domain = siteMetaDataResp.data.data.domain;
-        }
+      if (siteMetaDataResp.data.status === "success") {
+        domainUrl = siteMetaDataResp?.data?.data?.domain;
       }
-      if(!Object.keys(siteMetaData).length)
+      if (!Object.keys(siteMetaData).length) {
         dispatch(setSiteMetaData(siteMetaDataResp.data.data));
+      }
+      return domainUrl;
+    } catch (error) {
+      console.error("Error fetching domain URL for site", error);
     }
-    catch(error) {
-      console.error('Error fetching domain URL for site', error)
-    }
-    
-  }
+  };
 
   const fetchMetrics = async () => {
     try {
@@ -190,15 +188,8 @@ const DashBoard = () => {
   useEffect(() => {
     if (selectedTenant?.refNum) {
       fetchMetrics();
-      window.addEventListener('txeLoginEvent', () => {
-        fetchCurrentTenantData();
-      })
     }
   }, [selectedTenant]);
-
-  useEffect(() => {
-   handleDomainUrlForSite();
-  }, [currentTenantData])
 
   useEffect(() => {
     dispatch(setAppDetails({}));
@@ -227,10 +218,18 @@ const DashBoard = () => {
       }
     };
     getLoggedInUserInfo();
-    
+    window.addEventListener("txeLoginEvent", async () => {
+      const tenantData = await fetchCurrentTenantData();
+      const domainUrl = await handleDomainUrlForSite();
+
+      const x = tenantData;
+      x[0].domain = domainUrl;
+      domainUrl && setCurrentTenantData(x);
+    });
+
     // Cleanup actions when component unmounts
     return () => {
-      window.removeEventListener('txeLoginEvent', () => {});
+      window.removeEventListener("txeLoginEvent", () => {});
     };
   }, []);
 
@@ -254,7 +253,7 @@ const DashBoard = () => {
       <div className="tenant-details-container">
         <TenantDetailCard
           tenantLink={`https://${currentTenantData[0]?.domain}`}
-          lastUpdated={getLastUpdatedDate(currentTenantData[0]?.lastUpdated)}
+          lastUpdated={`Last Updated: ${getLastUpdatedDate(currentTenantData[0]?.lastUpdated)}`}
           imageSrc={tenantData[0].imageSrc}
           navigateOnClick={() => {
             appSelectionHandler(

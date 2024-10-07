@@ -22,7 +22,7 @@ export const RecommendedPages = (props: any) => {
   
   useEffect(() => {
     loginAndFetchRecommendations();
-  }, [selectedTenant, code, type]);
+  }, []);
 
   const loginAndFetchRecommendations = async () => {
     try {
