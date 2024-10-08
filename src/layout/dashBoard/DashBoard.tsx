@@ -251,20 +251,24 @@ const DashBoard = () => {
         />
       </div>
       <div className="tenant-details-container">
-        <TenantDetailCard
-          tenantLink={`https://${currentTenantData[0]?.domain}`}
-          lastUpdated={`Last Updated: ${getLastUpdatedDate(currentTenantData[0]?.lastUpdated)}`}
-          imageSrc={tenantData[0].imageSrc}
-          navigateOnClick={() => {
-            appSelectionHandler(
-              tenantData[0].config,
-              navigate,
-              selectedTenant?.customerCode,
-              selectedTenant?.refNum,
-              dispatch
-            );
-          }}
-        />
+        {currentTenantData.length ? (
+          <TenantDetailCard
+            tenantLink={`https://${currentTenantData[0]?.domain}`}
+            lastUpdated={`Last Updated: ${getLastUpdatedDate(currentTenantData[0]?.lastUpdated)}`}
+            imageSrc="https://assets.phenompeople.com/CareerConnectResources/prod/BCG1US/images/No-Image-Found-400x264-1728367719526.png"
+            navigateOnClick={() => {
+              appSelectionHandler(
+                tenantData[0].config,
+                navigate,
+                selectedTenant?.customerCode,
+                selectedTenant?.refNum,
+                dispatch
+              );
+            }}
+          />
+        ) : (
+          <Loader title="Loading tenant details.." />
+        )}
       </div>
       <div className="overview-container">
         {metricsData.length > 0 && <h2 className="overview-heading">Overview</h2>}
