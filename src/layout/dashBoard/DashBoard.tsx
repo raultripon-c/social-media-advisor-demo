@@ -112,29 +112,62 @@ const DashBoard = () => {
       setAnalyticsMetaData(metaData);
       const isTrackerEnabled = checkJobTrackerEnabled(new Date().toString());
       setIsJobTrackerEnabled(isTrackerEnabled);
-      const metrics = [
-        {
-          name: "visitsKpi",
-          title: "Career Site Visits",
-          text: "Total number of career site visits with daily delta percentage",
-        },
-        {
-          name: "applicationsConversionKpi",
-          title: "Conversion Rate",
-          text: "Total number of Talent Community, Job Alert, and Similar Job Alert subscriptions with daily delta percentage",
-        },
-        {
-          name: "completedCareerSiteApplies",
-          title: "Recent Leads",
-          text: "Total number of job seekers who clicked the Apply button",
-        },
-        { name: "uniqueLeads", title: "New Applicants", text: "Total number of unique leads generated" },
-        {
-          name: "avgTimeOnPage",
-          title: "Avg. Time on Page",
-          text: "Average time a visitor spends on the career site with daily delta percentage",
-        },
-      ];
+      const isIndia = metaData.applicationRegion === "in";
+      const metrics = isIndia
+        ? [
+          {
+            name: "visitsKpi",
+            title: "Career Site Visits",
+            text: "Total number of career site visits with daily delta percentage",
+          },
+          {
+            name: "applicationsConversionKpi",
+            title: "Conversion Rate",
+            text: "Total number of Talent Community, Job Alert, and Similar Job Alert subscriptions with daily delta percentage",
+          },
+          {
+            name: "completedCareerSiteApplies",
+            title: "Recent Leads",
+            text: "Total number of job seekers who clicked the Apply button",
+          },
+          {
+            name: "uniqueLeads",
+            title: "New Applicants",
+            text: "Total number of unique leads generated",
+          },
+          {
+            name: "avgTimeOnPage",
+            title: "Avg. Time on Page",
+            text: "Average time a visitor spends on the career site with daily delta percentage",
+          },
+        ]
+        : [
+          {
+            name: "visitsKpiCurrent",
+            title: "Career Site Visits",
+            text: "Total number of career site visits with daily delta percentage",
+          },
+          {
+            name: "applicationsConversionKpiCurrent",
+            title: "Conversion Rate",
+            text: "Total number of Talent Community, Job Alert, and Similar Job Alert subscriptions with daily delta percentage",
+          },
+          {
+            name: "completedCareerSiteAppliesCurrent",
+            title: "Recent Leads",
+            text: "Total number of job seekers who clicked the Apply button",
+          },
+          {
+            name: "uniqueLeadsCurrent",
+            title: "New Applicants",
+            text: "Total number of unique leads generated",
+          },
+          {
+            name: "avgTimeOnPageCurrent",
+            title: "Avg. Time on Page",
+            text: "Average time a visitor spends on the career site with daily delta percentage",
+          },
+        ];
       const metricResponses = await Promise.all(
         metrics.map(async (metric) => {
           try {
@@ -229,7 +262,7 @@ const DashBoard = () => {
 
     // Cleanup actions when component unmounts
     return () => {
-      window.removeEventListener("txeLoginEvent", () => {});
+      window.removeEventListener("txeLoginEvent", () => { });
     };
   }, []);
 
