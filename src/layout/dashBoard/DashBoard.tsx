@@ -136,8 +136,8 @@ const DashBoard = () => {
             return {
               title: metric.title,
               previous: response.data[0]?.previous,
-              current: response.data[0]?.current || response.data[0]?.CURRENT_VALUE,
-              rate: response.data[0]?.rate || response.data[0]?.PERC_CHANGE,
+              current: response.data[0]?.current || response.data[0]?.CURRENT_VALUE || response.data[0].value,
+              rate: response.data[0]?.rate || response.data[0]?.PERC_CHANGE || response.data[0].rate,
               text: metric.text,
             };
           } catch (error) {
@@ -159,7 +159,7 @@ const DashBoard = () => {
       };
       const filteredMetricResponses = metricResponses.filter((metric) => metric !== null);
       const formattedData = filteredMetricResponses.map((metric) => {
-        let value = metric.current ? `${metric.current}` : "N/A";
+        let value = metric.current !== null && metric.current !== undefined ? `${metric.current}` : "N/A";
         let change = formatChange(metric.rate);
         if (metric.title === "Avg. Time on Page" && metric.current) {
           value = formatAvgTimeOnPage(metric.current);
