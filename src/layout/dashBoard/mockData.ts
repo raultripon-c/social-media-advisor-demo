@@ -9,7 +9,7 @@ export const staticData = [
             appType: "external",
             appConfig: { link: CMS_URL + "/tier3" },
             context: "customer",
-            requestParams: { lsrc: "txe", lsw: "_self", refNum: "", customerCode: "", route: "pages" },
+            requestParams: { lsrc: "txe", lsw: "_self", refNum: "", customerCode: "", route: "pages", site: ""},
         },
     },
     {

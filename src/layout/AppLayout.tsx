@@ -58,8 +58,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   const [showSidebarMenu, toggleSidebarMenu] = useState(false);
   const { selectedApp, allApps } = useSelector((state: any) => state.app);
   let selectedAppFromSession = JSON.parse(sessionStorage.getItem("selectedApp") || "null");
-  const customerTenants = useSelector((state: AppStore) => state.customer.customerTenants);
   const selectedTenant = useSelector((state: AppStore) => state.customer.selectedTenant);
+  const siteMetaData = useSelector((state: AppStore) => state.customer.siteMetaData);
   const logedUserRoles = useSelector((state: AppStore) => state.customer.logedUserRoles);
   const sessionTrackerProjectKey = `${(window as any)._env_.SESSION_TRACKER_PROJECT_KEY || ""}`;
   const sessionTrackerIngestPoint = `${(window as any)._env_.SESSION_TRACKER_INGEST_POINT || ""}`;
@@ -176,7 +176,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       currentApp?.name &&
       ((selectedTenant?.customerCode && selectedTenant?.refNum) || currentApp.context === "platform")
     ) {
-      appSelectionHandler(currentApp, navigate, selectedTenant?.customerCode, selectedTenant?.refNum, dispatch);
+      appSelectionHandler(currentApp, navigate, selectedTenant?.customerCode, selectedTenant?.refNum, siteMetaData, dispatch);
     }
   }, [selectedApp, selectedTenant, selectedTenant?.refNum]);
 

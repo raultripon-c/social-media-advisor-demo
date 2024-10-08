@@ -1,25 +1,23 @@
 import { isEmpty } from "lodash";
 import { toast } from "react-toastify";
-import { useSelector } from "react-redux";
 
 import { RemoteModuleRenderer } from "../remote-modules/RemoteModuleRenderer";
 
 import { DATE_FORMAT, navigationHeaderApps, noShowSideBar } from "./constants";
 import { setAppDetails, setDashboardSelected } from "../store/apps/actions";
-import { AppStore } from "store";
 
 export const appSelectionHandler = (
   selectedApp: any,
   navigate: any,
   customerCode: string,
   refNum: string,
+  siteMetaData: any,
   dispatch?: any,
   openInNewTab?: boolean
 ) => {
   let appType = selectedApp.appType;
   const mfRoute = selectedApp.appConfig?.route;
   const routeWithoutRefNum = mfRoute?.replace("/:refnum", "");
-  const siteMetaData = useSelector((state: AppStore) => state.customer.siteMetaData);
   let updatedRoute = "";
   if (!selectedApp) {
     navigate(customerCode ? `${customerCode}/summary` : "/");
@@ -61,7 +59,7 @@ export const appSelectionHandler = (
       const link = getLink(selectedApp, {
         refNum: refNum,
         customerCode: customerCode,
-        site: btoa(siteMetaData)
+        site: btoa(JSON.stringify(siteMetaData))
       });
       if (link && !isEmpty(link)) window.open(link, "_blank");
       else {

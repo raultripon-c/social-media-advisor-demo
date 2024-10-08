@@ -93,7 +93,7 @@ export const RecommendedPages = (props: any) => {
           customerCode: "",
           route: "Dashboard",
           payload: '',
-          site: btoa(siteMetaData)
+          site: btoa(JSON.stringify(siteMetaData))
         },
       };
       const link = getLink(config, {

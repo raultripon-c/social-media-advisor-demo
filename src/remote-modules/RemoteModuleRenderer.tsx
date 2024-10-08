@@ -15,6 +15,10 @@ export const RemoteModuleRenderer = () => {
     (state: AppStore) => state.customer.selectedTenant
   );
 
+  const siteMetaData = useSelector(
+    (state: AppStore) => state.customer.siteMetaData
+  );
+
   const { data, user, allTenants, customerTenants } = useSelector(
     (state: AppStore) => state.customer
   );  
@@ -87,7 +91,8 @@ export const RemoteModuleRenderer = () => {
           navigatingApp,
           navigate,
           selectedTenant?.customerCode,
-          selectedTenant?.refNum
+          selectedTenant?.refNum,
+          siteMetaData
         );
         break;
       //add any other cases which has to be handled parent level

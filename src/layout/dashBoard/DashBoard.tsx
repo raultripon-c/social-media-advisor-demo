@@ -68,7 +68,7 @@ const DashBoard = () => {
     if (matchedApp) {
       navigateToApp(matchedApp);
     } else if (config) {
-      appSelectionHandler(config, navigate, selectedTenant?.customerCode, selectedTenant?.refNum, dispatch);
+      appSelectionHandler(config, navigate, selectedTenant?.customerCode, selectedTenant?.refNum, siteMetaData, dispatch, false);
     } else {
       console.log(`Clicked on ${text}`);
     }
@@ -87,21 +87,23 @@ const DashBoard = () => {
   const navigateToApp = (selectedApp: any) => {
     sessionStorage.setItem("selectedApp", JSON.stringify(selectedApp));
     dispatch(setAppDetails(selectedApp));
-    appSelectionHandler(selectedApp, navigate, selectedTenant?.customerCode, selectedTenant?.refNum, dispatch, true);
+    appSelectionHandler(selectedApp, navigate, selectedTenant?.customerCode, selectedTenant?.refNum, siteMetaData, dispatch, true);
   };
 
-  const handleLiveUrlForSite = async (url: string) => {
-    try{
-      const resp : any= await APIService.getDomainUrl(selectedTenant.refNum, url);
-      if(resp?.data?.status === "success") {
-        return resp?.data?.data;
+  const handleLiveUrlForSite = async (url: string): Promise<string | null> => {
+    try {
+      const response = await APIService.getDomainUrl(selectedTenant.refNum, url);
+      if (response?.data?.status === "success") {
+        const domainUrl = response?.data?.data;
+        if (domainUrl && new URL(domainUrl).hostname) {
+          return domainUrl;
+        }
       }
-      return null;
+    } catch (error) {
+      console.error("Error fetching live URL for site", error);
     }
-    catch(err) {
-      console.error("Error fetching live URL for site", err);
-    }
-  }
+    return url;
+  };
 
   const fetchTenantLangs = async () => { 
     try{
@@ -279,7 +281,9 @@ const DashBoard = () => {
                 navigate,
                 selectedTenant?.customerCode,
                 selectedTenant?.refNum,
-                dispatch
+                siteMetaData,
+                dispatch,
+                false
               );
             }}
           />
