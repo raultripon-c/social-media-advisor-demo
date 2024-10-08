@@ -209,5 +209,20 @@ export const APIService = {
       console.error('Error fetching supported langs:', err);
       throw err;
     }
+  },
+
+  getDomainUrl: async (refNum: string, url: string) => {
+    try {
+      const res = await API.post(
+        `${(window as any)._env_.CMS_URL}/api/getDomainUrl`,
+        { refNum: refNum, url: url },
+        { withCredentials: true }
+      );
+      return res;
+    }
+    catch (err) {
+      console.error('Error fetching domain URL:', err);
+      throw err;
+    }
   }
 };

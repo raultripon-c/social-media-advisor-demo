@@ -90,6 +90,19 @@ const DashBoard = () => {
     appSelectionHandler(selectedApp, navigate, selectedTenant?.customerCode, selectedTenant?.refNum, dispatch, true);
   };
 
+  const handleLiveUrlForSite = async (url: string) => {
+    try{
+      const resp : any= await APIService.getDomainUrl(selectedTenant.refNum, url);
+      if(resp?.data?.status === "success") {
+        return resp?.data?.data;
+      }
+      return null;
+    }
+    catch(err) {
+      console.error("Error fetching live URL for site", err);
+    }
+  }
+
   const handleDomainUrlForSite = async () => {
     try {
       let domainUrl;
@@ -254,9 +267,9 @@ const DashBoard = () => {
     window.addEventListener("txeLoginEvent", async () => {
       const tenantData = await fetchCurrentTenantData();
       const domainUrl = await handleDomainUrlForSite();
-
+      const liveUrl = await handleLiveUrlForSite(`https://${domainUrl}`);
       const x = tenantData;
-      x[0].domain = domainUrl;
+      x[0].domain = liveUrl;
       domainUrl && setCurrentTenantData(x);
     });
 
@@ -286,7 +299,7 @@ const DashBoard = () => {
       <div className="tenant-details-container">
         {currentTenantData.length ? (
           <TenantDetailCard
-            tenantLink={`https://${currentTenantData[0]?.domain}`}
+            tenantLink={`${currentTenantData[0]?.domain}`}
             lastUpdated={`Last Updated: ${getLastUpdatedDate(currentTenantData[0]?.lastUpdated)}`}
             imageSrc="https://assets.phenompeople.com/CareerConnectResources/prod/BCG1US/images/No-Image-Found-400x264-1728367719526.png"
             navigateOnClick={() => {
