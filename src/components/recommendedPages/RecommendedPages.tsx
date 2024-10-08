@@ -92,14 +92,14 @@ export const RecommendedPages = (props: any) => {
           refNum: "",
           customerCode: "",
           route: "Dashboard",
-          payload: siteMetaData,
+          payload: '',
         },
       };
       const link = getLink(config, {
         refNum: selectedTenant?.refNum,
         customerCode: selectedTenant?.customerCode || customerDetails?.data?.customerCode,
         payload: btoa(JSON.stringify(cardContent)),
-        data: useSelector((state: AppStore) => state.customer.siteMetaData)
+        data: siteMetaData
       });
       if (link && !isEmpty(link)) window.open(link, "_blank");
       else {
