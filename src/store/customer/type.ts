@@ -9,5 +9,6 @@ export interface CustomerState {
   customers:[];
   selectedPartner:[]
   allTenants:[]
-  partners:[]
+  partners:[],
+  siteMetaData: {}
 }

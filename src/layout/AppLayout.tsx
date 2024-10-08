@@ -7,7 +7,7 @@ import { useKeycloak } from "phenom-auth-react-adapter";
 import { AppStore } from "store";
 import Toast from "../components/Toast/Toast";
 import { IRoute, appRoutes } from "../routes/AppRoutes";
-import { setSelectedTenant, setUserRoles, setAllTenants } from "../store/customer/actions";
+import { setUserRoles } from "../store/customer/actions";
 import RBAJson from "../utils/RBA.json";
 import {
   appSelectionHandler,
@@ -23,9 +23,6 @@ import { APIService } from "../utils/api.service";
 import "./AppLayout.scss";
 import { InitialLoader } from "./Loader";
 import ToolsSideBar from "./sideBar/SideBar";
-import { filter } from "lodash";
-import { apiUrl } from "../utils/constants";
-import { API } from "../utils/api";
 
 interface AppLayoutProps {
   allApps: any;
@@ -40,7 +37,7 @@ interface AppLayoutProps {
  * @param {AppLayoutProps} props - The properties for the AppLayout component.
  *
  * @returns {JSX.Element} The rendered AppLayout component.
- * 
+ *
  * The component performs the following tasks:
  * - Fetches and sets application data.
  * - Manages user roles and tenant information.
@@ -60,39 +57,25 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   const userDetails = window?.keycloakInstance?.tokenParsed?.userDetails;
   const [showSidebarMenu, toggleSidebarMenu] = useState(false);
   const { selectedApp, allApps } = useSelector((state: any) => state.app);
-  let selectedAppFromSession = JSON.parse(
-    sessionStorage.getItem("selectedApp") || "null"
-  );
-  const customerTenants = useSelector(
-    (state: AppStore) => state.customer.customerTenants
-  );
-  const selectedTenant = useSelector(
-    (state: AppStore) => state.customer.selectedTenant
-  );
-  const logedUserRoles = useSelector(
-    (state: AppStore) => state.customer.logedUserRoles
-  );
-  const sessionTrackerProjectKey = `${
-    (window as any)._env_.SESSION_TRACKER_PROJECT_KEY || ""
-  }`;
-  const sessionTrackerIngestPoint = `${
-    (window as any)._env_.SESSION_TRACKER_INGEST_POINT || ""
-  }`;
+  let selectedAppFromSession = JSON.parse(sessionStorage.getItem("selectedApp") || "null");
+  const customerTenants = useSelector((state: AppStore) => state.customer.customerTenants);
+  const selectedTenant = useSelector((state: AppStore) => state.customer.selectedTenant);
+  const logedUserRoles = useSelector((state: AppStore) => state.customer.logedUserRoles);
+  const sessionTrackerProjectKey = `${(window as any)._env_.SESSION_TRACKER_PROJECT_KEY || ""}`;
+  const sessionTrackerIngestPoint = `${(window as any)._env_.SESSION_TRACKER_INGEST_POINT || ""}`;
   const userId = userDetails?.userName;
   const fetchedApps = useSelector((state: any) => state.app.allApps);
 
   useEffect(() => {
-    // const selectedTenantFromSession = JSON.parse(sessionStorage.getItem("selectedTenant") || "null");    
-  if(!selectedTenant.length){
-    const refNum = window.location.pathname.split("/")[2];
+    // const selectedTenantFromSession = JSON.parse(sessionStorage.getItem("selectedTenant") || "null");
+    if (!selectedTenant.length) {
+      const refNum = window.location.pathname.split("/")[2];
 
       if (!window.location.pathname.includes("summary")) {
-        const tenantsUrl = `${
-          (window as any)._env_.APP_API_URL
-        }/customers/tenants/${refNum}`;
+        const tenantsUrl = `${(window as any)._env_.APP_API_URL}/customers/tenants/${refNum}`;
         APIService.getTenants(tenantsUrl, dispatch);
       }
-  }
+    }
 
     let response = JSON.parse(sessionStorage.getItem("allapps") || "[]");
     if (response.length == 0) {
@@ -102,45 +85,19 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       const mfRoutes = getMfRoutes(response);
       const filteredApps: any = transformAppData(response); // filters customerTenantApps and platformApps
       setTransformedAppData(filteredApps);
-      setCustomerTenantApps(filteredApps?.customerTenantApps); // customerTenantApps 
+      setCustomerTenantApps(filteredApps?.customerTenantApps); // customerTenantApps
       setAllRoutes([...appRoutes, ...mfRoutes]);
     }
 
-    if (!window.keycloakInstance.bearer_token)
-      window.keycloakInstance.bearer_token = "Bearer " + keycloak.token;
+    if (!window.keycloakInstance.bearer_token) window.keycloakInstance.bearer_token = "Bearer " + keycloak.token;
   }, []);
-
-  // const getAllTenants = async () => {
-  //   const API_URL = (window as any)._env_.APP_API_URL; 
-  //   const APP_DC_REGION = `${(window as any)._env_.APP_DC}`;
-  //   let getTenantUrl = `${API_URL}/${apiUrl.getTenantDetails}`;
-
-  //   if (APP_DC_REGION?.toLocaleUpperCase() !== "US".toLocaleUpperCase()) {
-  //     getTenantUrl = `${getTenantUrl}?dc_region=${APP_DC_REGION}`;
-  //   }
-  //   await API.get(getTenantUrl)
-  //   .then((response: any) => {
-  //     const result = response.data;
-  //     if (response.status == 200 && result.status) {
-  //       dispatch(setAllTenants(response.data.data));
-  //       sessionStorage.setItem(
-  //         "tenants",
-  //         JSON.stringify(response.data.data)
-  //       );
-  //     } else {
-        
-  //     }
-  //   })
-  // };
 
   useEffect(() => {
     if (selectedApp || selectedAppFromSession) {
       const refNum = window.location.pathname.split("/")[2];
 
       if (refNum != "summary") {
-        const tenantsUrl = `${
-          (window as any)._env_.APP_API_URL
-        }/customers/tenants/${refNum}`;
+        const tenantsUrl = `${(window as any)._env_.APP_API_URL}/customers/tenants/${refNum}`;
         APIService.getTenants(tenantsUrl, dispatch);
       }
     }
@@ -148,14 +105,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
 
   //for setting selectedApp in session
   useEffect(() => {
-    let detailsApp =
-      fetchedApps &&
-      findAppConfigByRoutes(fetchedApps, window.location.pathname)[0];
-    if (
-      detailsApp &&
-      Object.keys(detailsApp).length != 0 &&
-      !window.location.pathname.includes("summmary")
-    ) {
+    let detailsApp = fetchedApps && findAppConfigByRoutes(fetchedApps, window.location.pathname)[0];
+    if (detailsApp && Object.keys(detailsApp).length != 0 && !window.location.pathname.includes("summmary")) {
       sessionStorage.setItem("selectedApp", JSON.stringify(detailsApp));
       selectedAppFromSession = detailsApp;
     } else {
@@ -164,20 +115,13 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   }, [fetchedApps]);
   useEffect(() => {
     if (userId) {
-      sessionTracker.initiate(
-        userId,
-        sessionTrackerProjectKey,
-        sessionTrackerIngestPoint
-      );
+      sessionTracker.initiate(userId, sessionTrackerProjectKey, sessionTrackerIngestPoint);
 
       sessionTracker.setMetadata("user-org", window?.orgInfo?.code);
       sessionTracker.setMetadata("user-type", window?.orgInfo?.type);
       sessionTracker.setMetadata("environment", (window as any)?._env_.APP_ENV);
       let entitlements = window.keycloakInstance?.tokenParsed?.entitlements;
-      sessionTracker.setMetadata(
-        "user-entitlement",
-        entitlements && entitlements.length > 0 ? entitlements[0] : ""
-      );
+      sessionTracker.setMetadata("user-entitlement", entitlements && entitlements.length > 0 ? entitlements[0] : "");
 
       (window as any).sessionTracker = sessionTracker;
     }
@@ -186,9 +130,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
     if (logedUserRoles?.length > 0) {
       let rbaroles: any = [];
       logedUserRoles.map((role: any) => {
-        let rbarole = RBAJson.roles.filter(
-          (rbarole: any) => rbarole.role === role
-        )[0];
+        let rbarole = RBAJson.roles.filter((rbarole: any) => rbarole.role === role)[0];
         rbaroles.push(rbarole);
       });
       dispatch(
@@ -204,13 +146,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
     toggleSidebarMenu(false);
   }, [selectedApp]);
 
-
   const getAllApps = async () => {
     try {
-      const response =
-        allApps && allApps.length > 0
-          ? allApps
-          : await APIService.getAllApps(setAppsLoader);
+      const response = allApps && allApps.length > 0 ? allApps : await APIService.getAllApps(setAppsLoader);
 
       if (!response) return;
       let res = [...response];
@@ -232,21 +170,13 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
     }
   }, [selectedTenant?.customerId]);
   useEffect(() => {
-    const currentApp =
-      selectedApp.length > 0 ? selectedApp : selectedAppFromSession;
+    const currentApp = selectedApp.length > 0 ? selectedApp : selectedAppFromSession;
     if (
       currentApp &&
       currentApp?.name &&
-      ((selectedTenant?.customerCode && selectedTenant?.refNum) ||
-        currentApp.context === "platform")
+      ((selectedTenant?.customerCode && selectedTenant?.refNum) || currentApp.context === "platform")
     ) {
-      appSelectionHandler(
-        currentApp,
-        navigate,
-        selectedTenant?.customerCode,
-        selectedTenant?.refNum,
-        dispatch
-      );
+      appSelectionHandler(currentApp, navigate, selectedTenant?.customerCode, selectedTenant?.refNum, dispatch);
     }
   }, [selectedApp, selectedTenant, selectedTenant?.refNum]);
 
@@ -254,12 +184,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
     <>
       {rolesLoader ? (
         <InitialLoader show={true} />
-      ) : transformedAppData &&
-        (transformedAppData as any[])?.length === 0 &&
-        !appsLoader ? (
-        <div className="unauthorized-box font-14">
-          {<EmptyState text={"No apps Found"} />}
-        </div>
+      ) : transformedAppData && (transformedAppData as any[])?.length === 0 && !appsLoader ? (
+        <div className="unauthorized-box font-14">{<EmptyState text={"No apps Found"} />}</div>
       ) : (
         <div className="service-tools-app-layout">
           <Toast />
@@ -270,35 +196,20 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
               categories={customerTenantApps}
               setCategories={setCustomerTenantApps}
               refNum={selectedTenant?.refNum}
-              showSummaryNavigator={
-                !window.location.pathname.includes("summary")
-              }
+              showSummaryNavigator={!window.location.pathname.includes("summary")}
             />
             <div className="tools-body-container">
               {showSidebarMenu && (
                 <div
-                  className={`gray-layer ${
-                    showSidebar(selectedApp) || showSidebarMenu
-                      ? "sidebar-menu"
-                      : ""
-                  }`}
+                  className={`gray-layer ${showSidebar(selectedApp) || showSidebarMenu ? "sidebar-menu" : ""}`}
                 ></div>
               )}
               <Routes>
                 {!userDetails.userType && (
-                  <Route
-                    path="/"
-                    element={
-                      <Navigate to={`/${userDetails.userOrg}/summary`} />
-                    }
-                  />
+                  <Route path="/" element={<Navigate to={`/${userDetails.userOrg}/summary`} />} />
                 )}
                 {allRoutes.map((route: IRoute) => (
-                  <Route
-                    key={route.path}
-                    path={route.path}
-                    element={<route.component />}
-                  />
+                  <Route key={route.path} path={route.path} element={<route.component />} />
                 ))}
               </Routes>
             </div>

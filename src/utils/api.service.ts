@@ -2,49 +2,12 @@ import { API } from "./api";
 import { getRegionWiseAccessApi } from "./object.utils";
 import { apiUrl } from "./constants";
 import {
-  setCustomerDetails,
-  setCustomerTenants,
   setLogedUserRoles,
   setSelectedTenant,
 } from "../store/customer/actions";
 import { toast } from "react-toastify";
-// import('../../txe_apps.json')
-// .then((data) => {
-//   const txeApps = data;
-//   sessionStorage.setItem("allapps",JSON.stringify(txeApps))
-//   console.log("txeApps"+JSON.stringify(txeApps));
-// })
-// .catch((error) => {
-//   console.error("Error loading txe_apps.json:", error);
-// });
 
 export const APIService = {
-  getCustomerDetails: async (
-    orgCode: any,
-    dispatch: any,
-    selectedTenant: any
-  ) => {
-    const APP_API_URL = (window as any)._env_.APP_API_URL;
-    await API.get(`${APP_API_URL}/customers/code/${orgCode}`)
-      .then((result: any) => {
-        const response = result.data.data;
-        if (response) {
-          dispatch(setCustomerDetails(response));
-          if (!selectedTenant || Object.keys(selectedTenant).length === 0) {
-            let tenantRefnum = window.location.pathname.split("/")[2]=="summary"?response.tenantRefnums[0]:window.location.pathname.split("/")[2]
-            dispatch(setSelectedTenant({ refNum: tenantRefnum }));
-          }
-          (window as any).customerRefnums = response?.tenantRefnums;
-        } else {
-          dispatch(setCustomerDetails({}));
-        }
-      })
-      .catch((error) => {
-        toast.error("Error in getting customer details");
-        console.log("Error in getting customer details : " + error);
-        dispatch(setCustomerDetails({}));
-      });
-  },
   getLoggedInUserRoles: async (dispatch: any, setRolesLoader: any) => {
     setRolesLoader(true);
     const DC_REGION: any = (window as any)._env_.APP_DC;
@@ -73,10 +36,8 @@ export const APIService = {
       });
   },
   getAllApps: async (setAppsLoader?: any) => {
-    // setAppsLoader(true);
     return await API.get(`${(window as any)._env_.TOOLS_API_URL}api/apps`)
       .then((result: any) => {
-        // let apps = result?.data?.data;
         let apps = result?.data?.data;
         let appNamesList = apps
           ?.filter((app: any) => {
@@ -94,36 +55,8 @@ export const APIService = {
         console.log("Error in fetching apps : " + error);
         return null;
       })
-      .finally(() => {
-        // setAppsLoader(false);
-      });
   },
-  getCustomerTenants: async (
-    id: string,
-    dispatch: any,
-    selectedTenant?: any
-  ) => {
-    const url = apiUrl?.tenantsByCustomerId.replace("{customerid}", id);
-    const APP_API_URL = (window as any)._env_.APP_API_URL;
-    await API.get(`${APP_API_URL}/${url}`)
-      .then((response: any) => {
-        const result = response.data;
-        if (result.data != null && result.status) {
-          dispatch(setCustomerTenants(result.data));
-        } else {
-          setCustomerTenants([]);
-        }
-        const primaryTenant = result.data.find((item: any) => item.isParent);
-        if (Object.keys(selectedTenant)?.length === 0) {
-          dispatch(setSelectedTenant(primaryTenant || response.data.data[0]));
-        }
-      })
-      .catch((error) => {
-        toast.error("Error in fetching tenants");
-        console.log("Error in getting tenants : " + error);
-        setCustomerTenants([]);
-      });
-  },
+
   getTenants: async (url: string, dispatch: any) => {
     API.get(url)
       .then((response: any) => {
@@ -159,12 +92,12 @@ export const APIService = {
   getDateRanges() {
     const currentEndDate = new Date();
     const currentStartDate = new Date(currentEndDate);
-    currentStartDate.setDate(currentEndDate.getDate() - 90); 
+    currentStartDate.setDate(currentEndDate.getDate() - 90);
     const previousEndDate = new Date(currentStartDate);
-    previousEndDate.setDate(currentStartDate.getDate() - 1); 
+    previousEndDate.setDate(currentStartDate.getDate() - 1);
     const previousStartDate = new Date(previousEndDate);
     previousStartDate.setDate(previousEndDate.getDate() - 90);
-  
+
     return {
       current_start: currentStartDate.toISOString().split('T')[0],
       current_end: currentEndDate.toISOString().split('T')[0],
@@ -172,27 +105,109 @@ export const APIService = {
       previous_end: previousEndDate.toISOString().split('T')[0],
     };
   },
-  
-    getMetrics: async (metric: string, analyticsMetaData: any, isJobTrackerEnabled: boolean) => {
-      const dateRanges = APIService.getDateRanges();
-      const data = {
-        filters: {
-          refNum: analyticsMetaData?.refNum,
-          dateRange: dateRanges,
-          region: analyticsMetaData?.regions[0] || "us",
-          siteType: "external",
-          jobTrackerFlag: isJobTrackerEnabled,
-        },
-        metric: metric,
-      };
-      try {
-        const url = `${(window as any)._env_.ANALYTICS_SB_URL}/analytics-data` 
-        const response = await API.post(url, data);
-        return response.data;
-      } catch (error) {
-        console.error('Error fetching metrics:', error);
-        throw error;
-      }
-    }
 
+  getMetrics: async (metric: string, analyticsMetaData: any, isJobTrackerEnabled: boolean) => {
+    const dateRanges = APIService.getDateRanges();
+    const data = {
+      filters: {
+        refNum: analyticsMetaData?.refNum,
+        dateRange: dateRanges,
+        region: analyticsMetaData?.regions[0] || "us",
+        siteType: "external",
+        jobTrackerFlag: isJobTrackerEnabled,
+      },
+      metric: metric,
+    };
+    try {
+      const url = `${(window as any)._env_.ANALYTICS_SB_URL}/analytics-data`
+      const response = await API.post(url, data);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching metrics:', error);
+      throw error;
+    }
+  },
+
+  getTenantDetails: async (refNum: string) => {
+    try {
+      const url = `${(window as any)._env_.CMS_URL}/api/getTenantSearchSuggestion`;
+      const response = await API.post(url, {
+        refNum: refNum,
+      }, { withCredentials: true });
+      return response;
+    } catch (error) {
+      console.error('Error fetching tenant details:', error);
+      throw error;
+    }
+  },
+
+  getSiteMetaData: async (refNum: string) => {
+    try {
+      const url = `${(window as any)._env_.CMS_URL}/api/getSiteMetaData`;
+      const response = await API.post(url, {
+        refNum: refNum,
+      }, { withCredentials: true });
+      return response;
+    } catch (error) {
+      console.error('Error fetching site meta data:', error);
+      throw error;
+    }
+  },
+
+  triggerTxeLogin: async (code: string, type: string) => {
+    try {
+      const res = await API.post(
+        `${(window as any)._env_.CMS_URL}/api/txeLogin`,
+        {
+          "ph-org-code": code,
+          "ph-org-type": type,
+          token: window.keycloakInstance.token,
+          expires_in: window?.keycloakInstance?.tokenParsed?.exp,
+        },
+        { withCredentials: true }
+      );
+      return res;
+    }
+    catch (err) {
+      console.error('Error triggering TXE login:', err);
+      throw err;
+    }
+  },
+
+  getPageRecommendations: async (locale: string, refNum: string) => {
+    try {
+      const res = await API.post(
+        `${(window as any)._env_.CMS_URL}/api/getPageRecommendations`,
+        {
+          batchSize: 6,
+          isSVRequired: false,
+          locale,
+          offset: 0,
+          refNum,
+          siteVariant: "external",
+        },
+        { withCredentials: true }
+      );
+      return res;
+    }
+    catch (err) {
+      console.error('Error fetching page recommendations:', err);
+      throw err;
+    }
+  },
+
+  getSupportedLangs: async (refNum: string) => {
+    try {
+      const res = await API.post(
+        `${(window as any)._env_.CMS_URL}/api/tenantLangs`,
+        { refNum: refNum },
+        { withCredentials: true }
+      );
+      return res;
+    }
+    catch (err) {
+      console.error('Error fetching supported langs:', err);
+      throw err;
+    }
+  }
 };
