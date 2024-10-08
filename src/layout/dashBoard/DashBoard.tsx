@@ -103,15 +103,37 @@ const DashBoard = () => {
     }
   }
 
-  const handleDomainUrlForSite = async () => {
+  const fetchTenantLangs = async () => { 
+    try{
+      const resp = await APIService.getSupportedLangs(selectedTenant.refNum)
+      if(resp.data.status === "success") {
+        return resp.data.data;
+      }
+      return null;
+    }
+    catch(err) {
+      console.error("Error fetching tenant languages", err);
+    }
+  }
+
+  const handleDomainUrlForSite = async (supportedLangs: Array<any>) => {
     try {
       let domainUrl;
       const siteMetaDataResp: any = await APIService.getSiteMetaData(selectedTenant.refNum);
       if (siteMetaDataResp.data.status === "success") {
         domainUrl = siteMetaDataResp?.data?.data?.domain;
       }
+      const metaData = siteMetaDataResp.data.data;
+      metaData['supportedLangs'] = supportedLangs;
+      if(siteMetaDataResp.data.data.defaultLanguage) {
+        metaData['defaultLang'] = {
+          'language': siteMetaDataResp.data.data.defaultLanguage.toLowerCase()
+        }
+        //set in session storage also
+        sessionStorage.setItem("locale", siteMetaDataResp.data.data.defaultLanguage);
+      }
       if (!Object.keys(siteMetaData).length) {
-        dispatch(setSiteMetaData(siteMetaDataResp.data.data));
+        dispatch(setSiteMetaData(metaData));
       }
       return domainUrl;
     } catch (error) {
@@ -213,8 +235,9 @@ const DashBoard = () => {
     };
     getLoggedInUserInfo();
     window.addEventListener("txeLoginEvent", async () => {
+      const tenantSupportedLangs = await fetchTenantLangs();
       const tenantData = await fetchCurrentTenantData();
-      const domainUrl = await handleDomainUrlForSite();
+      const domainUrl = await handleDomainUrlForSite(tenantSupportedLangs);
       const liveUrl = await handleLiveUrlForSite(`https://${domainUrl}`);
       const x = tenantData;
       x[0].domain = liveUrl;

@@ -15,7 +15,7 @@ export const RecommendedPages = (props: any) => {
     (state: any) => state.customer.selectedTenant
   );
   const customerDetails = useSelector((state: AppStore) => state.customer);
-  const siteMetaData = useSelector((state: AppStore) => state.customer.siteMetaData)
+  const siteMetaData = useSelector((state: AppStore) => state.customer.siteMetaData);
 
   let [pageRecommendation, setRecommendedPagesData] = useState<any>(null);
   let [recommendationsLoader, setRecommendationsLoader] = useState<boolean>(true);
@@ -93,6 +93,7 @@ export const RecommendedPages = (props: any) => {
           customerCode: "",
           route: "Dashboard",
           payload: '',
+          site: btoa(siteMetaData)
         },
       };
       const link = getLink(config, {
