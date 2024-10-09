@@ -12,7 +12,7 @@ import { API } from "../../utils/api";
 import { APIService } from "../../utils/api.service";
 import { getFullDate, getLastUpdatedDate, getGreetingMessage } from "./utils";
 import { RecommendedPages } from "../../components/recommendedPages/RecommendedPages";
-import { tenantData, staticData, metricsDataForIndia, metricsDataForOtherRegions } from "./mockData";
+import { tenantData, staticData, metricsDataForIndia, metricsDataForOtherRegions, tenantImageUrl } from "./mockData";
 
 const DashBoard = () => {
   interface MetricData {
@@ -274,7 +274,7 @@ const DashBoard = () => {
           (<TenantDetailCard
             tenantLink={`${currentTenantData[0]?.domain}`}
             lastUpdated={`Last Updated: ${getLastUpdatedDate(currentTenantData[0]?.lastUpdated)}`}
-            imageSrc="https://assets.phenompeople.com/CareerConnectResources/prod/WAMEGLOBAL/images/State=Emptystate-1728467620342.png"
+            imageSrc={tenantImageUrl}
             navigateOnClick={() => {
               appSelectionHandler(
                 tenantData[0].config,
