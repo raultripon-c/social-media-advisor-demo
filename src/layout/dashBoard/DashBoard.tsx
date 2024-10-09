@@ -274,7 +274,7 @@ const DashBoard = () => {
           <TenantDetailCard
             tenantLink={`${currentTenantData[0]?.domain}`}
             lastUpdated={`Last Updated: ${getLastUpdatedDate(currentTenantData[0]?.lastUpdated)}`}
-            imageSrc="https://assets.phenompeople.com/CareerConnectResources/prod/BCG1US/images/No-Image-Found-400x264-1728367719526.png"
+            imageSrc="https://assets.phenompeople.com/CareerConnectResources/prod/WAMEGLOBAL/images/State=Emptystate-1728467620342.png"
             navigateOnClick={() => {
               appSelectionHandler(
                 tenantData[0].config,
