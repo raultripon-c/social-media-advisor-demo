@@ -12,7 +12,7 @@ import { API } from "../../utils/api";
 import { APIService } from "../../utils/api.service";
 import { getFullDate, getLastUpdatedDate, getGreetingMessage } from "./utils";
 import { RecommendedPages } from "../../components/recommendedPages/RecommendedPages";
-import { tenantData, staticData, metricsDataForIndia, metricsDataForOtherRegions } from "./mockData";
+import { tenantData, staticData, metricsDataForIndia, metricsDataForOtherRegions, tenantImageUrl } from "./mockData";
 
 const DashBoard = () => {
   interface MetricData {
@@ -68,7 +68,7 @@ const DashBoard = () => {
     if (matchedApp) {
       navigateToApp(matchedApp);
     } else if (config) {
-      appSelectionHandler(config, navigate, selectedTenant?.customerCode, selectedTenant?.refNum, dispatch);
+      appSelectionHandler(config, navigate, selectedTenant?.customerCode, selectedTenant?.refNum, siteMetaData, dispatch, false);
     } else {
       console.log(`Clicked on ${text}`);
     }
@@ -87,31 +87,55 @@ const DashBoard = () => {
   const navigateToApp = (selectedApp: any) => {
     sessionStorage.setItem("selectedApp", JSON.stringify(selectedApp));
     dispatch(setAppDetails(selectedApp));
-    appSelectionHandler(selectedApp, navigate, selectedTenant?.customerCode, selectedTenant?.refNum, dispatch, true);
+    appSelectionHandler(selectedApp, navigate, selectedTenant?.customerCode, selectedTenant?.refNum, siteMetaData, dispatch, true);
   };
 
-  const handleLiveUrlForSite = async (url: string) => {
+  const handleLiveUrlForSite = async (url: string): Promise<string | null> => {
+    try {
+      const response = await APIService.getDomainUrl(selectedTenant.refNum, url);
+      if (response?.data?.status === "success") {
+        const domainUrl = response?.data?.data;
+        if (domainUrl && new URL(domainUrl).hostname) {
+          return domainUrl;
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching live URL for site", error);
+    }
+    return url;
+  };
+
+  const fetchTenantLangs = async () => { 
     try{
-      const resp : any= await APIService.getDomainUrl(selectedTenant.refNum, url);
-      if(resp?.data?.status === "success") {
-        return resp?.data?.data;
+      const resp = await APIService.getSupportedLangs(selectedTenant.refNum)
+      if(resp.data.status === "success") {
+        return resp.data.data;
       }
       return null;
     }
     catch(err) {
-      console.error("Error fetching live URL for site", err);
+      console.error("Error fetching tenant languages", err);
     }
   }
 
-  const handleDomainUrlForSite = async () => {
+  const handleDomainUrlForSite = async (supportedLangs: Array<any>) => {
     try {
       let domainUrl;
       const siteMetaDataResp: any = await APIService.getSiteMetaData(selectedTenant.refNum);
       if (siteMetaDataResp.data.status === "success") {
         domainUrl = siteMetaDataResp?.data?.data?.domain;
       }
+      const metaData = siteMetaDataResp.data.data;
+      metaData['supportedLangs'] = supportedLangs;
+      if(siteMetaDataResp.data.data.defaultLanguage) {
+        metaData['defaultLang'] = {
+          'language': siteMetaDataResp.data.data.defaultLanguage.toLowerCase()
+        }
+        //set in session storage also
+        sessionStorage.setItem("locale", siteMetaDataResp.data.data.defaultLanguage);
+      }
       if (!Object.keys(siteMetaData).length) {
-        dispatch(setSiteMetaData(siteMetaDataResp.data.data));
+        dispatch(setSiteMetaData(metaData));
       }
       return domainUrl;
     } catch (error) {
@@ -213,8 +237,9 @@ const DashBoard = () => {
     };
     getLoggedInUserInfo();
     window.addEventListener("txeLoginEvent", async () => {
+      const tenantSupportedLangs = await fetchTenantLangs();
       const tenantData = await fetchCurrentTenantData();
-      const domainUrl = await handleDomainUrlForSite();
+      const domainUrl = await handleDomainUrlForSite(tenantSupportedLangs);
       const liveUrl = await handleLiveUrlForSite(`https://${domainUrl}`);
       const x = tenantData;
       x[0].domain = liveUrl;
@@ -245,24 +270,24 @@ const DashBoard = () => {
         />
       </div>
       <div className="tenant-details-container">
-        {currentTenantData.length ? (
-          <TenantDetailCard
+        {userHasCmsAccess && (currentTenantData.length ? (
+          (<TenantDetailCard
             tenantLink={`${currentTenantData[0]?.domain}`}
             lastUpdated={`Last Updated: ${getLastUpdatedDate(currentTenantData[0]?.lastUpdated)}`}
-            imageSrc="https://assets.phenompeople.com/CareerConnectResources/prod/BCG1US/images/No-Image-Found-400x264-1728367719526.png"
+            imageSrc={tenantImageUrl}
             navigateOnClick={() => {
               appSelectionHandler(
                 tenantData[0].config,
                 navigate,
                 selectedTenant?.customerCode,
                 selectedTenant?.refNum,
-                dispatch
+                siteMetaData,
+                dispatch,
+                false
               );
             }}
-          />
-        ) : (
-          <Loader title="Loading tenant details.." />
-        )}
+          />) 
+        ): <Loader title="Loading tenant details.." />)} 
       </div>
       <div className="overview-container">
         {metricsData.length > 0 && <h2 className="overview-heading">Overview</h2>}

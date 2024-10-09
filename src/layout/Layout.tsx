@@ -27,7 +27,6 @@ const Layout = () => {
   const [initialized, setInitialized] = useState(false);
   window.keycloakInstance = keycloak;
   window.orgInfo = orgInfo;
-  const app = useSelector((state: any) => state.app);
   let pendo = (window as any).pendo;
   const [allApps, setAllApps] = useState<any[]>([]);
   useEffect(()=>{

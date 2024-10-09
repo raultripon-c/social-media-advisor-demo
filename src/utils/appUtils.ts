@@ -11,6 +11,7 @@ export const appSelectionHandler = (
   navigate: any,
   customerCode: string,
   refNum: string,
+  siteMetaData: any,
   dispatch?: any,
   openInNewTab?: boolean
 ) => {
@@ -34,7 +35,7 @@ export const appSelectionHandler = (
           ? `/${updatedRoute}${routeWithoutRefNum}`
           : `${routeWithoutRefNum}`;
         const link = `${window.location.origin}${route}`;
-        window.open(link, "_blank");
+        navigateToNewTab(link);
         sessionStorage.removeItem("selectedApp");
         dispatch(setAppDetails({}));
       } else {
@@ -58,8 +59,11 @@ export const appSelectionHandler = (
       const link = getLink(selectedApp, {
         refNum: refNum,
         customerCode: customerCode,
+        site: btoa(JSON.stringify(siteMetaData))
       });
-      if (link && !isEmpty(link)) window.open(link, "_blank");
+      if (link && !isEmpty(link)) {
+        navigateToNewTab(link);
+      }
       else {
         toast.dismiss();
         toast.error("Link is not provided for navigation");
@@ -72,7 +76,7 @@ export const appSelectionHandler = (
         : `${routeWithoutRefNum}`;
 
         const link = `${window.location.origin}${route}`;
-        window.open(link, "_blank");
+        navigateToNewTab(link);
       } else {
         navigate(
           !isEmpty(updatedRoute)

@@ -1,4 +1,5 @@
 const CMS_URL = (window as any)._env_.CMS_URL;
+export const tenantImageUrl = "https://assets.phenompeople.com/CareerConnectResources/prod/WAMEGLOBAL/images/State=Emptystate-1728467620342.png";
 
 export const staticData = [
     {
@@ -9,7 +10,7 @@ export const staticData = [
             appType: "external",
             appConfig: { link: CMS_URL + "/tier3" },
             context: "customer",
-            requestParams: { lsrc: "txe", lsw: "_self", refNum: "", customerCode: "", route: "pages" },
+            requestParams: { lsrc: "txe", lsw: "_self", refNum: "", customerCode: "", route: "pages", site: ""},
         },
     },
     {
