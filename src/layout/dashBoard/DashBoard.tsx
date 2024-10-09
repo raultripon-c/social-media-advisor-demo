@@ -270,8 +270,8 @@ const DashBoard = () => {
         />
       </div>
       <div className="tenant-details-container">
-        {currentTenantData.length ? (
-          <TenantDetailCard
+        {userHasCmsAccess && (currentTenantData.length ? (
+          (<TenantDetailCard
             tenantLink={`${currentTenantData[0]?.domain}`}
             lastUpdated={`Last Updated: ${getLastUpdatedDate(currentTenantData[0]?.lastUpdated)}`}
             imageSrc="https://assets.phenompeople.com/CareerConnectResources/prod/WAMEGLOBAL/images/State=Emptystate-1728467620342.png"
@@ -286,10 +286,8 @@ const DashBoard = () => {
                 false
               );
             }}
-          />
-        ) : (
-          <Loader title="Loading tenant details.." />
-        )}
+          />) 
+        ): <Loader title="Loading tenant details.." />)} 
       </div>
       <div className="overview-container">
         {metricsData.length > 0 && <h2 className="overview-heading">Overview</h2>}
