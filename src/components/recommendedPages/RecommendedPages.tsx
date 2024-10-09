@@ -100,7 +100,6 @@ export const RecommendedPages = (props: any) => {
         refNum: selectedTenant?.refNum,
         customerCode: selectedTenant?.customerCode || customerDetails?.data?.customerCode,
         payload: btoa(JSON.stringify(cardContent)),
-        data: siteMetaData
       });
       if (link && !isEmpty(link)) window.open(link, "_blank");
       else {
