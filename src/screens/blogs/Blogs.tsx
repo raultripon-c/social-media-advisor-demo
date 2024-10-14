@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { AppStore } from "store";
 import { Loader } from "@phenom/react-ui-components";
-import { removeElementsById } from "utils/helper/utilizer";
+import { removeElementsById } from "../../utils/helper/utilizer";
 
 declare global {
     interface Window {
@@ -33,7 +33,7 @@ const Blogs = () => {
                 if (!existsScrElem) {
                     const scrElem = document.createElement("script");
                     scrElem.id = embedScriptId;
-                    scrElem.src = selectedApp?.url;
+                    scrElem.src = 'https://cmsqa1.phenompro.com:9000/embed.js';
                     scrElem.onload = () => {
                         resolve();
                     };
