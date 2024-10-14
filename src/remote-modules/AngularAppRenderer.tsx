@@ -84,6 +84,7 @@ export function AngularAppRenderer(props: any) {
         
        const link = document.createElement('link');
        link.rel = 'stylesheet';
+       link.id = 'crm-stylesheet';
        link.href = cssUrl;
        document.head.appendChild(link);
   

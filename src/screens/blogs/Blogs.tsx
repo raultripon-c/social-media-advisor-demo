@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { AppStore } from "store";
 import { Loader } from "@phenom/react-ui-components";
+import { removeElementsById } from "utils/helper/utilizer";
 
 declare global {
     interface Window {
@@ -44,6 +45,7 @@ const Blogs = () => {
         };
 
         if (storeData && storeData.selectedTenant && storeData.selectedTenant.refNum) { 
+            removeElementsById('crm-stylesheet');
             loadScript().then(() => {
                 if (window.txEmbed) {
                     window.txEmbed.embedModules("blogs", "#tools-body-container", {refNum: storeData.selectedTenant.refNum, token: window.keycloakInstance.token });

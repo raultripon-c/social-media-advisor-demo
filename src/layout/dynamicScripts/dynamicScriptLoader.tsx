@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { AppStore } from "store";
 import { Loader } from "@phenom/react-ui-components";
+import { removeElementsById } from "utils/helper/utilizer";
 
 declare global {
   interface Window {
@@ -46,6 +47,7 @@ const ContentHub: React.FC = () => {
       storeData.selectedTenant &&
       storeData.selectedTenant.refNum
     ) {
+      removeElementsById('crm-stylsheet');
       loadScript().then(() => {
         if (window.txEmbed) {
           window.txEmbed.embedModules(selectedApp?.embedType, "#tools-body-container", {
