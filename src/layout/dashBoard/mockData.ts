@@ -10,7 +10,7 @@ export const staticData = [
             appType: "external",
             appConfig: { link: CMS_URL + "/tier3" },
             context: "customer",
-            requestParams: { lsrc: "txe", lsw: "_self", refNum: "", customerCode: "", route: "pages", site: ""},
+            requestParams: { lsrc: "txe", lsw: "_self", refNum: "", customerCode: "", route: "pages", site: "" },
         },
     },
     {
@@ -62,25 +62,30 @@ export const metricsDataForIndia = [
         text: "Total number of career site visits with daily delta percentage",
     },
     {
+        name: "uniqueLeads",
+        title: "Unique Leads",
+        text: "Total number of unique leads generated (analytics > candidate experience > job seekers overview > unique leads)",
+    },
+    {
         name: "applicationsConversionKpi",
-        title: "Conversion Rate",
+        title: "Subscriptions",
         text: "Total number of Talent Community, Job Alert, and Similar Job Alert subscriptions with daily delta percentage",
     },
     {
         name: "completedCareerSiteApplies",
-        title: "Recent Leads",
-        text: "Total number of job seekers who clicked the Apply button",
-    },
-    {
-        name: "uniqueLeads",
-        title: "New Applicants",
-        text: "Total number of unique leads generated",
+        title: "Apply Clicks",
+        text: "Total number of job seekers who clicked the Apply button (analytics > candidate experience > apply)",
     },
     {
         name: "avgTimeOnPage",
-        title: "Avg. Time on Page",
+        title: "Average Time on Site",
         text: "Average time a visitor spends on the career site with daily delta percentage",
     },
+    {
+        name: "jobVisitsToApplyClicksConversionRate",
+        title: "Conversion Rate",
+        text: "Job Visits to Apply Clicks Conversion Rate (CX Candidate Experience > Apply Clicks > Job Visits to Apply Clicks Conversion Rate)",
+    }
 ];
 
 export const metricsDataForOtherRegions = [
@@ -90,23 +95,30 @@ export const metricsDataForOtherRegions = [
         text: "Total number of career site visits with daily delta percentage",
     },
     {
+        name: "uniqueLeadsCurrent",
+        title: "Unique Leads",
+        text: "Total number of unique leads generated (analytics > candidate experience > job seekers overview > unique leads)",
+    },
+    {
         name: "applicationsConversionKpiCurrent",
-        title: "Conversion Rate",
+        title: "Subscriptions",
         text: "Total number of Talent Community, Job Alert, and Similar Job Alert subscriptions with daily delta percentage",
     },
     {
         name: "completedCareerSiteAppliesCurrent",
-        title: "Recent Leads",
-        text: "Total number of job seekers who clicked the Apply button",
-    },
-    {
-        name: "uniqueLeadsCurrent",
-        title: "New Applicants",
-        text: "Total number of unique leads generated",
+        title: "Apply Clicks",
+        text: "Total number of job seekers who clicked the Apply button (analytics > candidate experience > apply)",
     },
     {
         name: "avgTimeOnPageCurrent",
-        title: "Avg. Time on Page",
+        title: "Average Time on Site",
         text: "Average time a visitor spends on the career site with daily delta percentage",
     },
+    {
+        name: "jobVisitsToApplyClicksConversionRateCurrent",
+        title: "Conversion Rate",
+        text: "Job Visits to Apply Clicks Conversion Rate (CX Candidate Experience > Apply Clicks > Job Visits to Apply Clicks Conversion Rate)",
+    }
 ];
+
+export const campaignColumns = ["Campaign Name", "Status", "Channel", "Conversion", "Audience"];

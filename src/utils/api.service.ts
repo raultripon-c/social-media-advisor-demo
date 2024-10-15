@@ -112,7 +112,6 @@ export const APIService = {
       filters: {
         refNum: analyticsMetaData?.refNum,
         dateRange: dateRanges,
-        region: analyticsMetaData?.regions[0] || "us",
         siteType: "external",
         jobTrackerFlag: isJobTrackerEnabled,
       },
