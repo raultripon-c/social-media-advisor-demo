@@ -21,7 +21,7 @@ export const staticData = [
             appType: "external",
             appConfig: { link: 'https://cmsqa1.phenompro.com:9000' + "/tier3" },
             context: "customer",
-            requestParams: { lsrc: "txe", lsw: "_self", refNum: "", customerCode: "", route: "txe-blogs-new", site: ""},
+            requestParams: { lsrc: "txe", lsw: "_self", refNum: "", customerCode: "", route: "blogs-new", site: ""},
         }
     },
     {
