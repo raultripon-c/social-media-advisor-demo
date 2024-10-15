@@ -91,7 +91,7 @@ export const RecommendedPages = (props: any) => {
           lsw: "_self",
           refNum: "",
           customerCode: "",
-          route: "Dashboard",
+          route: "dashboard-tier3",
           payload: '',
           site: btoa(JSON.stringify(siteMetaData))
         },
