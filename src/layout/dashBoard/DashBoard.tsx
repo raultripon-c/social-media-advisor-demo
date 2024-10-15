@@ -185,7 +185,7 @@ const DashBoard = () => {
       const formattedData = filteredMetricResponses.map((metric) => {
         let value = metric.current !== null && metric.current !== undefined ? `${metric.current}` : "N/A";
         let change = formatChange(metric.rate);
-        if (metric.title === "Avg. Time on Page" && metric.current) {
+        if (metric.title === "Average Time on Site" && metric.current) {
           value = formatAvgTimeOnPage(metric.current);
         } else if (metric.title === "Conversion Rate" && metric.current) {
           value = formatConversionRate(value);
