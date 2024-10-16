@@ -23,6 +23,7 @@ import { APIService } from "../utils/api.service";
 import "./AppLayout.scss";
 import { InitialLoader } from "./Loader";
 import ToolsSideBar from "./sideBar/SideBar";
+import Tracker from "@openreplay/tracker";
 
 interface AppLayoutProps {
   allApps: any;
@@ -52,6 +53,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   const [allRoutes, setAllRoutes] = useState<IRoute[]>([]);
   const [transformedAppData, setTransformedAppData] = useState({});
   const [customerTenantApps, setCustomerTenantApps] = useState();
+  const [trackerInitialized, setTrackerInitialized] = useState(false);
   const [appsLoader, setAppsLoader] = useState(true);
   const [rolesLoader, setRolesLoader] = useState(true);
   const userDetails = window?.keycloakInstance?.tokenParsed?.userDetails;
@@ -179,6 +181,24 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       appSelectionHandler(currentApp, navigate, selectedTenant?.customerCode, selectedTenant?.refNum, siteMetaData, dispatch);
     }
   }, [selectedApp, selectedTenant, selectedTenant?.refNum]);
+
+  useEffect(() => {
+    if(!trackerInitialized){
+      const tracker = new Tracker({
+        projectKey: (window as any)._env_.OPENREPLAY_PROJECT_KEY,
+        ingestPoint: (window as any)._env_.OPEN_REPLAY_URL,
+      });
+
+      tracker.start({
+        userID: window.keycloakInstance?.tokenParsed?.userDetails?.userName,
+        metadata: {
+          refNum: selectedTenant?.refNum,
+          customerName: selectedTenant?.customerName,
+        },
+      });
+      setTrackerInitialized(true);
+    }
+  }, [selectedTenant]); 
 
   return (
     <>
