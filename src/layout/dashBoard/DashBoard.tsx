@@ -20,7 +20,8 @@ const DashBoard = () => {
     value: string;
     change: string;
     tooltipText: string;
-  }
+  };
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const selectedTenant = useSelector((state: AppStore) => state.customer.selectedTenant);
@@ -105,15 +106,15 @@ const DashBoard = () => {
     return url;
   };
 
-  const fetchTenantLangs = async () => { 
-    try{
+  const fetchTenantLangs = async () => {
+    try {
       const resp = await APIService.getSupportedLangs(selectedTenant.refNum)
-      if(resp.data.status === "success") {
+      if (resp.data.status === "success") {
         return resp.data.data;
       }
       return null;
     }
-    catch(err) {
+    catch (err) {
       console.error("Error fetching tenant languages", err);
     }
   }
@@ -127,7 +128,7 @@ const DashBoard = () => {
       }
       const metaData = siteMetaDataResp.data.data;
       metaData['supportedLangs'] = supportedLangs;
-      if(siteMetaDataResp.data.data.defaultLanguage) {
+      if (siteMetaDataResp.data.data.defaultLanguage) {
         metaData['defaultLang'] = {
           'language': siteMetaDataResp.data.data.defaultLanguage.toLowerCase()
         }
@@ -156,12 +157,26 @@ const DashBoard = () => {
       const metricResponses = await Promise.all(
         metrics.map(async (metric) => {
           try {
-            const response = await APIService.getMetrics(metric.name, metaData, isTrackerEnabled);
-            return {
+            const currentResponse = await APIService.getMetrics(metric.name, metaData, isTrackerEnabled);
+            const currentValue = currentResponse.data[0]?.current || currentResponse.data[0]?.CURRENT_VALUE || currentResponse.data[0].value;
+
+            let previousValue = null;
+            let rate = null;
+
+            // Only fetch the previous metric if not in India
+            if (!isIndia) {
+              const previousResponse = await APIService.getMetrics(`${metric.name.replace("Current", "Previous")}`, metaData, isTrackerEnabled);
+              previousValue = previousResponse.data[0]?.previous || previousResponse.data[0]?.PREVIOUS_VALUE || previousResponse.data[0].value;
+
+              // Calculate rate of change
+              if (previousValue) {
+                rate = ((currentValue - previousValue) / previousValue * 100).toFixed(2);
+              }
+            } return {
               title: metric.title,
-              previous: response.data[0]?.previous,
-              current: response.data[0]?.current || response.data[0]?.CURRENT_VALUE || response.data[0].value,
-              rate: response.data[0]?.rate || response.data[0]?.PERC_CHANGE || response.data[0].rate,
+              previous: previousValue ? previousValue : currentResponse.data[0]?.previous,
+              current: currentValue,
+              rate: previousValue ? rate : (currentResponse.data[0]?.rate || currentResponse.data[0]?.PERC_CHANGE || currentResponse.data[0].rate),
               text: metric.text,
             };
           } catch (error) {
@@ -172,8 +187,8 @@ const DashBoard = () => {
       );
       const formatAvgTimeOnPage = (value: any) => {
         const totalSeconds = parseFloat(value);
-        const minutes = Math.floor(totalSeconds);
-        const seconds = Math.round((totalSeconds - minutes) * 100);
+        const minutes = Math.floor(totalSeconds / 60); 
+        const seconds = Math.round(totalSeconds % 60); 
         return `${minutes} min ${seconds} sec`;
       };
       const formatConversionRate = (value: any) => `${value}%`;
@@ -286,8 +301,8 @@ const DashBoard = () => {
                 false
               );
             }}
-          />) 
-        ): <Loader title="Loading tenant details.." />)} 
+          />)
+        ) : <Loader title="Loading tenant details.." />)}
       </div>
       <div className="overview-container">
         {metricsData.length > 0 && <h2 className="overview-heading">Overview</h2>}
