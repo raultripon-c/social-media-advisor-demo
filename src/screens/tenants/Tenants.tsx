@@ -45,6 +45,11 @@ interface TenantsProps {
 const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
 
   const { customers } = useSelector((state: AppStore) => state.customer);
+  const userDetails = window?.keycloakInstance?.tokenParsed?.userDetails;
+  const customerTenants = useSelector(
+    (state: AppStore) => state.customer.customerTenants
+  );
+  const customerDetails = useSelector((state: AppStore) => state.customer);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   
@@ -110,11 +115,26 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
     );
 
     if (storedTenants.length === 0) {
-      getAllTenants();
+      if(!(userDetails?.userType === "PARTNER")) {
+        APIService.getCustomerDetails(userDetails?.userOrg, dispatch);
+      } else {
+        getAllTenants();
+      }
+      
     } else {
       dispatch(setAllTenants(storedTenants));
     }
   }, []);
+
+  useEffect(() => {
+    if (customerDetails?.data?.id && customerTenants.length === 0) {
+      APIService.getCustomerTenants(
+        customerDetails?.data?.id,
+        dispatch,
+        setTotalTenantsData
+      );
+    }
+  }, [customerDetails?.data?.id]);
 
   useEffect(() => {
     dispatch(setAppDetails({}));
@@ -143,6 +163,16 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
       setFilteredData(customers);
     }
   }, [customers]);
+
+  useEffect(() => {
+    if (totalTenantsData?.length > 0) {
+      setFilteredData(
+        totalTenantsData.sort((a: any, b: any) =>
+          a.tenantName.localeCompare(b.tenantName)
+        )
+      );
+    }
+  }, [totalTenantsData]);
 
   const navigateToDashBoard = (selectedTenant: any = {}) => {
     dispatch(setSelectedTenant(selectedTenant));
