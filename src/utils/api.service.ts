@@ -34,7 +34,8 @@ export const APIService = {
   getCustomerTenants: async (
     id: string,
     dispatch: any,
-    setTotalTenantsData?: any
+    setTotalTenantsData: any,
+    setIsLoading: any
   ) => {
     const url = apiUrl?.tenantsByCustomerId.replace("{customerid}", id);
     const APP_API_URL = (window as any)._env_.APP_API_URL;
@@ -51,6 +52,8 @@ export const APIService = {
         toast.error("Error in fetching tenants");
         console.log("Error in getting tenants : " + error);
         setAllTenants([]);
+      }).finally(() => {
+        setIsLoading(false);
       });
   },
   getLoggedInUserRoles: async (dispatch: any, setRolesLoader: any) => {

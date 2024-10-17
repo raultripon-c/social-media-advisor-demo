@@ -53,7 +53,7 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   
-  const [isLoading, setIsLoading] = useState<boolean>();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [searchKey, setSearchKey] = useState<string>("");
   const [filteredData, setFilteredData] = useState(
     JSON.parse(sessionStorage.getItem("tenants") || "[]") as any
@@ -77,7 +77,6 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
   };
 
   const getAllTenants = async () => {
-    setIsLoading(true);
     let getTenantUrl = `${API_URL}/${apiUrl.getTenantDetails}`;
     if (APP_DC_REGION?.toLocaleUpperCase() !== "US".toLocaleUpperCase()) {
       getTenantUrl = `${getTenantUrl}?dc_region=${APP_DC_REGION}`;
@@ -123,6 +122,7 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
       
     } else {
       dispatch(setAllTenants(storedTenants));
+      setIsLoading(false);
     }
   }, []);
 
@@ -131,7 +131,8 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
       APIService.getCustomerTenants(
         customerDetails?.data?.id,
         dispatch,
-        setTotalTenantsData
+        setTotalTenantsData,
+        setIsLoading
       );
     }
   }, [customerDetails?.data?.id]);
