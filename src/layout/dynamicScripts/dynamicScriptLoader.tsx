@@ -51,10 +51,9 @@ const ContentHub: React.FC = () => {
           window.txEmbed.embedModules(selectedApp?.embedType, "#tools-body-container", {
             refNum: storeData.selectedTenant.refNum,
             token: window.keycloakInstance.token,
-          }, () => {
-            setIsLoading(false);
           });
         }
+        setIsLoading(false);
       });
     }
   }, [storeData]);

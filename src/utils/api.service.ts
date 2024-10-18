@@ -4,10 +4,58 @@ import { apiUrl } from "./constants";
 import {
   setLogedUserRoles,
   setSelectedTenant,
+  setAllTenants,
+  setCustomerDetails
 } from "../store/customer/actions";
 import { toast } from "react-toastify";
 
 export const APIService = {
+  getCustomerDetails: async (
+    orgCode: any,
+    dispatch: any,
+  ) => {
+    const APP_API_URL = (window as any)._env_.APP_API_URL;
+    await API.get(`${APP_API_URL}/customers/code/${orgCode}`)
+      .then((result: any) => {
+        const response = result.data.data;
+        if (response) {
+          dispatch(setCustomerDetails(response));
+        } else {
+          dispatch(setCustomerDetails({}));
+        }
+      })
+      .catch((error) => {
+        toast.error("Error in getting customer details");
+        console.log("Error in getting customer details : " + error);
+        dispatch(setAllTenants({}));
+      });
+  },
+
+  getCustomerTenants: async (
+    id: string,
+    dispatch: any,
+    setTotalTenantsData: any,
+    setIsLoading: any
+  ) => {
+    const url = apiUrl?.tenantsByCustomerId.replace("{customerid}", id);
+    const APP_API_URL = (window as any)._env_.APP_API_URL;
+    await API.get(`${APP_API_URL}/${url}`)
+      .then((response: any) => {
+        const result = response.data;
+        if (result.data != null && result.status) {
+          dispatch(setTotalTenantsData(result.data));
+        } else {
+          setAllTenants([]);
+        }
+      })
+      .catch((error) => {
+        toast.error("Error in fetching tenants");
+        console.log("Error in getting tenants : " + error);
+        setAllTenants([]);
+      }).finally(() => {
+        setIsLoading(false);
+      });
+  },
   getLoggedInUserRoles: async (dispatch: any, setRolesLoader: any) => {
     setRolesLoader(true);
     const DC_REGION: any = (window as any)._env_.APP_DC;

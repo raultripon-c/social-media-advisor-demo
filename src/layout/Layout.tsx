@@ -71,7 +71,6 @@ const Layout = () => {
           </div>
           {selectedTenant &&
           Object.entries(selectedTenant)?.length === 0 &&
-          userDetails?.userType === "PARTNER" &&
           (window.location.pathname === '/') ? (
             <Tenants allApps={allApps} setAllApps={setAllApps} />
           ) : (
