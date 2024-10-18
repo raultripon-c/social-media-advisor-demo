@@ -77,21 +77,12 @@ function Header({
 
 
   const handleLogoClick = () => {
-    const userType = window?.keycloakInstance?.userInfo?.userDetails?.userType;
     sessionStorage.removeItem("selectedApp");
     dispatch(setSelectedTenant({}));
     dispatch(setSidebarState(false));
     dispatch(setAppDetails({}));
-    if (userType && userType === "PARTNER") {
-      dispatch(setSelectedTenant({}));
-      sessionStorage.removeItem("selectedApp");
-      dispatch(setCustomerTenants([]));
-      navigate("/");
-    } else {
-      const customerCode =
-        window?.keycloakInstance?.userInfo?.userDetails?.userOrg;
-      navigate(`/${customerCode}/summary`);
-    }
+    dispatch(setCustomerTenants([]));
+    navigate("/");
   };
 
 

@@ -6,10 +6,7 @@ import { EmptyState } from "@phenom/react-ui-components";
 import { AppStore } from "store";
 import { Search } from "../../components/TenantSearch/TenantsSearch";
 import { setAppDetails, setAppsFromAPI } from "../../store/apps/actions";
-import {
-  setAllTenants,
-  setSelectedTenant,
-} from "../../store/customer/actions";
+import { setAllTenants, setSelectedTenant } from "../../store/customer/actions";
 import { API } from "../../utils/api";
 
 import { Loader } from "@phenom/react-ui-components";
@@ -20,11 +17,11 @@ import "./Tenants.scss";
 /**
  * The `Tenants` component is responsible for fetching and displaying a list of tenants.
  * It interacts with the Redux store to manage state and uses session storage to cache data.
- * 
+ *
  * Props:
  * - `allApps`: An array containing all applications.
  * - `setAllApps`: A function to set the applications.
- * 
+ *
  * The component performs the following tasks:
  * - Fetches all applications and tenants from the API.
  * - Stores the fetched data in session storage and updates the Redux store.
@@ -32,7 +29,7 @@ import "./Tenants.scss";
  * - Displays a loading indicator while data is being fetched.
  * - Shows a list of tenants or an empty state if no tenants are configured.
  * - Handles navigation to the tenant's dashboard when a tenant is selected.
- * 
+ *
  * @param {TenantsProps} param0 - The props for the component.
  * @returns {JSX.Element} The rendered component.
  */
@@ -43,7 +40,6 @@ interface TenantsProps {
 }
 
 const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
-
   const { customers } = useSelector((state: AppStore) => state.customer);
   const userDetails = window?.keycloakInstance?.tokenParsed?.userDetails;
   const customerTenants = useSelector(
@@ -52,7 +48,7 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
   const customerDetails = useSelector((state: AppStore) => state.customer);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  
+
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [searchKey, setSearchKey] = useState<string>("");
   const [filteredData, setFilteredData] = useState(
@@ -68,7 +64,7 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
     try {
       const response = await APIService.getAllApps();
       if (!response) return;
-      let res = response
+      let res = response;
       sessionStorage.setItem("allapps", JSON.stringify(res));
       dispatch(setAppsFromAPI(res));
     } catch (error) {
@@ -92,10 +88,7 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
             )
           );
           dispatch(setAllTenants(response.data.data));
-          sessionStorage.setItem(
-            "tenants",
-            JSON.stringify(response.data.data)
-          );
+          sessionStorage.setItem("tenants", JSON.stringify(response.data.data));
         } else {
           setTotalTenantsData([]);
         }
@@ -109,17 +102,14 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
   };
 
   useEffect(() => {
-    let storedTenants = JSON.parse(
-      sessionStorage.getItem("tenants") || "[]"
-    );
+    let storedTenants = JSON.parse(sessionStorage.getItem("tenants") || "[]");
 
     if (storedTenants.length === 0) {
-      if(!(userDetails?.userType === "PARTNER")) {
+      if (!(userDetails?.userType === "PARTNER")) {
         APIService.getCustomerDetails(userDetails?.userOrg, dispatch);
       } else {
         getAllTenants();
       }
-      
     } else {
       dispatch(setAllTenants(storedTenants));
       setIsLoading(false);
@@ -148,6 +138,7 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
       dispatch(setAppsFromAPI(apps));
     }
   }, []);
+
   useEffect(() => {
     if (searchKey.trim().length >= 0) {
       let data = totalTenantsData?.filter((eachCustomer: any) =>
@@ -157,7 +148,6 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
     }
   }, [searchKey]);
 
-  
   useEffect(() => {
     if (customers?.length > 0) {
       setTotalTenantsData(customers);
@@ -177,8 +167,10 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
 
   const navigateToDashBoard = (selectedTenant: any = {}) => {
     dispatch(setSelectedTenant(selectedTenant));
-    sessionStorage.setItem("selectedTenant", JSON.stringify(selectedTenant))
-    navigate(`/${selectedTenant.customerCode}/${selectedTenant.refNum}/summary`);
+    sessionStorage.setItem("selectedTenant", JSON.stringify(selectedTenant));
+    navigate(
+      `/${selectedTenant.customerCode}/${selectedTenant.refNum}/summary`
+    );
   };
 
   if (isLoading) {
@@ -203,16 +195,15 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
       </div>
       {totalTenantsData?.length !== 0 ? (
         <div className="tenant-list">
-          {filteredData
-            ?.map((eachTenant: any) => (
-              <div
-                className="tenant-card"
-                key={eachTenant.id}
-                onClick={() => navigateToDashBoard(eachTenant)}
-              >
-                <span>{eachTenant.tenantName}</span>
-              </div>
-            ))}
+          {filteredData?.map((eachTenant: any) => (
+            <div
+              className="tenant-card"
+              key={eachTenant.id}
+              onClick={() => navigateToDashBoard(eachTenant)}
+            >
+              <span>{eachTenant.tenantName}</span>
+            </div>
+          ))}
           {filteredData?.length === 0 && (
             <div className="no-tenant-found">No Tenants found</div>
           )}
