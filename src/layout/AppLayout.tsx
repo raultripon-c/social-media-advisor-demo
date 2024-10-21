@@ -23,7 +23,7 @@ import { APIService } from "../utils/api.service";
 import "./AppLayout.scss";
 import { InitialLoader } from "./Loader";
 import ToolsSideBar from "./sideBar/SideBar";
-
+import { updateTrackerMetadata } from "./dashBoard/utils";
 interface AppLayoutProps {
   allApps: any;
 }
@@ -45,7 +45,7 @@ interface AppLayoutProps {
  * - Initializes session tracking.
  * - Manages sidebar visibility and state.
  */
-const AppLayout: React.FC<AppLayoutProps> = ({}) => {
+const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { keycloak } = useKeycloak();
@@ -179,6 +179,10 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       appSelectionHandler(currentApp, navigate, selectedTenant?.customerCode, selectedTenant?.refNum, siteMetaData, dispatch);
     }
   }, [selectedApp, selectedTenant, selectedTenant?.refNum]);
+
+  useEffect(() => {
+    updateTrackerMetadata(selectedTenant.refNum, selectedTenant.customerName)
+  }, [selectedTenant])
 
   return (
     <>
