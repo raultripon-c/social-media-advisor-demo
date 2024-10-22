@@ -20,6 +20,8 @@ EXPOSE 80
 COPY nginx.conf  /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist/ /var/www/html/
 
+RUN cat version.txt
+
 # Copy .env file and shell script to container
 WORKDIR /var/www/html
 COPY ./env.sh .
