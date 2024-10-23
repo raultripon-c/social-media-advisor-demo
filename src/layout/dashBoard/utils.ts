@@ -40,14 +40,3 @@ export const getGreetingMessage = () => {
     return "Good evening";
   }
 };
-
-export const updateTrackerMetadata = (RefNum: string, CustomerName: string) => {
-  if (window.openReplayTracker) {
-    window.openReplayTracker.setMetadata({
-      RefNum,
-      CustomerName,
-    });
-  } else {
-    console.log("OpenReplay tracker is not initialized.");
-  }
-}
