@@ -23,7 +23,7 @@ window._env_ = {
   STATUS_PAGE_URL: "https://status.phenom.com/",
   STATUS_API_AUTH_KEY: "OAuth bb6f44f0-f381-4a1d-8b58-ca979ecc2c7d",
   STATUS_PAGE_ID: "gj9yx1mw4y1j",
-  SESSION_TRACKER_PROJECT_KEY: "FfSBhhgQ4R5uNSEkJMG6",
+  SESSION_TRACKER_PROJECT_KEY: "eUx04NQDdVT7HamM8IyJ",
   SESSION_TRACKER_INGEST_POINT: "https://openreplay.phenom.com/ingest",
   GRAFANA_FARO_URL: "https://agent-qa.phenompro.com/collect",
   GRAFANA_FARO_API_KEY:
