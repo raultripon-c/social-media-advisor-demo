@@ -58,6 +58,7 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
     JSON.parse(sessionStorage.getItem("tenants") || "[]") as any
   );
   const API_URL = (window as any)._env_.APP_API_URL;
+  const PROVISIONING_API = (window as any)._env_.PROVISIONING_URL;
   const APP_DC_REGION = `${(window as any)._env_.APP_DC}`;
 
   const getAllApps = async () => {
@@ -73,7 +74,7 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
   };
 
   const getAllTenants = async () => {
-    let getTenantUrl = `${API_URL}/${apiUrl.getTenantDetails}`;
+    let getTenantUrl = `${PROVISIONING_API}/${apiUrl.getTenantDetails}`;
     if (APP_DC_REGION?.toLocaleUpperCase() !== "US".toLocaleUpperCase()) {
       getTenantUrl = `${getTenantUrl}?dc_region=${APP_DC_REGION}`;
     }

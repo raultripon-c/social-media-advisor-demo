@@ -35,4 +35,5 @@ window._env_ = {
   CMS_URL: "https://cms-qa1.phenompro.com",
   CMS_CAAS_URL: "https://caas-qa1.phenompro.com",
   CRM_URL: "https://candidates-intqa.phenompro.com",
+  PROVISIONING_URL: "https://provisioning-qa.phenompro.com/api"
 };
