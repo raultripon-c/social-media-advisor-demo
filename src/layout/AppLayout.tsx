@@ -176,7 +176,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       currentApp?.name &&
       ((selectedTenant?.customerCode && selectedTenant?.refNum) || currentApp.context === "platform")
     ) {
-      appSelectionHandler(currentApp, navigate, selectedTenant?.customerCode, selectedTenant?.refNum, siteMetaData, dispatch);
+      if(Object.keys(siteMetaData).length || currentApp?.appType !== "external" ) {
+        appSelectionHandler(currentApp, navigate, selectedTenant?.customerCode, selectedTenant?.refNum, siteMetaData, dispatch);
+      }
     }
   }, [selectedApp, selectedTenant, selectedTenant?.refNum]);
 
