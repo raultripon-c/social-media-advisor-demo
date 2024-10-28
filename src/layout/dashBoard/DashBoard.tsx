@@ -8,6 +8,7 @@ import {
   GreetingCard,
   OverviewCard,
   TenantDetailCard,
+  Table
 } from "@phenom/react-ui-components";
 import { AppStore } from "store";
 import { setAppDetails, setAppsFromAPI } from "../../store/apps/actions";
@@ -24,6 +25,7 @@ import {
   staticData,
   metricsDataForIndia,
   metricsDataForOtherRegions,
+  campaignColumns,
   tenantImageUrl,
 } from "./mockData";
 
@@ -33,7 +35,12 @@ const DashBoard = () => {
     value: string;
     change: string;
     tooltipText: string;
-  }
+  };
+
+  interface CampaignData {
+    "Campaign Name": { name: string };
+    Status: string;
+  };
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -54,6 +61,11 @@ const DashBoard = () => {
   const [metricsData, setMetricsData] = useState<MetricData[]>([]);
   const [currentTenantData, setCurrentTenantData] = useState<any>([]);
 
+  const [campaignData, setCampaignData] = useState<CampaignData[]>([]);
+  const userHasCmsAccess =
+    window?.keycloakInstance?.userInfo?.resources["cms"] &&
+    window?.keycloakInstance?.userInfo?.resources["cms"].roles.length > 0;
+
   const fetchCurrentTenantData = async () => {
     const tenantResp: any = await APIService.getTenantDetails(
       selectedTenant.refNum
@@ -62,6 +74,8 @@ const DashBoard = () => {
       return tenantResp.data.data.docs;
     }
   };
+
+  const { code, type } = window.orgInfo;
 
   const getAllApps = async () => {
     try {
@@ -294,9 +308,30 @@ const DashBoard = () => {
     }
   };
 
+  const campaignsList = async () => {
+    try {
+      const refNum = selectedTenant?.refNum;
+      await APIService.registerToken(refNum, code, type);
+      const campaigns = await APIService.getCampaigns(selectedTenant)
+      const formattedData = campaigns.map((campaign: any) => ({
+        "Campaign Name": {
+          name: campaign.campaignName
+        },
+        Status: campaign.status ? `${campaign.status}` : "N/A",
+        Channel: campaign.channel ? `${campaign.channel}` : "N/A",
+        Conversion: campaign.conversion ? `${campaign.conversion}` : "N/A",
+        Audience: campaign.audience ? `${campaign.audience}` : "N/A"
+      }));
+      setCampaignData(formattedData);
+    } catch (error) {
+      console.error("Error fetching campaigns list:", error);
+    }
+  };
+
   useEffect(() => {
     if (selectedTenant?.refNum) {
       fetchMetrics();
+      campaignsList();
     }
   }, [selectedTenant]);
 
@@ -431,6 +466,14 @@ const DashBoard = () => {
         )}
       </div>
       <RecommendedPages />
+      {campaignData.length > 0 && (
+        <>
+          <h2 className="overview-heading">Campaigns</h2>
+          <div className="table-container">
+            <Table columns={campaignColumns} data={campaignData} />
+          </div>
+        </>
+      )}
     </div>
   );
 };
