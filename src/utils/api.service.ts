@@ -8,6 +8,10 @@ import {
   setCustomerDetails
 } from "../store/customer/actions";
 import { toast } from "react-toastify";
+interface Campaign {
+  campaignName: string;
+  status: string;
+}
 
 export const APIService = {
   getCustomerDetails: async (
@@ -270,6 +274,59 @@ export const APIService = {
     catch (err) {
       console.error('Error fetching domain URL:', err);
       throw err;
+    }
+  },
+
+  getCampaigns: async (tenantData: any, startIndex: number = 1, pageSize: number = 5): Promise<Campaign[]> => {
+    const data = {
+      refNum: tenantData?.refNum,
+      browserBaseDate: new Date().toISOString(),
+      startIndex,
+      pageSize,
+      searchCriteria: {
+        searchText: "",
+        createdBy: "",
+        status: "",
+        campaignDisplayType: "",
+        sort: {
+          field: "createdDate",
+          order: -1,
+        },
+      }
+    };
+    try {
+      const url = `${(window as any)._env_.CRM_HUB_URL}/ecampaign/getCampaignsV3`;
+      const response = await API.post(url, data, {});
+      const campaigns: Campaign[] = response.results.map((item: any) => ({
+        campaignName: item.campaignName,
+        status: item.status
+      }));
+      return campaigns;
+    } catch (error) {
+      console.error('Error fetching campaigns:', error);
+      toast.error("Error fetching campaigns");
+      return [];
+    }
+  },
+  
+  registerToken: async (refNum: string, code: string, type: string) => {
+    const data = {
+        "product_ver": "1.0",
+        "newLogin": true,
+        "applicationName": "candidate-app",
+        "expiryTime": 900,
+        "recruiterUserId": window.keycloakInstance.subject,
+        "ph-org-code": code,
+        "ph-org-type": type,
+        "refNum": refNum
+    };
+    try {
+      const url = `${(window as any)._env_.CANDIDATES_USER_MANAGEMENT_URL}/tokenDetail`;
+      const response = await API.post(url, data, {});
+      console.log('Token registration response:', response);
+    } catch (error) {
+      console.error('Error registering token:', error);
+      throw error;
     }
   }
 };
