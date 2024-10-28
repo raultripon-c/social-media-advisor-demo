@@ -212,36 +212,34 @@ export const RemoteModuleRenderer = () => {
   };
   return (
     <div>
-      <div>
-        {selectedModuleAppObject.framework === "REACT" && (
-          <ReactAppRenderer
-            module={selectedApp.module}
-            component={selectedApp.component}
-            url={getSelectedAppUrl(selectedApp, false) || selectedApp.url}
+      {selectedModuleAppObject.framework === "REACT" && (
+        <ReactAppRenderer
+          module={selectedApp.module}
+          component={selectedApp.component}
+          url={getSelectedAppUrl(selectedApp, false) || selectedApp.url}
+          scope={selectedApp.scope}
+          props={moduleProps}
+          loading={selectedApp.loadingMessage}
+          envconfig={
+            getSelectedAppUrl(selectedApp, true) || selectedApp.envconfig
+          }
+          key={key}
+        />
+      )}
+      {selectedModuleAppObject.framework == "ANGULAR" &&
+        selectedApp.scope &&
+        selectedApp && (
+          <AngularAppRenderer
             scope={selectedApp.scope}
-            props={moduleProps}
-            loading={selectedApp.loadingMessage}
-            envconfig={
-              getSelectedAppUrl(selectedApp, true) || selectedApp.envconfig
-            }
+            module={selectedApp.module}
+            url={selectedApp.url}
+            selectedApp={selectedApp}
+            component={selectedApp.component}
+            appWindowConfig={selectedApp.appWindowConfig}
             key={key}
+            selectedAppTitle={selectedAppTitle}
           />
         )}
-        {selectedModuleAppObject.framework == "ANGULAR" &&
-          selectedApp.scope &&
-          selectedApp && (
-            <AngularAppRenderer
-              scope={selectedApp.scope}
-              module={selectedApp.module}
-              url={selectedApp.url}
-              selectedApp={selectedApp}
-              component={selectedApp.component}
-              appWindowConfig={selectedApp.appWindowConfig}
-              key={key}
-              selectedAppTitle={selectedAppTitle}
-            />
-          )}
-      </div>
     </div>
   );
 };

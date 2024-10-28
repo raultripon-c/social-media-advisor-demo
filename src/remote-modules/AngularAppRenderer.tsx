@@ -39,11 +39,23 @@ export function AngularAppRenderer(props: any) {
   const { ready, failed } = useDynamicMFLoader({
     url: props.url,
   });
-  const element = document.createElement("script");
-  element.src = "https://pie-dev-onephenom.phenompro.com/scripts.js";
-  element.type = "text/javascript";
-  element.async = true;
-  document.head.appendChild(element);
+  const checkCrmScriptIsLoaded = document.getElementById('crm-script');
+  if(!checkCrmScriptIsLoaded) {
+    const element = document.createElement("script");
+    element.src = "https://pie-dev-onephenom.phenompro.com/scripts.js";
+    element.type = "text/javascript";
+    element.async = true;
+    element.id = 'crm-script';
+    document.head.appendChild(element);
+  }
+
+  const cmsStylesToRemove = ["txe-cms-style-main", "txe-cms-style-app"];
+  cmsStylesToRemove.forEach((styleId) => {
+    const styleElement = document.getElementById(styleId);
+    if (styleElement) {
+      styleElement.remove();
+    }
+  });
   // useEffect(() => {
 
   //   const shadowRoot = containerRef.current.attachShadow({ mode: 'open' });
