@@ -121,4 +121,4 @@ export const metricsDataForOtherRegions = [
     }
 ];
 
-export const campaignColumns = ["Campaign Name", "Status", "Channel", "Conversion", "Audience"];
+export const campaignColumns = ["Campaign Name", "Status"];
