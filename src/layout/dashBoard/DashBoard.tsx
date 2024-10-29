@@ -191,7 +191,7 @@ const DashBoard = () => {
         //set in session storage also
         sessionStorage.setItem(
           "locale",
-          siteMetaDataResp.data.data.defaultLanguage
+          siteMetaDataResp.data.data.defaultLanguage.toLowerCase()
         );
       }
       if (!Object.keys(siteMetaData).length) {
