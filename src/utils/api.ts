@@ -1,4 +1,5 @@
 import axios, { AxiosResponse } from "axios";
+import { APIService } from "./api.service";
 declare global {
   interface Window {
     keycloakInstance: any;
@@ -13,16 +14,30 @@ export const API = axios.create({
     return (status >= 200 && status < 300) || status === 403; // default
   },
 });
+
+const redirectToLogin = () => {
+  const keycloakUrl = (window as any)._env_.APP_KEYCLOAK_URL;
+  if (keycloakUrl.endsWith('/login')) {
+    const newUrl = keycloakUrl.slice(0, keycloakUrl.length - '/login'.length);
+    window.location.href = newUrl;
+  } else {
+    window.location.href = keycloakUrl;
+  }
+};
+
 const waitForToken = () => {
+  const { code, type } = window.orgInfo;
   if (window.keycloakInstance.isTokenExpired()) {
     return new Promise<void>((resolve, reject) => {
       window.keycloakInstance
         .updateToken(-1)
-        .then(function () {
+        .then(async () => {
+          await APIService.triggerTxeLogin(code, type)
           resolve();
         })
         .catch(function () {
           sessionStorage.clear();
+          redirectToLogin();
         });
       // }
     });
