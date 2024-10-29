@@ -12,7 +12,7 @@ declare global {
 }
 
 const Assets = () => {
-    removeStyleByUrl("https://cdn-pipeline.phenompro.com/CareerConnectResources/Candidateapp/common/cpui/camp-default.png");
+    removeStyleByUrl("camp-default.png");
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const storeData = useSelector((state: AppStore) => state.customer);
     const selectedModuleAppObject = useSelector((state: any) => {
