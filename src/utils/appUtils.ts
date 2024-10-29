@@ -309,3 +309,14 @@ export function setObjectReferenceFromString(obj: any, str: string, value: any) 
 	const lastObj = keys.reduce((a, i) => (a[i] = a[i] || {}), obj);
 	if (lastKey) lastObj[lastKey] = value;
 }
+
+export const removeStyleByUrl = (url: string) => {
+  const styleTags = document.querySelectorAll("style");
+
+  styleTags.forEach((styleTag) => {
+    if (styleTag.textContent?.includes(url)) {
+      styleTag.remove();
+    }
+  });
+};
+

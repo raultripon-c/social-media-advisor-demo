@@ -71,10 +71,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
     if (!selectedTenant.length) {
       const refNum = window.location.pathname.split("/")[2];
 
-      if (!window.location.pathname.includes("summary")) {
-        const tenantsUrl = `${(window as any)._env_.APP_API_URL}/customers/tenants/${refNum}`;
-        APIService.getTenants(tenantsUrl, dispatch);
-      }
+      const tenantsUrl = `${(window as any)._env_.APP_API_URL}/customers/tenants/${refNum}`;
+      APIService.getTenants(tenantsUrl, dispatch);
     }
 
     let response = JSON.parse(sessionStorage.getItem("allapps") || "[]");
@@ -92,16 +90,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
     if (!window.keycloakInstance.bearer_token) window.keycloakInstance.bearer_token = "Bearer " + keycloak.token;
   }, []);
 
-  useEffect(() => {
-    if (selectedApp || selectedAppFromSession) {
-      const refNum = window.location.pathname.split("/")[2];
-
-      if (refNum != "summary") {
-        const tenantsUrl = `${(window as any)._env_.APP_API_URL}/customers/tenants/${refNum}`;
-        APIService.getTenants(tenantsUrl, dispatch);
-      }
-    }
-  }, []);
 
   //for setting selectedApp in session
   useEffect(() => {

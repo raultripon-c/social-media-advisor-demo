@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { AppStore } from "store";
 import { Loader } from "@phenom/react-ui-components";
+import { removeStyleByUrl } from "../../utils/appUtils";
 
 declare global {
   interface Window {
@@ -10,6 +11,7 @@ declare global {
 }
 
 const ContentHub: React.FC = () => {
+  removeStyleByUrl("camp-default.png");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const storeData = useSelector((state: AppStore) => state.customer);
   const selectedModuleAppObject = useSelector((state: any) => {
