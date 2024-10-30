@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { AppStore } from "store";
 import { Loader } from "@phenom/react-ui-components";
 import { removeElementsById } from "../../utils/helper/utilizer";
+import { removeStyleByUrl } from "../../utils/appUtils";
 
 declare global {
   interface Window {
@@ -11,6 +12,7 @@ declare global {
 }
 
 const ContentHub: React.FC = () => {
+  removeStyleByUrl("camp-default.png");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const storeData = useSelector((state: AppStore) => state.customer);
   const selectedModuleAppObject = useSelector((state: any) => {
@@ -53,10 +55,9 @@ const ContentHub: React.FC = () => {
           window.txEmbed.embedModules(selectedApp?.embedType, "#tools-body-container", {
             refNum: storeData.selectedTenant.refNum,
             token: window.keycloakInstance.token,
-          }, () => {
-            setIsLoading(false);
           });
         }
+        setIsLoading(false);
       });
     }
   }, [storeData]);

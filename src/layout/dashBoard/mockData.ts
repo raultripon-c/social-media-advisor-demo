@@ -56,7 +56,7 @@ export const tenantData = [
             appType: "external",
             appConfig: { link: CMS_URL + "/tier3" },
             context: "customer",
-            requestParams: { lsrc: "txe", lsw: "_self", refNum: "", customerCode: "" },
+            requestParams: { lsrc: "txe", lsw: "_self", refNum: "", customerCode: "", site: ""},
         },
     },
 ];
@@ -127,4 +127,4 @@ export const metricsDataForOtherRegions = [
     }
 ];
 
-export const campaignColumns = ["Campaign Name", "Status", "Channel", "Conversion", "Audience"];
+export const campaignColumns = ["Campaign Name", "Status"];

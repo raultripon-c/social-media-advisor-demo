@@ -3,6 +3,8 @@ import { useSelector } from "react-redux";
 import { AppStore } from "store";
 import { Loader } from "@phenom/react-ui-components";
 import { removeElementsById } from "../../utils/helper/utilizer";
+import './Assets.css';
+import { removeStyleByUrl } from "../../utils/appUtils";
 
 declare global {
     interface Window {
@@ -11,6 +13,7 @@ declare global {
 }
 
 const Assets = () => {
+    removeStyleByUrl("camp-default.png");
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const storeData = useSelector((state: AppStore) => state.customer);
     const selectedModuleAppObject = useSelector((state: any) => {

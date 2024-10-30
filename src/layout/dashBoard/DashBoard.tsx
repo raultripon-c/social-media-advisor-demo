@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { EmptyState, Button, Loader, GreetingCard, OverviewCard, TenantDetailCard } from "@phenom/react-ui-components";
+import {
+  EmptyState,
+  Button,
+  Loader,
+  GreetingCard,
+  OverviewCard,
+  TenantDetailCard,
+  Table
+} from "@phenom/react-ui-components";
 import { AppStore } from "store";
 import { setAppDetails, setAppsFromAPI } from "../../store/apps/actions";
 import { setSiteMetaData } from "../../store/customer/actions";
@@ -12,7 +20,14 @@ import { API } from "../../utils/api";
 import { APIService } from "../../utils/api.service";
 import { getFullDate, getLastUpdatedDate, getGreetingMessage } from "./utils";
 import { RecommendedPages } from "../../components/recommendedPages/RecommendedPages";
-import { tenantData, staticData, metricsDataForIndia, metricsDataForOtherRegions, tenantImageUrl } from "./mockData";
+import {
+  tenantData,
+  staticData,
+  metricsDataForIndia,
+  metricsDataForOtherRegions,
+  campaignColumns,
+  tenantImageUrl,
+} from "./mockData";
 
 const DashBoard = () => {
   interface MetricData {
@@ -22,36 +37,53 @@ const DashBoard = () => {
     tooltipText: string;
   };
 
+  interface CampaignData {
+    "Campaign Name": { name: string };
+    Status: string;
+  };
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const selectedTenant = useSelector((state: AppStore) => state.customer.selectedTenant);
-  const siteMetaData = useSelector((state: AppStore) => state.customer.siteMetaData);
+  const selectedTenant = useSelector(
+    (state: AppStore) => state.customer.selectedTenant
+  );
+  const siteMetaData = useSelector(
+    (state: AppStore) => state.customer.siteMetaData
+  );
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [filteredData, setFilteredData] = useState<any[]>([]);
   const [totalAppsData, setTotalAppsData] = useState<any[]>([]);
   const userName = window.keycloakInstance.tokenParsed.name;
   const [userDetails, setDetails] = useState<any>();
   const [analyticsMetaData, setAnalyticsMetaData] = useState<any>(null);
-  const [isJobTrackerEnabled, setIsJobTrackerEnabled] = useState<boolean>(false);
+  const [isJobTrackerEnabled, setIsJobTrackerEnabled] =
+    useState<boolean>(false);
   const [metricsData, setMetricsData] = useState<MetricData[]>([]);
   const [currentTenantData, setCurrentTenantData] = useState<any>([]);
 
+  const [campaignData, setCampaignData] = useState<CampaignData[]>([]);
   const userHasCmsAccess =
     window?.keycloakInstance?.userInfo?.resources["cms"] &&
     window?.keycloakInstance?.userInfo?.resources["cms"].roles.length > 0;
 
   const fetchCurrentTenantData = async () => {
-    const tenantResp: any = await APIService.getTenantDetails(selectedTenant.refNum);
+    const tenantResp: any = await APIService.getTenantDetails(
+      selectedTenant.refNum
+    );
     if (tenantResp.data.status === "success") {
       return tenantResp.data.data.docs;
     }
   };
 
+  const { code, type } = window.orgInfo;
+
   const getAllApps = async () => {
     try {
       const response = useSelector((state: AppStore) => state.app.allApps);
       if (response) {
-        const sortedData = response.sort((a: any, b: any) => a.name.localeCompare(b.name));
+        const sortedData = response.sort((a: any, b: any) =>
+          a.name.localeCompare(b.name)
+        );
         sessionStorage.setItem("allapps", JSON.stringify(sortedData));
         setTotalAppsData(sortedData);
         setFilteredData(sortedData);
@@ -65,11 +97,21 @@ const DashBoard = () => {
   };
 
   const handleButtonClick = (text: string, config?: object) => {
-    const matchedApp = totalAppsData.find((app) => app.name.toLowerCase() === text.toLowerCase());
+    const matchedApp = totalAppsData.find(
+      (app) => app.name.toLowerCase() === text.toLowerCase()
+    );
     if (matchedApp) {
       navigateToApp(matchedApp);
     } else if (config) {
-      appSelectionHandler(config, navigate, selectedTenant?.customerCode, selectedTenant?.refNum, siteMetaData, dispatch, false);
+      appSelectionHandler(
+        config,
+        navigate,
+        selectedTenant?.customerCode,
+        selectedTenant?.refNum,
+        siteMetaData,
+        dispatch,
+        false
+      );
     } else {
       console.log(`Clicked on ${text}`);
     }
@@ -77,7 +119,9 @@ const DashBoard = () => {
 
   const checkJobTrackerEnabled = (startDate: string) => {
     if (analyticsMetaData?.jobTrackersStartDate) {
-      const actualDate = new Date(analyticsMetaData.jobTrackersStartDate).toJSON();
+      const actualDate = new Date(
+        analyticsMetaData.jobTrackersStartDate
+      ).toJSON();
       const jobTrackingDate = getFullDate(actualDate);
       const selectedStartDate = getFullDate(startDate);
       return selectedStartDate >= jobTrackingDate;
@@ -88,12 +132,23 @@ const DashBoard = () => {
   const navigateToApp = (selectedApp: any) => {
     sessionStorage.setItem("selectedApp", JSON.stringify(selectedApp));
     dispatch(setAppDetails(selectedApp));
-    appSelectionHandler(selectedApp, navigate, selectedTenant?.customerCode, selectedTenant?.refNum, siteMetaData, dispatch, true);
+    appSelectionHandler(
+      selectedApp,
+      navigate,
+      selectedTenant?.customerCode,
+      selectedTenant?.refNum,
+      siteMetaData,
+      dispatch,
+      true
+    );
   };
 
   const handleLiveUrlForSite = async (url: string): Promise<string | null> => {
     try {
-      const response = await APIService.getDomainUrl(selectedTenant.refNum, url);
+      const response = await APIService.getDomainUrl(
+        selectedTenant.refNum,
+        url
+      );
       if (response?.data?.status === "success") {
         const domainUrl = response?.data?.data;
         if (domainUrl && new URL(domainUrl).hostname) {
@@ -108,32 +163,36 @@ const DashBoard = () => {
 
   const fetchTenantLangs = async () => {
     try {
-      const resp = await APIService.getSupportedLangs(selectedTenant.refNum)
+      const resp = await APIService.getSupportedLangs(selectedTenant.refNum);
       if (resp.data.status === "success") {
         return resp.data.data;
       }
       return null;
-    }
-    catch (err) {
+    } catch (err) {
       console.error("Error fetching tenant languages", err);
     }
-  }
+  };
 
   const handleDomainUrlForSite = async (supportedLangs: Array<any>) => {
     try {
       let domainUrl;
-      const siteMetaDataResp: any = await APIService.getSiteMetaData(selectedTenant.refNum);
+      const siteMetaDataResp: any = await APIService.getSiteMetaData(
+        selectedTenant.refNum
+      );
       if (siteMetaDataResp.data.status === "success") {
         domainUrl = siteMetaDataResp?.data?.data?.domain;
       }
       const metaData = siteMetaDataResp.data.data;
-      metaData['supportedLangs'] = supportedLangs;
+      metaData["supportedLangs"] = supportedLangs;
       if (siteMetaDataResp.data.data.defaultLanguage) {
-        metaData['defaultLang'] = {
-          'language': siteMetaDataResp.data.data.defaultLanguage.toLowerCase()
-        }
+        metaData["defaultLang"] = {
+          language: siteMetaDataResp.data.data.defaultLanguage.toLowerCase(),
+        };
         //set in session storage also
-        sessionStorage.setItem("locale", siteMetaDataResp.data.data.defaultLanguage);
+        sessionStorage.setItem(
+          "locale",
+          siteMetaDataResp.data.data.defaultLanguage.toLowerCase()
+        );
       }
       if (!Object.keys(siteMetaData).length) {
         dispatch(setSiteMetaData(metaData));
@@ -146,7 +205,9 @@ const DashBoard = () => {
 
   const fetchMetrics = async () => {
     try {
-      const metaData = await APIService.getMetaDataByRefNum(selectedTenant.refNum);
+      const metaData = await APIService.getMetaDataByRefNum(
+        selectedTenant.refNum
+      );
       setAnalyticsMetaData(metaData);
       const isTrackerEnabled = checkJobTrackerEnabled(new Date().toString());
       setIsJobTrackerEnabled(isTrackerEnabled);
@@ -157,26 +218,50 @@ const DashBoard = () => {
       const metricResponses = await Promise.all(
         metrics.map(async (metric) => {
           try {
-            const currentResponse = await APIService.getMetrics(metric.name, metaData, isTrackerEnabled);
-            const currentValue = currentResponse.data[0]?.current || currentResponse.data[0]?.CURRENT_VALUE || currentResponse.data[0].value;
+            const currentResponse = await APIService.getMetrics(
+              metric.name,
+              metaData,
+              isTrackerEnabled
+            );
+            const currentValue =
+              currentResponse.data[0]?.current ||
+              currentResponse.data[0]?.CURRENT_VALUE ||
+              currentResponse.data[0].value;
 
             let previousValue = null;
             let rate = null;
 
             // Only fetch the previous metric if not in India
             if (!isIndia) {
-              const previousResponse = await APIService.getMetrics(`${metric.name.replace("Current", "Previous")}`, metaData, isTrackerEnabled);
-              previousValue = previousResponse.data[0]?.previous || previousResponse.data[0]?.PREVIOUS_VALUE || previousResponse.data[0].value;
+              const previousResponse = await APIService.getMetrics(
+                `${metric.name.replace("Current", "Previous")}`,
+                metaData,
+                isTrackerEnabled
+              );
+              previousValue =
+                previousResponse.data[0]?.previous ||
+                previousResponse.data[0]?.PREVIOUS_VALUE ||
+                previousResponse.data[0].value;
 
               // Calculate rate of change
               if (previousValue) {
-                rate = ((currentValue - previousValue) / previousValue * 100).toFixed(2);
+                rate = (
+                  ((currentValue - previousValue) / previousValue) *
+                  100
+                ).toFixed(2);
               }
-            } return {
+            }
+            return {
               title: metric.title,
-              previous: previousValue ? previousValue : currentResponse.data[0]?.previous,
+              previous: previousValue
+                ? previousValue
+                : currentResponse.data[0]?.previous,
               current: currentValue,
-              rate: previousValue ? rate : (currentResponse.data[0]?.rate || currentResponse.data[0]?.PERC_CHANGE || currentResponse.data[0].rate),
+              rate: previousValue
+                ? rate
+                : currentResponse.data[0]?.rate ||
+                  currentResponse.data[0]?.PERC_CHANGE ||
+                  currentResponse.data[0].rate,
               text: metric.text,
             };
           } catch (error) {
@@ -187,8 +272,8 @@ const DashBoard = () => {
       );
       const formatAvgTimeOnPage = (value: any) => {
         const totalSeconds = parseFloat(value);
-        const minutes = Math.floor(totalSeconds / 60); 
-        const seconds = Math.round(totalSeconds % 60); 
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = Math.round(totalSeconds % 60);
         return `${minutes} min ${seconds} sec`;
       };
       const formatConversionRate = (value: any) => `${value}%`;
@@ -196,9 +281,14 @@ const DashBoard = () => {
         if (rate === undefined) return "N/A";
         return rate >= 0 ? `+${rate}%` : `${rate}%`;
       };
-      const filteredMetricResponses = metricResponses.filter((metric) => metric !== null);
+      const filteredMetricResponses = metricResponses.filter(
+        (metric) => metric !== null
+      );
       const formattedData = filteredMetricResponses.map((metric) => {
-        let value = metric.current !== null && metric.current !== undefined ? `${metric.current}` : "N/A";
+        let value =
+          metric.current !== null && metric.current !== undefined
+            ? `${metric.current}`
+            : "N/A";
         let change = formatChange(metric.rate);
         if (metric.title === "Average Time on Site" && metric.current) {
           value = formatAvgTimeOnPage(metric.current);
@@ -218,9 +308,30 @@ const DashBoard = () => {
     }
   };
 
+  const campaignsList = async () => {
+    try {
+      const refNum = selectedTenant?.refNum;
+      await APIService.registerToken(refNum, code, type);
+      const campaigns = await APIService.getCampaigns(selectedTenant)
+      const formattedData = campaigns.map((campaign: any) => ({
+        "Campaign Name": {
+          name: campaign.campaignName
+        },
+        Status: campaign.status ? `${campaign.status}` : "N/A",
+        Channel: campaign.channel ? `${campaign.channel}` : "N/A",
+        Conversion: campaign.conversion ? `${campaign.conversion}` : "N/A",
+        Audience: campaign.audience ? `${campaign.audience}` : "N/A"
+      }));
+      setCampaignData(formattedData);
+    } catch (error) {
+      console.error("Error fetching campaigns list:", error);
+    }
+  };
+
   useEffect(() => {
     if (selectedTenant?.refNum) {
       fetchMetrics();
+      campaignsList();
     }
   }, [selectedTenant]);
 
@@ -241,10 +352,16 @@ const DashBoard = () => {
   useEffect(() => {
     const getLoggedInUserInfo = async () => {
       try {
-        const loggedInUserEmail = window.keycloakInstance?.tokenParsed?.userDetails?.userName;
+        const loggedInUserEmail =
+          window.keycloakInstance?.tokenParsed?.userDetails?.userName;
         if (!loggedInUserEmail) return;
-        const endPoint = apiUrl.getUserBySearch.replace("{username}", loggedInUserEmail);
-        const response = await API.get(`${(window as any)._env_.APP_API_URL}/${endPoint}`);
+        const endPoint = apiUrl.getUserBySearch.replace(
+          "{username}",
+          loggedInUserEmail
+        );
+        const response = await API.get(
+          `${(window as any)._env_.APP_API_URL}/${endPoint}`
+        );
         setDetails(response?.data?.data);
       } catch (error) {
         console.log(error);
@@ -263,7 +380,7 @@ const DashBoard = () => {
 
     // Cleanup actions when component unmounts
     return () => {
-      window.removeEventListener("txeLoginEvent", () => { });
+      window.removeEventListener("txeLoginEvent", () => {});
     };
   }, []);
 
@@ -285,10 +402,12 @@ const DashBoard = () => {
         />
       </div>
       <div className="tenant-details-container">
-        {userHasCmsAccess && (currentTenantData.length ? (
-          (<TenantDetailCard
+        {currentTenantData.length ? (
+          <TenantDetailCard
             tenantLink={`${currentTenantData[0]?.domain}`}
-            lastUpdated={`Last Updated: ${getLastUpdatedDate(currentTenantData[0]?.lastUpdated)}`}
+            lastUpdated={`Last Updated: ${getLastUpdatedDate(
+              currentTenantData[0]?.lastUpdated
+            )}`}
             imageSrc={tenantImageUrl}
             navigateOnClick={() => {
               appSelectionHandler(
@@ -301,22 +420,28 @@ const DashBoard = () => {
                 false
               );
             }}
-          />)
-        ) : <Loader title="Loading tenant details.." />)}
+          />
+        ) : (
+          <Loader title="Loading tenant details.." />
+        )}
       </div>
       <div className="overview-container">
-        {metricsData.length > 0 && <h2 className="overview-heading">Overview</h2>}
+        {metricsData.length > 0 && (
+          <h2 className="overview-heading">Overview</h2>
+        )}
         {[0, 1].map((rowIndex) => (
           <div className="overview-grid-container" key={rowIndex}>
-            {metricsData.slice(rowIndex * 3, (rowIndex + 1) * 3).map((item, index) => (
-              <OverviewCard
-                key={index}
-                title={item.title}
-                value={item.value}
-                change={item.change}
-                tooltipText={item.tooltipText}
-              />
-            ))}
+            {metricsData
+              .slice(rowIndex * 3, (rowIndex + 1) * 3)
+              .map((item, index) => (
+                <OverviewCard
+                  key={index}
+                  title={item.title}
+                  value={item.value}
+                  change={item.change}
+                  tooltipText={item.tooltipText}
+                />
+              ))}
           </div>
         ))}
       </div>
@@ -340,7 +465,15 @@ const DashBoard = () => {
           <EmptyState displayText="No Apps found" />
         )}
       </div>
-      {userHasCmsAccess && <RecommendedPages />}
+      <RecommendedPages />
+      {campaignData.length > 0 && (
+        <>
+          <h2 className="overview-heading">Campaigns</h2>
+          <div className="table-container">
+            <Table columns={campaignColumns} data={campaignData} />
+          </div>
+        </>
+      )}
     </div>
   );
 };
