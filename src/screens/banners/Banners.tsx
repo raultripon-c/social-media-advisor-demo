@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { AppStore } from "store";
 import { Loader } from "@phenom/react-ui-components";
+import { removeElementsById } from "../../utils/helper/utilizer";
 import { removeStyleByUrl } from "../../utils/appUtils";
 
 declare global {
@@ -54,6 +55,7 @@ const Banners = () => {
     };
 
     if (storeData && storeData.selectedTenant && storeData.selectedTenant.refNum) {
+      removeElementsById('crm-stylesheet');
       loadScript().then(() => {
         if (window.txEmbed) {
           window.txEmbed.embedModules("banners", "#tools-body-container", {

@@ -15,8 +15,14 @@ export const staticData = [
     },
     {
         displayText: "Article",
-        value: "Blog",
+        value: "AI Blogs",
         icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Company_notification.svg",
+        config: {
+            appType: "external",
+            appConfig: { link: CMS_URL + "/tier3" },
+            context: "customer",
+            requestParams: { lsrc: "txe", lsw: "_self", refNum: "", customerCode: "", route: "blogs-new", site: ""},
+        }
     },
     {
         displayText: "Campaigns",

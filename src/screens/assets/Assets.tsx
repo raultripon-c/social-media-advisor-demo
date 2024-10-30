@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { AppStore } from "store";
 import { Loader } from "@phenom/react-ui-components";
+import { removeElementsById } from "../../utils/helper/utilizer";
 import './Assets.css';
 import { removeStyleByUrl } from "../../utils/appUtils";
 
@@ -48,6 +49,7 @@ const Assets = () => {
         };
 
         if (storeData && storeData.selectedTenant && storeData.selectedTenant.refNum) { 
+            removeElementsById('crm-stylesheet');
             loadScript().then(() => {
                 if (window.txEmbed) {
                     window.txEmbed.embedModules("assets", "#tools-body-container", {refNum: storeData.selectedTenant.refNum, token: window.keycloakInstance.token });
