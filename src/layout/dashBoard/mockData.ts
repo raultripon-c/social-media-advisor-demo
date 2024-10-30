@@ -1,5 +1,5 @@
 const CMS_URL = (window as any)._env_.CMS_URL;
-export const tenantImageUrl = "https://assets.phenompeople.com/CareerConnectResources/prod/WAMEGLOBAL/images/State=Emptystate-1728467620342.png";
+export const tenantImageUrl = "https://pp-cdn.phenompeople.com/CareerConnectResources/q/pcs/common/dashboardHomePage.jpg";
 
 export const staticData = [
     {

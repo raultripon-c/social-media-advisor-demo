@@ -307,7 +307,7 @@ export const APIService = {
       return campaigns;
     } catch (error) {
       console.error('Error fetching campaigns:', error);
-      toast.error("Error fetching campaigns");
+      // toast.error("Error fetching campaigns");
       return [];
     }
   },
