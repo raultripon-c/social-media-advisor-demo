@@ -7,7 +7,7 @@ import { useKeycloak } from "phenom-auth-react-adapter";
 import { AppStore } from "store";
 import Toast from "../components/Toast/Toast";
 import { IRoute, appRoutes } from "../routes/AppRoutes";
-import { setUserRoles } from "../store/customer/actions";
+import { setUserRoles, setSiteMetaData } from "../store/customer/actions";
 import RBAJson from "../utils/RBA.json";
 import {
   appSelectionHandler,
@@ -15,6 +15,7 @@ import {
   getMfRoutes,
   showSidebar,
   transformAppData,
+  handleDomainUrlForSite
 } from "../utils/appUtils";
 
 import sessionTracker from "phenom-session-tracker";
@@ -67,7 +68,11 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   const fetchedApps = useSelector((state: any) => state.app.allApps);
 
   useEffect(() => {
-    // const selectedTenantFromSession = JSON.parse(sessionStorage.getItem("selectedTenant") || "null");
+    const setCmsSiteMetaData = async () => {
+      const tenantSupportedLangs = await APIService.getSupportedLangs(refNum)
+      return await handleDomainUrlForSite(tenantSupportedLangs, selectedTenant, dispatch, setSiteMetaData, siteMetaData);
+    }
+    setCmsSiteMetaData();
     if (!selectedTenant.length) {
       const refNum = window.location.pathname.split("/")[2];
 
@@ -164,9 +169,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       currentApp?.name &&
       ((selectedTenant?.customerCode && selectedTenant?.refNum) || currentApp.context === "platform")
     ) {
-      if(Object.keys(siteMetaData).length || currentApp?.appType !== "external" ) {
-        appSelectionHandler(currentApp, navigate, selectedTenant?.customerCode, selectedTenant?.refNum, siteMetaData, dispatch);
-      }
+        appSelectionHandler(currentApp, navigate, selectedTenant?.customerCode, selectedTenant?.refNum, siteMetaData, dispatch, false, setSiteMetaData, selectedTenant);
     }
   }, [selectedApp, selectedTenant, selectedTenant?.refNum]);
 

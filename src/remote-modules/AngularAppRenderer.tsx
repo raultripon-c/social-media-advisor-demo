@@ -94,8 +94,8 @@ export function AngularAppRenderer(props: any) {
   
        const cssUrl = `${(window as any)._env_.CRM_URL}/${data["styles.css"]}`;
         
-       const link = document.createElement('link');
-       link.rel = 'stylesheet';
+       const link = document.createElement("link");
+       link.rel = "stylesheet";
        link.id = 'crm-stylesheet';
        link.href = cssUrl;
        document.head.appendChild(link);
@@ -106,7 +106,9 @@ export function AngularAppRenderer(props: any) {
     }
   }
   useEffect(() => {
-    fetchAndLoadScript()    
+    if (!document.getElementById("crm-styles")) {
+      fetchAndLoadScript();
+    }
     loadComponent();
     if (ready) {
       (async () => {

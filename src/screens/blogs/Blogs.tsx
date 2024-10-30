@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { AppStore } from "store";
 import { Loader } from "@phenom/react-ui-components";
 import { removeElementsById } from "../../utils/helper/utilizer";
-import { removeStyleByUrl } from "../../utils/appUtils";
+import { removeCrmStyles } from "../../utils/appUtils";
 
 declare global {
     interface Window {
@@ -11,7 +11,7 @@ declare global {
     }
 }
 const Blogs = () => {
-    removeStyleByUrl("camp-default.png");
+    removeCrmStyles();
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const storeData = useSelector((state: AppStore) => state.customer);
 
@@ -47,24 +47,37 @@ const Blogs = () => {
             });
         };
 
-        if (storeData && storeData.selectedTenant && storeData.selectedTenant.refNum) { 
-            removeElementsById('crm-stylesheet');
-            loadScript().then(() => {
-                if (window.txEmbed) {
-                    window.txEmbed.embedModules("blogs", "#tools-body-container", {refNum: storeData.selectedTenant.refNum, token: window.keycloakInstance.token });
+        if (
+          storeData &&
+          storeData.selectedTenant &&
+          storeData.selectedTenant.refNum
+        ) {
+          removeElementsById("crm-stylesheet");
+          loadScript().then(() => {
+            if (window.txEmbed) {
+              window.txEmbed.embedModules(
+                "blogs",
+                "#tools-body-container",
+                {
+                  refNum: storeData.selectedTenant.refNum,
+                  token: window.keycloakInstance.token,
+                },
+                () => {
+                  setIsLoading(false);
                 }
-                setIsLoading(false);
-            });
+              );
+            }
+          });
         }
     }, [storeData]);
     return (
         <div style={{ height: "100%"}}>
-            <div id="tools-body-container" style={{ height: "100%" }}></div>
-            {isLoading && (
+          {isLoading && (
                 <div>
                     <Loader title="Please Wait, Loading..." />
                 </div>
             )}
+            <div id="tools-body-container" style={{ height: "100%" }}></div>
         </div>
     );
 }

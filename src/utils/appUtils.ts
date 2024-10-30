@@ -5,6 +5,7 @@ import { RemoteModuleRenderer } from "../remote-modules/RemoteModuleRenderer";
 
 import { DATE_FORMAT, navigationHeaderApps, noShowSideBar } from "./constants";
 import { setAppDetails, setDashboardSelected } from "../store/apps/actions";
+import { APIService } from "./api.service";
 
 export const appSelectionHandler = (
   selectedApp: any,
@@ -12,8 +13,10 @@ export const appSelectionHandler = (
   customerCode: string,
   refNum: string,
   siteMetaData: any,
-  dispatch?: any,
-  openInNewTab?: boolean
+  dispatch: any,
+  openInNewTab: boolean,
+  setSiteMetaData: any,
+  selectedTenant: any
 ) => {
   let appType = selectedApp.appType;
   const mfRoute = selectedApp.appConfig?.route;
@@ -55,19 +58,24 @@ export const appSelectionHandler = (
       dispatch(setAppDetails({}));
       dispatch(setDashboardSelected(false));
       sessionStorage.removeItem("selectedApp");
-      
-      const link = getLink(selectedApp, {
-        refNum: refNum,
-        customerCode: customerCode,
-        site: btoa(JSON.stringify(siteMetaData))
+      const setCmsSiteMetaData = async () => {
+        const tenantSupportedLangs = await APIService.getSupportedLangs(refNum)
+        return await handleDomainUrlForSite(tenantSupportedLangs, selectedTenant, dispatch, setSiteMetaData, siteMetaData);
+      }
+      setCmsSiteMetaData().then((metaData) => { 
+        const link = getLink(selectedApp, {
+          refNum: refNum,
+          customerCode: customerCode,
+          site: btoa(JSON.stringify(metaData))
+        });
+        if (link && !isEmpty(link)) {
+          navigateToNewTab(link);
+        }
+        else {
+          toast.dismiss();
+          toast.error("Link is not provided for navigation");
+        }
       });
-      if (link && !isEmpty(link)) {
-        navigateToNewTab(link);
-      }
-      else {
-        toast.dismiss();
-        toast.error("Link is not provided for navigation");
-      }
       break;
     case "script":
       if (openInNewTab) {
@@ -310,13 +318,44 @@ export function setObjectReferenceFromString(obj: any, str: string, value: any) 
 	if (lastKey) lastObj[lastKey] = value;
 }
 
-export const removeStyleByUrl = (url: string) => {
+export const removeCrmStyles = () => {
   const styleTags = document.querySelectorAll("style");
 
   styleTags.forEach((styleTag) => {
-    if (styleTag.textContent?.includes(url)) {
+    if (styleTag.textContent?.includes("camp-default.png")) {
       styleTag.remove();
     }
   });
+
+  const crmStyles = document.getElementById("crm-styles");
+  crmStyles && document.head.removeChild(crmStyles);
 };
 
+
+export const handleDomainUrlForSite = async (supportedLangs: Array<any>, selectedTenant: any, dispatch: any, setSiteMetaData: any, siteMetaData: any) => {
+  try {
+    let domainUrl;
+    const siteMetaDataResp: any = await APIService.getSiteMetaData(selectedTenant.refNum);
+    if (siteMetaDataResp.data.status === "success") {
+      domainUrl = siteMetaDataResp?.data?.data?.domain;
+    }
+    const metaData = siteMetaDataResp.data.data;
+    metaData["supportedLangs"] = supportedLangs;
+    if (siteMetaDataResp.data.data.defaultLanguage) {
+      metaData["defaultLang"] = {
+        language: siteMetaDataResp.data.data.defaultLanguage.toLowerCase(),
+      };
+      // set in session storage also
+      sessionStorage.setItem(
+        "locale",
+        siteMetaDataResp.data.data.defaultLanguage.toLowerCase()
+      );
+    }
+    if (!Object.keys(siteMetaData).length) {
+      dispatch(setSiteMetaData(metaData));
+    }
+    return metaData;
+  } catch (error) {
+    console.error("Error fetching domain URL for site", error);
+  }
+};

@@ -13,7 +13,7 @@ import {
 import { AppStore } from "store";
 import { setAppDetails, setAppsFromAPI } from "../../store/apps/actions";
 import { setSiteMetaData } from "../../store/customer/actions";
-import { appSelectionHandler } from "../../utils/appUtils";
+import { appSelectionHandler, handleDomainUrlForSite } from "../../utils/appUtils";
 import "./DashBoard.scss";
 import { apiUrl } from "../../utils/constants";
 import { API } from "../../utils/api";
@@ -110,7 +110,9 @@ const DashBoard = () => {
         selectedTenant?.refNum,
         siteMetaData,
         dispatch,
-        false
+        false,
+        setSiteMetaData,
+        selectedTenant
       );
     } else {
       console.log(`Clicked on ${text}`);
@@ -139,7 +141,9 @@ const DashBoard = () => {
       selectedTenant?.refNum,
       siteMetaData,
       dispatch,
-      true
+      true,
+      setSiteMetaData,
+      selectedTenant
     );
   };
 
@@ -159,48 +163,6 @@ const DashBoard = () => {
       console.error("Error fetching live URL for site", error);
     }
     return url;
-  };
-
-  const fetchTenantLangs = async () => {
-    try {
-      const resp = await APIService.getSupportedLangs(selectedTenant.refNum);
-      if (resp.data.status === "success") {
-        return resp.data.data;
-      }
-      return null;
-    } catch (err) {
-      console.error("Error fetching tenant languages", err);
-    }
-  };
-
-  const handleDomainUrlForSite = async (supportedLangs: Array<any>) => {
-    try {
-      let domainUrl;
-      const siteMetaDataResp: any = await APIService.getSiteMetaData(
-        selectedTenant.refNum
-      );
-      if (siteMetaDataResp.data.status === "success") {
-        domainUrl = siteMetaDataResp?.data?.data?.domain;
-      }
-      const metaData = siteMetaDataResp.data.data;
-      metaData["supportedLangs"] = supportedLangs;
-      if (siteMetaDataResp.data.data.defaultLanguage) {
-        metaData["defaultLang"] = {
-          language: siteMetaDataResp.data.data.defaultLanguage.toLowerCase(),
-        };
-        //set in session storage also
-        sessionStorage.setItem(
-          "locale",
-          siteMetaDataResp.data.data.defaultLanguage.toLowerCase()
-        );
-      }
-      if (!Object.keys(siteMetaData).length) {
-        dispatch(setSiteMetaData(metaData));
-      }
-      return domainUrl;
-    } catch (error) {
-      console.error("Error fetching domain URL for site", error);
-    }
   };
 
   const fetchMetrics = async () => {
@@ -369,13 +331,13 @@ const DashBoard = () => {
     };
     getLoggedInUserInfo();
     window.addEventListener("txeLoginEvent", async () => {
-      const tenantSupportedLangs = await fetchTenantLangs();
+      const tenantSupportedLangs = await APIService.getSupportedLangs(selectedTenant.refNum)
+      const metaData = await handleDomainUrlForSite(tenantSupportedLangs, selectedTenant, dispatch, setSiteMetaData, siteMetaData);
       const tenantData = await fetchCurrentTenantData();
-      const domainUrl = await handleDomainUrlForSite(tenantSupportedLangs);
-      const liveUrl = await handleLiveUrlForSite(`https://${domainUrl}`);
+      const liveUrl = await handleLiveUrlForSite(`https://${metaData.domain}`);
       const x = tenantData;
       x[0].domain = liveUrl;
-      domainUrl && setCurrentTenantData(x);
+      metaData && setCurrentTenantData(x);
     });
 
     // Cleanup actions when component unmounts
@@ -417,7 +379,9 @@ const DashBoard = () => {
                 selectedTenant?.refNum,
                 siteMetaData,
                 dispatch,
-                false
+                false,
+                setSiteMetaData,
+                selectedTenant
               );
             }}
           />

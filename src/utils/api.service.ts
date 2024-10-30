@@ -249,12 +249,15 @@ export const APIService = {
 
   getSupportedLangs: async (refNum: string) => {
     try {
-      const res = await API.post(
+      const resp = await API.post(
         `${(window as any)._env_.CMS_URL}/api/tenantLangs`,
         { refNum: refNum },
         { withCredentials: true }
       );
-      return res;
+      if (resp.data.status === "success") {
+        return resp.data.data;
+      }
+      return null;
     }
     catch (err) {
       console.error('Error fetching supported langs:', err);

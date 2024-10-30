@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { AppStore } from "store";
 import { Loader } from "@phenom/react-ui-components";
 import { removeElementsById } from "../../utils/helper/utilizer";
-import { removeStyleByUrl } from "../../utils/appUtils";
+import { removeCrmStyles } from "../../utils/appUtils";
 
 declare global {
   interface Window {
@@ -11,7 +11,7 @@ declare global {
   }
 }
 const Banners = () => {
-  removeStyleByUrl("camp-default.png");
+  removeCrmStyles();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const storeData = useSelector((state: AppStore) => state.customer);
   const selectedModuleAppObject = useSelector((state: any) => {
@@ -20,16 +20,6 @@ const Banners = () => {
   });
   var selectedApp = selectedModuleAppObject?.appConfig || {};
 
-  // TODO: Will remove this in future
-  const deleteCmsLoader = () => {
-    const targetLoaderDiv = document.querySelector("#tools-body-container");
-    if (targetLoaderDiv) {
-      const loaderDiv: HTMLElement | null = targetLoaderDiv.querySelector(".ppc-loading");
-      if (loaderDiv) {
-        loaderDiv.style.display = "none";
-      }
-    }
-  };
 
   useEffect(() => {
     const embedScriptId = selectedApp?.scriptId;
@@ -54,33 +44,37 @@ const Banners = () => {
       });
     };
 
-    if (storeData && storeData.selectedTenant && storeData.selectedTenant.refNum) {
+    if (
+      storeData &&
+      storeData.selectedTenant &&
+      storeData.selectedTenant.refNum
+    ) {
       removeElementsById('crm-stylesheet');
       loadScript().then(() => {
         if (window.txEmbed) {
-          window.txEmbed.embedModules("banners", "#tools-body-container", {
-            refNum: storeData.selectedTenant.refNum,
-            token: window.keycloakInstance.token,
-          });
-        }
-        setIsLoading(false);
-        // Will remove this in future
-        for (let i = 1; i <= 3; i++) {
-            setTimeout(() => {
-              deleteCmsLoader();
-            }, 5000);
+          window.txEmbed.embedModules(
+            "banners",
+            "#tools-body-container",
+            {
+              refNum: storeData.selectedTenant.refNum,
+              token: window.keycloakInstance.token,
+            },
+            () => {
+              setIsLoading(false);
+            }
+          );
         }
       });
     }
   }, [storeData]);
   return (
     <div>
-      <div id="tools-body-container"></div>
       {isLoading && (
         <div>
           <Loader title="Please Wait, Loading..." />
         </div>
       )}
+      <div id="tools-body-container"></div>
     </div>
   );
 };

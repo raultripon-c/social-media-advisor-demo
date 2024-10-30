@@ -8,6 +8,7 @@ import { AngularAppRenderer } from "./AngularAppRenderer";
 import { AppStore } from "store";
 import { appSelectionHandler, getAppByName } from "../utils/appUtils";
 import { setAppDetails } from "../store/apps/actions";
+import { setSiteMetaData } from "../store/customer/actions";
 import { MessageService } from "../MessageService";
 
 export const RemoteModuleRenderer = () => {
@@ -92,7 +93,11 @@ export const RemoteModuleRenderer = () => {
           navigate,
           selectedTenant?.customerCode,
           selectedTenant?.refNum,
-          siteMetaData
+          siteMetaData,
+          dispatch,
+          false,
+          setSiteMetaData,
+          selectedTenant
         );
         break;
       //add any other cases which has to be handled parent level
