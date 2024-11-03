@@ -119,9 +119,20 @@ const CrmStylesRenderer = () => {
     document.head.appendChild(crmStyles);
   };
 
+  const crmExternalStyles = [
+    { id: 'codemirror-css', src: 'codemirror.css' },
+    { id: 'font-awesome-css', src: 'font-awesome.css' },
+    { id: 'jquery-timepicker-css', src: 'jquery.timepicker.css' },
+    { id: 'daterangepicker-css', src: 'daterangepicker.css' }
+  ];
+
   const removeStyles = () => {
     const styles = document.getElementById('crm-index-styles');
     if (styles) document.head.removeChild(styles);
+    crmExternalStyles.forEach(style => {
+      const link = document.getElementById(style.id);
+      if (link) document.head.removeChild(link);
+    });
   };
 
   useEffect(() => {
@@ -131,6 +142,28 @@ const CrmStylesRenderer = () => {
     localStorage.setItem("CP_USER_LOGIN_TYPE", JSON.stringify("CP_LOGIN_TYPE_KEY_CLOAK"));
     code && localStorage.setItem("CP_KEY_CLOAK_ORG_CODE", JSON.stringify(code));
     type && localStorage.setItem("CP_KEY_CLOAK_ORG_TYPE", JSON.stringify(type));
+    
+    
+    const loadStyles = () => {
+      const crmHost = (window as any)._env_?.CRM_URL;
+      if (crmHost) {
+        crmExternalStyles.forEach(style => {
+          if (!document.getElementById(style.id)) {
+            const link = document.createElement('link');
+            link.id = style.id;
+            link.rel = 'stylesheet';
+            link.href = `${crmHost}/${style.src}`;
+            document.head.appendChild(link);
+          }
+        });
+      } else {
+        console.warn('CRM_URL is not defined in window._env_');
+      }
+    };
+    
+    loadStyles();
+    
+
     return () => {
       removeStyles();
     };
