@@ -53,7 +53,7 @@ export const APIService = {
         }
       })
       .catch((error) => {
-        toast.error("Error in fetching tenants");
+        // toast.error("Error in fetching tenants");
         console.log("Error in getting tenants : " + error);
         setAllTenants([]);
       }).finally(() => {
@@ -115,7 +115,7 @@ export const APIService = {
         dispatch(setSelectedTenant(response.data.data));
       })
       .catch((error: any) => {
-        toast.error("Error in fetching tenants");
+        // toast.error("Error in fetching tenants");
         console.log("Error in getting tenants : " + error);
       });
   },

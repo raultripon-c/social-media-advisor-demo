@@ -9,18 +9,24 @@ import dashboardInfo from "../../assets/images/dashboard/dashboardInfo.svg";
 import dashboardActive from "../../assets/svg/HomeVector.svg";
 import dashboardGrey from "../../assets/svg/HomeVectorGrey.svg";
 import { setAppDetails, setSidebarState, setDashboardSelected } from "../../store/apps/actions";
+import { setSiteMetaData } from "../../store/customer/actions";
 import {
   setCustomerTenants,
   setSelectedTenant,
 } from "../../store/customer/actions";
 import { CUSTOMER_LEVEL, PLATFORM, TENANT } from "../../utils/constants";
 import "./SideBar.scss";
+import { AppSelectionOptions } from "../../interfaces/AppSelectionOptions";
+import { appSelectionHandler } from "../../utils/appUtils";
 
 function ToolsSideBar(props: any) {
   const { categories, setCategories } = props;
   const dashboardSelected = useSelector((state: any) => state.app.dashboardSelected);
   const selectedTenant = useSelector(
     (state: AppStore) => state.customer.selectedTenant
+  );
+  const siteMetaData = useSelector(
+    (state: AppStore) => state.customer.siteMetaData
   );
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [disableAutoClose, setDisableAutoClose] = useState(true);
@@ -61,13 +67,28 @@ function ToolsSideBar(props: any) {
     handleCrmStyles();
   }, [sidebarOpen]);
   const handleAppSelection = (app: any) => {
-    dispatch(setDashboardSelected(false));
-    setSidebarOpen(true);
-    app && sessionStorage.setItem("selectedApp", JSON.stringify(app));
-    dispatch(setAppDetails(app));
-    sessionTracker.setCustomEvent("App Selected", {
-      "App Name": app?.name,
-    });
+    if(app?.name === "Experience Manager"){
+      const appSelectionOptions: AppSelectionOptions = {
+        selectedApp: app,
+        navigate: navigate,
+        customerCode: selectedTenant?.customerCode,
+        refNum: selectedTenant?.refNum,
+        siteMetaData: siteMetaData,
+        dispatch: dispatch,
+        openInNewTab: false,
+        setSiteMetaData: setSiteMetaData,
+        selectedTenant: selectedTenant,
+      }
+      appSelectionHandler(appSelectionOptions);
+    } else {
+      dispatch(setDashboardSelected(false));
+      setSidebarOpen(true);
+      app && sessionStorage.setItem("selectedApp", JSON.stringify(app));
+      dispatch(setAppDetails(app));
+      sessionTracker.setCustomEvent("App Selected", {
+        "App Name": app?.name,
+      });
+    }
   };
 
   return (

@@ -181,7 +181,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
         setSiteMetaData: setSiteMetaData,
         selectedTenant: selectedTenant,
       }
-        appSelectionHandler(appSelectionOptions);
+      appSelectionHandler(appSelectionOptions);
     }
   }, [selectedApp, selectedTenant, selectedTenant?.refNum]);
 

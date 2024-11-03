@@ -115,9 +115,6 @@ const handleExternalApp = async (
   customerCode: string,
   navigate: (path: string) => void
 ) => {
-  dispatch(setAppDetails({}));
-  dispatch(setDashboardSelected(false));
-  sessionStorage.removeItem("selectedApp");
 
   const tenantSupportedLangs = await APIService.getSupportedLangs(refNum);
   const metaData = await handleDomainUrlForSite(
@@ -336,8 +333,8 @@ export function findAppConfigByRoutes(apps: any = [], value: string): any {
   try {
     return apps.filter((element: any) => {
       try {
-        const currentAppPath = window.location.pathname.split('/').filter(Boolean)[2];
-        const configAppPath = element?.appConfig?.route.toLowerCase().split('/').filter(Boolean)[0];
+        const currentAppPath = window.location.pathname.split('/').filter(Boolean)[2] || "";
+        const configAppPath = element?.appConfig?.route?.toLowerCase().split('/').filter(Boolean)[0] || "";
         return configAppPath === currentAppPath;
       } catch (error) {
         console.error("An error occurred while filtering: ", error);
