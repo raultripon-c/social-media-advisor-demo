@@ -39,6 +39,15 @@ function ToolsSideBar(props: any) {
     sessionStorage.removeItem("selectedApp");
     navigate(`${selectedTenant?.customerCode}/${selectedTenant?.refNum}/summary`);
   };
+  const handleCrmStyles = () => {
+    const buttonElement = document.querySelector('.template-editor-page .main-div .template-editor-cntr .widget-list-cntr.edit-cntr .action-bar');
+
+    if (sidebarOpen && buttonElement) {
+      buttonElement.classList.add('txe-side-bar-open');
+    } else if (!sidebarOpen && buttonElement) {
+      buttonElement.classList.remove('txe-side-bar-open');
+    }
+  };
   useEffect(()=>{
     if(window.location.pathname.includes("summary")){
       dispatch(setDashboardSelected(true));
@@ -46,6 +55,7 @@ function ToolsSideBar(props: any) {
   }, []);
   useEffect(() => {
     dispatch(setSidebarState(sidebarOpen));
+    handleCrmStyles();
   }, [sidebarOpen]);
   const handleAppSelection = (app: any) => {
     dispatch(setDashboardSelected(false));

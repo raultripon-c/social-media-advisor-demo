@@ -395,6 +395,15 @@ export const removeCrmStyles = () => {
   crmStyles && document.head.removeChild(crmStyles);
 };
 
+export const removeStyleBasedOnContent = (content: string) => {
+  const styleTags = document.querySelectorAll("style");
+
+  styleTags.forEach((styleTag) => {
+    if (styleTag.textContent?.includes(content)) {
+      styleTag.remove();
+    }
+  });
+};
 
 export const handleDomainUrlForSite = async (supportedLangs: Array<any>, selectedTenant: any, dispatch: any, setSiteMetaData: any, siteMetaData: any) => {
   try {

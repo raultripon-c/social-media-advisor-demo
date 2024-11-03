@@ -29,3 +29,12 @@ ul#spotlight-list {
 .campaign-footter {
   position: absolute !important;
 }
+// after drag and drop back and cancel buttons are breaking -> events
+.txe-side-bar-open {
+  left: 286px;
+  width: 337px;
+}
+// automation details header
+.automation-details-header {
+  top: 0px;
+}
