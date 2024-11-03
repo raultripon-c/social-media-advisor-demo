@@ -30,7 +30,8 @@ ul#spotlight-list {
   position: absolute !important;
 }
 // after drag and drop back and cancel buttons are breaking -> events
-.sidebar-open-style {
+.sidebar-open-style,
+.action-bar {
   left: inherit !important;
   width: 25% !important;
 }
