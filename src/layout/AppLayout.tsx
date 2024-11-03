@@ -69,11 +69,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   const fetchedApps = useSelector((state: any) => state.app.allApps);
 
   useEffect(() => {
-    const setCmsSiteMetaData = async () => {
-      const tenantSupportedLangs = await APIService.getSupportedLangs(selectedTenant?.refNum)
-      return await handleDomainUrlForSite(tenantSupportedLangs, selectedTenant, dispatch, setSiteMetaData, siteMetaData);
-    }
-    setCmsSiteMetaData();
     if (!selectedTenant.length) {
       const refNum = window.location.pathname.split("/")[2];
 
@@ -161,6 +156,11 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   useEffect(() => {
     if (selectedTenant?.customerId) {
       setRolesLoader(false);
+      const setCmsSiteMetaData = async () => {
+        const tenantSupportedLangs = await APIService.getSupportedLangs(selectedTenant?.refNum)
+        return await handleDomainUrlForSite(tenantSupportedLangs, selectedTenant, dispatch, setSiteMetaData, siteMetaData);
+      }
+      setCmsSiteMetaData();
     }
   }, [selectedTenant?.customerId]);
   useEffect(() => {
