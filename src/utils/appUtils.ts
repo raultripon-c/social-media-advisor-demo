@@ -6,97 +6,161 @@ import { RemoteModuleRenderer } from "../remote-modules/RemoteModuleRenderer";
 import { DATE_FORMAT, navigationHeaderApps, noShowSideBar } from "./constants";
 import { setAppDetails, setDashboardSelected } from "../store/apps/actions";
 import { APIService } from "./api.service";
+import { AppSelectionOptions } from "interfaces/AppSelectionOptions";
 
 export const appSelectionHandler = (
-  selectedApp: any,
-  navigate: any,
-  customerCode: string,
-  refNum: string,
-  siteMetaData: any,
-  dispatch: any,
-  openInNewTab: boolean,
-  setSiteMetaData: any,
-  selectedTenant: any
-) => {
-  let appType = selectedApp.appType;
-  const mfRoute = selectedApp.appConfig?.route;
-  const routeWithoutRefNum = mfRoute?.replace("/:refnum", "");
-  let updatedRoute = "";
+  options: AppSelectionOptions
+): void => {
+  const {
+    selectedApp,
+    navigate,
+    customerCode,
+    refNum,
+    siteMetaData,
+    dispatch,
+    openInNewTab,
+    setSiteMetaData,
+    selectedTenant
+  } = options;
+
   if (!selectedApp) {
     navigate(customerCode ? `${customerCode}/summary` : "/");
     return;
   }
-  if (selectedApp.context == "customer") {
+
+  const appType = selectedApp.appType;
+  const mfRoute = selectedApp.appConfig?.route || "";
+  const routeWithoutRefNum = mfRoute.replace("/:refnum", "");
+  let updatedRoute = "";
+
+  if (selectedApp.context === "customer") {
     updatedRoute = customerCode;
-  } else if (selectedApp.context == "tenant") {
+  } else if (selectedApp.context === "tenant") {
     updatedRoute = `${customerCode}/${refNum}`;
   }
+
   switch (appType) {
     case "module-federation":
-      if (openInNewTab) {
-        const route = !isEmpty(updatedRoute)
-          ? `/${updatedRoute}${routeWithoutRefNum}`
-          : `${routeWithoutRefNum}`;
-        const link = `${window.location.origin}${route}`;
-        navigateToNewTab(link);
-        sessionStorage.removeItem("selectedApp");
-        dispatch(setAppDetails({}));
-      } else {
-        selectedApp &&
-          sessionStorage.setItem("selectedApp", JSON.stringify(selectedApp));
-        if (isEmpty(updatedRoute) && selectedApp?.context !== "platform") {
-          sessionStorage.removeItem("selectedApp");
-        }
-        navigate(
-          !isEmpty(updatedRoute)
-            ? `/${updatedRoute}${routeWithoutRefNum}`
-            : `${routeWithoutRefNum}`
-        );
-      }
+      handleModuleFederation(
+        updatedRoute,
+        routeWithoutRefNum,
+        openInNewTab,
+        navigate,
+        dispatch,
+        selectedApp
+      );
       break;
     case "external":
-      dispatch(setAppDetails({}));
-      dispatch(setDashboardSelected(false));
-      sessionStorage.removeItem("selectedApp");
-      const setCmsSiteMetaData = async () => {
-        const tenantSupportedLangs = await APIService.getSupportedLangs(refNum)
-        return await handleDomainUrlForSite(tenantSupportedLangs, selectedTenant, dispatch, setSiteMetaData, siteMetaData);
-      }
-      setCmsSiteMetaData().then((metaData) => { 
-        const link = getLink(selectedApp, {
-          refNum: refNum,
-          customerCode: customerCode,
-          site: btoa(JSON.stringify(metaData))
-        });
-        if (link && !isEmpty(link)) {
-          navigateToNewTab(link);
-        }
-        else {
-          toast.dismiss();
-          toast.error("Link is not provided for navigation");
-        }
-      });
+      handleExternalApp(
+        refNum,
+        selectedTenant,
+        dispatch,
+        setSiteMetaData,
+        siteMetaData,
+        selectedApp,
+        customerCode,
+        navigate
+      );
       break;
     case "script":
-      if (openInNewTab) {
-        const route = !isEmpty(updatedRoute)
-        ? `/${updatedRoute}${routeWithoutRefNum}`
-        : `${routeWithoutRefNum}`;
-
-        const link = `${window.location.origin}${route}`;
-        navigateToNewTab(link);
-      } else {
-        navigate(
-          !isEmpty(updatedRoute)
-            ? `/${updatedRoute}${routeWithoutRefNum}`
-            : `${routeWithoutRefNum}`
-        );
-      }
-      
+      handleScriptApp(
+        updatedRoute,
+        routeWithoutRefNum,
+        openInNewTab,
+        navigate
+      );
       break;
     default:
       navigate("/");
       break;
+  }
+};
+
+const handleModuleFederation = (
+  updatedRoute: string,
+  routeWithoutRefNum: string,
+  openInNewTab: boolean,
+  navigate: (path: string) => void,
+  dispatch: any,
+  selectedApp: any
+) => {
+  if (openInNewTab) {
+    const route = !isEmpty(updatedRoute)
+      ? `/${updatedRoute}${routeWithoutRefNum}`
+      : `${routeWithoutRefNum}`;
+    const link = `${window.location.origin}${route}`;
+    navigateToNewTab(link);
+    sessionStorage.removeItem("selectedApp");
+    dispatch(setAppDetails({}));
+  } else {
+    sessionStorage.setItem("selectedApp", JSON.stringify(selectedApp));
+    if (isEmpty(updatedRoute) && selectedApp?.context !== "platform") {
+      sessionStorage.removeItem("selectedApp");
+    }
+    navigate(
+      !isEmpty(updatedRoute)
+        ? `/${updatedRoute}${routeWithoutRefNum}`
+        : `${routeWithoutRefNum}`
+    );
+  }
+};
+
+const handleExternalApp = async (
+  refNum: string,
+  selectedTenant: any,
+  dispatch: any,
+  setSiteMetaData: any,
+  siteMetaData: any,
+  selectedApp: any,
+  customerCode: string,
+  navigate: (path: string) => void
+) => {
+  dispatch(setAppDetails({}));
+  dispatch(setDashboardSelected(false));
+  sessionStorage.removeItem("selectedApp");
+
+  const tenantSupportedLangs = await APIService.getSupportedLangs(refNum);
+  const metaData = await handleDomainUrlForSite(
+    tenantSupportedLangs,
+    selectedTenant,
+    dispatch,
+    setSiteMetaData,
+    siteMetaData
+  );
+
+  const link = getLink(selectedApp, {
+    refNum: refNum,
+    customerCode: customerCode,
+    site: btoa(JSON.stringify(metaData))
+  });
+
+  if (link && !isEmpty(link)) {
+    navigateToNewTab(link);
+  } else {
+    toast.dismiss();
+    toast.error("Link is not provided for navigation");
+  }
+};
+
+const handleScriptApp = (
+  updatedRoute: string,
+  routeWithoutRefNum: string,
+  openInNewTab: boolean,
+  navigate: (path: string) => void
+) => {
+  const route = !isEmpty(updatedRoute)
+    ? `/${updatedRoute}${routeWithoutRefNum}`
+    : `${routeWithoutRefNum}`;
+
+  const link = `${window.location.origin}${route}`;
+  if (openInNewTab) {
+    navigateToNewTab(link);
+  } else {
+    navigate(
+      !isEmpty(updatedRoute)
+        ? `/${updatedRoute}${routeWithoutRefNum}`
+        : `${routeWithoutRefNum}`
+    );
   }
 };
 export const showSidebar = (app: any) => {
@@ -311,11 +375,11 @@ export function getLink(selectedApp: any, request: any): any {
 }
 
 export function setObjectReferenceFromString(obj: any, str: string, value: any) {
-	if (!str.length) return;
-	const keys = str.split(".");
-	const lastKey = keys.pop();
-	const lastObj = keys.reduce((a, i) => (a[i] = a[i] || {}), obj);
-	if (lastKey) lastObj[lastKey] = value;
+  if (!str.length) return;
+  const keys = str.split(".");
+  const lastKey = keys.pop();
+  const lastObj = keys.reduce((a, i) => (a[i] = a[i] || {}), obj);
+  if (lastKey) lastObj[lastKey] = value;
 }
 
 export const removeCrmStyles = () => {

@@ -6,6 +6,7 @@ import { MessageService } from "../MessageService";
 import "./AngularApp.scss";
 import { useDynamicMFLoader } from "./useDynamicMFLoader";
 import { setObjectReferenceFromString } from "../utils/appUtils";
+import CrmStylesRenderer from "./CrmStylesRenderer";
 
 export function AngularAppRenderer(props: any) {
   const containerRef = useRef(null);
@@ -152,12 +153,12 @@ export function AngularAppRenderer(props: any) {
   return (
     <div className="page">
       <div
-        className="crm-module main-page"
+        className="main-page"
         id="child-module-renderer"
         ref={containerRef}
         style={{ display: isReady ? "block" : "none" }}
       ></div>
-
+      <CrmStylesRenderer />
       {!isReady && (
         <div className="child-loading">
           <Loader title={"loading"} />

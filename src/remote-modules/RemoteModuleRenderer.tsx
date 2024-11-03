@@ -10,6 +10,7 @@ import { appSelectionHandler, getAppByName } from "../utils/appUtils";
 import { setAppDetails } from "../store/apps/actions";
 import { setSiteMetaData } from "../store/customer/actions";
 import { MessageService } from "../MessageService";
+import { AppSelectionOptions } from "interfaces/AppSelectionOptions";
 
 export const RemoteModuleRenderer = () => {
   const selectedTenant = useSelector(
@@ -88,17 +89,18 @@ export const RemoteModuleRenderer = () => {
         navigatingApp &&
           sessionStorage.setItem("selectedApp", JSON.stringify(navigatingApp));
         dispatch(setAppDetails(navigatingApp));
-        appSelectionHandler(
-          navigatingApp,
-          navigate,
-          selectedTenant?.customerCode,
-          selectedTenant?.refNum,
-          siteMetaData,
-          dispatch,
-          false,
-          setSiteMetaData,
-          selectedTenant
-        );
+        const appSelectionOptions: AppSelectionOptions = {
+          selectedApp: navigatingApp,
+          navigate: navigate,
+          customerCode: selectedTenant?.customerCode,
+          refNum: selectedTenant?.refNum,
+          siteMetaData: siteMetaData,
+          dispatch: dispatch,
+          openInNewTab: false,
+          setSiteMetaData: setSiteMetaData,
+          selectedTenant: selectedTenant
+        };
+        appSelectionHandler(appSelectionOptions);
         break;
       //add any other cases which has to be handled parent level
       default:

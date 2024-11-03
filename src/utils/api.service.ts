@@ -135,7 +135,7 @@ export const APIService = {
         throw new Error("No metadata found for the provided refNum.");
       }
     } catch (error) {
-      toast.error("Error fetching metadata");
+      // toast.error("Error fetching metadata");
       console.error("Error in getMetaDataByRefNum: ", error);
       return null;
     }

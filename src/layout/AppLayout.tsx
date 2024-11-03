@@ -24,6 +24,7 @@ import { APIService } from "../utils/api.service";
 import "./AppLayout.scss";
 import { InitialLoader } from "./Loader";
 import ToolsSideBar from "./sideBar/SideBar";
+import { AppSelectionOptions } from "interfaces/AppSelectionOptions";
 
 interface AppLayoutProps {
   allApps: any;
@@ -69,7 +70,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
 
   useEffect(() => {
     const setCmsSiteMetaData = async () => {
-      const tenantSupportedLangs = await APIService.getSupportedLangs(refNum)
+      const tenantSupportedLangs = await APIService.getSupportedLangs(selectedTenant?.refNum)
       return await handleDomainUrlForSite(tenantSupportedLangs, selectedTenant, dispatch, setSiteMetaData, siteMetaData);
     }
     setCmsSiteMetaData();
@@ -169,7 +170,18 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       currentApp?.name &&
       ((selectedTenant?.customerCode && selectedTenant?.refNum) || currentApp.context === "platform")
     ) {
-        appSelectionHandler(currentApp, navigate, selectedTenant?.customerCode, selectedTenant?.refNum, siteMetaData, dispatch, false, setSiteMetaData, selectedTenant);
+      const appSelectionOptions: AppSelectionOptions = {
+        selectedApp: currentApp,
+        navigate: navigate,
+        customerCode: selectedTenant?.customerCode,
+        refNum: selectedTenant?.refNum,
+        siteMetaData: siteMetaData,
+        dispatch: dispatch,
+        openInNewTab: false,
+        setSiteMetaData: setSiteMetaData,
+        selectedTenant: selectedTenant,
+      }
+        appSelectionHandler(appSelectionOptions);
     }
   }, [selectedApp, selectedTenant, selectedTenant?.refNum]);
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { isEmpty } from "lodash";
-import { toast } from "react-toastify";
+// import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import React from "react";
 import "./RecommendedPages.scss";
@@ -50,7 +50,7 @@ export const RecommendedPages = (props: any) => {
 
     } catch (error) {
       setRecommendationsLoader(false);
-      toast.error("Failed to fetch recommendations");
+      // toast.error("Failed to fetch recommendations");
       console.error("Error fetching recommendations data", error);
     }
   };
@@ -103,8 +103,8 @@ export const RecommendedPages = (props: any) => {
       });
       if (link && !isEmpty(link)) window.open(link, "_blank");
       else {
-        toast.dismiss();
-        toast.error("Link is not provided for navigation");
+        // toast.dismiss();
+        // toast.error("Link is not provided for navigation");
       }
     };
 

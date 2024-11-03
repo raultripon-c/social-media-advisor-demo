@@ -28,6 +28,7 @@ import {
   campaignColumns,
   tenantImageUrl,
 } from "./mockData";
+import { AppSelectionOptions } from "interfaces/AppSelectionOptions";
 
 const DashBoard = () => {
   interface MetricData {
@@ -103,17 +104,18 @@ const DashBoard = () => {
     if (matchedApp) {
       navigateToApp(matchedApp);
     } else if (config) {
-      appSelectionHandler(
-        config,
-        navigate,
-        selectedTenant?.customerCode,
-        selectedTenant?.refNum,
-        siteMetaData,
-        dispatch,
-        false,
-        setSiteMetaData,
-        selectedTenant
-      );
+      const appSelectionOptions: AppSelectionOptions = {
+        selectedApp: config,
+        navigate: navigate,
+        customerCode: selectedTenant?.customerCode,
+        refNum: selectedTenant?.refNum,
+        siteMetaData: siteMetaData,
+        dispatch: dispatch,
+        openInNewTab: false,
+        setSiteMetaData: setSiteMetaData,
+        selectedTenant: selectedTenant,
+      }
+      appSelectionHandler(appSelectionOptions);
     } else {
       console.log(`Clicked on ${text}`);
     }
@@ -134,17 +136,18 @@ const DashBoard = () => {
   const navigateToApp = (selectedApp: any) => {
     sessionStorage.setItem("selectedApp", JSON.stringify(selectedApp));
     dispatch(setAppDetails(selectedApp));
-    appSelectionHandler(
-      selectedApp,
-      navigate,
-      selectedTenant?.customerCode,
-      selectedTenant?.refNum,
-      siteMetaData,
-      dispatch,
-      true,
-      setSiteMetaData,
-      selectedTenant
-    );
+    const appSelectionOptions: AppSelectionOptions = {
+      selectedApp: selectedApp,
+      navigate: navigate,
+      customerCode: selectedTenant?.customerCode,
+      refNum: selectedTenant?.refNum,
+      siteMetaData: siteMetaData,
+      dispatch: dispatch,
+      openInNewTab: true,
+      setSiteMetaData: setSiteMetaData,
+      selectedTenant: selectedTenant,
+    }
+    appSelectionHandler(appSelectionOptions);
   };
 
   const handleLiveUrlForSite = async (url: string): Promise<string | null> => {
@@ -372,17 +375,18 @@ const DashBoard = () => {
             )}`}
             imageSrc={tenantImageUrl}
             navigateOnClick={() => {
-              appSelectionHandler(
-                tenantData[0].config,
-                navigate,
-                selectedTenant?.customerCode,
-                selectedTenant?.refNum,
-                siteMetaData,
-                dispatch,
-                false,
-                setSiteMetaData,
-                selectedTenant
-              );
+              const appSelectionOptions: AppSelectionOptions = {
+                selectedApp: tenantData[0].config,
+                navigate: navigate,
+                customerCode: selectedTenant?.customerCode,
+                refNum: selectedTenant?.refNum,
+                siteMetaData: siteMetaData,
+                dispatch: dispatch,
+                openInNewTab: false,
+                setSiteMetaData: setSiteMetaData,
+                selectedTenant: selectedTenant,
+              };
+              appSelectionHandler(appSelectionOptions);
             }}
           />
         ) : (
