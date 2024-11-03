@@ -50,7 +50,6 @@ export function AngularAppRenderer(props: any) {
     document.head.appendChild(element);
   }
 
-  removeStyleBasedOnContent("https://github.com/h5bp/html5-boilerplate/blob/master/src/css/main.css");
   const cmsStylesToRemove = ["txe-cms-style-main", "txe-cms-style-app"];
   cmsStylesToRemove.forEach((styleId) => {
     const styleElement = document.getElementById(styleId);
@@ -112,6 +111,7 @@ export function AngularAppRenderer(props: any) {
       fetchAndLoadScript();
     }
     loadComponent();
+    removeStyleBasedOnContent("https://github.com/h5bp/html5-boilerplate/blob/master/src/css/main.css");
     if (ready) {
       (async () => {
         const scope = props.scope;

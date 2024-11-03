@@ -30,11 +30,16 @@ ul#spotlight-list {
   position: absolute !important;
 }
 // after drag and drop back and cancel buttons are breaking -> events
-.txe-side-bar-open {
-  left: 286px;
-  width: 337px;
+.sidebar-open-style {
+  left: inherit !important;
+  width: 25% !important;
 }
+.sidebar-closed-style {
+  left: 55px !important;
+  width: 28.7% !important;
+}
+
 // automation details header
 .automation-details-header {
-  top: 0px;
+  top: 0px !important;
 }

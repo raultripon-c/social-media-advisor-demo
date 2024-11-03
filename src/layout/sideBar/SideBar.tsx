@@ -43,12 +43,15 @@ function ToolsSideBar(props: any) {
     const buttonElement = document.querySelector('.template-editor-page .main-div .template-editor-cntr .widget-list-cntr.edit-cntr .action-bar');
 
     if (sidebarOpen && buttonElement) {
-      buttonElement.classList.add('txe-side-bar-open');
+      buttonElement.classList.add('sidebar-open-style');
+      buttonElement.classList.remove('sidebar-closed-style');
     } else if (!sidebarOpen && buttonElement) {
-      buttonElement.classList.remove('txe-side-bar-open');
+      buttonElement.classList.add('sidebar-closed-style');
+      buttonElement.classList.remove('sidebar-open-style');
     }
   };
   useEffect(()=>{
+    handleCrmStyles();
     if(window.location.pathname.includes("summary")){
       dispatch(setDashboardSelected(true));
     }
