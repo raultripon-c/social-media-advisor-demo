@@ -159,7 +159,7 @@ export function AngularAppRenderer(props: any) {
         ref={containerRef}
         style={{ display: isReady ? "block" : "none" }}
       ></div>
-      <CrmStylesRenderer />
+      {props.scope === 'cpui' && <CrmStylesRenderer />}
       {!isReady && (
         <div className="child-loading">
           <Loader title={"loading"} />
