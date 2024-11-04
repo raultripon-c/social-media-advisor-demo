@@ -55,6 +55,14 @@ function ToolsSideBar(props: any) {
       buttonElement.classList.add('sidebar-closed-style');
       buttonElement.classList.remove('sidebar-open-style');
     }
+    const headerElement = document.querySelector('.close-facet-serach .data-details.list-cntr .header-list-cntr');
+    if (sidebarOpen && headerElement) {
+      headerElement.classList.add('sidebar-header-open-style');
+      headerElement.classList.remove('sidebar-header-closed-style');
+    } else if (!sidebarOpen && headerElement) {
+      headerElement.classList.add('sidebar-header-closed-style');
+      headerElement.classList.remove('sidebar-header-open-style');
+    }
   };
   useEffect(()=>{
     handleCrmStyles();
