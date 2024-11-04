@@ -41,7 +41,7 @@ export function AngularAppRenderer(props: any) {
     url: props.url,
   });
   const checkCrmScriptIsLoaded = document.getElementById('crm-script');
-  if(!checkCrmScriptIsLoaded) {
+  if(!checkCrmScriptIsLoaded && props.scope === 'cpui') {
     const element = document.createElement("script");
     element.src = "https://pie-dev-onephenom.phenompro.com/scripts.js";
     element.type = "text/javascript";
@@ -107,7 +107,7 @@ export function AngularAppRenderer(props: any) {
     }
   }
   useEffect(() => {
-    if (!document.getElementById("crm-styles")) {
+    if (!document.getElementById("crm-styles") && props.scope === 'cpui') {
       fetchAndLoadScript();
     }
     loadComponent();
@@ -159,7 +159,7 @@ export function AngularAppRenderer(props: any) {
         ref={containerRef}
         style={{ display: isReady ? "block" : "none" }}
       ></div>
-      {props.scope === 'cpui' && <CrmStylesRenderer />}
+      { props.scope === 'cpui' && <CrmStylesRenderer />}
       {!isReady && (
         <div className="child-loading">
           <Loader title={"loading"} />
