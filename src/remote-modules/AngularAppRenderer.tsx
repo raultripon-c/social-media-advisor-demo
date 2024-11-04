@@ -5,7 +5,7 @@ import { AppStore } from "store";
 import { MessageService } from "../MessageService";
 import "./AngularApp.scss";
 import { useDynamicMFLoader } from "./useDynamicMFLoader";
-import { removeStyleBasedOnContent, setObjectReferenceFromString } from "../utils/appUtils";
+import { removeStylesBasedOnContents, setObjectReferenceFromString } from "../utils/appUtils";
 import CrmStylesRenderer from "./CrmStylesRenderer";
 
 export function AngularAppRenderer(props: any) {
@@ -111,7 +111,7 @@ export function AngularAppRenderer(props: any) {
       fetchAndLoadScript();
     }
     loadComponent();
-    removeStyleBasedOnContent("https://github.com/h5bp/html5-boilerplate/blob/master/src/css/main.css");
+    removeStylesBasedOnContents("https://github.com/h5bp/html5-boilerplate/blob/master/src/css/main.css","assets-management-new-body");
     if (ready) {
       (async () => {
         const scope = props.scope;
