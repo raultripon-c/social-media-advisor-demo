@@ -392,13 +392,15 @@ export const removeCrmStyles = () => {
   crmStyles && document.head.removeChild(crmStyles);
 };
 
-export const removeStyleBasedOnContent = (content: string) => {
+export const removeStylesBasedOnContents = (contents: string[]) => {
   const styleTags = document.querySelectorAll("style");
 
   styleTags.forEach((styleTag) => {
-    if (styleTag.textContent?.includes(content)) {
-      styleTag.remove();
-    }
+    contents.forEach((content) => {
+      if (styleTag.textContent?.includes(content)) {
+        styleTag.remove();
+      }
+    });
   });
 };
 
