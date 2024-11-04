@@ -1,4 +1,14 @@
 import { Loader } from "@phenom/react-ui-components";
+
+// Extend the Window interface to include __ckeditor__
+declare global {
+  interface Window {
+    __ckeditor__: any;
+    CKEDITOR: any;
+    __$__: any;
+    $:any;
+  }
+}
 import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { AppStore } from "store";
@@ -20,6 +30,10 @@ export function AngularAppRenderer(props: any) {
   const appTitle = (props?.selectedAppTitle === 'SMS Templates' || props?.selectedAppTitle === 'Email Templates') ? props.selectedAppTitle : null;
 
   const [mountEvents, setMountEvents] = useState(null);
+  if(window.__ckeditor__) {
+    window.CKEDITOR = window.__ckeditor__;
+    window.$ = window.__$__;
+  }
 
   useEffect(() => {
     if (props?.appWindowConfig) {
@@ -125,17 +139,21 @@ export function AngularAppRenderer(props: any) {
             userId: window.keycloakInstance.userInfo.userDetails.id,
             userEmail: window.keycloakInstance.userInfo.userDetails.email,
             appName: appName,
-            MessageService:JSON.stringify(MessageService),
+            MessageService: JSON.stringify(MessageService),
             moduleRoute: moduleRoute,
             txeAppHeader: appTitle
           };
-          console.log('angular app props',{ props });
+          console.log('angular app props', { props });
           await module.mount(props);
           setReady(true);
         }
         // mountAngularComponent(ref.current, module.YourAngularModule);
       })();
     }
+    return () => {
+      window.__ckeditor__ = window.CKEDITOR;
+      window.__$__ = window.$;
+    };
   }, [ready]);
   //     const loadMountEvents = async () => {
   //       var x="cpui/CRMEvents"
