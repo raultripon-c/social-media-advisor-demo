@@ -299,7 +299,7 @@ export const APIService = {
     };
     try {
       const url = `${(window as any)._env_.CRM_HUB_URL}/ecampaign/getCampaignsV3`;
-      const response = await API.post(url, data, {});
+      const response: any = await API.post(url, data, {});
       const campaigns: Campaign[] = response.results.map((item: any) => ({
         campaignName: item.campaignName,
         status: item.status
@@ -329,6 +329,17 @@ export const APIService = {
       console.log('Token registration response:', response);
     } catch (error) {
       console.error('Error registering token:', error);
+      throw error;
+    }
+  },
+
+  isCanvasSite: async (refNum: string) => {
+    try {
+      const url = (`${(window as any)._env_.CMS_URL}/api/isCanvasSite`);
+      const response = await API.post(url, { refNum: refNum }, { withCredentials: true });
+      return response.data.data.isCanvasSite;
+    } catch (error) {
+      console.error('Error checking if site is Canvas:', error);
       throw error;
     }
   }

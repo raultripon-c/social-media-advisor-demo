@@ -85,6 +85,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       const filteredApps: any = transformAppData(response); // filters customerTenantApps and platformApps
       setTransformedAppData(filteredApps);
       setCustomerTenantApps(filteredApps?.customerTenantApps); // customerTenantApps
+      handleCanvasSite(filteredApps?.customerTenantApps);
       setAllRoutes([...appRoutes, ...mfRoutes]);
     }
 
@@ -135,6 +136,24 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
     toggleSidebarMenu(false);
   }, [selectedApp]);
 
+  const handleCanvasSite = (appsData: any) => {
+    window.addEventListener('txeLoginEvent', async () => {
+      const selectedTenantFromSession = sessionStorage.getItem('selectedTenant');
+      if(selectedTenantFromSession) {
+        const currTenant = JSON.parse(selectedTenantFromSession);
+        const isCanvasTenant = await APIService.isCanvasSite(currTenant.refNum);
+        sessionStorage.setItem('isCanvasSite', isCanvasTenant);
+        if(!isCanvasTenant) {
+          const parentIndex = appsData.findIndex((item: any) => item.name === "Experiences");
+          if (parentIndex !== -1) {
+            appsData[parentIndex].children = appsData[parentIndex].children.filter((child: any) => child.name !== "Banners");
+            setCustomerTenantApps(appsData);
+          }
+        }
+      }
+    }, {once: true});
+  }
+
   const getAllApps = async () => {
     try {
       const response = allApps && allApps.length > 0 ? allApps : await APIService.getAllApps(setAppsLoader);
@@ -146,6 +165,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       setTransformedAppData(transformAppData(res));
       const filteredApps: any = transformAppData(res);
       setCustomerTenantApps(filteredApps?.customerTenantApps);
+      handleCanvasSite(filteredApps?.customerTenantApps);
       sessionStorage.setItem("allapps", JSON.stringify(res));
       setAllRoutes([...appRoutes, ...mfRoutes]);
     } catch (error) {
