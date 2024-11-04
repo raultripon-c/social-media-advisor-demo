@@ -111,7 +111,7 @@ export function AngularAppRenderer(props: any) {
       fetchAndLoadScript();
     }
     loadComponent();
-    removeStylesBasedOnContents("https://github.com/h5bp/html5-boilerplate/blob/master/src/css/main.css","assets-management-new-body");
+    removeStylesBasedOnContents(["https://github.com/h5bp/html5-boilerplate/blob/master/src/css/main.css", "assets-management-new-body"]);
     if (ready) {
       (async () => {
         const scope = props.scope;
