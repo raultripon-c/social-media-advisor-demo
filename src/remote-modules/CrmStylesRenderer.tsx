@@ -127,6 +127,8 @@ const CrmStylesRenderer = () => {
   ];
 
   const removeStyles = () => {
+    const daterangepickerDivs = document.querySelectorAll('div.daterangepicker.dropdown-menu');
+    daterangepickerDivs.forEach(div => div.remove());
     const styles = document.getElementById('crm-index-styles');
     if (styles) document.head.removeChild(styles);
     crmExternalStyles.forEach(style => {
