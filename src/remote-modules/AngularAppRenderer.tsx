@@ -27,7 +27,7 @@ export function AngularAppRenderer(props: any) {
   const ref = useRef(null);
   const approute = props?.selectedApp?.route;
   const { appName, moduleRoute } = props?.selectedApp;
-  const appTitle = (props?.selectedAppTitle === 'SMS Templates' || props?.selectedAppTitle === 'Email Templates') ? props.selectedAppTitle : null;
+  const appTitle = (props?.selectedAppTitle === 'SMS Manager' || props?.selectedAppTitle === 'Email Manager') ? props.selectedAppTitle : null;
 
   const [mountEvents, setMountEvents] = useState(null);
   if(window.__ckeditor__) {
