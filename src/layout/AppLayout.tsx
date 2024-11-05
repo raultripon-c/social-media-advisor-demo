@@ -136,22 +136,31 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
     toggleSidebarMenu(false);
   }, [selectedApp]);
 
-  const handleCanvasSite = (appsData: any) => {
-    window.addEventListener('txeLoginEvent', async () => {
-      const selectedTenantFromSession = sessionStorage.getItem('selectedTenant');
-      if(selectedTenantFromSession) {
-        const currTenant = JSON.parse(selectedTenantFromSession);
-        const isCanvasTenant = await APIService.isCanvasSite(currTenant.refNum);
-        sessionStorage.setItem('isCanvasSite', isCanvasTenant);
-        if(!isCanvasTenant) {
-          const parentIndex = appsData.findIndex((item: any) => item.name === "Experiences");
-          if (parentIndex !== -1) {
-            appsData[parentIndex].children = appsData[parentIndex].children.filter((child: any) => child.name !== "Banners");
-            setCustomerTenantApps(appsData);
-          }
+  const checkCanvasSite = async (appsData: any) => {
+    const selectedTenantFromSession = sessionStorage.getItem('selectedTenant');
+    if(selectedTenantFromSession) {
+      const currTenant = JSON.parse(selectedTenantFromSession);
+      const isCanvasTenant = await APIService.isCanvasSite(currTenant.refNum);
+      sessionStorage.setItem('isCanvasSite', isCanvasTenant);
+      if(!isCanvasTenant) {
+        const parentIndex = appsData.findIndex((item: any) => item.name === "Experiences");
+        if (parentIndex !== -1) {
+          appsData[parentIndex].children = appsData[parentIndex].children.filter((child: any) => child.name !== "Banners");
+          setCustomerTenantApps(appsData);
         }
       }
-    }, {once: true});
+    }
+  }
+
+  const handleCanvasSite = (appsData: any) => {
+    if(document.cookie.includes('token')) {
+      checkCanvasSite(appsData);
+    }
+    else {
+      window.addEventListener('txeLoginEvent', async () => {
+        checkCanvasSite(appsData);
+      }, {once: true});
+    }
   }
 
   const getAllApps = async () => {

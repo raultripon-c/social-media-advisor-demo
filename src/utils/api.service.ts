@@ -335,7 +335,7 @@ export const APIService = {
 
   isCanvasSite: async (refNum: string) => {
     try {
-      const url = (`${(window as any)._env_.CMS_URL}/api/isCanvasSite`);
+      const url = `${(window as any)._env_.CMS_URL}/api/isCanvasSite`;
       const response = await API.post(url, { refNum: refNum }, { withCredentials: true });
       return response.data.data.isCanvasSite;
     } catch (error) {
