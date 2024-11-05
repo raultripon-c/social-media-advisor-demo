@@ -35,13 +35,13 @@ export const staticData = [
         icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Generic.svg",
     },
     {
-        displayText: "Email templates",
-        value: "Email templates",
+        displayText: "Email Manager",
+        value: "Email Manager",
         icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Generic.svg",
     },
     {
-        displayText: "SMS templates",
-        value: "SMS templates",
+        displayText: "SMS Manager",
+        value: "SMS Manager",
         icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Generic.svg",
     },
 ];
