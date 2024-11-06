@@ -90,6 +90,11 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
     }
 
     if (!window.keycloakInstance.bearer_token) window.keycloakInstance.bearer_token = "Bearer " + keycloak.token;
+
+    // Cleanup actions when component unmounts
+    return () => {
+      
+    };
   }, []);
 
 
@@ -136,6 +141,39 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
     toggleSidebarMenu(false);
   }, [selectedApp]);
 
+  useEffect(() => {
+    if (selectedTenant?.customerId) {
+      const setCmsSiteMetaData = async () => {
+        const tenantSupportedLangs = await APIService.getSupportedLangs(selectedTenant?.refNum)
+        return await handleDomainUrlForSite(tenantSupportedLangs, selectedTenant, dispatch, setSiteMetaData, siteMetaData);
+      }
+      setCmsSiteMetaData();
+    }
+    setRolesLoader(false);
+  }, [selectedTenant?.customerId]);
+
+  useEffect(() => {
+    const currentApp = selectedApp.length > 0 ? selectedApp : selectedAppFromSession;
+    if (
+      currentApp &&
+      currentApp?.name &&
+      ((selectedTenant?.customerCode && selectedTenant?.refNum) || currentApp.context === "platform")
+    ) {
+      const appSelectionOptions: AppSelectionOptions = {
+        selectedApp: currentApp,
+        navigate: navigate,
+        customerCode: selectedTenant?.customerCode,
+        refNum: selectedTenant?.refNum,
+        siteMetaData: siteMetaData,
+        dispatch: dispatch,
+        openInNewTab: false,
+        setSiteMetaData: setSiteMetaData,
+        selectedTenant: selectedTenant,
+      }
+      appSelectionHandler(appSelectionOptions);
+    }
+  }, [selectedApp, selectedTenant, selectedTenant?.refNum]);
+
   const checkCanvasSite = async (appsData: any) => {
     const selectedTenantFromSession = sessionStorage.getItem('selectedTenant');
     if(selectedTenantFromSession) {
@@ -152,13 +190,13 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
     }
   }
 
-  const handleCanvasSite = (appsData: any) => {
+  const handleCanvasSite = async(appsData: any) => {
     if(document.cookie.includes('token')) {
-      checkCanvasSite(appsData);
+      await checkCanvasSite(appsData);
     }
     else {
       window.addEventListener('txeLoginEvent', async () => {
-        checkCanvasSite(appsData);
+        await checkCanvasSite(appsData);
       }, {once: true});
     }
   }
@@ -181,38 +219,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       console.error("Error:", error);
     }
   };
-
-  useEffect(() => {
-    if (selectedTenant?.customerId) {
-      setRolesLoader(false);
-      const setCmsSiteMetaData = async () => {
-        const tenantSupportedLangs = await APIService.getSupportedLangs(selectedTenant?.refNum)
-        return await handleDomainUrlForSite(tenantSupportedLangs, selectedTenant, dispatch, setSiteMetaData, siteMetaData);
-      }
-      setCmsSiteMetaData();
-    }
-  }, [selectedTenant?.customerId]);
-  useEffect(() => {
-    const currentApp = selectedApp.length > 0 ? selectedApp : selectedAppFromSession;
-    if (
-      currentApp &&
-      currentApp?.name &&
-      ((selectedTenant?.customerCode && selectedTenant?.refNum) || currentApp.context === "platform")
-    ) {
-      const appSelectionOptions: AppSelectionOptions = {
-        selectedApp: currentApp,
-        navigate: navigate,
-        customerCode: selectedTenant?.customerCode,
-        refNum: selectedTenant?.refNum,
-        siteMetaData: siteMetaData,
-        dispatch: dispatch,
-        openInNewTab: false,
-        setSiteMetaData: setSiteMetaData,
-        selectedTenant: selectedTenant,
-      }
-      appSelectionHandler(appSelectionOptions);
-    }
-  }, [selectedApp, selectedTenant, selectedTenant?.refNum]);
 
   return (
     <>

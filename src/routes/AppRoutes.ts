@@ -4,11 +4,12 @@ import ContentHub from "../layout/dynamicScripts/dynamicScriptLoader"
 import Assets from "../screens/assets/Assets"
 import Blogs from "../screens/blogs/Blogs";
 import Banners from "../screens/banners/Banners";
+import UnmatchedRoutePage from "../components/UnmatchedRoutePage/UnmatchedRoutePage";
+
 export interface IRoute {
   path: string;
   component: React.FunctionComponent<any>;
 }
-
 
 const dashBoard = {
   path: "/:customerCode/:refnum/summary",
@@ -34,10 +35,16 @@ const BannersManager = {
   component: Banners,
 }
 
+const unmatchedRoutePage = {
+  path: "*",
+  component: UnmatchedRoutePage
+}
+
 export const appRoutes = [
   AssetManager,
   ContenthubComponent,
   BlogsManger,
   BannersManager,
   dashBoard,
+  unmatchedRoutePage
 ];
