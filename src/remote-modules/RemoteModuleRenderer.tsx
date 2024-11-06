@@ -27,6 +27,9 @@ export const RemoteModuleRenderer = () => {
 
   useEffect(()=>{
     (window as any).TXEMessageService=MessageService;
+    if ((window as any).___prmise___) {
+      window.Promise = (window as any).___prmise___;
+    }
   },[])
   const APP_ENV = (window as any)._env_.APP_ENV;
   const selectedModuleAppObject = useSelector((state: any) => {
