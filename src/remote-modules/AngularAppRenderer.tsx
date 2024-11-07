@@ -34,6 +34,9 @@ export function AngularAppRenderer(props: any) {
     window.CKEDITOR = window.__ckeditor__;
     window.$ = window.__$__;
   }
+  if ((window as any).___prmise___) {
+    window.Promise = (window as any).___prmise___;
+  }
 
   useEffect(() => {
     if (props?.appWindowConfig) {
@@ -124,10 +127,10 @@ export function AngularAppRenderer(props: any) {
     if (!document.getElementById("crm-styles") && props.scope === 'cpui') {
       fetchAndLoadScript();
     }
-    loadComponent();
     removeStylesBasedOnContents(["https://github.com/h5bp/html5-boilerplate/blob/master/src/css/main.css", "assets-management-new-body"]);
     if (ready) {
       (async () => {
+        loadComponent();
         const scope = props.scope;
         const exposedModule = props.module;
         const module = await loadRemoteModule(scope, exposedModule);

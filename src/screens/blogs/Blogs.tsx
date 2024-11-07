@@ -56,6 +56,7 @@ const Blogs = () => {
         return selectedAppFromSession || state.app?.selectedApp;
       });
     var selectedApp = selectedModuleAppObject?.appConfig || {};
+    (window as any).isCmsModule = true;
 
     useEffect(() => {
         const resources = loadStylesAndScripts();

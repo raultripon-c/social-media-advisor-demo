@@ -14,6 +14,7 @@ declare global {
 
 const Assets = () => {
     removeCrmStyles();
+    (window as any).isCmsModule = true;
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const storeData = useSelector((state: AppStore) => state.customer);
     const selectedModuleAppObject = useSelector((state: any) => {
