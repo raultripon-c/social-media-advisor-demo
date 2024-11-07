@@ -20,7 +20,7 @@ export const useDynamicMFLoader = (args: any) => {
     }
     // if (!isScriptAlreadyDownloaded(args.url)) {
       const element = document.createElement("script");
-      element.src = args.url;
+      element.src = args.url + `?v=${Date.now()}`;
       element.type = "text/javascript";
       element.async = true;
       setReady(false);
