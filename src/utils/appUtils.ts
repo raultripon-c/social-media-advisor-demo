@@ -386,6 +386,10 @@ export const removeCrmStyles = () => {
     if (styleTag.textContent?.includes("camp-default.png")) {
       styleTag.remove();
     }
+    if (styleTag.textContent?.includes("Bootstrap v4.3.1")) {
+      styleTag.remove();
+      console.log("Removed a <style> tag containing 'Bootstrap v4.3.1'");
+    }
   });
 
   const crmStyles = document.getElementById("crm-styles");
