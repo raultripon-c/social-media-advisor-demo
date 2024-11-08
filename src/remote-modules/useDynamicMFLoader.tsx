@@ -24,7 +24,7 @@ export const useDynamicMFLoader = (args: any) => {
 
     // Create and load the script dynamically
     const scriptElement = document.createElement("script");
-    scriptElement.src = args.url + `?v=${Date.now()}`;
+    scriptElement.src = args.url;
     scriptElement.type = "text/javascript";
     scriptElement.async = true;
 
