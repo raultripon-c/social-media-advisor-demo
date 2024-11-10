@@ -67,6 +67,23 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   const sessionTrackerIngestPoint = `${(window as any)._env_.SESSION_TRACKER_INGEST_POINT || ""}`;
   const userId = userDetails?.userName;
   const fetchedApps = useSelector((state: any) => state.app.allApps);
+
+  const navigateToApp = (selectedApp: any, customerCode: string, refNum: string) => {
+    sessionStorage.setItem("selectedApp", JSON.stringify(selectedApp));
+    dispatch(setAppDetails(selectedApp));
+    const appSelectionOptions: AppSelectionOptions = {
+      selectedApp: selectedApp,
+      navigate: navigate,
+      customerCode: customerCode,
+      refNum: refNum,
+      siteMetaData: siteMetaData,
+      dispatch: dispatch,
+      openInNewTab: false,
+      setSiteMetaData: setSiteMetaData,
+      selectedTenant: selectedTenant,
+    }
+    appSelectionHandler(appSelectionOptions);
+  };
   const handleInternalNavigation = (event: CustomEvent) => {
     console.log(
       "Successfully listened internalNavigation event from CRM",
@@ -96,15 +113,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
         const response = JSON.parse(
           sessionStorage.getItem("allapps") || "[]"
         );
-        const detailsApp = response.find((element: any) =>
-          url.slice(0, url.lastIndexOf('/')).includes(element?.appConfig?.route?.toLowerCase())
-        );
+        
+        const detailsApp = response.find((element: any) => element?.appConfig?.route?.toLowerCase() === "/dashboard/email-management/campaigns");
         if (detailsApp) {
-          // const newRoute = `/${path[0]}/${path[1]}${url.slice(0, url.lastIndexOf('/'))}`;
-          navigate("/PNM/PHENA0059/dashboard/email-management/campaigns");
-          setAppDetails(detailsApp)
-          sessionStorage.setItem("selectedApp", JSON.stringify(detailsApp));
-          console.log("Changed App to", detailsApp);
+          const customerCode = selectedTenant?.customerCode || path[0];
+          const refNum = selectedTenant?.refNum || path[1];
+          navigateToApp(detailsApp, customerCode, refNum);
         }
       }
     }
