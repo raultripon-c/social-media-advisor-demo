@@ -333,9 +333,9 @@ export function findAppConfigByRoutes(apps: any = [], value: string): any {
   try {
     return apps.filter((element: any) => {
       try {
-        const currentAppPath = window.location.pathname.split('/').filter(Boolean)[2] || "";
-        const configAppPath = element?.appConfig?.route?.toLowerCase().split('/').filter(Boolean)[0] || "";
-        return configAppPath === currentAppPath;
+        return value
+          .toLowerCase()
+          .includes(element?.appConfig?.route?.toLowerCase());
       } catch (error) {
         console.error("An error occurred while filtering: ", error);
         return false;
@@ -385,6 +385,10 @@ export const removeCrmStyles = () => {
   styleTags.forEach((styleTag) => {
     if (styleTag.textContent?.includes("camp-default.png")) {
       styleTag.remove();
+    }
+    if (styleTag.textContent?.includes("Bootstrap v4.3.1")) {
+      styleTag.remove();
+      console.log("Removed a <style> tag containing 'Bootstrap v4.3.1'");
     }
   });
 

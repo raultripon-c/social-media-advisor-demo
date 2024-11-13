@@ -32,7 +32,6 @@ const waitForToken = () => {
       window.keycloakInstance
         .updateToken(-1)
         .then(async () => {
-          await APIService.triggerTxeLogin(code, type)
           resolve();
         })
         .catch(function () {

@@ -138,13 +138,14 @@ export function AngularAppRenderer(props: any) {
           const props = {
             token: window.keycloakInstance.token,
             refNum: selectedTenant?.refNum,
-            subPath: `/${selectedTenant?.customerCode}/${selectedTenant?.refNum}${approute}`,
+            subPath: `/${selectedTenant?.customerCode}/${selectedTenant?.refNum}`,
             userId: window.keycloakInstance.userInfo.userDetails.id,
             userEmail: window.keycloakInstance.userInfo.userDetails.email,
             appName: appName,
             MessageService: JSON.stringify(MessageService),
             moduleRoute: moduleRoute,
-            txeAppHeader: appTitle
+            txeAppHeader: appTitle,
+            companyName: selectedTenant?.tenantName,
           };
           console.log('angular app props', { props });
           await module.mount(props);
