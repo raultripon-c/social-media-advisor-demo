@@ -333,9 +333,9 @@ export function findAppConfigByRoutes(apps: any = [], value: string): any {
   try {
     return apps.filter((element: any) => {
       try {
-        const currentAppPath = window.location.pathname.split('/').filter(Boolean)[2] || "";
-        const configAppPath = element?.appConfig?.route?.toLowerCase().split('/').filter(Boolean)[0] || "";
-        return configAppPath === currentAppPath;
+        return value
+          .toLowerCase()
+          .includes(element?.appConfig?.route?.toLowerCase());
       } catch (error) {
         console.error("An error occurred while filtering: ", error);
         return false;
