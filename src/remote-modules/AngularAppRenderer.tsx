@@ -67,7 +67,7 @@ export function AngularAppRenderer(props: any) {
     document.head.appendChild(element);
   }
 
-  const cmsStylesToRemove = ["txe-cms-style-main", "txe-cms-style-app"];
+  const cmsStylesToRemove = ["txe-cms-style-main", "txe-cms-style-app", "ckEditor"];
   cmsStylesToRemove.forEach((styleId) => {
     const styleElement = document.getElementById(styleId);
     if (styleElement) {
