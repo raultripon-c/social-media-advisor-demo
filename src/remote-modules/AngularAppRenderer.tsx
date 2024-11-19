@@ -72,7 +72,7 @@ export function AngularAppRenderer(props: any) {
     }
 
     // Clean up the CRM styles
-    const cmsStylesToRemove = ["txe-cms-style-main", "txe-cms-style-app"];
+    const cmsStylesToRemove = ["txe-cms-style-main", "txe-cms-style-app", "ckEditor"];
     cmsStylesToRemove.forEach((styleId) => {
       const styleElement = document.getElementById(styleId);
       if (styleElement) styleElement.remove();
