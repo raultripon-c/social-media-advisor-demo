@@ -1,0 +1,38 @@
+.configure-font-families{
+    .font-family-names{
+      .name-box{
+        border: 1px solid #57a9b6;
+        border-radius: 16px;
+        min-height: 50px;
+        padding: 10px;
+        input{
+          margin-right: 10px;
+        }
+        label{
+          font-size: 16px;
+          color: #53575e;
+        }
+      }
+    }
+    .no-fonts{
+      width: 565px;
+    }
+    .font-list{
+        padding-top: 20px;
+    }
+    .fetch-from-file-button{
+      padding-top: 30px;
+    }
+    .fetch-font-button{
+      
+    }
+    .add-font-button{
+        padding-right: 300px;
+    }
+    .actions{
+        padding-left:70px;
+    }
+    .submit-button{
+        padding-left: 500px;
+    }
+  }

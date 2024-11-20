@@ -1,0 +1,44 @@
+.cms-page-title{
+	border-bottom: 1px solid $border-color-default;
+	padding: 10px 25px; 
+	.page-title{
+		float: left;
+		margin: 3px auto 0;
+		font-size: $heading-font-size-h1;		
+	}
+	.btn{
+		float: right;
+	}
+	&:after{
+		clear: both;
+		content: "";
+		display: table;
+	}
+}
+ .section-heading{
+ 	font-size: 30px;
+ 	font-weight: Light;
+ 	margin-bottom: 25px;
+ 	font-family: $font-family-primary-light;
+ 	&.small{
+ 		font-size: 26px;
+ 	}
+ 	&.x-small{
+ 		font-size: 22px;
+ 		margin-bottom: 20px;
+ 	}
+ }
+ .field-category-heading{
+ 	font-size: 20px;
+ 	font-weight: Light;
+ 	margin-bottom: 15px;
+ 	margin-top: 25px;
+ 	&.small{
+ 		font-size: 18px;
+ 	}
+ 	&.x-small{
+ 		font-size: 16px;		
+ 		margin-bottom: 10px;
+ 		margin-top: 20px;
+ 	}
+ }

@@ -1,0 +1,80 @@
+.cms-site-import-mgr{
+
+    //common for widget-import-options, assets-options, site-script-options, phApp-options, refine-search-options, resource-bundle-options
+
+    .widget-options{
+        
+    }
+
+    //END
+
+    .widget-import-options{
+
+    }
+    .assets-options{
+
+    }
+    .site-script-options{
+
+    }
+    .phApp-options{
+
+    }
+    .ph-mutation-observer-options{
+
+    }
+    .ph-tracking-options{
+        
+    }
+    .refine-search-options{
+        .facet-list-area{
+            
+        }
+        .action-btn-group{
+            margin-bottom: $space-lg + $space-xs;
+            .icon{
+                float: right;
+                margin-left: 5px;
+            }
+        }
+        .info-icon{
+            font-size: 16px;
+        }
+        .facet-list-item{
+            display: table;
+            margin: 0 -$space-sm;
+            width: 100%;
+            &.fyf-steps{
+                margin-bottom: -80px;
+            }
+            &.key-value-pairs{
+                margin-top: 60px;
+                margin-left: -540px;
+            }
+             .facet-value{
+                 padding: 0 $space-sm;
+                 display: table-cell;
+                 vertical-align: top;
+                 height: 85px;
+                 width: 22%;
+                 label{
+                     white-space: nowrap;
+                 }
+                &.defualt-facet-action {
+                    max-width: 135px;
+                    width: 15%;
+                }
+                &.actions {
+                    width: 19%;
+                    .btn {
+                        min-width: 40px;
+                    }
+                }
+             }            
+        }
+    }
+}
+.cms-site-import-mgr .refine-search-options .facet-list-item ~.key-value-pairs{
+    margin-top: 0px;
+}
+

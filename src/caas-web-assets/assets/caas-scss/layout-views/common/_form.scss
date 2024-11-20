@@ -1,0 +1,452 @@
+.form-group{
+ 	margin-bottom: 15px; 	
+ 	background-color: #fff; 	
+ 	position: relative;
+ 	@include borderRadius(3px);
+	 &.edit-mode{
+		 padding: $space-lg;
+		 position: relative;
+		 margin-bottom: 0;
+		 &:hover{
+			background-color: $bg-color-special-primary;
+			span.icon{
+				display: inline;
+			}	 
+		 }
+		 .form-control{
+			 background-color: #ffffff;
+		 }
+		 span.icon{
+			 display: none;
+			 background-color: $bg-color-special-secondary;
+			 position: absolute;
+			 top: 0;
+			 right: 0;
+			 padding: 4px 10px 2px;
+			 color: $text-color-heading;
+			 font-size: $text-font-size-small;
+			 cursor: pointer;
+			 z-index: 1;
+		 }
+	 }
+ 	label{
+ 		position: relative;
+ 		display: block;
+ 		font-weight: normal;
+ 		margin-bottom: 0;
+ 		.float-label {
+ 			position: absolute;
+ 			left: 15px;
+ 			z-index: 3;
+ 			top: 5px;
+ 			font-size: 12px;
+ 		}
+		&.inline-block{
+			display: inline-block;
+		}
+		&.sr-only{
+			position: absolute;
+		}
+ 	}
+ 	input,textarea,select{						
+ 		min-height: 34px;
+ 		box-shadow: none;
+ 		border: 1px solid $border-color-primary;
+ 		background-color: transparent;
+ 		&:focus,&:active,&:hover{
+ 			border-color: $brand-color;
+ 			box-shadow: none;
+ 		}
+ 		&::-moz-placeholder {
+ 			color: $input-placeholder-color;
+ 			opacity: 1;
+ 		}
+ 		&:-ms-input-placeholder {
+ 			color: $input-placeholder-color;
+ 		}
+ 		&::-webkit-input-placeholder {
+ 			color: $input-placeholder-color;
+ 		}
+	 }
+	 .form-size{
+		min-height: 100px;
+		box-shadow: none;
+		border: 1px solid $border-color-primary;
+		background-color: transparent;
+		width:900px;
+	 }
+	 
+	input[type="color"]{
+		border: 0;
+		padding: 0;
+		min-height: 10px;
+		width: 24px;
+		margin: -4px 0 0;
+		height: 24px;
+	}
+ 	textarea{
+ 		min-height: 100px;
+ 	}
+ 	&:focus,&:active,&:hover,&.active{
+ 		border-color: $brand-color;
+ 		box-shadow: none; 		
+ 	}
+ 	&.active{
+ 		label{	 		
+ 			.float-label {
+ 				font-size: 12px;
+ 				color: $brand-color;
+ 			}
+ 		}
+ 	}
+ 	.error{
+ 		position: absolute;
+ 		left: 0;
+ 		background-color: #333;
+ 		font-size: $text-font-size-small;
+ 		color: $text-color-white;
+ 		padding: 8px 10px;
+ 		z-index: $header-zindex;
+		&:before{
+		    content: "";
+		    position: absolute;
+		    border-left: 8px solid transparent;
+		    border-right: 8px solid transparent;
+		    border-bottom: 8px solid #333;
+		    top: -8px;
+		    display: block;
+		    left: 0px;
+		    right: 0;
+		    height: 0;
+		    width: 0;
+ 		}
+ 	}
+ 	&.has-feedback{
+ 		&.left{
+ 			.form-control {
+			    padding-left: 34px;
+			    padding-right: 12px;
+			}
+ 			.form-control-feedback {
+			    right: auto;
+			    left: 0;
+			    z-index: 2;
+			    display: block;
+			    width: 34px;
+			    height: 34px;
+			    line-height: 34px;
+			    text-align: center;
+			    pointer-events: none;
+			}
+ 		}
+	 }
+	 &.multi-fields{
+		.input-check-group{
+			display: inline-block;
+			padding-right: $space-lg;
+		}
+	}
+ }
+label.input-check-group{
+	font-weight: normal;
+	margin-top: 10px;
+	cursor: pointer;
+	position: relative;
+	input{
+		@include opacity(0);
+		height: inherit;
+		left: 0px;		    	
+		top: 0;	    		    		    
+		position: absolute;
+		width: 100%;
+    	height: 100%;
+		cursor: pointer;
+	}			    	
+	.checkbox,.radio{			    		
+		margin: 0 10px 0 0;
+		padding: 0;
+		background: #ffffff none repeat scroll 0px 0px;
+		@include borderRadius(3px);
+		border: 1px solid $border-color-primary;
+		display: inline-block;
+		float: left;
+		height: 15px;
+		margin-right: 10px;
+		margin-top: -2px;
+		/* position: relative; */
+		top: 2px;
+		width: 15px;
+		&:focus{
+			border: 1px solid $brand-color;
+		}
+		&::before{
+			content: "";
+			border-color: #fff;
+			border-image: none;
+			border-style: solid;
+			display: none;
+			border-width: 0px 0px 2px 2px;
+			height: 5px;
+			left: 2px;
+			position: absolute;
+			top: 3px;
+			transform: rotate(-45deg);
+			-webkit-transform: rotate(-45deg) !important;
+			-ms-transform: rotate(-45deg) !important;
+			-o-transform: rotate(-45deg) !important;
+			width: 9px;
+		}
+	}
+	.radio{
+		@include borderRadius(50%);
+		height: 16px;
+		width: 16px;
+		&::before{
+			border-width: 5px;
+			height: 9px;
+			left: 2px;
+			position: absolute;
+			transform: rotate(0deg);
+			top: 2px;
+			@include borderRadius(50%);
+		}
+	}
+	input:checked + .checkbox,
+	input:checked + .radio {
+		border: solid 1px  #3C6D68 ;
+		background-color:  #3C6D68 ;
+	}
+	input:checked + .checkbox::before ,
+	input:checked + .radio::before{ 		
+		display: block;
+	}
+}
+
+label.input-check-toggle {
+    .input-block{
+    	width: 34px;
+    	height: 20px;
+    	background: $text-color-lighter;
+    	border: 1px solid $text-color-lighter;
+    	@include borderRadius(50px);
+    	position: relative;
+    	float: left;
+    	    &:before {
+    	    content: '';
+    	    position: absolute;
+    	    top: 11px;
+    	    left: 13px;
+    	    height: 2px;
+    	    color: #999999;
+    	    font-size: 1.1em;
+    	}
+    	&:after {
+    	    content: '';
+    	    position: absolute;
+    	    top: 11px;
+    	    left: 45px;
+    	    height: 2px;
+    	    color: #999999;
+    	    font-size: 1.1em;
+    	}
+    	&.active{
+    		background: $border-color-special;
+    		border: 1px solid $border-color-special;
+    	}
+    }
+	input[type=checkbox] {
+	    @include opacity(0);
+	    height: inherit;
+	    left: 0px;		    	
+	    top: 0;	    		    		    
+	    position: absolute;
+	    width: inherit;
+	    & + .checkbox {
+		    color: #494949;
+		    font-size: 14px;
+		    margin-top: 10px;
+		    line-height: 1.8em;
+		}
+		&:checked + .checkbox {
+		    left: 16px;
+		    background: $bg-color-special-white;
+		}
+	}
+	.checkbox {
+	    display: block;
+	    width: 16px;
+	    height: 16px;
+	    @include borderRadius(50px);
+	    @include transition(all .5s ease);
+	    cursor: pointer;
+	    position: absolute;
+	    top: 7px;
+	    margin-top: -6px !important;
+	    z-index: 1;
+	    left: 1px;
+	    background: $bg-color-special-white;
+	}
+}
+
+.progress{
+	background-color: $progree-bar-bg-color;
+	height: 5px;
+	margin-bottom: 10px; 	
+	@include borderRadius(0px);
+	.progress-bar{
+		background-color: $progree-bar-progress-color;
+		box-shadow: none;
+	}
+}
+
+.action-btn-group{
+	&:after{
+		clear: both;
+		content: "";
+		display: table;
+	}
+}
+.form-inline{
+	.form-group{
+		label{
+			display: inline-block;
+		}
+	}
+}
+
+
+// Range slider
+
+//====================================================
+// For web kit
+//====================================================
+
+input[type=range]{
+    -webkit-appearance: none;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+    min-width: 125px;
+    height: 5px;
+    background: $bg-color-special-one;
+    border: none;
+    border-radius: 3px;
+}
+
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    border: none;
+    height: 16px;
+    width: 16px;
+	border-radius: 50%;
+	border: 2px solid #fff;
+    background: $bg-color-special-two;
+    margin-top: -5px;
+}
+
+input[type=range]:focus {
+    outline: none;
+}
+
+input[type=range]:focus::-webkit-slider-runnable-track {
+    background: #ccc;
+}
+/** FF*/
+/** FF*/
+input[type="range"]::-moz-range-progress {
+	background-color: #43e5f7; 
+  }
+  input[type="range"]::-moz-range-track {  
+	background-color: #9a905d;
+  }
+  /* IE*/
+  input[type="range"]::-ms-fill-lower {
+	background-color: #43e5f7; 
+  }
+  input[type="range"]::-ms-fill-upper {  
+	background-color: #9a905d;
+  }
+
+//====================================================
+// For mozilla
+//====================================================
+
+input[type=range]{
+    /* fix for FF unable to apply focus style bug  */
+    border: 1px solid white; 
+
+    /*required for proper track sizing in FF*/
+    min-width: 125px;
+}
+
+input[type=range]::-moz-range-track {
+    min-width: 125px;
+    height: 5px;
+    background: $bg-color-special-one;
+    border: none;
+    border-radius: 3px;
+}
+
+input[type=range]::-moz-range-thumb {
+    border: none;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: $bg-color-special-two;
+}
+
+/*hide the outline behind the border*/
+input[type=range]:-moz-focusring{
+    outline: 1px solid $brand-color;
+    outline-offset: -1px;
+}
+
+input[type=range]:focus::-moz-range-track {
+    background: #ccc;
+}
+
+//====================================================
+// For internet explorer
+//====================================================
+
+input[type=range]::-ms-track {
+    min-width: 120px;
+    height: 5px;
+    
+    /*remove bg colour from the track, we'll use ms-fill-lower and ms-fill-upper instead */
+    background: transparent;
+    
+    /*leave room for the larger thumb to overflow with a transparent border */
+    border-color: transparent;
+    border-width: 6px 0;
+
+    /*remove default tick marks*/
+    color: transparent;
+}
+input[type=range]::-ms-fill-lower {
+    background: $text-color-heading;
+    border-radius: 10px;
+}
+input[type=range]::-ms-fill-upper {
+    background: $bg-color-special-one;
+    border-radius: 10px;
+}
+input[type=range]::-ms-thumb {
+    border: none;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: $bg-color-special-two;
+}
+input[type=range]:focus::-ms-fill-lower {
+    background: #888;
+}
+input[type=range]:focus::-ms-fill-upper {
+    background: #ccc;
+}
+
+
+
+ @media screen and (max-width: 1700px) {
+
+ }

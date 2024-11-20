@@ -1,0 +1,105 @@
+.btn{
+ 	min-width: 75px;
+ 	padding: $space-sm $space-lg;
+ 	font-size: $text-font-size-default;
+ 	@include borderRadius(2px);
+ 	//@include opacity(0.9);
+	 	&:hover{
+	 	//	@include opacity(1);
+	 	}
+	&.plain-button{
+		 	color: $button-plain-text-color;
+		 	background-color: $button-plain-bg-color;
+		 	border: 1px solid $button-plain-border-color;
+		 	&:hover{
+		 		background-color: $button-plain-bg-hover-color;
+		 		color: $button-plain-text-hover-color;
+		 		border: 1px solid $button-plain-border-color;
+		 	}
+	 	}
+	&.default-button{
+		 	color: $button-default-text-color;
+		 	background-color: $button-default-bg-color; 			
+		 	// border: 1px solid $button-default-border-color;
+		 	&:hover{
+		 		// background-color: $button-default-bg-hover-color;
+		 		// color: $button-default-text-hover-color;
+		 		// border: 1px solid $button-default-border-color;
+		 	}
+		}
+	&.widget-cancel-button{
+			color: $button-default-text-color;
+			background-color: $button-default-bg-color; 			
+			&:hover{
+				background-color: $button-default-bg-hover-color;
+				color: rgba(79, 152, 156, 1);
+				border: none;
+				border: 1px solid transparent;
+			}
+		}	 
+	&.primary-button{
+		 	color: $button-primary-text-color;
+			background-color: $button-primary-bg-color; 
+			border-radius: 50px !important;
+			&.fyf-reorder-icon{
+				color: #3C6D68;
+				background-color: #fff;
+				border: 1px solid #e0e0e0;
+			}		
+		 	&:hover{
+		 		background-color: $button-primary-bg-hover-color;
+		 		color: $button-primary-text-hover-color;
+			}
+			&.fyf-config{
+				float: right;
+			} 	 
+		 }
+	&.warning-button{		
+		 	color: #fff;
+			background-color: #c74833; 
+			&.fyf-remove-icon{
+				color: darkred;
+				background-color: #ffffff;
+				border: 1px solid #e0e0e0
+			} 		
+		 	&:hover{
+		 		background-color: $text-color-danger;
+		 		color: $button-primary-text-color;
+		 	}
+		 }
+	&.panel-button-default{
+		 		//background-color: $panel-button-bg-color-primary;
+		 		//color: $panel-button-color-primary;		
+	 	}
+ 	&.panel-button-primary{
+ 		//background-color: $panel-button-bg-color-secondary;
+ 		//color: $panel-button-color-secondary;
+	 }
+	&.cancel-btn{
+		color: $text-color-special;
+		text-align: center;
+		padding: $space-sm 0;
+		&:hover{
+			color: $text-color-heading;
+		}
+	}
+	&.btn-cancel {
+		color: #464F5E;
+		border: none;
+		padding: 8px 0;
+		width: auto;
+		min-width: inherit;
+	}
+	&.btn-left {
+		float: left;
+	}
+}
+.nya-bs-select.open,
+.dropdown.open{
+	.caret{
+		border-top: 0;
+		border-bottom: 4px solid;
+		border-right: 4px solid transparent;
+		border-left: 4px solid transparent;
+	}
+}

@@ -1,0 +1,58 @@
+ux-dialog-container.cms-edit-modal-container.cms-img-modal{
+    max-width: 85%;
+    margin: 2% auto;
+    .cms-image-edit-mgr > .ai-dialog-body{
+        max-height: 500px;
+    }
+    .gallery-section{
+        min-height: 250px;
+    }
+    .crop-image-options{
+        background-color: $bg-color-primary;
+        float: right;
+        padding: $space-xs $space-md;
+        margin-right: $space-lg;
+        @include borderRadius(3px);
+        .icon{
+            padding-left: $space-lg + 4;
+            color: $text-color-heading;
+            &:first-child{
+                padding-left: $space-xs;
+            }
+            &:hover{
+                color: $brand-color-primary;
+            }
+            font-size: $text-font-size-20 + 4;
+            &.horizontal:before{
+                transform: rotate(45deg);
+            }
+            &.vertical:before{
+                transform: rotate(135deg);
+            }
+            &.reset{
+                color: $text-color-warning;
+            }
+            &.save{
+                color: $brand-color-primary;
+            }
+        }
+    }
+    .crop-section{
+        .file-info h5{
+            &:after{
+                clear: both;
+                display: table;
+                content: "";
+            }
+        }
+        .file-label{
+            float: left;
+            width: 30%;
+        }
+        .file-value{
+            float: left;
+            width: 70%;
+            padding-left: $space-md; 
+        }
+    }
+}

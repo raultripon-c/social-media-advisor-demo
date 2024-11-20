@@ -1,0 +1,42 @@
+.cms-edit-modal-container{
+	ai-dialog-header{
+
+	}
+	ai-dialog-body{
+
+	}
+	ai-dialog-footer{
+
+	}
+	.cms-tenant-mgr{
+		min-width: 320px;
+		width: 50%;
+	}
+	.tenat-edit-form{
+		position: relative;
+		padding-bottom: 21px;
+	}
+	// .add-persona{
+	// 	position: absolute;
+	// 	bottom: 0;
+	// }
+	.persona .form-group input{
+		width: 350px;
+		
+	}
+	.domain-prefix{
+		word-break: break-all;
+	}
+	.persona{
+		position: relative;
+	}
+	.actions.delete-facet{
+		position: absolute;
+		right: 15px;
+		top: 60px;
+	}
+	.actions .remove-button{
+		min-width: 40px;
+		padding: 5px;
+	}
+}

@@ -1,0 +1,40 @@
+.cms-image-edit-mgr {
+    .logo_images {
+        max-height: 65px;
+        max-width: 65px;
+    }
+    .inline-show {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        display: inline;
+    }
+    .pages-list {
+        height: 200px;
+        overflow-y: auto;
+        border: 1px solid $border-color-default;
+        margin: $space-sm 0;
+        @include borderRadius(2px);
+        li {
+            padding: $space-xs $space-sm;
+            cursor: pointer;
+            .icon {
+                color: $text-color-special;
+                padding-right: $space-xs;
+            }
+            &.active {
+                background-color: $brand-color;
+                color: #ffffff;
+                .icon {
+                    color: #ffffff;
+                }
+            }
+        }
+        &>.page-list-item {
+            label {
+                // color: $text-color-special;
+                text-transform: capitalize; // font-size: $text-font-size-16;
+            }
+        }
+    }
+}

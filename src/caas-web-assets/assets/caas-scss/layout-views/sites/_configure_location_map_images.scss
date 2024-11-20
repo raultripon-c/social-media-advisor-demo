@@ -1,0 +1,28 @@
+.cms-location-map-mgr{
+    .form-group {
+        .addFacetLabel {
+          display: inline-block;
+        }
+        .add-facet-to-map {
+          display: inline-block;
+          text-align: right;
+        }
+      }
+      
+      .facet-names {
+        width: 100%;
+        display: table;
+        .facet-name {
+          display: table-cell;
+          width: 90%;
+        }
+        .actions {
+          width: 10%;
+          display: table-cell;
+          padding-left: 29px;
+          button {
+            min-width: 40px;
+          }
+        }
+      }
+}

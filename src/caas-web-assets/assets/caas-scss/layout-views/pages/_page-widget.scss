@@ -1,0 +1,76 @@
+.cms-edit-modal-container {
+    .cms-image-edit-mgr {
+        ai-dialog>ai-dialog-body {
+            max-height: 450px;
+            overflow: auto;
+        }
+        .upload-section {
+            width: 70%;
+            margin: 5% auto;
+        }
+        .tab-content {
+            .gallery-section {
+                .cms-media-assets {
+                    figure {
+                        max-height: 150px;
+                        cursor: pointer;
+                    }
+                }
+                .img-preview-block {
+                    width: 50%;
+                    margin: 5% auto;
+                    .details-block {
+                        display: table;
+                        margin-bottom: 30px;
+                        .img-view {
+                            display: table-cell;
+                            vertical-align: top;
+                            figure {
+                                width: 225px;
+                                padding: 8px;
+                                background-color: #f3fbfb;
+                            }
+                        }
+                        .img-details {
+                            display: table-cell;
+                            vertical-align: top;
+                            padding-left: 15px;
+                            .file-name,
+                            .file-type,
+                            .file-size,
+                            .file-platform,
+                            .file-dimension {
+                                margin-bottom: 15px;
+                            }
+                            h5 {
+                                font-size: $text-font-size-default;
+                                margin: 0;
+                            }
+                            span {
+                                font-size: $text-font-size-18;
+                                color: $text-color-default;
+                            }
+                        }
+                    }
+                    .action-btn-group {
+                        text-align: left;
+                        .btn {
+                            width: 35%;
+                        }
+                    }
+                }
+            }
+        }
+        .image-alt-text {
+            input {
+                width: 100%;
+            }
+        }
+    }
+}
+
+.cat-content {
+    border: 1px solid #d5d6da;
+    border-radius: 5px;
+    margin: 10px;
+}

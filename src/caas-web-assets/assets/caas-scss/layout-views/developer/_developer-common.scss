@@ -1,0 +1,106 @@
+.cms-dev-modal-container{
+	
+}
+
+.cms-widget-import-mgr,
+.cms-site-import-mgr,
+.cms-gdpr-widget-add,
+.cms-gdpr-pages-add,
+.cms-platform-import-mgr{
+   .plotform-options,
+   .site-options,
+   .widget-options{
+       .upload-section{
+            .image-upload {
+                .ion-android-download {
+                    font-size: 75px;
+                    line-height: normal;
+                }
+                h3{
+                    font-size: 24px;
+                }
+            }   
+        }
+        .widget-view-settings{
+            &:after{
+                content: "";
+                clear: both;
+                display: table;
+            }
+            label{
+                margin-right: 10px;
+                display: inline-block;
+            }
+        }
+   }
+        .facet-list-item{
+            display: table;
+            margin: 0 -$space-sm;
+            width: 100%;
+             .facet-value{
+                 padding: 0 $space-sm;
+                 display: table-cell;
+                 vertical-align: top;
+                 height: 85px;
+                 width: 22%;
+                 label{
+                     white-space: nowrap;
+                 }
+                &.defualt-facet-action {
+                    max-width: 135px;
+                    width: 15%;
+                }
+                &.actions {
+                    width: 19%;
+                    .btn {
+                        min-width: 40px;
+                    }
+                }
+             }            
+        }
+}
+
+.cms-widget-import-mgr,
+.cms-site-import-mgr,
+.cms-platform-import-mgr,
+.cms-resource-bundle-mgr{
+    .cms-widget-success-mgr,
+    .cms-widget-failure-mgr{
+        position: fixed;
+        left: 0;
+        right: 0;
+        max-width: 350px;
+        z-index: $modal-popup-zindex;
+        margin: 0 auto;
+        background-color: #fff;
+        text-align: center;
+        top: 20%;
+        .icon{
+            font-size: 250px;
+            color: $brand-color;
+            text-align: center;
+            display: block;
+            line-height: 250px;
+        }
+    }
+    .cms-widget-failure-mgr{
+        .icon{
+            color: $text-color-danger;
+        }
+    }
+    .modal-backdrop{
+        @include opacity(0.5);
+    }
+}
+
+.cms-table {
+    overflow: auto;
+    max-height: 150px;    
+    max-width: 600px;    
+    padding: 15px;
+    margin: 10px;
+    border: 1px ridge #dadada;
+    table.danger {
+	background-color: #fff9f9;
+    }
+}

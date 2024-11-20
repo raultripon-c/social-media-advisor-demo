@@ -1,0 +1,126 @@
+.cms-admin-page,
+.cms-developer-page,
+.cms-pages-preview-page{	
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+	-ms-flex-wrap: wrap;
+	height: 100%;
+	flex-wrap: wrap;
+	.side-sub-menu{
+		@include InnerPagePosAbsLeftBlock();	
+		@include transition(0.25s ease);
+		z-index: $left-nav-zindex;
+		overflow-y: auto;
+    	height: calc(100vh - #{$site-top-navbar-element-min-height});
+		.nav-list-view{
+			width: 100%;
+			overflow-y: auto;
+			@include leftSubNavListView();
+			li{
+				position: relative;
+                & > ul{
+                    display: none;
+                    li{
+                        display: block;
+                        &:after,
+                        &:before {
+                            content: "";
+                            display: table;
+                        }
+                        &:after{
+                            clear: both;
+                        }
+                    }
+                }
+		&.page-variant-background {
+		& > a{
+				background-color: #00a8b7;
+				color: #fff;
+		}
+		}
+                &.open{
+                    & > a{
+                        background-color: $brand-color;
+                        color: #fff;
+                    }
+                    & > ul{
+                        display: block;	
+                    }
+                }
+			}
+		}
+		&.opacity-left-nav {
+			opacity: 0.5;
+			.side-sub-menu-child.open {
+				left: 48px !important;
+				//@include transition(.4s all);
+			}
+		}
+    }
+	.developer-area{
+		flex: 0 0 calc(100% - 325px);
+		-webkit-flex: 0 0 calc(100% - 325px);
+		-ms-flex: 0 0 calc(100% - 325px);
+		max-width: 100%;
+		@include transition(0.25s ease);
+		overflow-x:auto;
+		height: calc(100vh - #{$site-top-navbar-element-min-height});
+		padding-bottom: $site-top-navbar-element-min-height;
+	}
+    .icon-toggle{
+		overflow: hidden;
+        background-color: $side-sub-navbar-header-color;
+        width: 100%;
+		height: 50px;
+		z-index: $left-nav-zindex;
+		.icon{
+			color: #fff;
+			font-size: $icon-font-size-16;
+			padding-right: 10px;
+			margin-top: 16px;
+			line-height: normal;
+			cursor: pointer;
+			&.ion-android-add-circle{
+				font-size: $icon-font-size-16;
+				margin-right: 10px;
+				margin-left: 10px;
+			}
+		}
+		.title{
+			float: left;
+		    padding-left: 15px;
+		    margin-top: 15px;
+		    margin-bottom: 15px;
+		    font-size: $text-font-size-16;
+		    color: #fff;	
+			text-transform: capitalize;	
+			&.blog-title{
+			 	padding-left: 25px;
+			}    
+		}
+	}
+    &.disable-left-nav{
+		.side-sub-menu{
+			flex: 0 0 0;
+			max-width: 0;
+			@include transition(0.25s ease);
+		}
+		.developer-area{
+			flex: 0 0 100%;
+			-webkit-flex: 0 0 100%;
+			-ms-flex: 0 0 100%;
+			max-width: 100%;
+		}
+	}
+}
+.widgetbrowser-developer-area{
+	flex: 0 0 100%;
+	-webkit-flex: 0 0 100%;
+	-ms-flex: 0 0 100%;
+	max-width: 100%;
+	@include transition(0.25s ease);
+}
+.cms-pages-preview-page .side-sub-menu .nav-list-view li:last-child > ul > li:last-child {
+	padding-bottom: 200px;
+}

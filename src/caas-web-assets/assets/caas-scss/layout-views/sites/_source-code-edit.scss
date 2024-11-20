@@ -1,0 +1,20 @@
+.cms-source-code-edit-page{
+	.side-sub-menu{
+		@include InnerPagePosAbsLeftBlock();	
+		@include leftSubDropdownNav();	
+		z-index: $header-zindex + 2;
+	}
+	.souce-edit-area{
+		@include InnerPosAbsRightBlock();
+	}
+	.alert{
+		position: fixed;
+		top: 60px;
+		left: 0;
+		right: 0;
+		margin: 0 auto;
+		max-width: 500px;
+		width: 100%;
+		z-index: $header-zindex + 3;
+	}
+}
