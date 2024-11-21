@@ -23,8 +23,7 @@ import { RecommendedPages } from "../../components/recommendedPages/RecommendedP
 import {
   tenantData,
   staticData,
-  metricsDataForIndia,
-  metricsDataForOtherRegions,
+  metricsDataForAllRegions,
   campaignColumns,
   tenantImageUrl,
 } from "./mockData";
@@ -176,10 +175,7 @@ const DashBoard = () => {
       setAnalyticsMetaData(metaData);
       const isTrackerEnabled = checkJobTrackerEnabled(new Date().toString());
       setIsJobTrackerEnabled(isTrackerEnabled);
-      const isIndia = metaData.applicationRegion === "in";
-      const metrics = isIndia
-        ? metricsDataForIndia
-        : metricsDataForOtherRegions;
+      const metrics = metricsDataForAllRegions;
       const metricResponses = await Promise.all(
         metrics.map(async (metric) => {
           try {
@@ -196,25 +192,22 @@ const DashBoard = () => {
             let previousValue = null;
             let rate = null;
 
-            // Only fetch the previous metric if not in India
-            if (!isIndia) {
-              const previousResponse = await APIService.getMetrics(
-                `${metric.name.replace("Current", "Previous")}`,
-                metaData,
-                isTrackerEnabled
-              );
-              previousValue =
-                previousResponse.data[0]?.previous ||
-                previousResponse.data[0]?.PREVIOUS_VALUE ||
-                previousResponse.data[0].value;
+            const previousResponse = await APIService.getMetrics(
+              `${metric.name.replace("Current", "Previous")}`,
+              metaData,
+              isTrackerEnabled
+            );
+            previousValue =
+              previousResponse.data[0]?.previous ||
+              previousResponse.data[0]?.PREVIOUS_VALUE ||
+              previousResponse.data[0].value;
 
-              // Calculate rate of change
-              if (previousValue) {
-                rate = (
-                  ((currentValue - previousValue) / previousValue) *
-                  100
-                ).toFixed(2);
-              }
+            // Calculate rate of change
+            if (previousValue) {
+              rate = (
+                ((currentValue - previousValue) / previousValue) *
+                100
+              ).toFixed(2);
             }
             return {
               title: metric.title,
@@ -225,8 +218,8 @@ const DashBoard = () => {
               rate: previousValue
                 ? rate
                 : currentResponse.data[0]?.rate ||
-                  currentResponse.data[0]?.PERC_CHANGE ||
-                  currentResponse.data[0].rate,
+                currentResponse.data[0]?.PERC_CHANGE ||
+                currentResponse.data[0].rate,
               text: metric.text,
             };
           } catch (error) {
@@ -345,7 +338,7 @@ const DashBoard = () => {
 
     // Cleanup actions when component unmounts
     return () => {
-      window.removeEventListener("txeLoginEvent", () => {});
+      window.removeEventListener("txeLoginEvent", () => { });
     };
   }, []);
 

@@ -21,7 +21,7 @@ export const staticData = [
             appType: "external",
             appConfig: { link: CMS_URL + "/tier3" },
             context: "customer",
-            requestParams: { lsrc: "txe", lsw: "_self", refNum: "", customerCode: "", route: "blogs-new", site: ""},
+            requestParams: { lsrc: "txe", lsw: "_self", refNum: "", customerCode: "", route: "blogs-new", site: "" },
         }
     },
     {
@@ -56,45 +56,12 @@ export const tenantData = [
             appType: "external",
             appConfig: { link: CMS_URL + "/tier3" },
             context: "customer",
-            requestParams: { lsrc: "txe", lsw: "_self", refNum: "", customerCode: "", site: ""},
+            requestParams: { lsrc: "txe", lsw: "_self", refNum: "", customerCode: "", site: "" },
         },
     },
 ];
 
-export const metricsDataForIndia = [
-    {
-        name: "visitsKpi",
-        title: "Career Site Visits",
-        text: "Total number of career site visits with daily delta percentage",
-    },
-    {
-        name: "uniqueLeads",
-        title: "Unique Leads",
-        text: "Total number of unique leads generated (analytics > candidate experience > job seekers overview > unique leads)",
-    },
-    {
-        name: "applicationsConversionKpi",
-        title: "Subscriptions",
-        text: "Total number of Talent Community, Job Alert, and Similar Job Alert subscriptions with daily delta percentage",
-    },
-    {
-        name: "completedCareerSiteApplies",
-        title: "Apply Clicks",
-        text: "Total number of job seekers who clicked the Apply button (analytics > candidate experience > apply)",
-    },
-    {
-        name: "avgTimeOnPage",
-        title: "Average Time on Site",
-        text: "Average time a visitor spends on the career site with daily delta percentage",
-    },
-    {
-        name: "jobVisitsToApplyClicksConversionRate",
-        title: "Conversion Rate",
-        text: "Job Visits to Apply Clicks Conversion Rate (CX Candidate Experience > Apply Clicks > Job Visits to Apply Clicks Conversion Rate)",
-    }
-];
-
-export const metricsDataForOtherRegions = [
+export const metricsDataForAllRegions = [
     {
         name: "visitsKpiCurrent",
         title: "Career Site Visits",
