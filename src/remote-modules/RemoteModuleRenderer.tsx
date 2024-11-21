@@ -231,6 +231,7 @@ export const RemoteModuleRenderer = () => {
           envconfig={
             getSelectedAppUrl(selectedApp, true) || selectedApp.envconfig
           }
+          moduleRoute={selectedApp.moduleRoute}
           key={key}
         />
       )}

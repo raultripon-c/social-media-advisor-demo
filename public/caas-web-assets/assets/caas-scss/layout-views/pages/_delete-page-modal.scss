@@ -1,0 +1,56 @@
+.cms-edit-modal-container.cms-delete-page-modal{
+	border-radius: unset; 
+	top: 19%;
+    .delete-page-modal-body-container{
+		padding: 30px 5%;
+		margin: 0 auto;
+		.warning-message{
+			margin-bottom: 19px; 
+			.delete-image{
+				margin: 18px 0px;
+			}
+			h4{
+				margin: 9px 0px;
+			}
+		}
+		.error-message{
+			.delete-image{
+				margin: 20px 0px;
+			}
+			.cancel-buttton{
+				border-radius: unset;
+				min-width: 113px;
+				margin-bottom: 6px;
+				background-color: #2927B2;
+			}
+		}	
+	}
+
+	ai-dialog-header {
+		background-color: #00a8b7;
+		color: white;
+		padding: 15px 25px !important;	
+		h2.modal-title {
+			color: white !important;
+		}
+	}
+
+	ai-dialog-footer {
+		padding: 15px 30px	!important;
+		.delete-button{
+			background-color: #2927B2;
+		}
+		.default-cancel-buttton{
+			border:unset;
+			color: #2927B2;
+			&:focus{
+				outline: unset;
+				box-shadow: unset;
+			}
+		}
+	}
+
+	ai-dialog-body{
+		border-radius: unset; 
+	}
+}

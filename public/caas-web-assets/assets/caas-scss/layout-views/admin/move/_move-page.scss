@@ -1,0 +1,44 @@
+.cms-admin-add-api-mgr{
+    &.cms-move-page-mgr{
+         .ppc-loading-text{
+			top: 60%;
+    		left: 45%;
+    		color: #00a8B6;
+		}
+        .pages-list{
+            height: 200px;
+            overflow-y: auto;
+            border: 1px solid $border-color-default;
+            margin: $space-sm 0;
+            @include borderRadius(2px);
+            li{
+                padding: $space-xs $space-sm;
+                cursor: pointer;
+                .icon{
+                    color: $text-color-special;
+                    padding-right: $space-xs;
+                }
+                &.active{
+                    background-color: $brand-color;
+                    color: #ffffff;
+                    .icon{
+                        color: #ffffff;
+                    }
+                }
+            }
+            & > .page-list-item{
+                label{
+                    // color: $text-color-special;
+                    text-transform: capitalize;
+                    // font-size: $text-font-size-16;
+                }
+                .inner-page-list{
+                    .inner-page-list-item{
+
+                    }
+                }
+            }
+        }
+    }
+}
+

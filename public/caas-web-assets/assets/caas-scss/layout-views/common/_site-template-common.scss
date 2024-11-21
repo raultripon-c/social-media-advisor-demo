@@ -1,0 +1,96 @@
+//steps bar css
+
+.steps-block-class {    
+	@include box-shadow(0 0px 0px 2px #e0e0e0);
+	ul {
+		border-bottom: 1px solid $border-color-default;
+		border-top-left-radius: 5px;
+		border-top-right-radius: 5px;
+		display: table;
+		margin: 0;
+		overflow: hidden;
+		padding: 0;
+		width: 100%;
+	}
+	li {
+		width: 33.33%;
+		float: left;
+		list-style: outside none none;
+		min-height: 50px;
+		padding: 10px;
+		position: relative;
+		background-color: #f3f3f3;
+		&:last-child {
+			&::before, &::after {
+				display: none;
+			}
+		}
+		.step-label {
+			color: $text-color-light;
+			margin-top: 10px;
+			overflow: hidden;
+			text-transform: uppercase;
+			font-size: 12px;
+			padding-right: 15px;
+			padding-left: 20px;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			.number {
+                /* font-size: 14px; */
+            }
+            .fa-check{
+            	display: none;
+            }
+            .step-des {
+            	display: block;
+            	font-size: $text-font-size-16;
+            	text-transform: none;
+            	padding-top: 2px;
+            	overflow: hidden;
+            	white-space: nowrap;
+            	text-overflow: ellipsis;
+            }
+        }
+        &::before,
+        &::after {
+        	border-color: transparent transparent transparent $border-color-default;
+        	right: -1px;
+        	border-style: solid;
+        	border-width: 40px 0 40px 24px;
+        	content: "";
+        	position: absolute;
+        	top: 0;
+        	z-index: 1;
+        }
+        &::after {
+        	border-color: transparent transparent transparent #f3f3f3;
+        	right: 0;
+        }
+        &.current {
+        	background-color: #ffffff;
+        	.step-label {
+        		color: $text-color-special;                
+        	}
+        	&::before {
+        		border-color: #ffffff transparent;
+        		display: block;
+        		left: -24px;
+        		right: auto;
+        	}
+        	&::after {
+        		border-color: #f3f3f3 transparent #f3f3f3 #ffffff;
+        	}
+        }
+        &.completed {
+        	.step-label {
+        		.fa-check {
+        			padding-right: 5px;
+        			color: #13bacb;
+        			display: inline-block;
+        		}
+        	}
+        }
+    }
+}
+
+//--- END steps bar css -- //

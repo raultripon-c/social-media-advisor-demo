@@ -1,0 +1,65 @@
+.tenantselection-block{
+    // display:flex;
+    // margin-left:10%;
+    text-align: center;
+    .tenantselection {
+	span {
+	    height: 100px;
+	    display: flex;
+	    margin: 0 auto;
+	    align-items: center;
+	    justify-content: center;
+	}
+	//width: 300px;
+	// height: 100px;
+	// border: 1px solid #00a9b7;
+	// padding: 40px 60px;
+	// box-sizing: border-box;
+	// margin-left: 20px;
+	// margin-top:10%;
+	// color: #00a9b7;
+	// display: flex;
+
+	height: 100px;
+	width: 200px;
+	border: 1px solid #00a9b7;
+	box-sizing: border-box;
+	color: #00a9b7;
+	display: inline-block;
+	margin: 10px;
+	position: relative;
+
+	&:hover {
+            background-color: #00a9b7;
+            color: white;
+            cursor: pointer;
+	}
+    }   
+}
+
+
+.tenant-search-block-search {
+    margin-left:30%;
+    width: 500px;
+    margin-top: 5%;
+    position: relative; 
+    // text-align: center;
+}
+.tenant-search-block {
+    // margin-left:30%;
+    // width: 500px;
+    // margin-top: 5%;
+    // position: relative; 
+    text-align: center;
+}
+.input-with-icon {
+    position: relative;
+    .ion-ios-search {
+        position: absolute;
+        left: 10px;
+        top: 10px;
+    }
+    input {
+        padding-left: 25px;
+    }
+}

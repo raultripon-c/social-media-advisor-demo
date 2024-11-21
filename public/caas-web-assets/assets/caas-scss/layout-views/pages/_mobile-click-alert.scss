@@ -1,0 +1,42 @@
+.cms-alert-container{
+    max-width: 85%;
+    margin: 2% auto;
+
+    .alert-view{
+        min-height: 270px;
+        // min-width: 320px;
+        height: auto;
+        width: 520px;
+        border-radius: 2px;
+        position: absolute;
+        box-shadow: 0 2px 11px 0 rgba(83, 83, 83, 0.13);
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
+        .msg-content, .main-header, .action-buttons{
+            text-align: center;
+        }
+        .main-image{
+            width: 100px;
+        }
+        .dialog-header{
+            border-bottom: none;
+            .header-icon{
+                font-size: 100px;
+                line-height: 0.1;
+            }
+        }
+        .action-buttons{
+            &:after, &:before{
+                content: "";
+                display: table;
+                clear: both;
+            }
+            &.top-border{
+                border-top: 2px solid #eee;
+            }
+        }
+    }
+}

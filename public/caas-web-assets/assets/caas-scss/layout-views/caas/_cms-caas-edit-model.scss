@@ -1,0 +1,21 @@
+.cms-caas-edit-model {
+    .inner-page-container {
+        padding: 0px 5% 80px;
+        margin: 0 auto;
+        min-height: 350px;
+    }
+
+    .editable-ele{
+        width: 100%;
+        border: 1px solid #f1f1f1;
+        padding: 8px 12px;
+        &:focus{
+            outline: 0;
+            border-color: #d2d4d2;
+        }
+    }
+
+    .cms-grid-row {
+        padding-bottom: 10px;
+    }
+}

@@ -1,13 +1,13 @@
-import React, { Suspense, useEffect ,useRef} from "react";
+import React, { Suspense } from "react";
 import { Route, useNavigate } from "react-router-dom";
 
+import { Loader } from "@phenom/react-ui-components";
 import { GenericErrorBoundary } from "../components/ErrorBoundary/GenericErrorBoundary";
+import UnAuthorizedPage from "../components/UnAuthorizedPage/UnAuthorizedPage";
 import { ErrorBoundary } from "./error-component/ErrorBoundary";
 import { useDynamicMFLoader } from "./useDynamicMFLoader";
-import UnAuthorizedPage from "../components/UnAuthorizedPage/UnAuthorizedPage";
-import Loading from "../components/loader/InlineLoader";
-import { Loader } from "@phenom/react-ui-components";
 
+import { Routes } from 'react-router-dom';
 import "./error-component/ErrorBoundary.scss";
 
 interface Props {
@@ -19,6 +19,7 @@ interface Props {
   loading?: string;
   props?: any;
   envconfig: string;
+  moduleRoute: string;
 }
 function loadComponent(scope: any, module: any, component: any) {
 
@@ -48,7 +49,7 @@ function loadComponent(scope: any, module: any, component: any) {
 }
 export function ReactAppRenderer(props: Props) {
  
-   
+  
   
   const loadEnvs = (fileName: any) => {
     const isEnvConfigAlreadyLoaded = (scriptSrc: string) => {
@@ -114,6 +115,9 @@ export function ReactAppRenderer(props: Props) {
                 height: props.style ? "calc(100vh - 48px)" : "100%",
               }}
             >
+              <Routes>
+                <Route path={`/:customerCode/:refnum${props.moduleRoute}/*`} element={<RemoteComponent {...props.props} />} />
+              </Routes>
               <RemoteComponent {...props.props} />
             </div>
           </Suspense>

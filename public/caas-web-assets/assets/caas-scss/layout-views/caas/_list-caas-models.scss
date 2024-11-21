@@ -1,0 +1,25 @@
+.cms-caas-page {
+    .cms-page-title h3 {
+        font-size: 18px;
+    }
+
+    .cms-caas-title {
+        height: 60px;
+        background-color: #ffffff;
+        -webkit-box-shadow: 0 2px 2px 0 rgba(237, 237, 237, 0.5);
+        -moz-box-shadow: 0 2px 2px 0 rgba(237, 237, 237, 0.5);
+        -ms-box-shadow: 0 2px 2px 0 rgba(237, 237, 237, 0.5);
+        box-shadow: 0 2px 2px 0 rgba(237, 237, 237, 0.5);
+        padding: 0 32px;
+        width: 100%;
+        position: relative;
+    }
+
+    .selected-tab {
+        color: blue;
+    }
+
+    .cms-caas-tags {
+        text-transform: capitalize;
+    }
+}

@@ -1,0 +1,387 @@
+ux-dialog-container.cms-edit-modal-container.browse-existing{
+    max-width: 1088px;
+    max-height: 100%;
+    .cms-browse-menu-mgr {
+        max-height: 450px;
+        ai-dialog-header {
+            background-color: #43515c;
+            border-top-left-radius: 3px;
+            border-top-right-radius: 3px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            h2.modal-title {
+                color: #ffffff !important;
+                font-size: 18px !important;
+                width: 100%;
+            }
+        }
+        ai-dialog-body {
+            background: #f8f9fa;
+            max-height: inherit !important;
+            overflow: overlay;
+            padding: 56px;
+            .inner-page-container {
+                padding: 0;
+                .search-class{
+                    margin-bottom: 33px;
+                    display: flex;
+                    position: relative;
+                    .search-input {
+                        // width: calc(100% - 20px);
+                        position: relative;
+                        max-width: 328px;
+                        svg {
+                            position: absolute;
+                            left: 14px;
+                            top: 7px;
+                            width: 25px;
+                            height: 25px;
+                            fill: #8ea4b0;
+                        }
+                        .inputtext{
+                            width: 100%;
+                            height: 40px;
+                            font-size: 14px;
+                            border-radius: 50px;
+                            background-color: #ffffff;
+                            border: none;
+                            color: #607179;
+                            padding: 0 45px;
+                            outline: none;
+                            min-width: 328px;
+                        }
+                    }
+                    .custom-select {
+                        .btn.default-button {
+                            min-height: 40px;
+                            height: 40px;
+                            padding: 0px 20px 0px 12px;
+                            border-radius: 3px;
+                            text-align: left;
+                            border: solid 1px #e8eff5;
+                        }
+                        .seleted-options {
+                            padding: 0;
+                            margin: 0;
+                        }
+                    }
+                }
+                .add-btn-wrapper{
+                    display: inline-block;
+                    position: relative;
+                    margin-left: 24px;
+                    ul{
+                        display: none;
+                        position: absolute;
+                        width: 100%;
+                        left: 0;
+                        background: #fff;
+                        box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.1);
+                        padding: 5px;
+                        li{
+                            display: flex;
+                            align-items: center;
+                            padding: 3px 0;
+                            svg {
+                                fill: #686869;
+                                width: 20px;
+                                height: 20px;
+                            }
+                            a{
+                                font-size: 14px;
+                                line-height: 1.14;
+                                letter-spacing: 0.29px;
+                                color: #8ea4b0;
+                                font-weight: normal;
+                            }
+                        }
+                    }
+                    .btn{
+                        min-width: 112px;
+                        border-radius: 3px;
+                        background-color: #b7eaee;
+                        border: none;
+                        color: #008894;
+                        font-size: 14px;
+                        padding: 6px 16px;
+                    }
+                    &:hover{
+                        .btn{
+                            + ul{
+                                display: block;
+                            }
+                        }
+                    }
+                } 
+                .card-header {
+                    &.card-menufolder {
+                        .card-header {
+                            margin-left: 88px;
+                        }
+                    }
+
+                    
+                   
+                    /* background-color: #f8f9fa; */
+                    font-size: 14px;
+                    font-weight: normal;
+                    font-stretch: normal;
+                    font-style: normal;
+                    line-height: 1.29;
+                    letter-spacing: normal;
+                    color: #686869;
+                    padding-bottom: 16px;
+                    padding-top: 16px;
+                    border-bottom: solid 1px #e8eff5;;
+                    .for-dot {
+                        margin-right: 12px;
+                        width: 8px;
+                        float: left;
+                        margin-top: 4px;
+                        cursor: move;
+                        top: 5px;
+                        span {
+                        width: 2px;
+                        height: 2px;
+                        background: #2927B2;
+                        display: block;
+                        margin: 1px;
+                        float: left;
+                        }
+                    }
+                    .icon-image{
+                        display: inline-block;
+                        position: relative;
+                        top : -4px;
+                    }
+                    .child-name{
+                        display: inline-block;
+                        font-size: 14px;
+                        line-height: 19px;
+                        margin-left: 12px;
+                        vertical-align: text-bottom;
+                    }
+                }
+                .menu-developer-list {
+                    padding-top: 25px;
+                    > ul {
+                        > li {
+                            display: flex;
+                            align-items: center;
+                            justify-content: left;
+                            padding: 8px;
+                            flex-wrap: wrap;
+                            background: white;
+                            border-radius: 2px;
+                            box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.1);
+                            width: 100%;
+                            transition: 0.2s all;
+                            position: relative;
+                            min-height: 60px;
+                            .checkbox {
+                                border-radius: 50px;
+                                border-color: #c5d6e6;
+                            }
+                            .redord {
+                                position: relative;
+                                height: 10px;
+                                display: inline-block;
+                                margin-left: 6px;
+                                top: 1px;
+                                cursor: pointer;
+                                &::before {
+                                    content: "";
+                                    border-bottom: 4px solid #999999;
+                                    border-left: 4px solid transparent;
+                                    border-right: 4px solid transparent;
+                                    position: absolute;
+                                    left: 0;
+                                    top: 0;
+                                }
+                                &::after {
+                                    content: "";
+                                    border-top: 4px solid #999999;
+                                    border-left: 4px solid transparent;
+                                    border-right: 4px solid transparent;
+                                    position: absolute;
+                                    left: 0;
+                                    bottom: 0;
+                                }
+                            }
+                            &.head {
+                                min-height: 48px;
+                                > div {
+                                    text-shadow: 0 0 0 #2f2f2f;
+                                }
+                                &:hover {
+                                    background: #fff;
+                                }
+                            }
+                            > div {
+                                width: calc(100% - 325px);
+                                font-size: 14px;
+                                line-height: 1.14;
+                                color: #2f2f2f;
+                                &.camp-in-name-wr {
+                                    width: 325px;
+                                    padding-left: 28px;
+                                }
+                                &.cont-check {
+                                    width: 33px;
+                                    margin: 0;
+                                    min-width: 33px;
+                                    padding: 5px;
+                                    label.input-check-group .checkbox::before, 
+                                    label.input-check-group .radio::before {
+                                        left: 1px;
+                                        top: 2px;
+                                    }
+                                }
+                                &.camp-in-name-li {
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: space-between;
+                                    padding-right: 28px;
+                                    > div {
+                                        width: 100%;
+                                        &.camp-in-status {
+                                            text-transform: capitalize;
+                                            &.completed {
+                                                color: #5ed188;
+                                            }
+                                            &.inprogress {
+                                                color: #d45cb8;
+                                            }
+                                            &.draft {
+                                                color: #faa146;
+                                            }
+                                        }
+                                    }
+                                    .camp-in-act {
+                                        width: 170px;
+                                        position: relative;
+                                        .dott {
+                                            span {
+                                                display: inline-block;
+                                                width: 4px;
+                                                height: 4px;
+                                                background: #90a0ae;
+                                                border-radius: 50px;
+                                                margin: 0 2px;
+                                            }
+                                        }
+                                        .menu-action {
+                                            display: none;
+                                            left: -50px;
+                                            position: absolute;
+                                            width: 120px;
+                                            height: auto;
+                                            border-radius: 2px;
+                                            box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.1);
+                                            background-color: #ffffff;
+                                            z-index: 9;
+                                            padding: 10px;
+                                            ul li {
+                                                a {
+                                                    display: flex;
+                                                    align-items: center;
+                                                    justify-content: flex-start;
+                                                    font-size: 14px;
+                                                    color: #8ea4b0 !important;
+                                                    line-height: 1.14;
+                                                    font-weight: normal;
+                                                }
+                                                svg {
+                                                    width: 30px;
+                                                    height: 30px;
+                                                    fill: #686869;
+                                                    position: relative;
+                                                    top: -1px;
+                                                }
+                                                &:hover {
+                                                    a {
+                                                        color: #37a8b6 !important;
+                                                        svg {
+                                                            fill: #37a8b6;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        &:hover {
+                                            .menu-action {
+                                                display: block;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            &:hover {
+                                background: #EAE8FB;
+                            }
+                        }
+                        // ul{
+                        //     flex: 0 0 100%;
+                        // }
+                    }
+                }
+                .custom-select .btn.default-button{
+                    min-height: 40px;
+                    height: 40px;
+                }
+            }
+        }
+        ai-dialog-footer .action-btn-group{
+            margin-right: 24px;
+            margin-top: 23px; 
+            .btn{
+                @include borderRadius(3px);   
+                &.default-button{
+                    border: none;
+                }
+            }
+        }
+    }
+    .cms-create-menu-mgr{
+        .form-group{
+            margin-bottom: 35px;
+        }
+        .light-text-color{
+            color: #778998;
+        }
+        .input-group-addon{
+            background: transparent;
+            min-width: 75px;
+        
+        .form-group{
+            label{
+                margin-bottom: $space-md;
+                color: $text-color-heading;
+                font-size: 12px;
+            }
+        }
+        .form-group{
+            .input-group{
+                width: 496px;
+                height: 40px;
+                margin-left: 32px;
+            }
+        }
+        .action-btn-group{
+            margin-right: 24px;
+            margin-top: 23px; 
+            padding: $space-md;
+            .btn{
+                padding: 12px 50px;
+                font-size: 18px; 
+                @include borderRadius(3px);   
+                &.default-button{
+                    border: none;
+                }
+            }
+        }
+    }
+}
+}

@@ -1,0 +1,50 @@
+.cms-content-page-creation{
+    .content-nav-area{
+        margin-bottom: $space-lg + $space-sm;
+    }
+    .nav-tabs{
+        border-bottom: 0px;
+        & > li{
+        & > a{
+                color: $text-color-heading;
+                padding: 0;
+                padding-right: $space-lg + $space-sm;
+                border: 0;   
+                &:active,
+                &:hover,
+                &:focus{
+                    background-color: transparent;
+                    border: 0;   
+                }
+            }
+            &.active,
+            {
+            & > a{
+                    color: $text-color-special;
+                    border: 0;
+                    &:active,
+                    &:hover,
+                    &:focus{
+                        background-color: transparent;
+                        border: 0;   
+                    }
+                }
+            }
+        }
+    }
+    .ace-tm{
+        height: 300px;
+        border: 10px solid $border-color-default;
+        border-left: 0;
+        .ace_gutter{
+            background: $border-color-default;
+        }
+    }
+    .onlyin{
+        margin: 5px;
+    }
+
+    .onlyin-icons{
+        display: inline-block;
+    }
+}

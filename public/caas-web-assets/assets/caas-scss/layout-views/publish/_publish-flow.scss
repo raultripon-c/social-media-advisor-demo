@@ -1,0 +1,37 @@
+.cms-publish-flow-page{
+
+}
+.cms-publish-flow-container{
+	padding-bottom: 50px;
+	min-height: 350px;
+	.cms-grid-body{
+		border: 1px solid $border-color-primary;
+		margin-top: 30px;
+		.cms-grid-header{
+			margin-top: 0px;
+		}
+	}
+	label.input-check-group{
+		width: 50%;
+		max-width: 300px;
+	}
+	.publish-status{
+		text-align: center;
+		.icon{
+			color: $brand-color;
+			font-size: 125px;
+		}
+		p{
+			color: $text-color-heading;
+			font-size: $heading-font-size-h2;
+		}
+		.url-link{
+			color: $brand-color;
+			font-size: $text-font-size-18;
+			&:hover{
+				cursor: pointer;
+				color: #019aa7;
+			}
+		}
+	}
+}

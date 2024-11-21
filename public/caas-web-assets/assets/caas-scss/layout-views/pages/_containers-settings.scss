@@ -1,0 +1,75 @@
+.cms-container-edit-mgr{
+	ul{
+		padding: 20px;
+		li{
+			margin-bottom:10px; 
+		}
+	}
+	.input-check-toggle {
+		.input-text{
+			width: 50%;
+			display: inline-block;
+		}
+		.input-block{
+			width: 33px;
+			height: 20px;
+			background: #ffffff;
+			border: 1px solid #d2d4cd;
+			@include borderRadius(50px);
+			position: relative;
+			display: inline-block;
+			vertical-align: middle;
+			// float: right;
+				&:before {
+				content: '';
+				position: absolute;
+				top: 11px;
+				left: 13px;
+				height: 2px;
+				color: #999999;
+				font-size: 1.1em;
+			}
+			&:after {
+				content: '';
+				position: absolute;
+				top: 11px;
+				left: 45px;
+				height: 2px;
+				color: #999999;
+				font-size: 1.1em;
+			}
+		}
+		input[type=checkbox] {
+			@include opacity(0);
+			height: inherit;
+			left: 0px;		    	
+			top: 0;	    		    		    
+			position: absolute;
+			width: inherit;
+			& + .checkbox {
+				color: #494949;
+				font-size: 14px;
+				margin-top: 10px;
+				line-height: 1.8em;
+			}
+			&:checked + .checkbox {
+				left: 15px;
+				background: $brand-color;
+			}
+		}
+		.checkbox {
+			display: block;
+			width: 12px;
+			height: 12px;
+			@include borderRadius(50px);
+			@include transition(all .5s ease);
+			cursor: pointer;
+			position: absolute;
+			top: 9px;
+			margin-top: -6px !important;
+			z-index: 1;
+			left: 5px;
+			background: #ff6766;
+		}
+	}
+}

@@ -1,0 +1,156 @@
+.cms-caas-models-home {
+    $color_1: #ffffff;
+	$background_color_1: #00a8B6;
+
+	.form-group {
+		margin-bottom: 0;
+
+		.form-control {
+			width: 35%;
+			min-width: 280px;
+		}
+	}
+
+	.select-filter {
+		.form-group {
+			width: 48%;
+			display: inline-block;
+
+			&:last-child {
+				margin-left: 4%;
+				float: right;
+			}
+		}
+	}
+
+
+	.cms-grid {
+		.action {
+			overflow: visible;
+			.icon {
+				font-size: $icon-font-size-18;
+				padding: 3px 15px;
+				color: $brand-color;
+			}
+			.dropdown {
+				.btn {
+					background-color: #f3fbfb;
+				}
+			}
+		}
+		.cms-grid-body{
+			.cms-grid-row{
+				&:hover{
+					.dropdown {
+						.btn {
+							background-color: #f3fbfb;
+							min-height: 25px;
+							min-width: 25px;
+							padding: 0;
+							border: none;
+							font-weight: bold;
+							font-size: 23px;
+						}
+					}
+				}
+				.dropdown {
+					.btn {
+						min-height: 25px;
+						min-width: 25px;
+						padding: 0;
+						border: none;
+						font-weight: bold;
+						font-size: 23px;
+						background-color: $color_1;
+					}
+
+					.dropdown-menu {
+						> li {
+							> a {
+								color: #333333;
+								text-decoration: none;
+								&:hover {
+									color: $color_1;
+									background-color: $background_color_1;
+								}
+
+								&:focus {
+									color: $color_1;
+									background-color: $background_color_1;
+								}
+							}
+						}
+					}
+
+					.btn-default:hover {
+						font-weight: bold;
+						font-size: 23px;
+						color: #00a8B6;
+						background-color: #f3fbfb;
+					}
+
+					.btn-default:active {
+						font-weight: bold;
+						font-size: 23px;
+						background-color: white;
+					}
+
+					.dropdown-menu.show {
+						top: 6px;
+			    	left: 20px;
+					}
+				}
+			}
+		}
+	}
+
+	.dropdown {
+		.btn {
+			min-height: 25px;
+			min-width: 25px;
+			padding: 0;
+			border: none;
+			font-weight: bold;
+			font-size: 23px;
+			background-color: $color_1;
+		}
+
+		.dropdown-menu {
+			> li {
+				> a {
+					&:hover {
+						color: $color_1;
+						background-color: $background_color_1;
+					}
+
+					&:focus {
+						color: $color_1;
+						background-color: $background_color_1;
+					}
+				}
+			}
+		}
+
+		.btn-default:hover {
+			font-weight: bold;
+			font-size: 23px;
+			color: #00a8B6;
+			background-color: #f3fbfb;
+		}
+
+		.btn-default:active {
+			font-weight: bold;
+			font-size: 23px;
+			background-color: white;
+		}
+
+		.dropdown-menu.show {
+			top: 6px;
+    	left: 20px;
+		}
+	}
+
+	.tenants-grid-table{
+		overflow: visible;
+	}
+}

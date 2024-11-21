@@ -1,0 +1,97 @@
+.cms-developer-statistics,
+.cms-developer-statistics-sumamary {
+  .inner-page-container {
+    .form-group {
+      /* Remove focus ring from fields and use highlight color */
+      input::-webkit-datetime-edit-ampm-field:focus,
+      input::-webkit-datetime-edit-day-field:focus,
+      input::-webkit-datetime-edit-hour-field:focus,
+      input::-webkit-datetime-edit-millisecond-field:focus,
+      input::-webkit-datetime-edit-minute-field:focus,
+      input::-webkit-datetime-edit-month-field:focus,
+      input::-webkit-datetime-edit-second-field:focus,
+      input::-webkit-datetime-edit-week-field:focus,
+      input::-webkit-datetime-edit-year-field:focus {
+        background-color: highlight;
+        color: highlighttext;
+        outline: none;
+      }
+    }
+  }
+
+  .cms-grid {
+    overflow: auto;
+
+    .cms-grid-row {
+      clear: both;
+      white-space: nowrap;
+      width: 2147px;
+    }
+
+    .cms-grid-title {
+      background-color: #e8f6f8;
+    }
+
+    .grid-col-4 {
+      white-space: nowrap;
+      float: none;
+      display: inline-block;
+      width: 150px;
+    }
+  }
+
+  .no-data {
+    text-align: center;
+  }
+
+  .page-nav {
+    &::after {
+      content: "";
+      display: table;
+      clear: both;
+    }
+
+    .page-index-info,
+    .pagination {
+      float: left;
+    }
+
+    .page-index-info {
+      padding-top: $space-sm;
+      padding-right: $space-lg;
+    }
+
+    .pagination {
+      margin: 0;
+
+      & > .active > a,
+      & > .active > a:focus,
+      & > .active > a:hover {
+        background-color: $brand-color;
+        border-color: $brand-color-primary;
+      }
+    }
+  }
+}
+
+.cms-statistics-data {
+  ai-dialog-body {
+    padding-top: 0;
+    padding-bottom: 0;
+    border-radius: 4px;
+  }
+
+  ai-dialog-header {
+    border-radius: 4px;
+    background-color: #00a8b7;
+    color: white;
+
+    h2.modal-title {
+      color: white !important;
+    }
+  }
+
+  .tab-content {
+    padding: 15px 5%;
+  }
+}

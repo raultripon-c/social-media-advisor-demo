@@ -1,0 +1,50 @@
+.cms-footer{
+	background-color: $footer-bg-color;
+	padding: 15px 25px 10px; 
+	position: relative;
+	bottom: 0;
+	width: 100%;
+	z-index: $header-zindex+2;
+	p{
+		color: $footer-text-color;
+		font-size: 12px;
+		margin: 5px 0 5px 0px;
+	}
+	ul.footer-links{
+		li{				
+			a{
+				float: left;
+				color: #fff;
+				font-size: 12px;
+				padding-right: 20px;
+				&:hover{
+					color: $footer-link-hover-color;
+					text-decoration: none;
+				}
+			}
+		}
+	}
+	ul.social-links{
+		overflow: hidden;
+		float: right;
+		min-width: 125px;
+		display: inline-block;
+		margin-bottom: 0;
+		li{	
+			float: left;			
+			a{					
+				font-size: 0;
+				text-indent: -9999;
+				i.icon{
+					color: $text-color-lighter;
+					font-size: 20px;
+					padding-left: 25px;
+					line-height: normal;
+				}
+				&:hover{
+					text-decoration: none;
+				}
+			}
+		}
+	}
+}

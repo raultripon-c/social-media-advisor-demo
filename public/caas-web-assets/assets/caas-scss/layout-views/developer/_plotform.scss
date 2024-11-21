@@ -1,0 +1,35 @@
+.cms-platform-import-mgr{
+    //common for common-bundle-options, change-platform-options, vendor-bundle-options
+    .plotform-options{
+
+    }
+
+    //END
+
+    .common-bundle-options{
+
+    }
+    .change-platform-options{
+        .platform-info{
+            margin-top: 15px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .file-name {
+            width: 170px;
+            float: left;
+            text-transform: capitalize;
+            color: $text-color-heading;
+        }
+        .version-name{
+            &:before {
+                content: ":";
+                padding-right: 20%;
+                padding-left: 10%;
+            }
+        }
+    }
+    .vendor-bundle-options{
+
+    }
+}
