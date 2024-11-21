@@ -91,37 +91,47 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       event.detail.url
     );
     const url: string = event.detail.url;
+    localStorage.setItem("txeCustomPath", JSON.stringify(url));
     const path = window.location.pathname.split("/").filter(Boolean);
-    if (url && url.includes("/dashboard/candidates/") && url.indexOf(';') === -1) {
-      const currentApp = JSON.parse(sessionStorage.getItem("selectedApp") || "{}");
-      if (currentApp?.name?.toLowerCase() !== "candidates") {
-        const response = JSON.parse(
-          sessionStorage.getItem("allapps") || "[]"
-        );
-        const detailsApp = response.find((element: any) =>
-          url.includes(element?.appConfig?.route?.toLowerCase())
-        );
-        if (detailsApp) {
-          sessionStorage.setItem("selectedApp", JSON.stringify(detailsApp));
-          const newRoute = `/${path[0]}/${path[1]}${url}`;
-          navigate(newRoute);
-          console.log("Changed App to", detailsApp);
-        }
+
+    const appRouteDictionary: { [key: string]: string } = {
+      "email-templates": "Email Manager",
+      "sms-templates": "SMS Manager",
+      "sms-campaign": "Campaigns",
+      "campaigns": "Campaigns",
+      "automations":"Automations",
+      "lists":"Lists",
+      "events":"Events",
+      "talent-communities":"Talent Community",
+      "candidates": "Candidates",
+    };
+    const currentApp = JSON.parse(sessionStorage.getItem("selectedApp") || "{}");
+    const urlLastRoute = url.split('/').pop();
+    
+    const matchedKey = Object.keys(appRouteDictionary).find(key => url.includes(key));
+    if (matchedKey && url.indexOf(";") === -1 &&url.includes(`${matchedKey}/`) && currentApp?.name !== appRouteDictionary[matchedKey]) {
+      const response = JSON.parse(
+        sessionStorage.getItem("allapps") || "[]"
+      );
+      const detailsApp = response.find((element: any) => element?.name === appRouteDictionary[matchedKey]);
+      if (detailsApp) {
+        const customerCode = selectedTenant?.customerCode || path[0];
+        const refNum = selectedTenant?.refNum || path[1];
+        console.log("CROSS MODULE NAVIGATION => Changed App to", detailsApp);
+        localStorage.setItem("txeCustomPath", JSON.stringify(url));
+        navigateToApp(detailsApp, customerCode, refNum)
       }
-    } else if(url && url.includes("/dashboard/email-management/") && url.indexOf(';') === -1) {
-      const currentApp = JSON.parse(sessionStorage.getItem("selectedApp") || "{}");
-      if (currentApp?.name?.toLowerCase() === "events") {
-        const response = JSON.parse(
-          sessionStorage.getItem("allapps") || "[]"
-        );
-        const detailsApp = response.find((element: any) => element?.appConfig?.route?.toLowerCase() === "/dashboard/email-management/campaigns");
-        if (detailsApp) {
-          const customerCode = selectedTenant?.customerCode || path[0];
-          const refNum = selectedTenant?.refNum || path[1];
-          navigateToApp(detailsApp, customerCode, refNum);
-          sessionStorage.setItem("selectedApp", JSON.stringify(detailsApp));
-          console.log("Changed App to", detailsApp);
-        }
+    } else if (urlLastRoute && currentApp?.name !== appRouteDictionary[urlLastRoute]) {
+      const response = JSON.parse(
+        sessionStorage.getItem("allapps") || "[]"
+      );
+      const detailsApp = response.find((element: any) => element?.name === appRouteDictionary[urlLastRoute]);
+      if (detailsApp) {
+        const customerCode = selectedTenant?.customerCode || path[0];
+        const refNum = selectedTenant?.refNum || path[1];
+        console.log("CROSS MODULE NAVIGATION => Changed App to", detailsApp);
+        localStorage.setItem("txeCustomPath", JSON.stringify(url));
+        navigateToApp(detailsApp, customerCode, refNum)
       }
     }
   };
@@ -150,12 +160,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
     if (!window.keycloakInstance.bearer_token) window.keycloakInstance.bearer_token = "Bearer " + keycloak.token;
 
     window.addEventListener(
-      "internalNavigation",
+      "txeInternalNavigation",
       handleInternalNavigation as EventListener
     );
     return () => {
       window.removeEventListener(
-        "internalNavigation",
+        "txeInternalNavigation",
         handleInternalNavigation as EventListener
       );
     };

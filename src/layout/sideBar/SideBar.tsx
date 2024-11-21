@@ -75,6 +75,8 @@ function ToolsSideBar(props: any) {
     handleCrmStyles();
   }, [sidebarOpen]);
   const handleAppSelection = (app: any) => {
+    localStorage.removeItem("txeCustomPath");
+    localStorage.removeItem("TXE_SELECTED_CANDIDATES");
     if(app?.name === "Experience Manager"){
       const appSelectionOptions: AppSelectionOptions = {
         selectedApp: app,
