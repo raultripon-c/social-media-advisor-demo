@@ -53,6 +53,5 @@ export const crmFilterApps = async (refNum: string, userRoles?: any) => {
 
     } catch (error) {
         console.error("Error in crmFilterApps:", error);
-        throw error;
     }
 };
