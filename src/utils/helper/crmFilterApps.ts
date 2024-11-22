@@ -46,7 +46,7 @@ export const crmFilterApps = async (refNum: string, userRoles?: any) => {
         (window as any).showLists = isListsEnabledRP;
         (window as any).showCampaigns = isCampaignViewCampaignAccess;
         (window as any).showTemplates = isCampaignViewTemplateAccess;
-        (window as any).showTalentComunities = isJTCTabEnabled;
+        (window as any).showTalentCommunities = isJTCTabEnabled;
         (window as any).showAutomations = isTenantHasAutomationFeatureEnabled && isRecruiterHaveAutomationSettingAccess;
         (window as any).showEvents = isEventsEnabled && isRecruiterHaveViewEventsAccess;
 
