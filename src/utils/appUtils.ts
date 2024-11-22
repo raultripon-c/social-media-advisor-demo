@@ -7,6 +7,7 @@ import { DATE_FORMAT, navigationHeaderApps, noShowSideBar } from "./constants";
 import { setAppDetails, setDashboardSelected } from "../store/apps/actions";
 import { APIService } from "./api.service";
 import { AppSelectionOptions } from "interfaces/AppSelectionOptions";
+import { CommonConstants } from "./common-constants";
 
 export const appSelectionHandler = (
   options: AppSelectionOptions
@@ -208,6 +209,25 @@ export const transformAppData = (data: any) => {
   const customerTenantApps = categoryMap
     .map((item: any) => {
       const filteredApps = data?.filter((app: any) => {
+        // Define the exclusion mapping between app names and window variables
+        let exclusionMapping: any = {
+          Events: "showEvents",
+          Campaigns: "showCampaigns",
+          Automations: "showAutomations",
+          Lists: "showLists",
+          "Talent Community": "showTalentCommunities",
+          Candidates: "showCandidates",
+          "Email Manager" : "showTemplates",
+          "SMS Manager": "showTemplates",
+        };
+      
+        // Check if the app should be excluded based on the mapping
+        const shouldExclude = exclusionMapping[app.name] && !(window as any)[exclusionMapping[app.name]];
+      
+        // If the app should be excluded, return false
+        if (shouldExclude) return false;
+      
+        // Main filter conditions
         return (
           !app.isParent &&
           app.parentName === item.name &&

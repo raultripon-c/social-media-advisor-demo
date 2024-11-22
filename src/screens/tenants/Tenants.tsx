@@ -11,8 +11,9 @@ import { API } from "../../utils/api";
 
 import { Loader } from "@phenom/react-ui-components";
 import { APIService } from "../../utils/api.service";
-import { apiUrl } from "../../utils/constants";
+import { apiUrl, loginSessionTimeIntervals } from "../../utils/constants";
 import "./Tenants.scss";
+import { crmFilterApps } from "../../utils/helper/crmFilterApps";
 
 /**
  * The `Tenants` component is responsible for fetching and displaying a list of tenants.
@@ -45,6 +46,9 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
   const customerTenants = useSelector(
     (state: AppStore) => state.customer.customerTenants
   );
+  const { user } = useSelector(
+    (state: AppStore) => state.customer
+  ); 
   const customerDetails = useSelector((state: AppStore) => state.customer);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -166,7 +170,8 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
     }
   }, [totalTenantsData]);
 
-  const navigateToDashBoard = (selectedTenant: any = {}) => {
+  const navigateToDashBoard = async (selectedTenant: any = {}) => {
+    await crmFilterApps(selectedTenant?.refNum, user);
     dispatch(setSelectedTenant(selectedTenant));
     sessionStorage.setItem("selectedTenant", JSON.stringify(selectedTenant));
     navigate(
@@ -200,7 +205,11 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
             <div
               className="tenant-card"
               key={eachTenant.id}
-              onClick={() => navigateToDashBoard(eachTenant)}
+              onClick={async () => {
+              setIsLoading(true);
+              await navigateToDashBoard(eachTenant);
+              setIsLoading(false);
+              }}
             >
               <span>{eachTenant.tenantName}</span>
             </div>

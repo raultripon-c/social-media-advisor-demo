@@ -25,6 +25,7 @@ import "./AppLayout.scss";
 import { InitialLoader } from "./Loader";
 import ToolsSideBar from "./sideBar/SideBar";
 import { AppSelectionOptions } from "interfaces/AppSelectionOptions";
+import { crmFilterApps } from "../utils/helper/crmFilterApps";
 
 interface AppLayoutProps {
   allApps: any;
@@ -67,6 +68,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   const sessionTrackerIngestPoint = `${(window as any)._env_.SESSION_TRACKER_INGEST_POINT || ""}`;
   const userId = userDetails?.userName;
   const fetchedApps = useSelector((state: any) => state.app.allApps);
+  const { user } = useSelector(
+    (state: AppStore) => state.customer
+  );  
   
   const navigateToApp = (selectedApp: any, customerCode: string, refNum: string) => {
     sessionStorage.setItem("selectedApp", JSON.stringify(selectedApp));
@@ -95,8 +99,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
     const path = window.location.pathname.split("/").filter(Boolean);
 
     const appRouteDictionary: { [key: string]: string } = {
-      "email-templates": "Email Manager",
-      "sms-templates": "SMS Manager",
+      // "email-templates": "Email Manager",
+      // "sms-templates": "SMS Manager",
       "sms-campaign": "Campaigns",
       "campaigns": "Campaigns",
       "automations":"Automations",
@@ -144,18 +148,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       APIService.getTenants(tenantsUrl, dispatch);
     }
 
-    let response = JSON.parse(sessionStorage.getItem("allapps") || "[]");
-    if (response.length == 0) {
-      getAllApps();
-    } else {
-      dispatch(setAppsFromAPI(response));
-      const mfRoutes = getMfRoutes(response);
-      const filteredApps: any = transformAppData(response); // filters customerTenantApps and platformApps
-      setTransformedAppData(filteredApps);
-      setCustomerTenantApps(filteredApps?.customerTenantApps); // customerTenantApps
-      handleCanvasSite(filteredApps?.customerTenantApps);
-      setAllRoutes([...appRoutes, ...mfRoutes]);
-    }
 
     if (!window.keycloakInstance.bearer_token) window.keycloakInstance.bearer_token = "Bearer " + keycloak.token;
 
@@ -221,15 +213,34 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   }, [selectedApp]);
 
   useEffect(() => {
-    if (selectedTenant?.customerId) {
+    if (selectedTenant?.customerId || selectedTenant?.tenantId) {
       const setCmsSiteMetaData = async () => {
         const tenantSupportedLangs = await APIService.getSupportedLangs(selectedTenant?.refNum)
         return await handleDomainUrlForSite(tenantSupportedLangs, selectedTenant, dispatch, setSiteMetaData, siteMetaData);
       }
       setCmsSiteMetaData();
+      const setPermissionsBasedApps = async () => {
+        if(window?.keycloakInstance?.userInfo?.userDetails?.id) {
+          await crmFilterApps(selectedTenant?.refNum, user);
+          let response = JSON.parse(sessionStorage.getItem("allapps") || "[]");
+          if (response.length == 0) {
+            getAllApps();
+          } else {
+            dispatch(setAppsFromAPI(response));
+            const mfRoutes = getMfRoutes(response);
+            const filteredApps: any = transformAppData(response); // filters customerTenantApps and platformApps
+            setTransformedAppData(filteredApps);
+            setCustomerTenantApps(filteredApps?.customerTenantApps); // customerTenantApps
+            handleCanvasSite(filteredApps?.customerTenantApps);
+            setAllRoutes([...appRoutes, ...mfRoutes]);
+          }
+          setRolesLoader(false);
+        }
+      }
+      setPermissionsBasedApps();
     }
-    setRolesLoader(false);
-  }, [selectedTenant?.customerId]);
+    
+  }, [selectedTenant?.customerId, selectedTenant?.tenantId]);
 
   useEffect(() => {
     const currentApp = selectedApp.length > 0 ? selectedApp : selectedAppFromSession;
@@ -288,8 +299,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       let res = [...response];
       dispatch(setAppsFromAPI(res));
       const mfRoutes = getMfRoutes(res);
-      setTransformedAppData(transformAppData(res));
-      const filteredApps: any = transformAppData(res);
+      const transformedAppData = transformAppData(res)
+      setTransformedAppData(transformedAppData);
+      const filteredApps: any = transformedAppData;
       setCustomerTenantApps(filteredApps?.customerTenantApps);
       handleCanvasSite(filteredApps?.customerTenantApps);
       sessionStorage.setItem("allapps", JSON.stringify(res));

@@ -1,4 +1,3 @@
-import { Customer } from "../../utils/domin/Customer";
 
 export const SET_CUSTOMER_DETAILS = "SET_CUSTOMER_DETAILS";
 
@@ -25,7 +24,7 @@ export const SET_SITE_META_DATA = "SET_SITE_META_DATA"
 
 interface SetCustomer {
   type: typeof SET_CUSTOMER_DETAILS;
-  data: Customer;
+  data: any;
 }
 
 interface SetUserDetails {
@@ -45,18 +44,18 @@ interface SetLogedUserRoles {
 
 interface SetSelectedTenant {
   type: typeof SET_SELECTED_TENANT;
-  data: Customer;
+  data: any;
 }
 
 
 interface SetAllCustomers {
   type: typeof SET_ALL_CUSTOMERS;
-  data: Customer;
+  data: any;
 }
 
 interface SetUserRoles {
   type: typeof SET_USER_ROLES;
-  data: Customer;
+  data: any;
 }
 
 
