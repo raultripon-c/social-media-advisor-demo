@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { AppStore } from "store";
+import store, { AppStore } from "store";
 import { Loader } from "@phenom/react-ui-components";
 import { removeElementsById } from "../../utils/helper/utilizer";
 import { removeCrmStyles } from "../../utils/appUtils";
@@ -22,8 +22,8 @@ const ContentHub: React.FC = () => {
     );
     return selectedAppFromSession || state.app?.selectedApp;
   });
-    var selectedApp = selectedModuleAppObject?.appConfig || {};
- 
+  var selectedApp = selectedModuleAppObject?.appConfig || {};
+
   useEffect(() => {
     const embedScriptId = selectedApp?.scriptId;
     const existsScrElem = document.querySelector(`#${embedScriptId}`);
@@ -33,6 +33,7 @@ const ContentHub: React.FC = () => {
         if (!existsScrElem) {
           const scrElem = document.createElement("script");
           scrElem.id = embedScriptId;
+          // scrElem.src = 'https://localhost:9000/embed.js';
           scrElem.src = selectedApp?.url;
           scrElem.onload = () => {
             resolve();
@@ -49,6 +50,14 @@ const ContentHub: React.FC = () => {
       storeData.selectedTenant &&
       storeData.selectedTenant.refNum
     ) {
+
+      // This is to ensure embed script are not loaded multiple times
+      // This approach may be enhanced in the future
+      // For now retuning from here
+      if(Object.keys(storeData.siteMetaData)) {
+        return;
+      }
+
       removeElementsById('crm-stylesheet');
       loadScript().then(() => {
         if (window.txEmbed) {
