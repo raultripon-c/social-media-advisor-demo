@@ -148,7 +148,8 @@ export const APIService = {
       const response = await API.post(url, props, {
         headers: {
           Authorization: `${window.keycloakInstance.token}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept': '*/*'
         },
       });
 
