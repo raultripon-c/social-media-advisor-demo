@@ -444,7 +444,7 @@ export const handleDomainUrlForSite = async (supportedLangs: Array<any>, selecte
       // set in session storage also
       sessionStorage.setItem(
         "locale",
-        siteMetaDataResp.data.data.defaultLanguage.toLowerCase()
+        JSON.stringify(siteMetaDataResp.data.data.defaultLanguage.toLowerCase())
       );
     }
     if (!Object.keys(siteMetaData).length) {

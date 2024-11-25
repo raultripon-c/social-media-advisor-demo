@@ -54,9 +54,9 @@ const ContentHub: React.FC = () => {
       // This is to ensure embed script are not loaded multiple times
       // This approach may be enhanced in the future
       // For now retuning from here
-      if(Object.keys(storeData.siteMetaData)) {
-        return;
-      }
+      // if(Object.keys(storeData.siteMetaData)) {
+      //   return;
+      // }
 
       removeElementsById('crm-stylesheet');
       loadScript().then(() => {
