@@ -4,6 +4,7 @@ export const removeElementsById = (identificationId: string) => {
 }
 
 export const loadScriptById = (scriptId: string, src: string, onLoad?: any) => {
+    removeElementsById(scriptId);
     const script = document.createElement('script');
     script.id = scriptId;
     script.src = src;

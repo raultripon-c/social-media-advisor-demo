@@ -386,5 +386,15 @@ export const APIService = {
       console.error('Error checking if site is Canvas:', error);
       throw error;
     }
+  },
+
+  getPluginVersion: async () => {
+    try {
+      const url = `${(window as any)._env_.CMS_URL}/api/canvas/getPluginVersion`;
+      const response = await API.post(url, {}, { withCredentials: true });
+      return response;
+    } catch (error) {
+
+    }
   }
 };

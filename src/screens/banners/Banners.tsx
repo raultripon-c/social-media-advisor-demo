@@ -7,6 +7,7 @@ import {
   loadScriptById,
 } from "../../utils/helper/utilizer";
 import { removeCrmStyles } from "../../utils/appUtils";
+import { APIService } from "../../utils/api.service";
 
 declare global {
   interface Window {
@@ -71,29 +72,32 @@ const Banners = () => {
     ) {
       loadScript().then(() => {
         removeElementsById("crm-stylesheet");
-        loadScriptById(
-          "canvas-bootstrapper",
-          "https://dev-qa-cdn.phenompro.com/CareerConnectResources/qa1/canvas/scripts/web-canvas-bootstrapper-1732534357.js"
-        );
-        if (window.txEmbed) {
-          window.txEmbed.embedModules(
-            "banners",
-            "#tools-body-container",
-            {
-              refNum: storeData.selectedTenant.refNum,
-              token: window.keycloakInstance.token,
-            },
-            () => {
-              setIsLoading(false);
-              // Will remove this in future
-              for (let i = 1; i <= 3; i++) {
-                setTimeout(() => {
-                  deleteCmsLoader();
-                }, 5000);
-              }
-            }
+        APIService.getPluginVersion().then((response) => {
+          const scriptUrl: string = response?.data?.data?.script || "";
+          loadScriptById(
+            "canvas-bootstrapper",
+            scriptUrl
           );
-        }
+          if (window.txEmbed) {
+            window.txEmbed.embedModules(
+              "banners",
+              "#tools-body-container",
+              {
+                refNum: storeData.selectedTenant.refNum,
+                token: window.keycloakInstance.token,
+              },
+              () => {
+                setIsLoading(false);
+                // Will remove this in future
+                for (let i = 1; i <= 3; i++) {
+                  setTimeout(() => {
+                    deleteCmsLoader();
+                  }, 5000);
+                }
+              }
+            );
+          }
+        });
       });
     }
   }, [storeData]);
