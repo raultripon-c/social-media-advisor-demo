@@ -449,6 +449,8 @@ export const handleDomainUrlForSite = async (supportedLangs: Array<any>, selecte
     }
     if (!Object.keys(siteMetaData).length) {
       dispatch(setSiteMetaData(metaData));
+      sessionStorage.setItem("site", JSON.stringify(metaData));
+      sessionStorage.setItem("refnum", JSON.stringify(selectedTenant?.refNum));
     }
     return metaData;
   } catch (error) {
