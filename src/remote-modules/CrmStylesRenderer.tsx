@@ -8,6 +8,10 @@ const CrmStylesRenderer = () => {
     crmStyles.id = 'crm-index-styles';
     crmStyles.textContent = `
       /* Reset CSS Styles Start */
+      .main-header-bar {
+        display: none !important;
+      }
+
       * {
         padding: 0;
         margin: 0;
