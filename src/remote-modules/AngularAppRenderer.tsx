@@ -78,11 +78,6 @@ export function AngularAppRenderer(props: any) {
       if (styleElement) styleElement.remove();
     });
 
-    // Cleanup function: Remove script and styles
-    return () => {
-      const scriptElement = document.getElementById('crm-script');
-      if (scriptElement) document.head.removeChild(scriptElement);
-    };
   }, [props.scope]);
 
   // Fetch and load the CRM script and its associated CSS

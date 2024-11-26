@@ -6,13 +6,15 @@ import { EmptyState } from "@phenom/react-ui-components";
 import { AppStore } from "store";
 import { Search } from "../../components/TenantSearch/TenantsSearch";
 import { setAppDetails, setAppsFromAPI } from "../../store/apps/actions";
-import { setAllTenants, setSelectedTenant } from "../../store/customer/actions";
+import { setAllTenants, setSelectedTenant, setSiteMetaData } from "../../store/customer/actions";
 import { API } from "../../utils/api";
 
 import { Loader } from "@phenom/react-ui-components";
 import { APIService } from "../../utils/api.service";
-import { apiUrl } from "../../utils/constants";
+import { apiUrl, loginSessionTimeIntervals } from "../../utils/constants";
 import "./Tenants.scss";
+import { crmFilterApps } from "../../utils/helper/crmFilterApps";
+import { handleDomainUrlForSite } from "../../utils/appUtils";
 
 /**
  * The `Tenants` component is responsible for fetching and displaying a list of tenants.
@@ -40,11 +42,17 @@ interface TenantsProps {
 }
 
 const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
+  const siteMetaData = useSelector(
+    (state: AppStore) => state.customer.siteMetaData
+  );
   const { customers } = useSelector((state: AppStore) => state.customer);
   const userDetails = window?.keycloakInstance?.tokenParsed?.userDetails;
   const customerTenants = useSelector(
     (state: AppStore) => state.customer.customerTenants
   );
+  const { user } = useSelector(
+    (state: AppStore) => state.customer
+  ); 
   const customerDetails = useSelector((state: AppStore) => state.customer);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -166,9 +174,18 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
     }
   }, [totalTenantsData]);
 
-  const navigateToDashBoard = (selectedTenant: any = {}) => {
+  const navigateToDashBoard = async (selectedTenant: any = {}) => {
+    await crmFilterApps(selectedTenant?.refNum, user);
     dispatch(setSelectedTenant(selectedTenant));
     sessionStorage.setItem("selectedTenant", JSON.stringify(selectedTenant));
+    // const tenantSupportedLangs = await APIService.getSupportedLangs(selectedTenant?.refNum);
+    // await handleDomainUrlForSite(
+    //   tenantSupportedLangs,
+    //   selectedTenant,
+    //   dispatch,
+    //   setSiteMetaData,
+    //   siteMetaData
+    // );
     navigate(
       `/${selectedTenant.customerCode}/${selectedTenant.refNum}/summary`
     );
@@ -200,7 +217,11 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
             <div
               className="tenant-card"
               key={eachTenant.id}
-              onClick={() => navigateToDashBoard(eachTenant)}
+              onClick={async () => {
+              setIsLoading(true);
+              await navigateToDashBoard(eachTenant);
+              setIsLoading(false);
+              }}
             >
               <span>{eachTenant.tenantName}</span>
             </div>

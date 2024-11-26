@@ -2,7 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { AppStore } from "store";
 import { Loader } from "@phenom/react-ui-components";
-import { removeElementsById } from "../../utils/helper/utilizer";
+import {
+  removeElementsById,
+  loadScriptById,
+} from "../../utils/helper/utilizer";
 import { removeCrmStyles } from "../../utils/appUtils";
 
 declare global {
@@ -16,11 +19,27 @@ const Banners = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const storeData = useSelector((state: AppStore) => state.customer);
   const selectedModuleAppObject = useSelector((state: any) => {
-    const selectedAppFromSession = JSON.parse(sessionStorage.getItem("selectedApp") || "null");
+    const selectedAppFromSession = JSON.parse(
+      sessionStorage.getItem("selectedApp") || "null"
+    );
     return selectedAppFromSession || state.app?.selectedApp;
   });
   var selectedApp = selectedModuleAppObject?.appConfig || {};
 
+  // TODO: Will remove this in future
+  const deleteCmsLoader = () => {
+    const targetLoaderDiv = document.querySelector("#tools-body-container");
+    if (targetLoaderDiv) {
+      const loaderDiv = targetLoaderDiv.querySelectorAll(".ppc-loading");
+      loaderDiv.forEach((div) => {
+        (div as HTMLElement).style.display = "none";
+      });
+      const breadcrumbs: HTMLElement | null = targetLoaderDiv.querySelector(".tmt-breadcrumbs");
+      if (breadcrumbs) {
+        breadcrumbs.style.display = "none";
+      }
+    }
+  };
 
   useEffect(() => {
     const embedScriptId = selectedApp?.scriptId;
@@ -50,8 +69,12 @@ const Banners = () => {
       storeData.selectedTenant &&
       storeData.selectedTenant.refNum
     ) {
-      removeElementsById('crm-stylesheet');
       loadScript().then(() => {
+        removeElementsById("crm-stylesheet");
+        loadScriptById(
+          "canvas-bootstrapper",
+          "https://dev-qa-cdn.phenompro.com/CareerConnectResources/qa1/canvas/scripts/web-canvas-bootstrapper-1732534357.js"
+        );
         if (window.txEmbed) {
           window.txEmbed.embedModules(
             "banners",
@@ -62,6 +85,12 @@ const Banners = () => {
             },
             () => {
               setIsLoading(false);
+              // Will remove this in future
+              for (let i = 1; i <= 3; i++) {
+                setTimeout(() => {
+                  deleteCmsLoader();
+                }, 5000);
+              }
             }
           );
         }

@@ -25,6 +25,7 @@ import "./AppLayout.scss";
 import { InitialLoader } from "./Loader";
 import ToolsSideBar from "./sideBar/SideBar";
 import { AppSelectionOptions } from "interfaces/AppSelectionOptions";
+import { crmFilterApps } from "../utils/helper/crmFilterApps";
 
 interface AppLayoutProps {
   allApps: any;
@@ -67,6 +68,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   const sessionTrackerIngestPoint = `${(window as any)._env_.SESSION_TRACKER_INGEST_POINT || ""}`;
   const userId = userDetails?.userName;
   const fetchedApps = useSelector((state: any) => state.app.allApps);
+  const { user } = useSelector(
+    (state: AppStore) => state.customer
+  );  
   
   const navigateToApp = (selectedApp: any, customerCode: string, refNum: string) => {
     sessionStorage.setItem("selectedApp", JSON.stringify(selectedApp));
@@ -91,37 +95,47 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       event.detail.url
     );
     const url: string = event.detail.url;
+    localStorage.setItem("txeCustomPath", JSON.stringify(url));
     const path = window.location.pathname.split("/").filter(Boolean);
-    if (url && url.includes("/dashboard/candidates/") && url.indexOf(';') === -1) {
-      const currentApp = JSON.parse(sessionStorage.getItem("selectedApp") || "{}");
-      if (currentApp?.name?.toLowerCase() !== "candidates") {
-        const response = JSON.parse(
-          sessionStorage.getItem("allapps") || "[]"
-        );
-        const detailsApp = response.find((element: any) =>
-          url.includes(element?.appConfig?.route?.toLowerCase())
-        );
-        if (detailsApp) {
-          sessionStorage.setItem("selectedApp", JSON.stringify(detailsApp));
-          const newRoute = `/${path[0]}/${path[1]}${url}`;
-          navigate(newRoute);
-          console.log("Changed App to", detailsApp);
-        }
+
+    const appRouteDictionary: { [key: string]: string } = {
+      // "email-templates": "Email Manager",
+      // "sms-templates": "SMS Manager",
+      "sms-campaign": "Campaigns",
+      "campaigns": "Campaigns",
+      "automations":"Automations",
+      "lists":"Lists",
+      "events":"Events",
+      "talent-communities":"Talent Community",
+      "candidates": "Candidates",
+    };
+    const currentApp = JSON.parse(sessionStorage.getItem("selectedApp") || "{}");
+    const urlLastRoute = url.split('/').pop();
+    
+    const matchedKey = Object.keys(appRouteDictionary).find(key => url.includes(key));
+    if (matchedKey && url.indexOf(";") === -1 &&url.includes(`${matchedKey}/`) && currentApp?.name !== appRouteDictionary[matchedKey]) {
+      const response = JSON.parse(
+        sessionStorage.getItem("allapps") || "[]"
+      );
+      const detailsApp = response.find((element: any) => element?.name === appRouteDictionary[matchedKey]);
+      if (detailsApp) {
+        const customerCode = selectedTenant?.customerCode || path[0];
+        const refNum = selectedTenant?.refNum || path[1];
+        console.log("CROSS MODULE NAVIGATION => Changed App to", detailsApp);
+        localStorage.setItem("txeCustomPath", JSON.stringify(url));
+        navigateToApp(detailsApp, customerCode, refNum)
       }
-    } else if(url && url.includes("/dashboard/email-management/") && url.indexOf(';') === -1) {
-      const currentApp = JSON.parse(sessionStorage.getItem("selectedApp") || "{}");
-      if (currentApp?.name?.toLowerCase() === "events") {
-        const response = JSON.parse(
-          sessionStorage.getItem("allapps") || "[]"
-        );
-        const detailsApp = response.find((element: any) => element?.appConfig?.route?.toLowerCase() === "/dashboard/email-management/campaigns");
-        if (detailsApp) {
-          const customerCode = selectedTenant?.customerCode || path[0];
-          const refNum = selectedTenant?.refNum || path[1];
-          navigateToApp(detailsApp, customerCode, refNum);
-          sessionStorage.setItem("selectedApp", JSON.stringify(detailsApp));
-          console.log("Changed App to", detailsApp);
-        }
+    } else if (urlLastRoute && currentApp?.name !== appRouteDictionary[urlLastRoute]) {
+      const response = JSON.parse(
+        sessionStorage.getItem("allapps") || "[]"
+      );
+      const detailsApp = response.find((element: any) => element?.name === appRouteDictionary[urlLastRoute]);
+      if (detailsApp) {
+        const customerCode = selectedTenant?.customerCode || path[0];
+        const refNum = selectedTenant?.refNum || path[1];
+        console.log("CROSS MODULE NAVIGATION => Changed App to", detailsApp);
+        localStorage.setItem("txeCustomPath", JSON.stringify(url));
+        navigateToApp(detailsApp, customerCode, refNum)
       }
     }
   };
@@ -134,28 +148,16 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       APIService.getTenants(tenantsUrl, dispatch);
     }
 
-    let response = JSON.parse(sessionStorage.getItem("allapps") || "[]");
-    if (response.length == 0) {
-      getAllApps();
-    } else {
-      dispatch(setAppsFromAPI(response));
-      const mfRoutes = getMfRoutes(response);
-      const filteredApps: any = transformAppData(response); // filters customerTenantApps and platformApps
-      setTransformedAppData(filteredApps);
-      setCustomerTenantApps(filteredApps?.customerTenantApps); // customerTenantApps
-      handleCanvasSite(filteredApps?.customerTenantApps);
-      setAllRoutes([...appRoutes, ...mfRoutes]);
-    }
 
     if (!window.keycloakInstance.bearer_token) window.keycloakInstance.bearer_token = "Bearer " + keycloak.token;
 
     window.addEventListener(
-      "internalNavigation",
+      "txeInternalNavigation",
       handleInternalNavigation as EventListener
     );
     return () => {
       window.removeEventListener(
-        "internalNavigation",
+        "txeInternalNavigation",
         handleInternalNavigation as EventListener
       );
     };
@@ -211,15 +213,34 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   }, [selectedApp]);
 
   useEffect(() => {
-    if (selectedTenant?.customerId) {
+    if (selectedTenant?.customerId || selectedTenant?.tenantId) {
       const setCmsSiteMetaData = async () => {
         const tenantSupportedLangs = await APIService.getSupportedLangs(selectedTenant?.refNum)
         return await handleDomainUrlForSite(tenantSupportedLangs, selectedTenant, dispatch, setSiteMetaData, siteMetaData);
       }
       setCmsSiteMetaData();
+      const setPermissionsBasedApps = async () => {
+        if(window?.keycloakInstance?.userInfo?.userDetails?.id) {
+          await crmFilterApps(selectedTenant?.refNum, user);
+          let response = JSON.parse(sessionStorage.getItem("allapps") || "[]");
+          if (response.length == 0) {
+            getAllApps();
+          } else {
+            dispatch(setAppsFromAPI(response));
+            const mfRoutes = getMfRoutes(response);
+            const filteredApps: any = transformAppData(response); // filters customerTenantApps and platformApps
+            setTransformedAppData(filteredApps);
+            setCustomerTenantApps(filteredApps?.customerTenantApps); // customerTenantApps
+            handleCanvasSite(filteredApps?.customerTenantApps);
+            setAllRoutes([...appRoutes, ...mfRoutes]);
+          }
+          setRolesLoader(false);
+        }
+      }
+      setPermissionsBasedApps();
     }
-    setRolesLoader(false);
-  }, [selectedTenant?.customerId]);
+    
+  }, [selectedTenant?.customerId, selectedTenant?.tenantId]);
 
   useEffect(() => {
     const currentApp = selectedApp.length > 0 ? selectedApp : selectedAppFromSession;
@@ -278,8 +299,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       let res = [...response];
       dispatch(setAppsFromAPI(res));
       const mfRoutes = getMfRoutes(res);
-      setTransformedAppData(transformAppData(res));
-      const filteredApps: any = transformAppData(res);
+      const transformedAppData = transformAppData(res)
+      setTransformedAppData(transformedAppData);
+      const filteredApps: any = transformedAppData;
       setCustomerTenantApps(filteredApps?.customerTenantApps);
       handleCanvasSite(filteredApps?.customerTenantApps);
       sessionStorage.setItem("allapps", JSON.stringify(res));

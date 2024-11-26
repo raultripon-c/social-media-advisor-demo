@@ -113,6 +113,7 @@ export const APIService = {
     API.get(url)
       .then((response: any) => {
         dispatch(setSelectedTenant(response.data.data));
+        sessionStorage.setItem("selectedTenant", JSON.stringify(response.data.data));
       })
       .catch((error: any) => {
         // toast.error("Error in fetching tenants");
@@ -136,6 +137,49 @@ export const APIService = {
       }
     } catch (error) {
       // toast.error("Error fetching metadata");
+      console.error("Error in getMetaDataByRefNum: ", error);
+      return null;
+    }
+  },
+
+  getTenantConfig: async (props: any): Promise<any> => {
+    try {
+      const url = `${(window as any)._env_.CRM_HUB_URL}/tenant-config/getAdminPanelSettings`;
+      const response = await API.post(url, props, {
+        headers: {
+          Authorization: `${window.keycloakInstance.token}`,
+          'Content-Type': 'application/json',
+          'Accept': '*/*'
+        },
+      });
+
+      if (response?.data) {
+        return response.data;
+      } else {
+        throw new Error("No metadata found for the provided refNum.");
+      }
+    } catch (error) {
+      console.error("Error in getMetaDataByRefNum: ", error);
+      return null;
+    }
+  },
+
+  getRecruiterPermissions: async (props: any): Promise<any> => {
+    try {
+      const url = `${(window as any)._env_.CANDIDATES_USER_MANAGEMENT_URL}/loginPermissionsId`;
+      const response = await API.post(url, props, {
+        headers: {
+          Authorization: `${window.keycloakInstance.token}`,
+          'Content-Type': 'application/json'
+        },
+      });
+
+      if (response?.data) {
+        return response.data;
+      } else {
+        throw new Error("No metadata found for the provided refNum.");
+      }
+    } catch (error) {
       console.error("Error in getMetaDataByRefNum: ", error);
       return null;
     }
