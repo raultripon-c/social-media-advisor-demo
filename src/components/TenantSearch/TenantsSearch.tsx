@@ -21,11 +21,11 @@ export const Search = (props: any) => {
   const getClassNameForSize = () => {
     switch (size) {
       case "small":
-        return "small";
+        return "txe-small";
       case "large":
-        return "large";
+        return "txe-large";
       default:
-        return "medium";
+        return "txe-medium";
     }
   };
 
