@@ -104,7 +104,7 @@ export function AngularAppRenderer(props: any) {
   const loadComponent = () => {
     const parentDiv = document.querySelector("#child-module-renderer");
     const appRoot = document.createElement("app-root");
-    const newElement = document.createElement(props.component);
+    const newElement = document.createElement("app-mfe-root");
 
     appRoot?.appendChild(newElement);
     parentDiv?.appendChild(appRoot);

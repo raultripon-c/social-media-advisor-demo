@@ -90,6 +90,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   };
 
   const handleInternalNavigation = (event: CustomEvent) => {
+    if((window as any).cpui?.init) {
+      return;
+    }
     console.log(
       "Successfully listened internalNavigation event from CRM",
       event.detail.url
