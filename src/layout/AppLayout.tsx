@@ -70,9 +70,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
   const fetchedApps = useSelector((state: any) => state.app.allApps);
   const { user } = useSelector(
     (state: AppStore) => state.customer
-  );
-
-  const navigateToApp = (selectedApp: any, customerCode: string, refNum: string) => {
+  );  
+  
+  const navigateToApp = (selectedApp: any, customerCode: string, refNum: string, customRoute?: any) => {
     sessionStorage.setItem("selectedApp", JSON.stringify(selectedApp));
     dispatch(setAppDetails(selectedApp));
     const appSelectionOptions: AppSelectionOptions = {
@@ -85,20 +85,20 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
       openInNewTab: false,
       setSiteMetaData: setSiteMetaData,
       selectedTenant: selectedTenant,
+      customeRoute: customRoute
     }
     appSelectionHandler(appSelectionOptions);
   };
 
   const handleInternalNavigation = (event: CustomEvent) => {
-    if ((window as any).cpui?.init) {
-      return;
-    }
+    // if((window as any).cpui?.init) {
+    //   return;
+    // }
     console.log(
       "Successfully listened internalNavigation event from CRM",
       event.detail.url
     );
     const url: string = event.detail.url;
-    localStorage.setItem("txeCustomPath", JSON.stringify(url));
     const path = window.location.pathname.split("/").filter(Boolean);
 
     const appRouteDictionary: { [key: string]: string } = {
@@ -124,8 +124,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
         const customerCode = selectedTenant?.customerCode || path[0];
         const refNum = selectedTenant?.refNum || path[1];
         console.log("CROSS MODULE NAVIGATION => Changed App to", detailsApp);
-        localStorage.setItem("txeCustomPath", JSON.stringify(url));
-        navigateToApp(detailsApp, customerCode, refNum)
+        navigateToApp(detailsApp, customerCode, refNum, url)
       }
     } else if (urlLastRoute && currentApp?.name !== appRouteDictionary[urlLastRoute]) {
       const response = JSON.parse(
@@ -136,8 +135,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
         const customerCode = selectedTenant?.customerCode || path[0];
         const refNum = selectedTenant?.refNum || path[1];
         console.log("CROSS MODULE NAVIGATION => Changed App to", detailsApp);
-        localStorage.setItem("txeCustomPath", JSON.stringify(url));
-        navigateToApp(detailsApp, customerCode, refNum)
+        navigateToApp(detailsApp, customerCode, refNum, url)
       }
     }
   };
@@ -281,7 +279,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
       }
       appSelectionHandler(appSelectionOptions);
     }
-  }, [selectedApp, selectedTenant, selectedTenant?.refNum]);
+  }, [selectedTenant, selectedTenant?.refNum]);
 
   const checkCanvasSite = async (appsData: any) => {
     const selectedTenantFromSession = sessionStorage.getItem('selectedTenant');

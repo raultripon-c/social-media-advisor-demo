@@ -21,7 +21,8 @@ export const appSelectionHandler = (
     dispatch,
     openInNewTab,
     setSiteMetaData,
-    selectedTenant
+    selectedTenant,
+    customeRoute
   } = options;
 
   if (!selectedApp) {
@@ -48,7 +49,8 @@ export const appSelectionHandler = (
         openInNewTab,
         navigate,
         dispatch,
-        selectedApp
+        selectedApp,
+        customeRoute
       );
       break;
     case "external":
@@ -83,7 +85,8 @@ const handleModuleFederation = (
   openInNewTab: boolean,
   navigate: (path: string) => void,
   dispatch: any,
-  selectedApp: any
+  selectedApp: any,
+  customRoute?: any
 ) => {
   if (openInNewTab) {
     const route = !isEmpty(updatedRoute)
@@ -98,11 +101,22 @@ const handleModuleFederation = (
     if (isEmpty(updatedRoute) && selectedApp?.context !== "platform") {
       sessionStorage.removeItem("selectedApp");
     }
+    if(customRoute) {
+      routeWithoutRefNum = customRoute;
+    }
     navigate(
       !isEmpty(updatedRoute)
         ? `/${updatedRoute}${routeWithoutRefNum}`
         : `${routeWithoutRefNum}`
     );
+    if(selectedApp?.appConfig?.scope === "cpui") {
+      const event = new CustomEvent("txeAppChange", {
+        detail: {
+        route: `${routeWithoutRefNum}`,
+        },
+      });
+      window.dispatchEvent(event);
+    }
   }
 };
 

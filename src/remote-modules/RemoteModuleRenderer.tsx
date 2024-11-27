@@ -194,7 +194,7 @@ export const RemoteModuleRenderer = () => {
  useEffect(() => {
     // Update key whenever subPath or refNum changes
     setKey((prevKey) => prevKey + 1);
-  }, [moduleProps?.subPath, moduleProps?.refNum,selectedModuleAppObject?.name, window.keycloakInstance?.token]);
+  }, [moduleProps?.subPath, moduleProps?.refNum, window.keycloakInstance?.token]);
   const getSelectedAppUrl = (selectedApp: any, isEnvconfig: boolean) => {
     let overriding = sessionStorage.getItem("overriding");
     if (APP_ENV?.toUpperCase() !== "QA" || !overriding) {
@@ -244,9 +244,10 @@ export const RemoteModuleRenderer = () => {
             url={selectedApp.url}
             selectedApp={selectedApp}
             component={selectedApp.component}
+            moduleRoute={selectedApp.moduleRoute}
             appWindowConfig={selectedApp.appWindowConfig}
-            key={key}
-            selectedAppTitle={selectedAppTitle}
+            // key={key}
+            // selectedAppTitle={selectedAppTitle}
           />
         )}
     </div>

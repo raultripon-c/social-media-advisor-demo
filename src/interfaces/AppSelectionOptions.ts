@@ -8,4 +8,5 @@ export interface AppSelectionOptions {
   openInNewTab: boolean;
   setSiteMetaData: (data: any) => void; // Define the setSiteMetaData function type
   selectedTenant: any;
+  customeRoute?: any;
 }

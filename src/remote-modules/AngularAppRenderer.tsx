@@ -21,9 +21,9 @@ declare global {
 export function AngularAppRenderer(props: any) {
   const containerRef = useRef(null);
   const selectedTenant = useSelector((state: AppStore) => state.customer.selectedTenant);
-  const approute = props?.selectedApp?.route;
-  const { appName, moduleRoute } = props?.selectedApp;
-  const appTitle = (props?.selectedAppTitle === 'SMS Manager' || props?.selectedAppTitle === 'Email Manager') ? props.selectedAppTitle : null;
+  // const approute = props?.selectedApp?.route;
+  const { moduleRoute } = props?.moduleRoute;
+  // const appTitle = (props?.selectedAppTitle === 'SMS Manager' || props?.selectedAppTitle === 'Email Manager') ? props.selectedAppTitle : null;
   const [isReady, setReady] = useState(false);
 
   if (window.__ckeditor__) {
@@ -103,11 +103,18 @@ export function AngularAppRenderer(props: any) {
   // Load the Angular component
   const loadComponent = () => {
     const parentDiv = document.querySelector("#child-module-renderer");
-    const appRoot = document.createElement("app-root");
-    const newElement = document.createElement("app-mfe-root");
-
-    appRoot?.appendChild(newElement);
-    parentDiv?.appendChild(appRoot);
+    const existingAppRoot = parentDiv?.querySelector("app-root") as HTMLElement;
+    if (existingAppRoot) {
+      existingAppRoot.remove();
+    }
+    const appRoot=document.createElement("app-root");
+    const newElement = document.createElement(props?.component);
+    if(appRoot){
+      appRoot.appendChild(newElement);
+    }
+    if (parentDiv) {
+      parentDiv.appendChild(appRoot);
+    }
   };
 
   // Handle module mounting after script loading
@@ -130,10 +137,10 @@ export function AngularAppRenderer(props: any) {
             subPath: `/${selectedTenant?.customerCode}/${selectedTenant?.refNum}`,
             userId: window.keycloakInstance.userInfo.userDetails.id,
             userEmail: window.keycloakInstance.userInfo.userDetails.email,
-            appName: appName,
+            // appName: appName,
             MessageService: JSON.stringify(MessageService),
             moduleRoute: moduleRoute,
-            txeAppHeader: appTitle,
+            // txeAppHeader: appTitle,
             companyName: selectedTenant?.tenantName,
           };
           console.log('angular app props', { props });
@@ -145,6 +152,7 @@ export function AngularAppRenderer(props: any) {
     return () => {
       window.__ckeditor__ = window.CKEDITOR;
       window.__$__ = window.$;
+      setReady(false);
     };
   }, [ready]);
 

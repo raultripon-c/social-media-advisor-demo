@@ -75,8 +75,6 @@ function ToolsSideBar(props: any) {
     handleCrmStyles();
   }, [sidebarOpen]);
   const handleAppSelection = (app: any) => {
-    localStorage.removeItem("txeCustomPath");
-    localStorage.removeItem("TXE_SELECTED_CANDIDATES");
     if(app?.name === "Experience Manager"){
       const appSelectionOptions: AppSelectionOptions = {
         selectedApp: app,
@@ -95,6 +93,18 @@ function ToolsSideBar(props: any) {
       setSidebarOpen(true);
       app && sessionStorage.setItem("selectedApp", JSON.stringify(app));
       dispatch(setAppDetails(app));
+      const appSelectionOptions: AppSelectionOptions = {
+        selectedApp: app,
+        navigate: navigate,
+        customerCode: selectedTenant?.customerCode,
+        refNum: selectedTenant?.refNum,
+        siteMetaData: siteMetaData,
+        dispatch: dispatch,
+        openInNewTab: false,
+        setSiteMetaData: setSiteMetaData,
+        selectedTenant: selectedTenant,
+      }
+      appSelectionHandler(appSelectionOptions);
       sessionTracker.setCustomEvent("App Selected", {
         "App Name": app?.name,
       });
