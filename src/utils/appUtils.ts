@@ -223,6 +223,11 @@ export const transformAppData = (data: any) => {
   const customerTenantApps = categoryMap
     .map((item: any) => {
       const filteredApps = data?.filter((app: any) => {
+        const isAnalyticsPresent = Object.keys(window.keycloakInstance.userInfo.resources).some((key) =>
+          key.toLowerCase().includes("analytics")
+        );
+        const userDetails = window?.keycloakInstance?.tokenParsed?.userDetails;
+        
         // Define the exclusion mapping between app names and window variables
         let exclusionMapping: any = {
           Events: "showEvents",
@@ -240,6 +245,16 @@ export const transformAppData = (data: any) => {
       
         // If the app should be excluded, return false
         if (shouldExclude) return false;
+
+        // Exclude "Bot Settings" and "Knowledge Base" if userType is not "PARTNER"
+        if(userDetails?.userType !== "PARTNER" && (app.name === "Bot Settings" || app.name === "Knowledge Base")) {
+          return false;
+        }
+
+        // Exclude "Analytics" if "analytics" is not present in the resources
+        if(!isAnalyticsPresent && app.name === "Analytics") {
+          return false;
+        }
       
         // Main filter conditions
         return (

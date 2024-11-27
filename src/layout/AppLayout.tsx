@@ -226,26 +226,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
           if (response.length == 0) {
             getAllApps();
           } else {
-            dispatch(setAppsFromAPI(response));
-            const isAnalyticsPresent = Object.keys(window.keycloakInstance.userInfo.resources).some((key) =>
-              key.toLowerCase().includes("analytics")
-            );
-            
-            const appsResponse = response.filter((item: any) => {
-              // Exclude "Bot Settings" and "Knowledge Base" if userType is not "PARTNER"
-              if (userDetails?.userType !== "PARTNER" && (item.name === "Bot Settings" || item.name === "Knowledge Base")) {
-                return false;
-              }
-            
-              // Exclude "Analytics" if "analytics" is not present in the resources
-              if (!isAnalyticsPresent && item.name === "Analytics") {
-                return false;
-              }
-            
-              return true;
-            });            
-            const mfRoutes = getMfRoutes(appsResponse);
-            const filteredApps: any = transformAppData(appsResponse); // filters customerTenantApps and platformApps
+            dispatch(setAppsFromAPI(response));       
+            const mfRoutes = getMfRoutes(response);
+            const filteredApps: any = transformAppData(response); // filters customerTenantApps and platformApps
             setTransformedAppData(filteredApps);
             setCustomerTenantApps(filteredApps?.customerTenantApps); // customerTenantApps
             handleCanvasSite(filteredApps?.customerTenantApps);
@@ -315,7 +298,24 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
       if (!response) return;
       let res = [...response];
       dispatch(setAppsFromAPI(res));
-      const mfRoutes = getMfRoutes(res);
+      const isAnalyticsPresent = Object.keys(window.keycloakInstance.userInfo.resources).some((key) =>
+        key.toLowerCase().includes("analytics")
+      );
+      
+      const appsResponse = res.filter((item: any) => {
+        // Exclude "Bot Settings" and "Knowledge Base" if userType is not "PARTNER"
+        if (userDetails?.userType !== "PARTNER" && (item.name === "Bot Settings" || item.name === "Knowledge Base")) {
+          return false;
+        }
+      
+        // Exclude "Analytics" if "analytics" is not present in the resources
+        if (!isAnalyticsPresent && item.name === "Analytics") {
+          return false;
+        }
+      
+        return true;
+      });
+      const mfRoutes = getMfRoutes(appsResponse);
       const transformedAppData = transformAppData(res)
       setTransformedAppData(transformedAppData);
       const filteredApps: any = transformedAppData;

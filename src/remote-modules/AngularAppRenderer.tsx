@@ -25,6 +25,15 @@ export function AngularAppRenderer(props: any) {
   const moduleRoute = props?.moduleRoute;
   // const appTitle = (props?.selectedAppTitle === 'SMS Manager' || props?.selectedAppTitle === 'Email Manager') ? props.selectedAppTitle : null;
   const [isReady, setReady] = useState(false);
+  if(!isReady && props?.scope === 'cpui') {
+    document.body.style.pointerEvents = "none";
+    document.body.style.cursor = "not-allowed";
+
+    setTimeout(() => {
+      document.body.style.pointerEvents = "";
+      document.body.style.cursor = "";
+    }, 10000);
+  }
 
   if (window.__ckeditor__) {
     window.CKEDITOR = window.__ckeditor__;
@@ -145,7 +154,19 @@ export function AngularAppRenderer(props: any) {
           };
           console.log('angular app props', { props });
           await module.mount(props);
-          setReady(true);
+          if( scope === 'cpui' ) {
+            window.addEventListener("crmModuleAvailable", () => {
+              const body = document.querySelector("body");
+              if (body) {
+                body.style.pointerEvents = "";
+                body.style.cursor = "";
+              }
+              setReady(true);
+            });
+          } else {
+            setReady(true);
+          }
+            
         }
       })();
     }
@@ -157,9 +178,8 @@ export function AngularAppRenderer(props: any) {
   }, [ready]);
 
   return (
-    <div className="page">
+    <div>
       <div
-        className="main-page"
         id="child-module-renderer"
         ref={containerRef}
         style={{ display: isReady ? "block" : "none" }}
