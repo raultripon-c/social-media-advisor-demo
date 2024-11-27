@@ -48,7 +48,7 @@ interface AppLayoutProps {
  * - Initializes session tracking.
  * - Manages sidebar visibility and state.
  */
-const AppLayout: React.FC<AppLayoutProps> = ({}) => {
+const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { keycloak } = useKeycloak();
@@ -70,8 +70,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   const fetchedApps = useSelector((state: any) => state.app.allApps);
   const { user } = useSelector(
     (state: AppStore) => state.customer
-  );  
-  
+  );
+
   const navigateToApp = (selectedApp: any, customerCode: string, refNum: string) => {
     sessionStorage.setItem("selectedApp", JSON.stringify(selectedApp));
     dispatch(setAppDetails(selectedApp));
@@ -90,7 +90,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   };
 
   const handleInternalNavigation = (event: CustomEvent) => {
-    if((window as any).cpui?.init) {
+    if ((window as any).cpui?.init) {
       return;
     }
     console.log(
@@ -106,17 +106,16 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       // "sms-templates": "SMS Manager",
       "sms-campaign": "Campaigns",
       "campaigns": "Campaigns",
-      "automations":"Automations",
-      "lists":"Lists",
-      "events":"Events",
-      "talent-communities":"Talent Community",
+      "automations": "Automations",
+      "lists": "Lists",
+      "events": "Events",
+      "talent-communities": "Talent Community",
       "candidates": "Candidates",
     };
     const currentApp = JSON.parse(sessionStorage.getItem("selectedApp") || "{}");
     const urlLastRoute = url.split('/').pop();
-    
     const matchedKey = Object.keys(appRouteDictionary).find(key => url.includes(key));
-    if (matchedKey && url.indexOf(";") === -1 &&url.includes(`${matchedKey}/`) && currentApp?.name !== appRouteDictionary[matchedKey]) {
+    if (matchedKey && url.indexOf(";") === -1 && url.includes(`${matchedKey}/`) && currentApp?.name !== appRouteDictionary[matchedKey]) {
       const response = JSON.parse(
         sessionStorage.getItem("allapps") || "[]"
       );
@@ -167,7 +166,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
 
     // Cleanup actions when component unmounts
     return () => {
-      
+
     };
   }, []);
 
@@ -223,15 +222,32 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       }
       setCmsSiteMetaData();
       const setPermissionsBasedApps = async () => {
-        if(window?.keycloakInstance?.userInfo?.userDetails?.id) {
+        if (window?.keycloakInstance?.userInfo?.userDetails?.id) {
           await crmFilterApps(selectedTenant?.refNum, user);
           let response = JSON.parse(sessionStorage.getItem("allapps") || "[]");
           if (response.length == 0) {
             getAllApps();
           } else {
             dispatch(setAppsFromAPI(response));
-            const mfRoutes = getMfRoutes(response);
-            const filteredApps: any = transformAppData(response); // filters customerTenantApps and platformApps
+            const isAnalyticsPresent = Object.keys(window.keycloakInstance.userInfo.resources).some((key) =>
+              key.toLowerCase().includes("analytics")
+            );
+            
+            const appsResponse = response.filter((item: any) => {
+              // Exclude "Bot Settings" and "Knowledge Base" if userType is not "PARTNER"
+              if (userDetails?.userType !== "PARTNER" && (item.name === "Bot Settings" || item.name === "Knowledge Base")) {
+                return false;
+              }
+            
+              // Exclude "Analytics" if "analytics" is not present in the resources
+              if (!isAnalyticsPresent && item.name === "Analytics") {
+                return false;
+              }
+            
+              return true;
+            });            
+            const mfRoutes = getMfRoutes(appsResponse);
+            const filteredApps: any = transformAppData(appsResponse); // filters customerTenantApps and platformApps
             setTransformedAppData(filteredApps);
             setCustomerTenantApps(filteredApps?.customerTenantApps); // customerTenantApps
             handleCanvasSite(filteredApps?.customerTenantApps);
@@ -242,7 +258,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       }
       setPermissionsBasedApps();
     }
-    
+
   }, [selectedTenant?.customerId, selectedTenant?.tenantId]);
 
   useEffect(() => {
@@ -269,11 +285,11 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
 
   const checkCanvasSite = async (appsData: any) => {
     const selectedTenantFromSession = sessionStorage.getItem('selectedTenant');
-    if(selectedTenantFromSession) {
+    if (selectedTenantFromSession) {
       const currTenant = JSON.parse(selectedTenantFromSession);
       const isCanvasTenant = await APIService.isCanvasSite(currTenant.refNum);
       sessionStorage.setItem('isCanvasSite', isCanvasTenant);
-      if(!isCanvasTenant) {
+      if (!isCanvasTenant) {
         const parentIndex = appsData.findIndex((item: any) => item.name === "Experiences");
         if (parentIndex !== -1) {
           appsData[parentIndex].children = appsData[parentIndex].children.filter((child: any) => child.name !== "Banners");
@@ -283,14 +299,14 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
     }
   }
 
-  const handleCanvasSite = async(appsData: any) => {
-    if(document.cookie.includes('token')) {
+  const handleCanvasSite = async (appsData: any) => {
+    if (document.cookie.includes('token')) {
       await checkCanvasSite(appsData);
     }
     else {
       window.addEventListener('txeLoginEvent', async () => {
         await checkCanvasSite(appsData);
-      }, {once: true});
+      }, { once: true });
     }
   }
 
