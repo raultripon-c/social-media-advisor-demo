@@ -22,7 +22,7 @@ export function AngularAppRenderer(props: any) {
   const containerRef = useRef(null);
   const selectedTenant = useSelector((state: AppStore) => state.customer.selectedTenant);
   // const approute = props?.selectedApp?.route;
-  const { moduleRoute } = props?.moduleRoute;
+  const moduleRoute = props?.moduleRoute;
   // const appTitle = (props?.selectedAppTitle === 'SMS Manager' || props?.selectedAppTitle === 'Email Manager') ? props.selectedAppTitle : null;
   const [isReady, setReady] = useState(false);
 
