@@ -5,6 +5,7 @@ import Assets from "../screens/assets/Assets"
 import Blogs from "../screens/blogs/Blogs";
 import Banners from "../screens/banners/Banners";
 import UnmatchedRoutePage from "../components/UnmatchedRoutePage/UnmatchedRoutePage";
+import { RemoteModuleRenderer } from "../remote-modules/RemoteModuleRenderer";
 
 export interface IRoute {
   path: string;
@@ -34,7 +35,10 @@ const BannersManager = {
   path: "/:customerCode/:refnum/banners",
   component: Banners,
 }
-
+const SMSWildCardRoute = {
+  path: "/:customerCode/:refnum/dashboard/email-management/sms-campaign",
+  component: RemoteModuleRenderer
+}
 const unmatchedRoutePage = {
   path: "*",
   component: UnmatchedRoutePage
@@ -46,5 +50,6 @@ export const appRoutes = [
   BlogsManger,
   BannersManager,
   dashBoard,
+  SMSWildCardRoute,
   unmatchedRoutePage
 ];
