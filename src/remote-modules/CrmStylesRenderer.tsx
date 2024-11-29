@@ -13,6 +13,19 @@ const CrmStylesRenderer = () => {
         right: auto !important;
       }
 
+      .candidate-bulk-import-page .page-footer {
+        display: block !important;
+        right: 0 !important;
+        position: sticky !important;
+        left: 0 !important;
+        width: 100% !important
+      }
+      .candidate-bulk-import-page .page-footer .actions-container {
+        justify-content: end !important;
+      }
+      
+      
+
       .close-facet-serach .data-details.list-cntr .header-list-cntr {
         right: 0 !important;
         left: 0 !important;      
