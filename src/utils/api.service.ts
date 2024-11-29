@@ -249,8 +249,9 @@ export const APIService = {
     }
   },
 
-  triggerTxeLogin: async (code: string, type: string) => {
+  triggerTxeLogin: async () => {
     try {
+      const { code, type } = window.orgInfo;
       const res = await API.post(
         `${(window as any)._env_.CMS_URL}/api/txeLogin`,
         {

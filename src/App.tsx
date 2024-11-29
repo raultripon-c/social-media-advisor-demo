@@ -15,8 +15,7 @@ const App = (): JSX.Element => {
     console.log("onKeycloakEvent from TXE", event, error);
   };
   const tokenLogger = (tokens: any) => {
-    const { code, type } = window.orgInfo;
-    APIService.triggerTxeLogin(code, type);
+    APIService.triggerTxeLogin();
     const event = new CustomEvent("tokenRefreshed");
     window.dispatchEvent(event);
     console.log("onKeycloakTokens from TXE", tokens);

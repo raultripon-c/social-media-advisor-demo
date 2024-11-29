@@ -104,6 +104,7 @@ function ToolsSideBar(props: any) {
         setSiteMetaData: setSiteMetaData,
         selectedTenant: selectedTenant,
       }
+      localStorage.removeItem("txeCustomPath");
       appSelectionHandler(appSelectionOptions);
       sessionTracker.setCustomEvent("App Selected", {
         "App Name": app?.name,

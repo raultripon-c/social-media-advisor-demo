@@ -99,6 +99,13 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
       event.detail.url
     );
     const url: string = event.detail.url;
+    const mfRoutes = JSON.parse(sessionStorage.getItem("mfRoutes") || "[]");
+    if(!mfRoutes.some((route: { path: string; }) => route.path === url)){
+      localStorage.setItem("txeCustomPath", JSON.stringify(url));
+      console.log(allRoutes)
+    } else {
+      localStorage.removeItem("txeCustomPath");
+    }
     const path = window.location.pathname.split("/").filter(Boolean);
 
     const appRouteDictionary: { [key: string]: string } = {
@@ -115,7 +122,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
     const currentApp = JSON.parse(sessionStorage.getItem("selectedApp") || "{}");
     const urlLastRoute = url.split('/').pop();
     const matchedKey = Object.keys(appRouteDictionary).find(key => url.includes(key));
-    if (matchedKey && url.indexOf(";") === -1 && url.includes(`${matchedKey}/`) && currentApp?.name !== appRouteDictionary[matchedKey]) {
+    if (matchedKey && decodeURIComponent(url).indexOf(";") === -1 && url.includes(`${matchedKey}/`) && currentApp?.name !== appRouteDictionary[matchedKey]) {
       const response = JSON.parse(
         sessionStorage.getItem("allapps") || "[]"
       );
@@ -124,7 +131,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
         const customerCode = selectedTenant?.customerCode || path[0];
         const refNum = selectedTenant?.refNum || path[1];
         console.log("CROSS MODULE NAVIGATION => Changed App to", detailsApp);
-        navigateToApp(detailsApp, customerCode, refNum, url)
+        // localStorage.setItem("txeCustomPath", JSON.stringify(url));
+        navigateToApp(detailsApp, customerCode, refNum)
       }
     } else if (urlLastRoute && currentApp?.name !== appRouteDictionary[urlLastRoute]) {
       const response = JSON.parse(
@@ -135,7 +143,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
         const customerCode = selectedTenant?.customerCode || path[0];
         const refNum = selectedTenant?.refNum || path[1];
         console.log("CROSS MODULE NAVIGATION => Changed App to", detailsApp);
-        navigateToApp(detailsApp, customerCode, refNum, url)
+        // localStorage.setItem("txeCustomPath", JSON.stringify(url));
+        navigateToApp(detailsApp, customerCode, refNum)
       }
     }
   };
@@ -233,6 +242,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
             setCustomerTenantApps(filteredApps?.customerTenantApps); // customerTenantApps
             handleCanvasSite(filteredApps?.customerTenantApps);
             setAllRoutes([...appRoutes, ...mfRoutes]);
+            console.log("All Apps", mfRoutes);
           }
           setRolesLoader(false);
         }
@@ -298,24 +308,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
       if (!response) return;
       let res = [...response];
       dispatch(setAppsFromAPI(res));
-      const isAnalyticsPresent = Object.keys(window.keycloakInstance.userInfo.resources).some((key) =>
-        key.toLowerCase().includes("analytics")
-      );
-      
-      const appsResponse = res.filter((item: any) => {
-        // Exclude "Bot Settings" and "Knowledge Base" if userType is not "PARTNER"
-        if (userDetails?.userType !== "PARTNER" && (item.name === "Bot Settings" || item.name === "Knowledge Base")) {
-          return false;
-        }
-      
-        // Exclude "Analytics" if "analytics" is not present in the resources
-        if (!isAnalyticsPresent && item.name === "Analytics") {
-          return false;
-        }
-      
-        return true;
-      });
-      const mfRoutes = getMfRoutes(appsResponse);
+      const mfRoutes = getMfRoutes(res);
       const transformedAppData = transformAppData(res)
       setTransformedAppData(transformedAppData);
       const filteredApps: any = transformedAppData;
@@ -323,6 +316,15 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
       handleCanvasSite(filteredApps?.customerTenantApps);
       sessionStorage.setItem("allapps", JSON.stringify(res));
       setAllRoutes([...appRoutes, ...mfRoutes]);
+      const filteredPaths = mfRoutes
+        .map((obj: { path: any; }) => obj.path) // Extract paths
+        .filter((path: string) => path.includes("dashboard") && !path.endsWith("/*")) // Filter paths with "dashboard" and without "/*"
+        .map((path: string) => path.replace("/:customerCode/:refNum", "")); // Remove ":customerCode" and ":refNum"
+
+      // Convert back to objects if needed
+      const result = filteredPaths.map((path: any) => ({ path }));
+      sessionStorage.setItem("mfRoutes", JSON.stringify(result));
+
     } catch (error) {
       console.error("Error:", error);
     }

@@ -27,7 +27,7 @@ export const RecommendedPages = (props: any) => {
 
   const loginAndFetchRecommendations = async () => {
     try {
-      const txeLoginResponse = await APIService.triggerTxeLogin(code, type)
+      const txeLoginResponse = await APIService.triggerTxeLogin()
       console.log('TXELogin Response:', txeLoginResponse);
       if(txeLoginResponse.status === 200 && txeLoginResponse.data.status === 'success') {
         const txeLoginCustomEvent = new CustomEvent('txeLoginEvent');

@@ -8,6 +8,22 @@ const CrmStylesRenderer = () => {
     crmStyles.id = 'crm-index-styles';
     crmStyles.textContent = `
       /* Reset CSS Styles Start */
+      .campaign-summary-page .horizontal-nav-tabs {
+        left: auto !important;
+        right: auto !important;
+      }
+
+      .close-facet-serach .data-details.list-cntr .header-list-cntr {
+        right: 0 !important;
+        left: 0 !important;      
+      }
+      
+      .create-evt-footer {
+        right: auto !important;
+        left: auto !important;
+        position: sticky !important;
+      }
+
       .main-header-bar {
         display: none !important;
       }
