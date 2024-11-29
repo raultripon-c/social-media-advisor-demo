@@ -11,11 +11,20 @@ import Header from "./header/Header";
 const Layout = () => {
   
   const navigate = useNavigate();
-  const selectedTenant = useSelector(
-    (state: AppStore) => state.customer.selectedTenant
-  );
+  const selectedTenant = localStorage.getItem("selectedTenant") ? JSON.parse(localStorage.getItem("selectedTenant") || "{}") : {};
 
   useEffect(()=>{
+    if(!selectedTenant || !Object.keys(selectedTenant).length) {
+      navigate('/')
+      return;
+    }
+    const currentPath = window.location.pathname.replace("/dashboard/dashboard", "/dashboard");;
+    if(!currentPath.startsWith(`/${selectedTenant.customerCode}/${selectedTenant.refNum}`)) {
+      sessionStorage.setItem("txeCustomPath", currentPath)
+      navigate(`/${selectedTenant.customerCode}/${selectedTenant.refNum}${currentPath}`)
+    } else {
+      sessionStorage.setItem("txeCustomPath", currentPath.split('/').filter(Boolean).splice(2).join('/'))
+    }
     sessionStorage.removeItem("allapps")
   },[])
   

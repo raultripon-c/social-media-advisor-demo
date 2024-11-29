@@ -177,7 +177,7 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
   const navigateToDashBoard = async (selectedTenant: any = {}) => {
     await crmFilterApps(selectedTenant?.refNum, user);
     dispatch(setSelectedTenant(selectedTenant));
-    sessionStorage.setItem("selectedTenant", JSON.stringify(selectedTenant));
+    localStorage.setItem("selectedTenant", JSON.stringify(selectedTenant));
     // const tenantSupportedLangs = await APIService.getSupportedLangs(selectedTenant?.refNum);
     // await handleDomainUrlForSite(
     //   tenantSupportedLangs,

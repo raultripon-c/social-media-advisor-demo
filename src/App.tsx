@@ -15,10 +15,14 @@ const App = (): JSX.Element => {
     console.log("onKeycloakEvent from TXE", event, error);
   };
   const tokenLogger = (tokens: any) => {
-    APIService.triggerTxeLogin();
-    const event = new CustomEvent("tokenRefreshed");
-    window.dispatchEvent(event);
-    console.log("onKeycloakTokens from TXE", tokens);
+    try {
+      APIService.triggerTxeLogin();
+      const event = new CustomEvent("tokenRefreshed");
+      window.dispatchEvent(event);
+      console.log("onKeycloakTokens from TXE", tokens);
+    } catch (error) {
+      console.error("Error", error);
+    }
   };
 
   return (

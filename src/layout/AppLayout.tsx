@@ -73,7 +73,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
   );  
   
   const navigateToApp = (selectedApp: any, customerCode: string, refNum: string, customRoute?: any) => {
-    sessionStorage.setItem("selectedApp", JSON.stringify(selectedApp));
+    localStorage.setItem("selectedApp", JSON.stringify(selectedApp));
     dispatch(setAppDetails(selectedApp));
     const appSelectionOptions: AppSelectionOptions = {
       selectedApp: selectedApp,
@@ -101,10 +101,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
     const url: string = event.detail.url;
     const mfRoutes = JSON.parse(sessionStorage.getItem("mfRoutes") || "[]");
     if(!mfRoutes.some((route: { path: string; }) => route.path === url)){
-      localStorage.setItem("txeCustomPath", JSON.stringify(url));
+      sessionStorage.setItem("txeCustomPath", url);
       console.log(allRoutes)
-    } else {
-      localStorage.removeItem("txeCustomPath");
     }
     const path = window.location.pathname.split("/").filter(Boolean);
 
@@ -131,7 +129,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
         const customerCode = selectedTenant?.customerCode || path[0];
         const refNum = selectedTenant?.refNum || path[1];
         console.log("CROSS MODULE NAVIGATION => Changed App to", detailsApp);
-        // localStorage.setItem("txeCustomPath", JSON.stringify(url));
         navigateToApp(detailsApp, customerCode, refNum)
       }
     } else if (urlLastRoute && currentApp?.name !== appRouteDictionary[urlLastRoute]) {
@@ -143,20 +140,31 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
         const customerCode = selectedTenant?.customerCode || path[0];
         const refNum = selectedTenant?.refNum || path[1];
         console.log("CROSS MODULE NAVIGATION => Changed App to", detailsApp);
-        // localStorage.setItem("txeCustomPath", JSON.stringify(url));
         navigateToApp(detailsApp, customerCode, refNum)
       }
     }
   };
 
   useEffect(() => {
-    if (!selectedTenant.length) {
-      const refNum = window.location.pathname.split("/")[2];
+    const refNum = window.location.pathname.split("/")[2];
 
+    if (!selectedTenant.length && refNum) {
       const tenantsUrl = `${(window as any)._env_.APP_API_URL}/customers/tenants/${refNum}`;
       APIService.getTenants(tenantsUrl, dispatch);
     }
 
+    let response = JSON.parse(sessionStorage.getItem("allapps") || "[]");
+    if (response.length == 0) {
+      getAllApps();
+    } else {
+      dispatch(setAppsFromAPI(response));
+      const mfRoutes = getMfRoutes(response);
+      // const filteredApps: any = transformAppData(response); // filters customerTenantApps and platformApps
+      // setTransformedAppData(filteredApps);
+      // setCustomerTenantApps(filteredApps?.customerTenantApps); // customerTenantApps
+      // handleCanvasSite(filteredApps?.customerTenantApps);
+      setAllRoutes([...appRoutes, ...mfRoutes]);
+    }
 
     if (!window.keycloakInstance.bearer_token) window.keycloakInstance.bearer_token = "Bearer " + keycloak.token;
 
@@ -235,14 +243,14 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
           if (response.length == 0) {
             getAllApps();
           } else {
-            dispatch(setAppsFromAPI(response));       
-            const mfRoutes = getMfRoutes(response);
+            // dispatch(setAppsFromAPI(response));       
+            // const mfRoutes = getMfRoutes(response);
             const filteredApps: any = transformAppData(response); // filters customerTenantApps and platformApps
             setTransformedAppData(filteredApps);
             setCustomerTenantApps(filteredApps?.customerTenantApps); // customerTenantApps
             handleCanvasSite(filteredApps?.customerTenantApps);
-            setAllRoutes([...appRoutes, ...mfRoutes]);
-            console.log("All Apps", mfRoutes);
+            // setAllRoutes([...appRoutes, ...mfRoutes]);
+            // console.log("All Apps", mfRoutes);
           }
           setRolesLoader(false);
         }
@@ -275,7 +283,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
   }, [selectedTenant, selectedTenant?.refNum]);
 
   const checkCanvasSite = async (appsData: any) => {
-    const selectedTenantFromSession = sessionStorage.getItem('selectedTenant');
+    const selectedTenantFromSession = localStorage.getItem('selectedTenant');
     if (selectedTenantFromSession) {
       const currTenant = JSON.parse(selectedTenantFromSession);
       const isCanvasTenant = await APIService.isCanvasSite(currTenant.refNum);

@@ -306,34 +306,24 @@ export const transformAppData = (data: any) => {
 };
 export const getMfRoutes = (data: any) => {
   const mfRoutes = data
-    .filter(
-      ({ appType }: { appType: string }) => appType === "module-federation"
-    )
-    .flatMap(
-      ({
-        context,
-        appConfig,
-      }: {
-        context: string;
-        appConfig: { route: string };
-      }) => {
-        const { route } = appConfig;
-        let updatedPath: string;
+    .filter(({ appType }: { appType: string }) => appType === "module-federation")
+    .flatMap(({ context, appConfig }: { context: string; appConfig: { route?: string } }) => {
+      if (!appConfig?.route) return [];
 
-        if (context === "tenant") {
-          updatedPath = `/:customerCode/:refNum${route}`;
-        } else if (context === "customer") {
-          updatedPath = `/:customerCode${route}`;
-        } else {
-          updatedPath = route;
-        }
+      const { route } = appConfig;
+      let updatedPath: string;
 
-        return [
-          { path: updatedPath, component: RemoteModuleRenderer },
-          { path: `${updatedPath}/*`, component: RemoteModuleRenderer },
-        ];
+      if (context === "tenant" || context === "customer") {
+        updatedPath = `/:customerCode/:refNum${route}`;
+      } else {
+        updatedPath = route;
       }
-    );
+
+      return [
+        { path: updatedPath, component: RemoteModuleRenderer },
+        { path: `${updatedPath}/*`, component: RemoteModuleRenderer },
+      ];
+    });
   return mfRoutes;
 };
 

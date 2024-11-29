@@ -113,7 +113,7 @@ export const APIService = {
     API.get(url)
       .then((response: any) => {
         dispatch(setSelectedTenant(response.data.data));
-        sessionStorage.setItem("selectedTenant", JSON.stringify(response.data.data));
+        localStorage.setItem("selectedTenant", JSON.stringify(response.data.data));
       })
       .catch((error: any) => {
         // toast.error("Error in fetching tenants");
