@@ -75,7 +75,7 @@ const Banners = () => {
         APIService.getPluginVersion().then((response) => {
           const scriptUrl: string = response?.data?.data?.script || "";
           loadScriptById(
-            "canvas-bootstrapper",
+            "canvas-bootstrapper1",
             scriptUrl
           );
           if (window.txEmbed) {
