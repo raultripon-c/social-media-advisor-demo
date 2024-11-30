@@ -103,6 +103,7 @@ function ToolsSideBar(props: any) {
         openInNewTab: false,
         setSiteMetaData: setSiteMetaData,
         selectedTenant: selectedTenant,
+        customeRoute: true
       }
       sessionStorage.removeItem("txeCustomPath");
       appSelectionHandler(appSelectionOptions);
