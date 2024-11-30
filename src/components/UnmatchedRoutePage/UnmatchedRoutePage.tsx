@@ -39,18 +39,22 @@ const UnmatchedRoutePage = () => {
   const tiggerCleanupAndNavigateToHome = useCallback(() => {
     // if(isUnMatchedRoute) {
       const currentPath = window.location.pathname.replace("/dashboard/dashboard", "/dashboard");
+      let customRoute = "summary";
       let urlToNavigate;
       if(!currentPath.startsWith(`/${selectedTenant.customerCode}/${selectedTenant.refNum}`)) {
         urlToNavigate = `/${selectedTenant.customerCode}/${selectedTenant.refNum}${currentPath}`;
       } else {
-        urlToNavigate = `/${selectedTenant.customerCode}/${selectedTenant.refNum}/summary`;
+        customRoute = window.location.pathname.replace("/dashboard/dashboard", "/dashboard").split('/').filter(Boolean).splice(2).join('/') || 'summary';
+        urlToNavigate = `/${selectedTenant.customerCode}/${selectedTenant.refNum}/${customRoute}`;
       }
 
       navigate(urlToNavigate);
+      if(customRoute === 'summary') {
+        sessionStorage.removeItem("txeCustomPath");
+        sessionStorage.removeItem("selectedApp");
+      }
 
-      sessionStorage.removeItem("txeCustomPath");
-
-      sessionStorage.removeItem("selectedApp");
+      
     // }
   }, [dispatch]);
 

@@ -18,7 +18,7 @@ const Layout = () => {
       navigate('/')
       return;
     }
-    const currentPath = window.location.pathname.replace("/dashboard/dashboard", "/dashboard");;
+    const currentPath = window.location.pathname.replace("/dashboard/dashboard", "/dashboard");
     if(!currentPath.startsWith(`/${selectedTenant.customerCode}/${selectedTenant.refNum}`)) {
       sessionStorage.setItem("txeCustomPath", currentPath)
       navigate(`/${selectedTenant.customerCode}/${selectedTenant.refNum}${currentPath}`)
