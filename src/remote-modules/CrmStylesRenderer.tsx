@@ -8,7 +8,7 @@ const CrmStylesRenderer = () => {
     crmStyles.id = 'crm-index-styles';
     crmStyles.textContent = `
       /* Reset CSS Styles Start */
-      .crmUIBtnAskAnything {
+      .candidate-ask-anything-button {
         display: none !important;
       }
       .campaign-summary-page .horizontal-nav-tabs {
