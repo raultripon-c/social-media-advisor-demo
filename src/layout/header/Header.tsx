@@ -78,6 +78,8 @@ function Header({
 
   const handleLogoClick = () => {
     sessionStorage.removeItem("selectedApp");
+    localStorage.removeItem("selectedTenant");
+    sessionStorage.removeItem("txeCustomPath");
     dispatch(setSelectedTenant({}));
     dispatch(setSidebarState(false));
     dispatch(setAppDetails({}));
