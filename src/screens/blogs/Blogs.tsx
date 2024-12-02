@@ -12,36 +12,36 @@ declare global {
 }
 const loadStylesAndScripts = () => {
   // Function to add styles and scripts
-  const addResource = (tag: string, attributes: { [x: string]: any; rel?: string; href?: string; src?: string; }, parent = document.head) => {
-    const element = document.createElement(tag);
-    Object.keys(attributes).forEach(key => element.setAttribute(key, attributes[key]));
-    parent.appendChild(element);
-    return element;
-  };
+  // const addResource = (tag: string, attributes: { [x: string]: any; rel?: string; href?: string; src?: string; }, parent = document.head) => {
+  //   const element = document.createElement(tag);
+  //   Object.keys(attributes).forEach(key => element.setAttribute(key, attributes[key]));
+  //   parent.appendChild(element);
+  //   return element;
+  // };
 
-  // Load styles
-  const flatpickrStyles = addResource("link", {
-    rel: "stylesheet",
-    href: "https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css",
-  });
+  // // Load styles
+  // const flatpickrStyles = addResource("link", {
+  //   rel: "stylesheet",
+  //   href: "https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css",
+  // });
 
-  // Load script
-  const flatpickrScript = addResource("script", {
-    src: "https://cdn.jsdelivr.net/npm/flatpickr",
-  }, document.body);
+  // // Load script
+  // const flatpickrScript = addResource("script", {
+  //   src: "https://cdn.jsdelivr.net/npm/flatpickr",
+  // }, document.body);
 
-  return { flatpickrStyles, flatpickrScript };
+  // return { flatpickrStyles, flatpickrScript };
 };
 
-const removeStylesAndScripts = (resources: any) => {
-  // Remove styles and scripts
-  if (resources.flatpickrStyles) {
-    resources.flatpickrStyles.remove();
-  }
-  if (resources.flatpickrScript) {
-    resources.flatpickrScript.remove();
-  }
-};
+// const removeStylesAndScripts = (resources: any) => {
+//   // Remove styles and scripts
+//   if (resources.flatpickrStyles) {
+//     resources.flatpickrStyles.remove();
+//   }
+//   if (resources.flatpickrScript) {
+//     resources.flatpickrScript.remove();
+//   }
+// };
 
 
 const Blogs = () => {
@@ -106,7 +106,7 @@ const Blogs = () => {
           });
         }
         return () => {
-          removeStylesAndScripts(resources);
+          // removeStylesAndScripts(resources);
         }
     }, [storeData]);
     return (
