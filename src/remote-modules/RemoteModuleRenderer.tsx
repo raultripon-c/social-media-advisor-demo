@@ -243,7 +243,7 @@ export const RemoteModuleRenderer = () => {
           <AngularAppRenderer
             scope={selectedApp.scope}
             module={selectedApp.module}
-            url={'https://localhost:8080/remoteEntry.js'}
+            url={selectedApp.url}
             selectedApp={selectedApp}
             component={selectedApp.component}
             moduleRoute={selectedApp.moduleRoute}
