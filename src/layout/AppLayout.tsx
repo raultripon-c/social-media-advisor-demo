@@ -26,6 +26,7 @@ import { InitialLoader } from "./Loader";
 import ToolsSideBar from "./sideBar/SideBar";
 import { AppSelectionOptions } from "interfaces/AppSelectionOptions";
 import { crmFilterApps } from "../utils/helper/crmFilterApps";
+import { cmsFilterApps } from "../utils/helper/cmsFilterApps";
 
 interface AppLayoutProps {
   allApps: any;
@@ -239,6 +240,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
       const setPermissionsBasedApps = async () => {
         if (window?.keycloakInstance?.userInfo?.userDetails?.id) {
           await crmFilterApps(selectedTenant?.refNum, user);
+          await cmsFilterApps(selectedTenant?.refNum);
           let response = JSON.parse(sessionStorage.getItem("allapps") || "[]");
           if (response.length == 0) {
             getAllApps();
@@ -248,7 +250,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
             const filteredApps: any = transformAppData(response); // filters customerTenantApps and platformApps
             setTransformedAppData(filteredApps);
             setCustomerTenantApps(filteredApps?.customerTenantApps); // customerTenantApps
-            handleCanvasSite(filteredApps?.customerTenantApps);
+            // handleCanvasSite(filteredApps?.customerTenantApps);
             // setAllRoutes([...appRoutes, ...mfRoutes]);
             // console.log("All Apps", mfRoutes);
           }
@@ -282,32 +284,18 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
     }
   }, [selectedTenant, selectedTenant?.refNum]);
 
-  const checkCanvasSite = async (appsData: any) => {
-    const selectedTenantFromSession = localStorage.getItem('selectedTenant');
-    if (selectedTenantFromSession) {
-      const currTenant = JSON.parse(selectedTenantFromSession);
-      const isCanvasTenant = await APIService.isCanvasSite(currTenant.refNum);
-      sessionStorage.setItem('isCanvasSite', isCanvasTenant);
-      if (!isCanvasTenant) {
-        const parentIndex = appsData.findIndex((item: any) => item.name === "Experiences");
-        if (parentIndex !== -1) {
-          appsData[parentIndex].children = appsData[parentIndex].children.filter((child: any) => child.name !== "Banners");
-          setCustomerTenantApps(appsData);
-        }
-      }
-    }
-  }
+  
 
-  const handleCanvasSite = async (appsData: any) => {
-    if (document.cookie.includes('token')) {
-      await checkCanvasSite(appsData);
-    }
-    else {
-      window.addEventListener('txeLoginEvent', async () => {
-        await checkCanvasSite(appsData);
-      }, { once: true });
-    }
-  }
+  // const handleCanvasSite = async (appsData: any) => {
+  //   if (document.cookie.includes('token')) {
+  //     await checkCanvasSite(appsData);
+  //   }
+  //   else {
+  //     window.addEventListener('txeLoginEvent', async () => {
+  //       await checkCanvasSite(appsData);
+  //     }, { once: true });
+  //   }
+  // }
 
   const getAllApps = async () => {
     try {
@@ -321,7 +309,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
       setTransformedAppData(transformedAppData);
       const filteredApps: any = transformedAppData;
       setCustomerTenantApps(filteredApps?.customerTenantApps);
-      handleCanvasSite(filteredApps?.customerTenantApps);
+      // handleCanvasSite(filteredApps?.customerTenantApps);
       sessionStorage.setItem("allapps", JSON.stringify(res));
       setAllRoutes([...appRoutes, ...mfRoutes]);
       const filteredPaths = mfRoutes

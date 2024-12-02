@@ -226,6 +226,18 @@ export const transformAppData = (data: any) => {
     let newApps = apps.sort((a, b) => a.order - b.order);
     return newApps;
   };
+  
+  let exclusionMapping: any = {
+    Events: "showEvents",
+    Campaigns: "showCampaigns",
+    Automations: "showAutomations",
+    Lists: "showLists",
+    "Talent Community": "showTalentCommunities",
+    Candidates: "showCandidates",
+    "Email Manager" : "showTemplates",
+    "SMS Manager": "showTemplates",
+    "Banners": "showBanners"
+  };
 
   const customerTenantApps = categoryMap
     .map((item: any) => {
@@ -236,16 +248,7 @@ export const transformAppData = (data: any) => {
         const userDetails = window?.keycloakInstance?.tokenParsed?.userDetails;
         
         // Define the exclusion mapping between app names and window variables
-        let exclusionMapping: any = {
-          Events: "showEvents",
-          Campaigns: "showCampaigns",
-          Automations: "showAutomations",
-          Lists: "showLists",
-          "Talent Community": "showTalentCommunities",
-          Candidates: "showCandidates",
-          "Email Manager" : "showTemplates",
-          "SMS Manager": "showTemplates",
-        };
+        
       
         // Check if the app should be excluded based on the mapping
         const shouldExclude = exclusionMapping[app.name] && !(window as any)[exclusionMapping[app.name]];
@@ -304,6 +307,10 @@ export const transformAppData = (data: any) => {
     ...customerTenantApps,
     ...individualApps,
   ]);
+  // Set all window variables to false
+  Object.keys(exclusionMapping).forEach(key => {
+    (window as any)[exclusionMapping[key]] = false;
+  });
 
   const mainData = {
     customerTenantApps: combinedCustomerTenantApps,

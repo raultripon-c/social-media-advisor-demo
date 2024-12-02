@@ -14,6 +14,7 @@ import { APIService } from "../../utils/api.service";
 import { apiUrl, loginSessionTimeIntervals } from "../../utils/constants";
 import "./Tenants.scss";
 import { crmFilterApps } from "../../utils/helper/crmFilterApps";
+import { cmsFilterApps } from "../../utils/helper/cmsFilterApps";
 import { handleDomainUrlForSite } from "../../utils/appUtils";
 
 /**
@@ -176,6 +177,7 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
 
   const navigateToDashBoard = async (selectedTenant: any = {}) => {
     await crmFilterApps(selectedTenant?.refNum, user);
+    await cmsFilterApps(selectedTenant?.refNum);
     dispatch(setSelectedTenant(selectedTenant));
     localStorage.setItem("selectedTenant", JSON.stringify(selectedTenant));
     // const tenantSupportedLangs = await APIService.getSupportedLangs(selectedTenant?.refNum);
