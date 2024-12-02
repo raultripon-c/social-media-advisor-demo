@@ -193,7 +193,7 @@ export const RemoteModuleRenderer = () => {
   }, []);
  useEffect(() => {
     // Update key whenever subPath or refNum changes
-    if(selectedModuleAppObject?.appConfig?.scope !== "cpui") {
+    if((selectedModuleAppObject?.appConfig?.scope !== "cpui") && (selectedModuleAppObject?.appConfig?.scope !== 'analyticsUiPro')) {
       setKey((prevKey) => prevKey + 1);
     }
   }, [moduleProps?.subPath, moduleProps?.refNum,selectedModuleAppObject?.name, window.keycloakInstance?.token]);
@@ -243,7 +243,7 @@ export const RemoteModuleRenderer = () => {
           <AngularAppRenderer
             scope={selectedApp.scope}
             module={selectedApp.module}
-            url={selectedApp.url}
+            url={'https://localhost:8080/remoteEntry.js'}
             selectedApp={selectedApp}
             component={selectedApp.component}
             moduleRoute={selectedApp.moduleRoute}

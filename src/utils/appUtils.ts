@@ -116,6 +116,14 @@ const handleModuleFederation = (
       });
       window.dispatchEvent(event);
     }
+    if(selectedApp?.appConfig?.scope === 'analyticsUiPro') {
+      const event = new CustomEvent('triggeredAnalytics', {
+        detail: {
+        route: `${routeWithoutRefNum}`,
+        },
+      });
+      window.dispatchEvent(event);
+    }
   }
 };
 
