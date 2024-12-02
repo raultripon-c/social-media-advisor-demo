@@ -307,13 +307,6 @@ export const transformAppData = (data: any) => {
     ...customerTenantApps,
     ...individualApps,
   ]);
-  if (combinedCustomerTenantApps) {
-    sessionStorage.setItem("filteredApps", JSON.stringify(combinedCustomerTenantApps));
-  }
-  // Set all window variables to false
-  Object.keys(exclusionMapping).forEach(key => {
-    (window as any)[exclusionMapping[key]] = false;
-  });
 
   const mainData = {
     customerTenantApps: combinedCustomerTenantApps,

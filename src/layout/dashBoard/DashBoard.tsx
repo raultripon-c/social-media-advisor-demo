@@ -62,11 +62,6 @@ const DashBoard = () => {
   const [currentTenantData, setCurrentTenantData] = useState<any>([]);
 
   const [campaignData, setCampaignData] = useState<CampaignData[]>([]);
-  const userHasCmsAccess =
-    window?.keycloakInstance?.userInfo?.resources["cms"] &&
-    window?.keycloakInstance?.userInfo?.resources["cms"].roles.length > 0 || 
-    window?.keycloakInstance?.userInfo?.resources[`${(selectedTenant?.refNum).toLowerCase()}-cms`] && 
-    window?.keycloakInstance?.userInfo?.resources[`${(selectedTenant?.refNum).toLowerCase()}-cms`].roles.length > 0;
 
   const fetchCurrentTenantData = async () => {
     const tenantResp: any = await APIService.getTenantDetails(
@@ -79,15 +74,24 @@ const DashBoard = () => {
 
   const { code, type } = window.orgInfo;
 
+  let exclusionMapping: any = {
+    Events: "showEvents",
+    Campaigns: "showCampaigns",
+    Automations: "showAutomations",
+    Lists: "showLists",
+    "Talent Community": "showTalentCommunities",
+    Candidates: "showCandidates",
+    "Email Manager" : "showTemplates",
+    "SMS Manager": "showTemplates",
+    "Banners": "showBanners"
+  };
+
   const staticDataForApps = staticData.filter((app) => {
-    if (app.module === "cms" && userHasCmsAccess) {
+    if (app.module === "cms" && (window as any).userHasCmsAccess) {
       return true;
     } else if(app.module === "crm") {
-      const filteredApps = sessionStorage.getItem("filteredApps");
-      if (filteredApps) {
-        const apps = JSON.parse(filteredApps);
-        return apps.some((currentApp: any) => currentApp.name === app.value);
-      }
+    // Check if the app should be excluded based on the mapping
+    return exclusionMapping[app.value] && (window as any)[exclusionMapping[app.value]];
     }
   });
   
@@ -373,8 +377,8 @@ const DashBoard = () => {
           profileImage={userDetails?.profileImage}
         />
       </div>
-      <div className="tenant-details-container">
-        {currentTenantData.length && userHasCmsAccess ? (
+      {(window as any).userHasCmsAccess && <div className="tenant-details-container">
+        {currentTenantData.length ? (
           <TenantDetailCard
             tenantLink={`${currentTenantData[0]?.domain}`}
             lastUpdated={`Last Updated: ${getLastUpdatedDate(
@@ -399,7 +403,7 @@ const DashBoard = () => {
         ) : (
           <Loader title="Loading tenant details.." />
         )}
-      </div>
+      </div>}
       <div className="overview-container">
         {metricsData.length > 0 && (
           <h2 className="overview-heading">Overview</h2>
@@ -422,7 +426,7 @@ const DashBoard = () => {
       </div>
       <h2 className="overview-heading">Create</h2>
       <div className="button-row">
-        {staticDataForApps.length !== 0 ? (
+        {staticDataForApps.length !== 0 && (
           staticDataForApps.map((item, index) => (
             <Button
               key={index}
@@ -436,11 +440,9 @@ const DashBoard = () => {
               }}
             />
           ))
-        ) : (
-          <EmptyState displayText="No Apps found" />
         )}
       </div>
-      {userHasCmsAccess && <RecommendedPages />}
+      {(window as any).userHasCmsAccess && <RecommendedPages />}
       {campaignData.length > 0 && (
         <>
           <h2 className="overview-heading">Campaigns</h2>

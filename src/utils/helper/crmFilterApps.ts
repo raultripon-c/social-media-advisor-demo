@@ -3,6 +3,14 @@ import { CommonConstants } from "../../utils/common-constants";
 
 export const crmFilterApps = async (refNum: string, userRoles?: any) => {
     try {
+        (window as any).showEvents = false;
+        (window as any).showCandidates = false;
+        (window as any).showLists = false;
+        (window as any).showCampaigns = false;
+        (window as any).showTemplates = false;
+        (window as any).showTalentCommunities = false;
+        (window as any).showAutomations = false;
+        (window as any).showEvents = false;
         console.log(userRoles);
         const recruiterUserId = (window as any).keycloakInstance.userInfo.userDetails.id;
         const applicationName = CommonConstants.APPLICATION_NAME;

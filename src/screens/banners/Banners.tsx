@@ -54,7 +54,7 @@ const Banners = () => {
         if (!existsScrElem) {
           const scrElem = document.createElement("script");
           scrElem.id = embedScriptId;
-          scrElem.src = selectedApp?.url;
+          scrElem.src = "https://cmsqa1.phenompro.com:9000/embed.js";
           scrElem.onload = () => {
             resolve();
           };
