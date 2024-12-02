@@ -64,7 +64,9 @@ const DashBoard = () => {
   const [campaignData, setCampaignData] = useState<CampaignData[]>([]);
   const userHasCmsAccess =
     window?.keycloakInstance?.userInfo?.resources["cms"] &&
-    window?.keycloakInstance?.userInfo?.resources["cms"].roles.length > 0;
+    window?.keycloakInstance?.userInfo?.resources["cms"].roles.length > 0 || 
+    window?.keycloakInstance?.userInfo?.resources[`${(selectedTenant?.refNum).toLowerCase()}-cms`] && 
+    window?.keycloakInstance?.userInfo?.resources[`${(selectedTenant?.refNum).toLowerCase()}-cms`].roles.length > 0;
 
   const fetchCurrentTenantData = async () => {
     const tenantResp: any = await APIService.getTenantDetails(
@@ -77,6 +79,18 @@ const DashBoard = () => {
 
   const { code, type } = window.orgInfo;
 
+  const staticDataForApps = staticData.filter((app) => {
+    if (app.module === "cms" && userHasCmsAccess) {
+      return true;
+    } else if(app.module === "crm") {
+      const filteredApps = sessionStorage.getItem("filteredApps");
+      if (filteredApps) {
+        const apps = JSON.parse(filteredApps);
+        return apps.some((currentApp: any) => currentApp.name === app.value);
+      }
+    }
+  });
+  
   const getAllApps = async () => {
     try {
       const response = useSelector((state: AppStore) => state.app.allApps);
@@ -360,7 +374,7 @@ const DashBoard = () => {
         />
       </div>
       <div className="tenant-details-container">
-        {currentTenantData.length ? (
+        {currentTenantData.length && userHasCmsAccess ? (
           <TenantDetailCard
             tenantLink={`${currentTenantData[0]?.domain}`}
             lastUpdated={`Last Updated: ${getLastUpdatedDate(
@@ -408,8 +422,8 @@ const DashBoard = () => {
       </div>
       <h2 className="overview-heading">Create</h2>
       <div className="button-row">
-        {staticData.length !== 0 ? (
-          staticData.map((item, index) => (
+        {staticDataForApps.length !== 0 ? (
+          staticDataForApps.map((item, index) => (
             <Button
               key={index}
               size="small"
@@ -426,7 +440,7 @@ const DashBoard = () => {
           <EmptyState displayText="No Apps found" />
         )}
       </div>
-      <RecommendedPages />
+      {userHasCmsAccess && <RecommendedPages />}
       {campaignData.length > 0 && (
         <>
           <h2 className="overview-heading">Campaigns</h2>
