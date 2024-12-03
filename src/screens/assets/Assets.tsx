@@ -13,7 +13,6 @@ declare global {
 }
 
 const Assets = () => {
-    removeCrmStyles();
     (window as any).isCmsModule = true;
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const storeData = useSelector((state: AppStore) => state.customer);
@@ -54,7 +53,6 @@ const Assets = () => {
           storeData.selectedTenant &&
           storeData.selectedTenant.refNum
         ) {
-          removeElementsById("crm-stylesheet");
           loadScript().then(() => {
             if (window.txEmbed) {
               window.txEmbed.embedModules(
@@ -66,6 +64,8 @@ const Assets = () => {
                 },
                 () => {
                   setIsLoading(false);
+                  removeElementsById("crm-stylesheet");
+                  removeCrmStyles();
                 }
               );
             }

@@ -5,6 +5,7 @@ export const staticData = [
     {
         displayText: "Page",
         value: "Page",
+        module: "cms",
         icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Generic.svg",
         config: {
             appType: "external",
@@ -16,6 +17,7 @@ export const staticData = [
     {
         displayText: "Article",
         value: "AI Blogs",
+        module: "cms",
         icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Company_notification.svg",
         config: {
             appType: "external",
@@ -27,21 +29,25 @@ export const staticData = [
     {
         displayText: "Campaigns",
         value: "Campaigns",
+        module: "crm",
         icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/campaign.svg",
     },
     {
         displayText: "Events",
         value: "Events",
+        module: "crm",
         icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Generic.svg",
     },
     {
         displayText: "Email Manager",
         value: "Email Manager",
+        module: "crm",
         icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Generic.svg",
     },
     {
         displayText: "SMS Manager",
         value: "SMS Manager",
+        module: "crm",
         icon: "https://assets-qa.phenompro.com/CareerConnectResources/siteqa1/common/js/vendor/Generic.svg",
     },
 ];

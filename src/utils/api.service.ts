@@ -251,7 +251,7 @@ export const APIService = {
 
   triggerTxeLogin: async () => {
     try {
-      const { code, type } = window.orgInfo;
+      const { code, type } = window.orgInfo ?? {};
       const res = await API.post(
         `${(window as any)._env_.CMS_URL}/api/txeLogin`,
         {
@@ -266,7 +266,7 @@ export const APIService = {
     }
     catch (err) {
       console.error('Error triggering TXE login:', err);
-      throw err;
+      // throw err;
     }
   },
 
@@ -374,7 +374,7 @@ export const APIService = {
       console.log('Token registration response:', response);
     } catch (error) {
       console.error('Error registering token:', error);
-      throw error;
+      // throw error;
     }
   },
 
@@ -385,7 +385,7 @@ export const APIService = {
       return response.data.data.isCanvasSite;
     } catch (error) {
       console.error('Error checking if site is Canvas:', error);
-      throw error;
+      return null;
     }
   },
 
