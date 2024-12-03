@@ -53,7 +53,7 @@ declare var phenomevent: any;
       const trackData: any = {};
       const tenantData = JSON.parse(localStorage.getItem("selectedTenant") || "{}");
       const ipAddress = localStorage.getItem("TXE_IP_ADR");
-      trackData.refNum = tenantData?.tenantRefNum ?? '';
+      trackData.refNum = tenantData?.refNum ?? '';
       trackData.userEmail = window?.keycloakInstance?.userInfo?.userDetails?.email ?? '';
       trackData.userName = window?.keycloakInstance?.userInfo?.name ?? '';
       trackData.tenantName = tenantData?.tenantName?.replace(/ /g, '_') ?? '';
