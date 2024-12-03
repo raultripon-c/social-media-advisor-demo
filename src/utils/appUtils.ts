@@ -114,7 +114,8 @@ const handleModuleFederation = (
         route: `${routeWithoutRefNum}`,
         },
       });
-      window.dispatchEvent(event);
+      // window.dispatchEvent(event);
+      document.getElementById("child-module-renderer")?.dispatchEvent(event);
     }
     if(selectedApp?.appConfig?.scope === 'analyticsUiPro') {
       const event = new CustomEvent('triggeredAnalytics', {

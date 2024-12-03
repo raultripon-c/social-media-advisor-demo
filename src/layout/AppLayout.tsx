@@ -75,7 +75,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
   );  
   
   const navigateToApp = (selectedApp: any, customerCode: string, refNum: string, customRoute?: any) => {
-    localStorage.setItem("selectedApp", JSON.stringify(selectedApp));
+    sessionStorage.setItem("selectedApp", JSON.stringify(selectedApp));
     dispatch(setAppDetails(selectedApp));
     const appSelectionOptions: AppSelectionOptions = {
       selectedApp: selectedApp,
