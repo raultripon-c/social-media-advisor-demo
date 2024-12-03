@@ -12,22 +12,34 @@ export const crmFilterApps = async (refNum: string, userRoles?: any) => {
         (window as any).showAutomations = false;
         (window as any).showEvents = false;
         console.log(userRoles);
-        const recruiterUserId = (window as any).keycloakInstance.userInfo.userDetails.id;
+
+        const keycloakInstance = (window as any).keycloakInstance;
+        if (!keycloakInstance || !keycloakInstance.userInfo || !keycloakInstance.userInfo.userDetails) {
+            throw new Error("Keycloak instance or user details are missing");
+        }
+        const recruiterUserId = keycloakInstance.userInfo.userDetails.id;
         const applicationName = CommonConstants.APPLICATION_NAME;
         const paramObj = {
             refNum,
             recruiterUserId
         };
-        const { code, type } = (window as any).orgInfo;
+
+        const orgInfo = (window as any).orgInfo;
+        if (!orgInfo) {
+            throw new Error("Organization info is missing");
+        }
+        const { code, type } = orgInfo;
 
         await APIService.registerToken(refNum, code, type);
         const tenantConfigResp = await APIService.getTenantConfig(paramObj);
-        const isEventEnabledTC = tenantConfigResp.modules.activate.events;
+        if (!tenantConfigResp || !tenantConfigResp.modules) {
+            throw new Error("Tenant config response or modules are missing");
+        }
+        const isEventEnabledTC = tenantConfigResp.modules.activate?.events;
         const hideCandidatesTab = tenantConfigResp.modules.agencies?.hideCandidatesTab ?? false;
-        const isTenantHasJTCEnabled = tenantConfigResp.modules.access.jtc;
-        const isTenantHasAutomationFeatureEnabled = tenantConfigResp.modules.feature.automation;
-        const isEventsEnabled = tenantConfigResp.modules.activate.events
-        // console.log("Getting tenant config is successful. isEventEnabledTC:", isEventEnabledTC);
+        const isTenantHasJTCEnabled = tenantConfigResp.modules.access?.jtc;
+        const isTenantHasAutomationFeatureEnabled = tenantConfigResp.modules.feature?.automation;
+        const isEventsEnabled = tenantConfigResp.modules.activate?.events;
 
         const params = {
             loginId: recruiterUserId,
@@ -35,19 +47,23 @@ export const crmFilterApps = async (refNum: string, userRoles?: any) => {
             tenantId: refNum
         };
         const recruiterPermissionsResp = await APIService.getRecruiterPermissions(params);
+        if (!recruiterPermissionsResp || !recruiterPermissionsResp.data || !recruiterPermissionsResp.data[0]) {
+            throw new Error("Recruiter permissions response or data are missing");
+        }
         let roleConfig = recruiterPermissionsResp.data[0].permissions;
-        const isEventEnabledRP =roleConfig.modules.events.view;
-        const isRecruiterHaveCandidatesViewAccess = roleConfig.modules.candidates.view;
-        const isListsEnabledRP =roleConfig.modules.list.view;
-        const isCampaignViewCampaignAccess =roleConfig.modules.campaigns.view;
-        const isCampaignViewTemplateAccess =roleConfig.modules.template.view;
-        const hasJTCTabViewAccess = roleConfig.modules.jtc.view;
-        const isRecruiterHaveAutomationSettingAccess = roleConfig?.modules?.automation?.view;
-        const isRecruiterHaveViewEventsAccess = roleConfig.modules.events.view;
+        if (!roleConfig || !roleConfig.modules) {
+            throw new Error("Role config or modules are missing");
+        }
+        const isEventEnabledRP = roleConfig.modules.events?.view;
+        const isRecruiterHaveCandidatesViewAccess = roleConfig.modules.candidates?.view;
+        const isListsEnabledRP = roleConfig.modules.list?.view;
+        const isCampaignViewCampaignAccess = roleConfig.modules.campaigns?.view;
+        const isCampaignViewTemplateAccess = roleConfig.modules.template?.view;
+        const hasJTCTabViewAccess = roleConfig.modules.jtc?.view;
+        const isRecruiterHaveAutomationSettingAccess = roleConfig.modules.automation?.view;
+        const isRecruiterHaveViewEventsAccess = roleConfig.modules.events?.view;
 
-        const isJTCTabEnabled = roleConfig.modules.candidates.view && isTenantHasJTCEnabled && hasJTCTabViewAccess;
-
-        // console.log("Getting recruiter permissions is successful. isEventEnabledRP:", isEventEnabledRP);
+        const isJTCTabEnabled = roleConfig.modules.candidates?.view && isTenantHasJTCEnabled && hasJTCTabViewAccess;
 
         (window as any).showEvents = isEventEnabledTC && isEventEnabledRP;
         (window as any).showCandidates = isRecruiterHaveCandidatesViewAccess && !hideCandidatesTab;
@@ -57,7 +73,6 @@ export const crmFilterApps = async (refNum: string, userRoles?: any) => {
         (window as any).showTalentCommunities = isJTCTabEnabled;
         (window as any).showAutomations = isTenantHasAutomationFeatureEnabled && isRecruiterHaveAutomationSettingAccess;
         (window as any).showEvents = isEventsEnabled && isRecruiterHaveViewEventsAccess;
-
 
     } catch (error) {
         console.error("Error in crmFilterApps:", error);

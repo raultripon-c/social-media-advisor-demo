@@ -266,7 +266,7 @@ export const APIService = {
     }
     catch (err) {
       console.error('Error triggering TXE login:', err);
-      throw err;
+      // throw err;
     }
   },
 
@@ -374,7 +374,7 @@ export const APIService = {
       console.log('Token registration response:', response);
     } catch (error) {
       console.error('Error registering token:', error);
-      throw error;
+      // throw error;
     }
   },
 

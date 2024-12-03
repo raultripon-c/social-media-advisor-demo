@@ -45,7 +45,6 @@ const loadStylesAndScripts = () => {
 
 
 const Blogs = () => {
-    removeCrmStyles();
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const storeData = useSelector((state: AppStore) => state.customer);
     
@@ -88,7 +87,6 @@ const Blogs = () => {
           storeData.selectedTenant &&
           storeData.selectedTenant.refNum
         ) {
-          removeElementsById("crm-stylesheet");
           loadScript().then(() => {
             if (window.txEmbed) {
               window.txEmbed.embedModules(
@@ -106,7 +104,8 @@ const Blogs = () => {
           });
         }
         return () => {
-          // removeStylesAndScripts(resources);
+          removeElementsById("crm-stylesheet");
+          removeCrmStyles();
         }
     }, [storeData]);
     return (
