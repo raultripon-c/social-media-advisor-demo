@@ -98,14 +98,14 @@ const Blogs = () => {
                 },
                 () => {
                   setIsLoading(false);
+                  removeElementsById("crm-stylesheet");
+                  removeCrmStyles();
                 }
               );
             }
           });
         }
-        return () => {
-          removeElementsById("crm-stylesheet");
-          removeCrmStyles();
+        return () => { 
         }
     }, [storeData]);
     return (

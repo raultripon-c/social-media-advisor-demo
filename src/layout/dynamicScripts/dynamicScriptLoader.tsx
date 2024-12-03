@@ -12,7 +12,6 @@ declare global {
 }
 
 const ContentHub: React.FC = () => {
-  removeCrmStyles();
   (window as any).isCmsModule = true;
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const storeData = useSelector((state: AppStore) => state.customer);
@@ -58,7 +57,6 @@ const ContentHub: React.FC = () => {
       //   return;
       // }
 
-      removeElementsById('crm-stylesheet');
       loadScript().then(() => {
         if (window.txEmbed) {
           window.txEmbed.embedModules(
@@ -70,6 +68,8 @@ const ContentHub: React.FC = () => {
             },
             () => {
               setIsLoading(false);
+              removeCrmStyles();
+              removeElementsById('crm-stylesheet');
             }
           );
         }

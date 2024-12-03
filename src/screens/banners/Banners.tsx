@@ -15,7 +15,6 @@ declare global {
   }
 }
 const Banners = () => {
-  removeCrmStyles();
   (window as any).isCmsModule = true;
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const storeData = useSelector((state: AppStore) => state.customer);
@@ -71,7 +70,6 @@ const Banners = () => {
       storeData.selectedTenant.refNum
     ) {
       loadScript().then(() => {
-        removeElementsById("crm-stylesheet");
         APIService.getPluginVersion().then((response) => {
           const scriptUrl: string = response?.data?.data?.script || "";
           loadScriptById(
@@ -88,6 +86,8 @@ const Banners = () => {
               },
               () => {
                 setIsLoading(false);
+                removeElementsById("crm-stylesheet");
+                removeCrmStyles();
                 // Will remove this in future
                 for (let i = 1; i <= 3; i++) {
                   setTimeout(() => {
