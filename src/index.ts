@@ -2,7 +2,7 @@ import("./bootstrap");
 
 declare var phenomevent: any;
 (async function () {
-    const scriptEle = document.getElementById('#crm_phenom_tracking_script');
+    const scriptEle = document.getElementById('#txe_phenom_tracking_script');
     if (scriptEle) {
       return;
     }
@@ -15,7 +15,6 @@ declare var phenomevent: any;
     const locParams = window.location;
     const phenomTrackingUrl = (window as any)._env_.PHENOM_TRACK_SCRIPT_URL;
     if (locParams) {
-      // checking running in local and getting the relative path for phenom tracking
       trackingUrl = phenomTrackingUrl;
     }
 
