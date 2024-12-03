@@ -58,13 +58,14 @@
   .header-com {
     display: flex;
     position: relative;
+    max-width: calc(100% - 58px);
     background-color: #fff;
     &.customers-page-header {
       border-radius: 0px;
     }
-    // &.logo-expanded{
-    //   max-width: 84.7%;
-    // }
+    &.logo-expanded{
+      max-width: calc(100% - 290px);
+    }
   }
   .tenant-selection {
     font-family: "Poppins" !important;
