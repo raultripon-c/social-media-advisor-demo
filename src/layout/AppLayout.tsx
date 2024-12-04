@@ -75,7 +75,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
   );  
   
   const navigateToApp = (selectedApp: any, customerCode: string, refNum: string, customRoute?: any) => {
-    sessionStorage.setItem("selectedApp", JSON.stringify(selectedApp));
+    localStorage.setItem("selectedApp", JSON.stringify(selectedApp));
     dispatch(setAppDetails(selectedApp));
     const appSelectionOptions: AppSelectionOptions = {
       selectedApp: selectedApp,
@@ -197,7 +197,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
     } else {
       // sessionStorage.removeItem("selectedApp");
     }
-  }, [fetchedApps]);
+  }, [fetchedApps, selectedTenant, selectedTenant?.refNum]);
   useEffect(() => {
     if (userId) {
       sessionTracker.initiate(userId, sessionTrackerProjectKey, sessionTrackerIngestPoint);
@@ -265,27 +265,27 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
 
   }, [selectedTenant?.customerId]);
 
-  useEffect(() => {
-    const currentApp = selectedApp.length > 0 ? selectedApp : selectedAppFromSession;
-    if (
-      currentApp &&
-      currentApp?.name &&
-      ((selectedTenant?.customerCode && selectedTenant?.refNum) || currentApp.context === "platform")
-    ) {
-      const appSelectionOptions: AppSelectionOptions = {
-        selectedApp: currentApp,
-        navigate: navigate,
-        customerCode: selectedTenant?.customerCode,
-        refNum: selectedTenant?.refNum,
-        siteMetaData: siteMetaData,
-        dispatch: dispatch,
-        openInNewTab: false,
-        setSiteMetaData: setSiteMetaData,
-        selectedTenant: selectedTenant,
-      }
-      appSelectionHandler(appSelectionOptions);
-    }
-  }, [selectedTenant, selectedTenant?.refNum]);
+  // useEffect(() => {
+  //   const currentApp = selectedApp.length > 0 ? selectedApp : selectedAppFromSession;
+  //   if (
+  //     currentApp &&
+  //     currentApp?.name &&
+  //     ((selectedTenant?.customerCode && selectedTenant?.refNum) || currentApp.context === "platform")
+  //   ) {
+  //     const appSelectionOptions: AppSelectionOptions = {
+  //       selectedApp: currentApp,
+  //       navigate: navigate,
+  //       customerCode: selectedTenant?.customerCode,
+  //       refNum: selectedTenant?.refNum,
+  //       siteMetaData: siteMetaData,
+  //       dispatch: dispatch,
+  //       openInNewTab: false,
+  //       setSiteMetaData: setSiteMetaData,
+  //       selectedTenant: selectedTenant,
+  //     }
+  //     appSelectionHandler(appSelectionOptions);
+  //   }
+  // }, [selectedTenant, selectedTenant?.refNum]);
 
   
 

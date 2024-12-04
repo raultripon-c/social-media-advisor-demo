@@ -271,6 +271,7 @@ export const APIService = {
     }
     catch (err) {
       console.error('Error triggering TXE login:', err);
+      return null;
       // throw err;
     }
   },
