@@ -14,12 +14,13 @@ const Layout = () => {
   const selectedTenant = localStorage.getItem("selectedTenant") ? JSON.parse(localStorage.getItem("selectedTenant") || "{}") : {};
 
   useEffect(()=>{
-    if(!selectedTenant || !Object.keys(selectedTenant).length) {
-      navigate('/')
+    if(window.location.pathname === "/" || !selectedTenant || !Object.keys(selectedTenant).length) {
+      localStorage.removeItem("selectedTenant");
+      navigate('/');
       return;
     }
     const currentPath = window.location.pathname.replace("/dashboard/dashboard", "/dashboard");
-    if(!currentPath.startsWith(`/${selectedTenant.customerCode}/${selectedTenant.refNum}`)) {
+    if(!currentPath.startsWith(`/${selectedTenant.customerCode}/${selectedTenant.refNum}`) && currentPath.includes("dashboard")) {
       sessionStorage.setItem("txeCustomPath", currentPath)
       navigate(`/${selectedTenant.customerCode}/${selectedTenant.refNum}${currentPath}`)
     } else {

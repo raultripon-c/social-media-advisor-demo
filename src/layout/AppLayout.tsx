@@ -27,6 +27,7 @@ import ToolsSideBar from "./sideBar/SideBar";
 import { AppSelectionOptions } from "interfaces/AppSelectionOptions";
 import { crmFilterApps } from "../utils/helper/crmFilterApps";
 import { cmsFilterApps } from "../utils/helper/cmsFilterApps";
+import { Loader } from "@phenom/react-ui-components";
 
 interface AppLayoutProps {
   allApps: any;
@@ -74,7 +75,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
   );  
   
   const navigateToApp = (selectedApp: any, customerCode: string, refNum: string, customRoute?: any) => {
-    localStorage.setItem("selectedApp", JSON.stringify(selectedApp));
+    sessionStorage.setItem("selectedApp", JSON.stringify(selectedApp));
     dispatch(setAppDetails(selectedApp));
     const appSelectionOptions: AppSelectionOptions = {
       selectedApp: selectedApp,
@@ -231,7 +232,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
   }, [selectedApp]);
 
   useEffect(() => {
-    if (selectedTenant?.customerId || selectedTenant?.tenantId) {
+    setRolesLoader(false);
+    if (selectedTenant?.customerId) {
+      setAppsLoader(true);
       const setCmsSiteMetaData = async () => {
         const tenantSupportedLangs = await APIService.getSupportedLangs(selectedTenant?.refNum)
         return await handleDomainUrlForSite(tenantSupportedLangs, selectedTenant, dispatch, setSiteMetaData, siteMetaData);
@@ -254,13 +257,13 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
             // setAllRoutes([...appRoutes, ...mfRoutes]);
             // console.log("All Apps", mfRoutes);
           }
-          setRolesLoader(false);
+          setAppsLoader(false);
         }
       }
       setPermissionsBasedApps();
     }
 
-  }, [selectedTenant?.customerId, selectedTenant?.tenantId]);
+  }, [selectedTenant?.customerId]);
 
   useEffect(() => {
     const currentApp = selectedApp.length > 0 ? selectedApp : selectedAppFromSession;
@@ -325,6 +328,14 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
       console.error("Error:", error);
     }
   };
+
+  if (appsLoader) {
+    return (
+      <div className="tenants-loader">
+        <Loader title="Please Wait, Loading Dashboard" />
+      </div>
+    );
+  }
 
   return (
     <>

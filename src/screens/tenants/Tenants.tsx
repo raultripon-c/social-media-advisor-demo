@@ -59,6 +59,7 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
   const dispatch = useDispatch();
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isNavigationLoading, setNavigationLoading] = useState<boolean>(false);
   const [searchKey, setSearchKey] = useState<string>("");
   const [filteredData, setFilteredData] = useState(
     JSON.parse(sessionStorage.getItem("tenants") || "[]") as any
@@ -178,8 +179,21 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
   const navigateToDashBoard = async (selectedTenant: any = {}) => {
     await crmFilterApps(selectedTenant?.refNum, user);
     await cmsFilterApps(selectedTenant?.refNum);
-    dispatch(setSelectedTenant(selectedTenant));
-    localStorage.setItem("selectedTenant", JSON.stringify(selectedTenant));
+    const tenantsUrl = `${(window as any)._env_.APP_API_URL}/customers/tenants/${selectedTenant?.refNum}`;
+    APIService.getTenants(tenantsUrl, dispatch).then((response: any) => {
+      let customerCode = selectedTenant.customerCode;
+      let refNum = selectedTenant.refNum;
+      if(response?.customerCode && response?.refNum) {
+        customerCode = response.customerCode;
+        refNum = response.refNum;
+      }
+      navigate(
+      `/${customerCode}/${refNum}/summary`
+      );
+      setNavigationLoading(false);
+    });
+    // dispatch(setSelectedTenant(selectedTenant));
+    // localStorage.setItem("selectedTenant", JSON.stringify(selectedTenant));
     // const tenantSupportedLangs = await APIService.getSupportedLangs(selectedTenant?.refNum);
     // await handleDomainUrlForSite(
     //   tenantSupportedLangs,
@@ -188,15 +202,21 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
     //   setSiteMetaData,
     //   siteMetaData
     // );
-    navigate(
-      `/${selectedTenant.customerCode}/${selectedTenant.refNum}/summary`
-    );
+    
   };
 
   if (isLoading) {
     return (
       <div className="tenants-loader">
         <Loader title="Please Wait, Loading Tenants" />
+      </div>
+    );
+  }
+
+  if (isNavigationLoading) {
+    return (
+      <div className="tenants-loader">
+        <Loader title="Please Wait, Navigating to Dashboard" />
       </div>
     );
   }
@@ -220,9 +240,9 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
               className="tenant-card"
               key={eachTenant.id}
               onClick={async () => {
-              setIsLoading(true);
-              await navigateToDashBoard(eachTenant);
-              setIsLoading(false);
+                setNavigationLoading(true);
+                localStorage.removeItem("selectedTenant");
+                await navigateToDashBoard(eachTenant);
               }}
             >
               <span>{eachTenant.tenantName}</span>

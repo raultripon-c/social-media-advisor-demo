@@ -110,15 +110,20 @@ export const APIService = {
   },
 
   getTenants: async (url: string, dispatch: any) => {
-    API.get(url)
-      .then((response: any) => {
+    try {
+      const response = await API.get(url);
+      if (response.data.data) {
         dispatch(setSelectedTenant(response.data.data));
         localStorage.setItem("selectedTenant", JSON.stringify(response.data.data));
-      })
-      .catch((error: any) => {
-        // toast.error("Error in fetching tenants");
-        console.log("Error in getting tenants : " + error);
-      });
+        return response.data.data;
+      } else {
+        dispatch(setSelectedTenant({}));
+        return;
+      }
+    } catch (error: any) {
+      console.log("Error in getting tenants : " + error);
+      return;
+    }
   },
 
   getMetaDataByRefNum: async (refNum: string): Promise<any> => {

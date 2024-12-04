@@ -175,7 +175,7 @@ const DashBoard = () => {
       );
       if (response?.data?.status === "success") {
         const domainUrl = response?.data?.data;
-        if (domainUrl && new URL(domainUrl).hostname) {
+        if (domainUrl && new URL(domainUrl.toString()).hostname) {
           return domainUrl;
         }
       }

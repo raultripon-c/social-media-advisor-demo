@@ -6,7 +6,7 @@ const CopyPlugin = require("copy-webpack-plugin");
 const deps = require("./package.json").dependencies;
 module.exports = {
   entry: {
-    app: "./src/index.js",
+    app: "./src/index.ts",
   },
   output: {
     publicPath: "auto",
