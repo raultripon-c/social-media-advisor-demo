@@ -124,6 +124,14 @@ const handleModuleFederation = (
       });
       window.dispatchEvent(event);
     }
+    if(selectedApp?.appConfig?.scope === 'chatbotManagementDashboard') {
+      const event = new CustomEvent('triggeredCmp', {
+        detail: {
+        route: `${routeWithoutRefNum}`,
+        },
+      });
+      window.dispatchEvent(event);
+    }
   }
 };
 
