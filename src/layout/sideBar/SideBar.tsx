@@ -88,6 +88,9 @@ function ToolsSideBar(props: any) {
         selectedTenant: selectedTenant,
       }
       appSelectionHandler(appSelectionOptions);
+    } else if (app?.name === "Banners") {
+      const bannersPath = `/${selectedTenant.customerCode}/${selectedTenant.refNum}/banners`;
+      window.location.assign(`${window.location.origin}${bannersPath}`);
     } else {
       dispatch(setDashboardSelected(false));
       setSidebarOpen(true);
