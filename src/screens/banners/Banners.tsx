@@ -13,6 +13,7 @@ import { triggerRefreshToken } from "../../utils/api";
 declare global {
   interface Window {
     txEmbed: any;
+    webCanvasCms: any;
   }
 }
 const Banners = () => {
@@ -105,6 +106,12 @@ const Banners = () => {
       }
     }
     fetchData();
+
+    return () => {
+      if (window && window["webCanvasCms"]) {
+        window["webCanvasCms"] = undefined;
+      }
+    };
   }, [storeData]);
   return (
     <div>
