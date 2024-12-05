@@ -16,6 +16,7 @@ declare global {
     webCanvasCms: any;
     Vue: any;
     Vue3: any;
+    CmsWebCanvas: any;
   }
 }
 const Banners = () => {
@@ -128,6 +129,9 @@ const Banners = () => {
       }
       if (window && window["Vue3"]) {
         window["Vue3"] = undefined;
+      }
+      if (window && window["CmsWebCanvas"]) {
+        window["CmsWebCanvas"] = undefined;
       }
 
     };
