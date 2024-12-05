@@ -25,8 +25,7 @@ const redirectToLogin = () => {
   }
 };
 
-const waitForToken = () => {
-  const { code, type } = window.orgInfo;
+export const waitForToken = () => {
   if (window.keycloakInstance.isTokenExpired()) {
     return new Promise<void>((resolve, reject) => {
       window.keycloakInstance
@@ -40,6 +39,18 @@ const waitForToken = () => {
         });
       // }
     });
+  }
+};
+
+export const triggerRefreshToken = async () => {
+  try {
+    await waitForToken();
+    const { code, type } = window.orgInfo ?? {};
+    code && type && APIService.triggerTxeLogin();
+    const event = new CustomEvent("tokenRefreshed");
+    window.dispatchEvent(event);
+  } catch (error) {
+    console.error("Error fetching user data", error);
   }
 };
 
