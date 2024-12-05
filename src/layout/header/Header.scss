@@ -60,6 +60,7 @@
     position: relative;
     max-width: calc(100% - 58px);
     background-color: #fff;
+    flex: 0 0 100%;
     &.customers-page-header {
       border-radius: 0px;
     }
@@ -70,6 +71,8 @@
   .tenant-selection {
     font-family: "Poppins" !important;
     border-radius: 4px;
+    flex: 0 0 50%;
+    max-width: 50%;
     // margin-left: 16px;
     // padding: 0px 10px;
     display: flex;

@@ -123,12 +123,12 @@ function Header({
       </button>
       {isCustomerPage && <div className="vertical-line"></div>}
       <div
-        className={`header-com col-md-12 ${
+        className={`header-com ${
           isCustomerPage ? "customers-page-header" : ""
         } ${sidebarOpen ? "logo-expanded" : ""}`}
       >
         {selectedTenant?.customerName && app && app?.context !== "platform" && (
-          <div className="tenant-selection col-md-6">
+          <div className="tenant-selection">
             <p className="header-selected-customer">
               {selectedTenant?.tenantName}
             </p>        
