@@ -27,7 +27,7 @@ const App = (): JSX.Element => {
     }
   };
   useEffect(() => {
-    const interval: number = (window as any)._env_.REFRESH_TOKEN_TIMEOUT_CMS || 10 * 60 * 1000;
+    const interval: number = new Function(`return ${(window as any)._env_.REFRESH_TOKEN_TIMEOUT_CMS}`)() || 10 * 60 * 1000;
     let intervalId: NodeJS.Timeout | null = null;
     if (interval) {
       intervalId = setInterval(async () => {
