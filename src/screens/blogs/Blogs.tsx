@@ -4,6 +4,7 @@ import { AppStore } from "store";
 import { Loader } from "@phenom/react-ui-components";
 import { removeElementsById } from "../../utils/helper/utilizer";
 import { removeCrmStyles } from "../../utils/appUtils";
+import { triggerRefreshToken } from "../../utils/api";
 
 declare global {
     interface Window {
@@ -58,53 +59,59 @@ const Blogs = () => {
     (window as any).isCmsModule = true;
 
     useEffect(() => {
-        const resources = loadStylesAndScripts();
-        const embedScriptId = selectedApp?.scriptId;
-        const existsScrElem = document.querySelector(`#${embedScriptId}`);
-        if(existsScrElem) {
-            existsScrElem.remove();
-        }
+        const fetchData = async () => {
+            await triggerRefreshToken();
+            const resources = loadStylesAndScripts();
+            const embedScriptId = selectedApp?.scriptId;
+            const existsScrElem = document.querySelector(`#${embedScriptId}`);
+            if(existsScrElem) {
+                existsScrElem.remove();
+            }
 
-        const loadScript = () => {
-            return new Promise<void>((resolve) => {
-                if (!existsScrElem) {
-                    const scrElem = document.createElement("script");
-                    scrElem.id = embedScriptId;
-                    // scrElem.src = 'https://cmsqa1.phenompro.com:9000/embed.js';
-                    scrElem.src = selectedApp?.url;
-                    scrElem.onload = () => {
+            const loadScript = () => {
+                return new Promise<void>((resolve) => {
+                    if (!existsScrElem) {
+                        const scrElem = document.createElement("script");
+                        scrElem.id = embedScriptId;
+                        // scrElem.src = 'https://cmsqa1.phenompro.com:9000/embed.js';
+                        scrElem.src = selectedApp?.url;
+                        scrElem.onload = () => {
+                            resolve();
+                        };
+                        document.querySelector("head")?.appendChild(scrElem);
+                    } else {
                         resolve();
-                    };
-                    document.querySelector("head")?.appendChild(scrElem);
-                } else {
-                    resolve();
+                    }
+                });
+            };
+
+            if (
+              storeData &&
+              storeData.selectedTenant &&
+              storeData.selectedTenant.refNum
+            ) {
+              loadScript().then(() => {
+                if (window.txEmbed) {
+                  window.txEmbed.embedModules(
+                    "blogs",
+                    "#tools-body-container",
+                    {
+                      refNum: storeData.selectedTenant.refNum,
+                      token: window.keycloakInstance.token,
+                    },
+                    () => {
+                      setIsLoading(false);
+                      removeElementsById("crm-stylesheet");
+                      removeCrmStyles();
+                    }
+                  );
                 }
-            });
+              });
+            }
         };
 
-        if (
-          storeData &&
-          storeData.selectedTenant &&
-          storeData.selectedTenant.refNum
-        ) {
-          loadScript().then(() => {
-            if (window.txEmbed) {
-              window.txEmbed.embedModules(
-                "blogs",
-                "#tools-body-container",
-                {
-                  refNum: storeData.selectedTenant.refNum,
-                  token: window.keycloakInstance.token,
-                },
-                () => {
-                  setIsLoading(false);
-                  removeElementsById("crm-stylesheet");
-                  removeCrmStyles();
-                }
-              );
-            }
-          });
-        }
+        fetchData();
+
         return () => { 
         }
     }, [storeData]);

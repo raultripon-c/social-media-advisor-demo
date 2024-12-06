@@ -194,7 +194,7 @@ export const RemoteModuleRenderer = () => {
   }, []);
  useEffect(() => {
     // Update key whenever subPath or refNum changes
-    if((selectedModuleAppObject?.appConfig?.scope !== "cpui") && (selectedModuleAppObject?.appConfig?.scope !== 'analyticsUiPro')) {
+    if((selectedModuleAppObject?.appConfig?.scope !== "cpui") && (selectedModuleAppObject?.appConfig?.scope !== 'analyticsUiPro') && (selectedModuleAppObject?.appConfig?.scope !== 'chatbotManagementDashboard')) {
       setKey((prevKey) => prevKey + 1);
     }
   }, [moduleProps?.subPath, moduleProps?.refNum,selectedModuleAppObject?.name, window.keycloakInstance?.token]);

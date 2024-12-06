@@ -1,31 +1,46 @@
 import ReactKeycloakProvider from "phenom-auth-react-adapter";
-import React from "react";
+import React, { useEffect } from "react";
 import "react-toastify/dist/ReactToastify.css";
 import "../index.scss";
 import Layout from "./layout/Layout";
 import { InitialLoader } from "./layout/Loader";
 import { APIService } from './utils/api.service';
+import { triggerRefreshToken, waitForToken } from "./utils/api";
 
 const App = (): JSX.Element => {
   const keyCloakConfig = {
     loginHost: (window as any)._env_.APP_KEYCLOAK_URL,
     clientId: (window as any)._env_.APP_CLIENT_ID,
   };
-  const eventLogger = (event: any, error: any) => {
-    console.log("onKeycloakEvent from TXE", event, error);
+  const eventLogger = async(event: any, error: any) => {
+    if(event === "onAuthRefreshSuccess") {
+      console.log("token refreshed event listned successfully", event, error);
+      await triggerRefreshToken();
+    }
   };
   const tokenLogger = (tokens: any) => {
     try {
-      const { code, type } = window.orgInfo ?? {};
-      code && type && APIService.triggerTxeLogin();
-      const event = new CustomEvent("tokenRefreshed");
-      window.dispatchEvent(event);
-      console.log("onKeycloakTokens from TXE", tokens);
+      console.log("onKeycloaktokenEvent from TXE", tokens);
+      // triggerRefreshToken();
     } catch (error) {
       console.error("Error", error);
     }
   };
+  useEffect(() => {
+    const interval: number = new Function(`return ${(window as any)._env_.REFRESH_TOKEN_TIMEOUT_CMS}`)() || 10 * 60 * 1000;
+    let intervalId: NodeJS.Timeout | null = null;
+    if (interval) {
+      intervalId = setInterval(async () => {
+        await triggerRefreshToken();
+      }, interval); // 10 minutes
+    }
 
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, []);
   return (
     <>
       <ReactKeycloakProvider

@@ -5,6 +5,7 @@ import { Loader } from "@phenom/react-ui-components";
 import { removeElementsById } from "../../utils/helper/utilizer";
 import './Assets.css';
 import { removeCrmStyles } from "../../utils/appUtils";
+import { triggerRefreshToken } from "../../utils/api";
 
 declare global {
     interface Window {
@@ -25,6 +26,8 @@ const Assets = () => {
     var selectedApp = selectedModuleAppObject?.appConfig || {};
 
     useEffect(() => {
+      const fetchData = async () => {
+        await triggerRefreshToken();
         const embedScriptId = selectedApp?.scriptId;
         const existsScrElem = document.querySelector(`#${embedScriptId}`);
         if(existsScrElem) {
@@ -71,6 +74,8 @@ const Assets = () => {
             }
           });
         }
+      }
+      fetchData();
     }, [storeData]);
 
     return (

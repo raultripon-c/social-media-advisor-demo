@@ -29,7 +29,7 @@ export const RecommendedPages = (props: any) => {
     try {
       const txeLoginResponse = await APIService.triggerTxeLogin()
       console.log('TXELogin Response:', txeLoginResponse);
-      if(txeLoginResponse.status === 200 && txeLoginResponse.data.status === 'success') {
+      if(txeLoginResponse && txeLoginResponse.status === 200 && txeLoginResponse.data.status === 'success') {
         const txeLoginCustomEvent = new CustomEvent('txeLoginEvent');
         window.dispatchEvent(txeLoginCustomEvent);
 

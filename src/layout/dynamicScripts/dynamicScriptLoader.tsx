@@ -4,6 +4,7 @@ import store, { AppStore } from "store";
 import { Loader } from "@phenom/react-ui-components";
 import { removeElementsById } from "../../utils/helper/utilizer";
 import { removeCrmStyles } from "../../utils/appUtils";
+import { triggerRefreshToken } from "../../utils/api";
 
 declare global {
   interface Window {
@@ -24,57 +25,61 @@ const ContentHub: React.FC = () => {
   var selectedApp = selectedModuleAppObject?.appConfig || {};
 
   useEffect(() => {
-    const embedScriptId = selectedApp?.scriptId;
-    const existsScrElem = document.querySelector(`#${embedScriptId}`);
+    const fetchData = async () => {
+      await triggerRefreshToken();
+      const embedScriptId = selectedApp?.scriptId;
+      const existsScrElem = document.querySelector(`#${embedScriptId}`);
 
-    const loadScript = () => {
-      return new Promise<void>((resolve) => {
-        if (!existsScrElem) {
-          const scrElem = document.createElement("script");
-          scrElem.id = embedScriptId;
-          // scrElem.src = 'https://localhost:9000/embed.js';
-          scrElem.src = selectedApp?.url;
-          scrElem.onload = () => {
+      const loadScript = () => {
+        return new Promise<void>((resolve) => {
+          if (!existsScrElem) {
+            const scrElem = document.createElement("script");
+            scrElem.id = embedScriptId;
+            // scrElem.src = 'https://localhost:9000/embed.js';
+            scrElem.src = selectedApp?.url;
+            scrElem.onload = () => {
+              resolve();
+            };
+            document.querySelector("head")?.appendChild(scrElem);
+          } else {
             resolve();
-          };
-          document.querySelector("head")?.appendChild(scrElem);
-        } else {
-          resolve();
-        }
-      });
-    };
+          }
+        });
+      };
 
-    if (
-      storeData &&
-      storeData.selectedTenant &&
-      storeData.selectedTenant.refNum
-    ) {
-
-      // This is to ensure embed script are not loaded multiple times
-      // This approach may be enhanced in the future
-      // For now retuning from here
-      // if(Object.keys(storeData.siteMetaData)) {
-      //   return;
-      // }
-
-      loadScript().then(() => {
-        if (window.txEmbed) {
-          window.txEmbed.embedModules(
-            selectedApp?.embedType,
-            "#tools-body-container",
-            {
-              refNum: storeData.selectedTenant.refNum,
-              token: window.keycloakInstance.token,
-            },
-            () => {
-              setIsLoading(false);
-              removeCrmStyles();
-              removeElementsById('crm-stylesheet');
-            }
-          );
-        }
-      });
+      if (
+        storeData &&
+        storeData.selectedTenant &&
+        storeData.selectedTenant.refNum
+      ) {
+        
+        // This is to ensure embed script are not loaded multiple times
+        // This approach may be enhanced in the future
+        // For now retuning from here
+        // if(Object.keys(storeData.siteMetaData)) {
+          //   return;
+          // }
+          
+          loadScript().then(() => {
+            if (window.txEmbed) {
+              window.txEmbed.embedModules(
+              selectedApp?.embedType,
+              "#tools-body-container",
+              {
+                refNum: storeData.selectedTenant.refNum,
+                token: window.keycloakInstance.token,
+              },
+              () => {
+                setIsLoading(false);
+                removeCrmStyles();
+                removeElementsById('crm-stylesheet');
+              }
+            );
+          }
+        });
+      }
     }
+    fetchData();
   }, [storeData]);
 
   return (
