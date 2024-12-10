@@ -40,6 +40,7 @@ interface AppSwitcherProps extends React.HTMLAttributes<HTMLElement> {
 }
 
 interface UserInfoProps extends React.HTMLAttributes<HTMLElement> {
+  clientId: string;
   env: string;
   kcObject: string;
   themeName: string;
@@ -110,9 +111,8 @@ function Header({
   return (
     <div className="header-container">
       <button
-        className={`header-logo-container  ${
-          isCustomerPage ? "logo-white" : ""
-        } ${sidebarOpen ? "title-logo-container" : ""}`}
+        className={`header-logo-container  ${isCustomerPage ? "logo-white" : ""
+          } ${sidebarOpen ? "title-logo-container" : ""}`}
         onClick={handleLogoClick}
       >
         <img
@@ -123,15 +123,14 @@ function Header({
       </button>
       {isCustomerPage && <div className="vertical-line"></div>}
       <div
-        className={`header-com ${
-          isCustomerPage ? "customers-page-header" : ""
-        } ${sidebarOpen ? "logo-expanded" : ""}`}
+        className={`header-com ${isCustomerPage ? "customers-page-header" : ""
+          } ${sidebarOpen ? "logo-expanded" : ""}`}
       >
         {selectedTenant?.customerName && app && app?.context !== "platform" && (
           <div className="tenant-selection">
             <p className="header-selected-customer">
               {selectedTenant?.tenantName}
-            </p>        
+            </p>
             {/* {customerTenants.length > 1 &&
               !window.location.pathname.includes("summary") && (
                 <div className="header-selected-tenant ">
@@ -155,6 +154,7 @@ function Header({
             icon="https://servicehub-qa.phenompro.com/public/logos/app-switcher/appswitcher_new.svg"
           ></app-switcher>
           <user-info
+            clientId={window.keycloakInstance.clientId}
             style={{ display: "flex", alignItems: "center" }}
             env={(window as any)._env_.APP_ENV}
             kcObject={JSON.stringify(window.keycloakInstance)}
