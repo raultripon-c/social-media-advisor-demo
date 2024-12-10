@@ -13,10 +13,6 @@ import { triggerRefreshToken } from "../../utils/api";
 declare global {
   interface Window {
     txEmbed: any;
-    webCanvasCms: any;
-    Vue: any;
-    Vue3: any;
-    CmsWebCanvas: any;
   }
 }
 const Banners = () => {
@@ -109,32 +105,6 @@ const Banners = () => {
       }
     }
     fetchData();
-
-    return () => {
-      if (window && window["webCanvasCms"]) {
-        window["webCanvasCms"] = undefined;
-      }
-      const elements = document.getElementsByTagName('banner-management');
-
-      if (elements.length > 0) {
-        if (elements[0].parentNode) {
-          elements[0].parentNode.removeChild(elements[0]);
-        }
-        console.log('<banner-management> element removed.');
-      } else {
-        console.log('<banner-management> element not found.');
-      }
-      if (window && window["Vue"]) {
-        window["Vue"] = undefined;
-      }
-      if (window && window["Vue3"]) {
-        window["Vue3"] = undefined;
-      }
-      if (window && window["CmsWebCanvas"]) {
-        window["CmsWebCanvas"] = undefined;
-      }
-
-    };
   }, [storeData]);
   return (
     <div>

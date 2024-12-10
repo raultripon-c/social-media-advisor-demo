@@ -143,6 +143,7 @@ export const RemoteModuleRenderer = () => {
         env: APP_ENV,
         parentApp: "hrit",
         selectedApp: selectedModuleAppObject,
+        tenantInfo: selectedTenant,
         customerRegion: data?.dcRegion || "US",
         logedUserRoles: user,
         selectedTenants: selectedTenant,
