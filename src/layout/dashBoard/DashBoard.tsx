@@ -323,6 +323,7 @@ const DashBoard = () => {
       dispatch(setAppsFromAPI(apps));
       setIsLoading(false);
     }
+    loadAppBundles();
   }, [dispatch]);
 
   useEffect(() => {
@@ -359,6 +360,36 @@ const DashBoard = () => {
       window.removeEventListener("txeLoginEvent", () => { });
     };
   }, []);
+
+  const loadAppBundles = () => {
+    try {
+      const allApps = JSON.parse(sessionStorage.getItem("allapps") || "{}");
+      const selectedTenant = JSON.parse(localStorage.getItem("selectedTenant") || "{}");
+      const appRoutes = allApps.reduce((acc: any, curr: any) => {
+        curr?.appConfig?.route && acc.add(curr?.appConfig?.route)
+        return acc;
+      }, new Set());
+      [...appRoutes].forEach((appRoute: string) => {
+          try {
+            const iframeEle = document.createElement("iframe");
+            iframeEle.setAttribute("src", `${window.location.origin}/${selectedTenant.customerCode}/${selectedTenant.refNum}/${appRoute}`);
+            iframeEle.setAttribute("style", "display:none;");
+            iframeEle.onload = () => {
+              console.log(`Loaded app bundle: ${appRoute}`);
+            }
+            document.body.appendChild(iframeEle);
+            setTimeout(() => {
+              document.body.removeChild(iframeEle);
+            }, 5000);
+          } catch (error) {
+            console.error("Error loading app bundles:", error);
+          }
+        }
+      );
+    } catch (error) {
+      console.error("Error loading app bundles:", error);
+    }
+  };
 
   if (isLoading) {
     return (
