@@ -339,8 +339,7 @@ export const getMfRoutes = (data: any) => {
       }
 
       return [
-        { path: updatedPath, component: RemoteModuleRenderer },
-        { path: `${updatedPath}/*`, component: RemoteModuleRenderer },
+        { path: updatedPath,component: RemoteModuleRenderer },
       ];
     });
   return mfRoutes;

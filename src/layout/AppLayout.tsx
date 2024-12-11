@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import { Navigate, Route, Routes, useNavigate } from "react-router";
 
 import { EmptyState } from "@phenom/react-ui-components";
 import { useKeycloak } from "phenom-auth-react-adapter";
@@ -341,38 +341,38 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
     <>
       {rolesLoader ? (
         <InitialLoader show={true} />
-      ) : transformedAppData && (transformedAppData as any[])?.length === 0 && !appsLoader ? (
-        <div className="unauthorized-box font-14">{<EmptyState text={"No apps Found"} />}</div>
-      ) : (
-        <div className="service-tools-app-layout">
-          <Toast />
-          <div className="service-tools-app-body">
-            <ToolsSideBar
-              showSidebarMenu={showSidebarMenu}
-              toggleSidebarMenu={toggleSidebarMenu}
-              categories={customerTenantApps}
-              setCategories={setCustomerTenantApps}
-              refNum={selectedTenant?.refNum}
-              showSummaryNavigator={!window.location.pathname.includes("summary")}
-            />
-            <div className="tools-body-container">
-              {showSidebarMenu && (
-                <div
-                  className={`gray-layer ${showSidebar(selectedApp) || showSidebarMenu ? "sidebar-menu" : ""}`}
-                ></div>
-              )}
-              <Routes>
-                {!userDetails.userType && (
-                  <Route path="/" element={<Navigate to={`/${userDetails.userOrg}/summary`} />} />
-                )}
-                {allRoutes.map((route: IRoute) => (
-                  <Route key={route.path} path={route.path} element={<route.component />} />
-                ))}
-              </Routes>
-            </div>
-          </div>
-        </div>
-      )}
+      ) : <Fragment>{
+        transformedAppData && (transformedAppData as any[])?.length === 0 && !appsLoader ? (
+          <div className="unauthorized-box font-14">{<EmptyState text={"No apps Found"} />}</div>
+        ) : (
+              <div className="service-tools-app-layout">
+                <Toast />
+                <div className="service-tools-app-body">
+                  <ToolsSideBar
+                    showSidebarMenu={showSidebarMenu}
+                    toggleSidebarMenu={toggleSidebarMenu}
+                    categories={customerTenantApps}
+                    setCategories={setCustomerTenantApps}
+                    refNum={selectedTenant?.refNum}
+                    showSummaryNavigator={!window.location.pathname.includes("summary")}
+                  />
+                  <div className="tools-body-container">
+                    {showSidebarMenu && (
+                      <div className={`gray-layer ${showSidebar(selectedApp) || showSidebarMenu ? "sidebar-menu" : ""}`}
+                      />
+                    )}
+                    <Routes>
+                      {!userDetails.userType && (
+                        <Route path="/" element={<Navigate to={`/${userDetails.userOrg}/summary`} />} />
+                      )}
+                      {allRoutes.map((route: IRoute) => (
+                        <Route key={route.path} path={route.path} element={<route.component />} />
+                      ))}
+                    </Routes>
+                  </div>
+                </div>
+              </div>
+        )}</Fragment>}
     </>
   );
 };

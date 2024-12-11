@@ -1,5 +1,5 @@
 import React, { Suspense } from "react";
-import { Route, useNavigate } from "react-router-dom";
+import { Route, useNavigate } from "react-router";
 
 import { Loader } from "@phenom/react-ui-components";
 import { GenericErrorBoundary } from "../components/ErrorBoundary/GenericErrorBoundary";
@@ -7,7 +7,6 @@ import UnAuthorizedPage from "../components/UnAuthorizedPage/UnAuthorizedPage";
 import { ErrorBoundary } from "./error-component/ErrorBoundary";
 import { useDynamicMFLoader } from "./useDynamicMFLoader";
 
-import { Routes } from 'react-router-dom';
 import "./error-component/ErrorBoundary.scss";
 
 interface Props {
@@ -115,9 +114,6 @@ export function ReactAppRenderer(props: Props) {
                 height: props.style ? "calc(100vh - 48px)" : "100%",
               }}
             >
-              <Routes>
-                <Route path={`/:customerCode/:refnum${props.moduleRoute}/*`} element={<RemoteComponent {...props.props} />} />
-              </Routes>
               <RemoteComponent {...props.props} />
             </div>
           </Suspense>

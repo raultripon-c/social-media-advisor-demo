@@ -9,6 +9,7 @@ import UnmatchedRoutePage from "../components/UnmatchedRoutePage/UnmatchedRouteP
 export interface IRoute {
   path: string;
   component: React.FunctionComponent<any>;
+  index?: boolean
 }
 
 const dashBoard = {

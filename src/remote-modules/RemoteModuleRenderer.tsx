@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Route, Outlet, Routes } from "react-router";
 
 import { ReactAppRenderer } from "./ReactAppRenderer";
 import { AngularAppRenderer } from "./AngularAppRenderer";
@@ -221,26 +221,42 @@ export const RemoteModuleRenderer = () => {
     }
     return null;
   };
+
   return (
     <div>
       {selectedModuleAppObject.framework === "REACT" && (
-        <ReactAppRenderer
-          module={selectedApp.module}
-          component={selectedApp.component}
-          url={getSelectedAppUrl(selectedApp, false) || selectedApp.url}
-          scope={selectedApp.scope}
-          props={moduleProps}
-          loading={selectedApp.loadingMessage}
-          envconfig={
-            getSelectedAppUrl(selectedApp, true) || selectedApp.envconfig
-          }
-          moduleRoute={selectedApp.moduleRoute}
-          key={key}
-        />
+        <Fragment>
+          <Routes>
+            <Route path={"*"} index={true} element={<ReactAppRenderer
+              module={selectedApp.module}
+              component={selectedApp.component}
+              url={getSelectedAppUrl(selectedApp, false) || selectedApp.url}
+              scope={selectedApp.scope}
+              props={moduleProps}
+              loading={selectedApp.loadingMessage}
+              envconfig={
+                getSelectedAppUrl(selectedApp, true) || selectedApp.envconfig
+              }
+              moduleRoute={selectedApp.moduleRoute}
+              key={key}
+            />} />
+          </Routes>
+          <Outlet />
+        </Fragment>
       )}
       {selectedModuleAppObject.framework == "ANGULAR" &&
         selectedApp.scope &&
         selectedApp && (
+        <Fragment>
+          <AngularAppRenderer
+            scope={selectedApp.scope}
+            module={selectedApp.module}
+            url={selectedApp.url}
+            selectedApp={selectedApp}
+            component={selectedApp.component}
+            moduleRoute={selectedApp.moduleRoute}
+            appWindowConfig={selectedApp.appWindowConfig}
+            key={key} />
           <AngularAppRenderer
             scope={selectedApp.scope}
             module={selectedApp.module}
@@ -250,8 +266,9 @@ export const RemoteModuleRenderer = () => {
             moduleRoute={selectedApp.moduleRoute}
             appWindowConfig={selectedApp.appWindowConfig}
             key={key}
-            // selectedAppTitle={selectedAppTitle}
+          // selectedAppTitle={selectedAppTitle}
           />
+        </Fragment>
         )}
     </div>
   );
