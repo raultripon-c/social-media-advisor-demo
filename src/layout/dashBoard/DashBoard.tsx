@@ -365,22 +365,24 @@ const DashBoard = () => {
     try {
       const allApps = JSON.parse(sessionStorage.getItem("allapps") || "{}");
       const selectedTenant = JSON.parse(localStorage.getItem("selectedTenant") || "{}");
-      const appRoutes = allApps.reduce((acc: any, curr: any) => {
-        curr?.appConfig?.route && acc.add(curr?.appConfig?.route)
+      const bundleUrlsVsRoutes = allApps.reduce((acc: any, curr: any) => {
+        if (curr?.appConfig?.url && curr?.appConfig?.route) {
+          acc[curr.appConfig.url] = curr.appConfig.route;
+        }
         return acc;
-      }, new Set());
-      [...appRoutes].forEach((appRoute: string) => {
+      }, {});
+      Object.values(bundleUrlsVsRoutes).forEach((appRoute: any) => {
           try {
-            const iframeEle = document.createElement("iframe");
-            iframeEle.setAttribute("src", `${window.location.origin}/${selectedTenant.customerCode}/${selectedTenant.refNum}/${appRoute}`);
-            iframeEle.setAttribute("style", "display:none;");
-            iframeEle.onload = () => {
-              console.log(`Loaded app bundle: ${appRoute}`);
+            const url = `${window.location.origin}/${selectedTenant.customerCode}/${selectedTenant.refNum}/${appRoute}`;
+            if(!document.querySelector(`[src="${url}"]`)) {
+              const iframeEle = document.createElement("iframe");
+              iframeEle.setAttribute("src", ``);
+              iframeEle.setAttribute("style", "display:none;");
+              iframeEle.onload = () => {
+                console.log(`Loaded app bundle: ${appRoute}`);
+              }
+              document.body.appendChild(iframeEle);
             }
-            document.body.appendChild(iframeEle);
-            setTimeout(() => {
-              document.body.removeChild(iframeEle);
-            }, 5000);
           } catch (error) {
             console.error("Error loading app bundles:", error);
           }
