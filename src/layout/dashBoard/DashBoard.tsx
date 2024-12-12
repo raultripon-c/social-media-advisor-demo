@@ -376,7 +376,7 @@ const DashBoard = () => {
             const url = `${window.location.origin}/${selectedTenant.customerCode}/${selectedTenant.refNum}/${appRoute}`;
             if(!document.querySelector(`[src="${url}"]`)) {
               const iframeEle = document.createElement("iframe");
-              iframeEle.setAttribute("src", ``);
+              iframeEle.setAttribute("src", url);
               iframeEle.setAttribute("style", "display:none;");
               iframeEle.onload = () => {
                 console.log(`Loaded app bundle: ${appRoute}`);
