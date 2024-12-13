@@ -69,20 +69,21 @@ const Blogs = () => {
             }
 
             const loadScript = () => {
-                return new Promise<void>((resolve) => {
-                    if (!existsScrElem) {
-                        const scrElem = document.createElement("script");
-                        scrElem.id = embedScriptId;
-                        // scrElem.src = 'https://cmsqa1.phenompro.com:9000/embed.js';
-                        scrElem.src = selectedApp?.url;
-                        scrElem.onload = () => {
-                            resolve();
-                        };
-                        document.querySelector("head")?.appendChild(scrElem);
-                    } else {
-                        resolve();
-                    }
-                });
+              return new Promise<void>((resolve) => {
+                const existsScrElem = document.querySelector(`#${embedScriptId}`);
+                if (!existsScrElem) {
+                  const scrElem = document.createElement("script");
+                  scrElem.id = embedScriptId;
+                  // scrElem.src = 'https://cmsqa1.phenompro.com:9000/embed.js';
+                  scrElem.src = selectedApp?.url;
+                  scrElem.onload = () => {
+                    resolve();
+                  };
+                  document.querySelector("head")?.appendChild(scrElem);
+                } else {
+                  resolve();
+                }
+              });
             };
 
             if (
@@ -91,7 +92,7 @@ const Blogs = () => {
               storeData.selectedTenant.refNum
             ) {
               loadScript().then(() => {
-                if (window.txEmbed) {
+                if (window.txEmbed && window.txEmbed.embedModules) {
                   window.txEmbed.embedModules(
                     "blogs",
                     "#tools-body-container",

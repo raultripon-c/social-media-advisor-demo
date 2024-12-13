@@ -36,18 +36,18 @@ const Assets = () => {
 
         const loadScript = () => {
             return new Promise<void>((resolve) => {
-                
-                if (!existsScrElem) {
-                    const scrElem = document.createElement("script");
-                    scrElem.id = embedScriptId;
-                    scrElem.src = selectedApp?.url;
-                    scrElem.onload = () => {
-                        resolve();
-                    };
-                    document.querySelector("head")?.appendChild(scrElem);
-                } else {
-                    resolve();
-                }
+              const existsScrElem = document.querySelector(`#${embedScriptId}`);
+              if (!existsScrElem) {
+                  const scrElem = document.createElement("script");
+                  scrElem.id = embedScriptId;
+                  scrElem.src = selectedApp?.url;
+                  scrElem.onload = () => {
+                      resolve();
+                  };
+                  document.querySelector("head")?.appendChild(scrElem);
+              } else {
+                  resolve();
+              }
             });
         };
 
@@ -57,8 +57,8 @@ const Assets = () => {
           storeData.selectedTenant.refNum
         ) {
           loadScript().then(() => {
-            if (window.txEmbed) {
-              window.txEmbed.embedModules(
+            if (window.txEmbed && window.txEmbed.embedCaasModules) {
+              window.txEmbed.embedCaasModules(
                 "assets",
                 "#tools-body-container",
                 {

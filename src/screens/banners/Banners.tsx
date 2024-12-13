@@ -53,6 +53,7 @@ const Banners = () => {
 
       const loadScript = () => {
         return new Promise<void>((resolve) => {
+          const existsScrElem = document.querySelector(`#${embedScriptId}`);
           if (!existsScrElem) {
             const scrElem = document.createElement("script");
             scrElem.id = embedScriptId;
@@ -79,7 +80,7 @@ const Banners = () => {
               "canvas-bootstrapper1",
               scriptUrl
             );
-            if (window.txEmbed) {
+            if (window.txEmbed && window.txEmbed.embedModules) {
               window.txEmbed.embedModules(
                 "banners",
                 "#tools-body-container",

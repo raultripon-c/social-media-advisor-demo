@@ -373,13 +373,14 @@ const DashBoard = () => {
       }, {});
       Object.values(bundleUrlsVsRoutes).forEach((appRoute: any) => {
           try {
-            const url = `${window.location.origin}/${selectedTenant.customerCode}/${selectedTenant.refNum}/${appRoute}`;
+            const url = `${window.location.origin}/${selectedTenant.customerCode}/${selectedTenant.refNum}${appRoute}`;
             if(!document.querySelector(`[src="${url}"]`)) {
               const iframeEle = document.createElement("iframe");
               iframeEle.setAttribute("src", url);
               iframeEle.setAttribute("style", "display:none;");
               iframeEle.onload = () => {
                 console.log(`Loaded app bundle: ${appRoute}`);
+                document.body.removeChild(iframeEle);
               }
               document.body.appendChild(iframeEle);
             }

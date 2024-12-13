@@ -29,9 +29,13 @@ const ContentHub: React.FC = () => {
       await triggerRefreshToken();
       const embedScriptId = selectedApp?.scriptId;
       const existsScrElem = document.querySelector(`#${embedScriptId}`);
+      if(existsScrElem) {
+        existsScrElem.remove();
+      }
 
       const loadScript = () => {
         return new Promise<void>((resolve) => {
+          const existsScrElem = document.querySelector(`#${embedScriptId}`);
           if (!existsScrElem) {
             const scrElem = document.createElement("script");
             scrElem.id = embedScriptId;
@@ -61,8 +65,8 @@ const ContentHub: React.FC = () => {
           // }
           
           loadScript().then(() => {
-            if (window.txEmbed) {
-              window.txEmbed.embedModules(
+            if (window.txEmbed && window.txEmbed.embedCaasModules) {
+              window.txEmbed.embedCaasModules(
               selectedApp?.embedType,
               "#tools-body-container",
               {
