@@ -42,7 +42,6 @@ export const RemoteModuleRenderer = () => {
   }
   let detailsApp = fetchedAppsFromStorage && fetchedAppsFromStorage.length && findAppConfigByRoutes(fetchedAppsFromStorage, window.location.pathname)[0];
   var selectedApp = detailsApp?.appConfig ?? selectedModuleAppObject?.appConfig;
-  var selectedApp = selectedModuleAppObject?.appConfig || {};
   var selectedAppTitle = selectedModuleAppObject?.hoverText || null;
   const dispatch = useDispatch();
   const navigate = useNavigate();
