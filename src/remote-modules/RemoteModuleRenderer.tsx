@@ -30,18 +30,19 @@ export const RemoteModuleRenderer = () => {
     (window as any).TXEMessageService=MessageService;
   },[])
   const APP_ENV = (window as any)._env_.APP_ENV;
-  const selectedModuleAppObject = useSelector((state: any) => {
-    const selectedAppFromSession = JSON.parse(
-      sessionStorage.getItem("selectedApp") || "null"
-    );
-    return selectedAppFromSession || state.app?.selectedApp;
-  });
   let fetchedAppsFromStorage = useSelector((state: any) => state.app.allApps);
   if(!fetchedAppsFromStorage || fetchedAppsFromStorage.length === 0) {
     fetchedAppsFromStorage = JSON.parse(sessionStorage.getItem("allapps") || "[]");
   }
   let detailsApp = fetchedAppsFromStorage && fetchedAppsFromStorage.length && findAppConfigByRoutes(fetchedAppsFromStorage, window.location.pathname)[0];
-  var selectedApp = detailsApp?.appConfig ?? selectedModuleAppObject?.appConfig;
+  var selectedApp = detailsApp?.appConfig;
+  const selectedModuleAppObject = useSelector((state: any) => {
+    const selectedAppFromSession = JSON.parse(
+      sessionStorage.getItem("selectedApp") || "null"
+    );
+
+    return detailsApp ?? (selectedAppFromSession || state.app?.selectedApp);
+  });
   var selectedAppTitle = selectedModuleAppObject?.hoverText || null;
   const dispatch = useDispatch();
   const navigate = useNavigate();
