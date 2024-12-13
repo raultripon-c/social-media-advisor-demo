@@ -4,7 +4,7 @@ import { AppStore } from "store";
 import { Loader } from "@phenom/react-ui-components";
 import { removeElementsById } from "../../utils/helper/utilizer";
 import './Assets.css';
-import { removeCrmStyles } from "../../utils/appUtils";
+import { findAppConfigByRoutes, removeCrmStyles } from "../../utils/appUtils";
 import { triggerRefreshToken } from "../../utils/api";
 
 declare global {
@@ -23,9 +23,16 @@ const Assets = () => {
         );
         return selectedAppFromSession || state.app?.selectedApp;
       });
-    var selectedApp = selectedModuleAppObject?.appConfig || {};
+    let fetchedApps = useSelector((state: any) => state.app.allApps);
+    if(!fetchedApps || fetchedApps.length === 0) {
+      fetchedApps = JSON.parse(sessionStorage.getItem("allapps") || "[]");
+    }
+    let detailsApp = fetchedApps && fetchedApps.length && findAppConfigByRoutes(fetchedApps, window.location.pathname)[0];
+    var selectedApp = detailsApp?.appConfig ?? selectedModuleAppObject?.appConfig;
 
     useEffect(() => {
+      const tokenBkp = localStorage.getItem("token");
+      localStorage.removeItem("token");
       const fetchData = async () => {
         await triggerRefreshToken();
         const embedScriptId = selectedApp?.scriptId;
@@ -76,6 +83,9 @@ const Assets = () => {
         }
       }
       fetchData();
+      return () => {
+        tokenBkp && localStorage.setItem("token", tokenBkp);
+      }
     }, [storeData]);
 
     return (

@@ -380,7 +380,7 @@ const DashBoard = () => {
               iframeEle.setAttribute("style", "display:none;");
               iframeEle.onload = () => {
                 console.log(`Loaded app bundle: ${appRoute}`);
-                document.body.removeChild(iframeEle);
+                // document.body.removeChild(iframeEle);
               }
               document.body.appendChild(iframeEle);
             }
