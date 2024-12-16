@@ -377,8 +377,7 @@ const DashBoard = () => {
             if(!document.querySelector(`[src="${url}"]`)) {
               const iframeEle = document.createElement("iframe");
               iframeEle.setAttribute("src", url);
-              iframeEle.setAttribute("style", "width: 100%; height: 500px;");
-              // iframeEle.setAttribute("style", "display:none;");
+              iframeEle.setAttribute("style", "display:none;");
 
               iframeEle.onload = () => {
                 console.log(`Loaded app bundle: ${appRoute}`);
