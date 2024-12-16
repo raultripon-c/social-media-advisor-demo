@@ -454,6 +454,27 @@ export const removeCrmStyles = () => {
   crmStyles && document.head.removeChild(crmStyles);
 };
 
+export const removeStyles = () => {
+  const styleTags = document.querySelectorAll("style");
+  const removedStyles: string[] = [];
+  styleTags.forEach((styleTag) => {
+    if (styleTag.textContent?.includes("Bootstrap v4.3.1")) {
+      removedStyles.push(styleTag.textContent);
+      styleTag.remove();
+      console.log("Removed a <style> tag containing 'Bootstrap v4.3.1'");
+    }
+  });
+  return removedStyles;
+};
+
+export const restoreStyles = (removedStyles: any[]) => {
+  removedStyles.forEach((styleContent) => {
+    const styleTag = document.createElement("style");
+    styleTag.textContent = styleContent;
+    document.head.appendChild(styleTag);
+  });
+};
+
 export const removeStylesBasedOnContents = (contents: string[]) => {
   const styleTags = document.querySelectorAll("style");
 
