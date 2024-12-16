@@ -17,7 +17,7 @@ import {
 import { CUSTOMER_LEVEL, PLATFORM, TENANT } from "../../utils/constants";
 import "./SideBar.scss";
 import { AppSelectionOptions } from "../../interfaces/AppSelectionOptions";
-import { appSelectionHandler, showSidebar } from "../../utils/appUtils";
+import { appSelectionHandler, findAppConfigByRoutes } from "../../utils/appUtils";
 
 function ToolsSideBar(props: any) {
   const { categories, setCategories } = props;
@@ -28,13 +28,18 @@ function ToolsSideBar(props: any) {
   const siteMetaData = useSelector(
     (state: AppStore) => state.customer.siteMetaData
   );
-  const { sidebarOpen } = useSelector((state: AppStore) => state.app);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [disableAutoClose, setDisableAutoClose] = useState(true);
+  let fetchedApps = useSelector((state: any) => state.app.allApps);
+  if(!fetchedApps || fetchedApps.length === 0) {
+    fetchedApps = JSON.parse(sessionStorage.getItem("allapps") || "[]");
+  }
+  let detailsApp = fetchedApps && fetchedApps.length && findAppConfigByRoutes(fetchedApps, window.location.pathname)[0];
   const selectedApp = useSelector((state: any) => {
     const selectedAppFromSession = JSON.parse(
       sessionStorage.getItem("selectedApp") || "null"
     );
-    return selectedAppFromSession || state.app?.selectedApp;
+    return detailsApp ?? (selectedAppFromSession || state.app?.selectedApp);
   });
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -74,11 +79,6 @@ function ToolsSideBar(props: any) {
     dispatch(setSidebarState(sidebarOpen));
     handleCrmStyles();
   }, [sidebarOpen]);
-
-  useEffect(() => {
-    console.log('sidebar icon is clicked');
-  }, [showSidebar]);
-
   const handleAppSelection = (app: any) => {
     if(app?.name === "Experience Manager"){
       const appSelectionOptions: AppSelectionOptions = {
@@ -98,7 +98,7 @@ function ToolsSideBar(props: any) {
       window.location.assign(`${window.location.origin}${bannersPath}`);
     } else {
       dispatch(setDashboardSelected(false));
-      dispatch(setSidebarState(true));
+      setSidebarOpen(true);
       app && sessionStorage.setItem("selectedApp", JSON.stringify(app));
       dispatch(setAppDetails(app));
       const appSelectionOptions: AppSelectionOptions = {
@@ -138,7 +138,7 @@ function ToolsSideBar(props: any) {
           placeholder="Search Navigation"
           sideBarHeading={null}
           onClose={(showSidebar: any) => {
-            dispatch(setSidebarState(showSidebar))
+            setSidebarOpen(showSidebar);
           }}
           dashboardIcons={{
             arrowRight: arrowRight,

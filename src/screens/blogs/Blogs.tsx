@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { AppStore } from "store";
 import { Loader } from "@phenom/react-ui-components";
 import { removeElementsById } from "../../utils/helper/utilizer";
-import { removeCrmStyles } from "../../utils/appUtils";
+import { findAppConfigByRoutes, removeCrmStyles } from "../../utils/appUtils";
 import { triggerRefreshToken } from "../../utils/api";
 
 declare global {
@@ -55,7 +55,12 @@ const Blogs = () => {
         );
         return selectedAppFromSession || state.app?.selectedApp;
       });
-    var selectedApp = selectedModuleAppObject?.appConfig || {};
+    let fetchedApps = useSelector((state: any) => state.app.allApps);
+    if(!fetchedApps || fetchedApps.length === 0) {
+      fetchedApps = JSON.parse(sessionStorage.getItem("allapps") || "[]");
+    }
+    let detailsApp = fetchedApps && fetchedApps.length && findAppConfigByRoutes(fetchedApps, window.location.pathname)[0];
+    var selectedApp = detailsApp?.appConfig ?? selectedModuleAppObject?.appConfig;
     (window as any).isCmsModule = true;
 
     useEffect(() => {
@@ -69,20 +74,21 @@ const Blogs = () => {
             }
 
             const loadScript = () => {
-                return new Promise<void>((resolve) => {
-                    if (!existsScrElem) {
-                        const scrElem = document.createElement("script");
-                        scrElem.id = embedScriptId;
-                        // scrElem.src = 'https://cmsqa1.phenompro.com:9000/embed.js';
-                        scrElem.src = selectedApp?.url;
-                        scrElem.onload = () => {
-                            resolve();
-                        };
-                        document.querySelector("head")?.appendChild(scrElem);
-                    } else {
-                        resolve();
-                    }
-                });
+              return new Promise<void>((resolve) => {
+                const existsScrElem = document.querySelector(`#${embedScriptId}`);
+                if (!existsScrElem) {
+                  const scrElem = document.createElement("script");
+                  scrElem.id = embedScriptId;
+                  // scrElem.src = 'https://cmsqa1.phenompro.com:9000/embed.js';
+                  scrElem.src = selectedApp?.url;
+                  scrElem.onload = () => {
+                    resolve();
+                  };
+                  document.querySelector("head")?.appendChild(scrElem);
+                } else {
+                  resolve();
+                }
+              });
             };
 
             if (
@@ -91,7 +97,7 @@ const Blogs = () => {
               storeData.selectedTenant.refNum
             ) {
               loadScript().then(() => {
-                if (window.txEmbed) {
+                if (window.txEmbed && window.txEmbed.embedModules) {
                   window.txEmbed.embedModules(
                     "blogs",
                     "#tools-body-container",

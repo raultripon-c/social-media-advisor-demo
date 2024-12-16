@@ -6,7 +6,7 @@ import { ReactAppRenderer } from "./ReactAppRenderer";
 import { AngularAppRenderer } from "./AngularAppRenderer";
 
 import { AppStore } from "store";
-import { appSelectionHandler, getAppByName } from "../utils/appUtils";
+import { appSelectionHandler, findAppConfigByRoutes, getAppByName } from "../utils/appUtils";
 import { setAppDetails } from "../store/apps/actions";
 import { setSiteMetaData } from "../store/customer/actions";
 import { MessageService } from "../MessageService";
@@ -30,13 +30,19 @@ export const RemoteModuleRenderer = () => {
     (window as any).TXEMessageService=MessageService;
   },[])
   const APP_ENV = (window as any)._env_.APP_ENV;
+  let fetchedAppsFromStorage = useSelector((state: any) => state.app.allApps);
+  if(!fetchedAppsFromStorage || fetchedAppsFromStorage.length === 0) {
+    fetchedAppsFromStorage = JSON.parse(sessionStorage.getItem("allapps") || "[]");
+  }
+  let detailsApp = fetchedAppsFromStorage && fetchedAppsFromStorage.length && findAppConfigByRoutes(fetchedAppsFromStorage, window.location.pathname)[0];
+  var selectedApp = detailsApp?.appConfig;
   const selectedModuleAppObject = useSelector((state: any) => {
     const selectedAppFromSession = JSON.parse(
       sessionStorage.getItem("selectedApp") || "null"
     );
-    return selectedAppFromSession || state.app?.selectedApp;
+
+    return detailsApp ?? (selectedAppFromSession || state.app?.selectedApp);
   });
-  var selectedApp = selectedModuleAppObject?.appConfig || {};
   var selectedAppTitle = selectedModuleAppObject?.hoverText || null;
   const dispatch = useDispatch();
   const navigate = useNavigate();

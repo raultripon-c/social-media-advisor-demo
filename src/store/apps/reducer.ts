@@ -4,7 +4,7 @@ import { AppState } from "./type";
 const initialState: AppState = {
   selectedApp: {},
   allApps: [],
-  sidebarOpen:true,
+  sidebarOpen:false,
   dashboardSelected: false,
 };
 
