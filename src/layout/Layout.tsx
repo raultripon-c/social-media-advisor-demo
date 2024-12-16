@@ -21,10 +21,10 @@ const Layout = () => {
     }
     const currentPath = window.location.pathname.replace("/dashboard/dashboard", "/dashboard");
     if(!currentPath.startsWith(`/${selectedTenant.customerCode}/${selectedTenant.refNum}`) && currentPath.includes("dashboard")) {
-      sessionStorage.setItem("txeCustomPath", currentPath)
+      currentPath.includes("dashboard") && sessionStorage.setItem("txeCustomPath", currentPath)
       navigate(`/${selectedTenant.customerCode}/${selectedTenant.refNum}${currentPath}`)
     } else {
-      sessionStorage.setItem("txeCustomPath", currentPath.split('/').filter(Boolean).splice(2).join('/'))
+      currentPath.includes("dashboard") && sessionStorage.setItem("txeCustomPath", currentPath.split('/').filter(Boolean).splice(2).join('/'))
     }
     sessionStorage.removeItem("allapps")
   },[])

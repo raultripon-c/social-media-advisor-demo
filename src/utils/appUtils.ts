@@ -248,6 +248,7 @@ export const transformAppData = (data: any) => {
     "Banners": "showBanners"
   };
 
+  const allFilteredApps: any[] = [];
   const customerTenantApps = categoryMap
     .map((item: any) => {
       const filteredApps = data?.filter((app: any) => {
@@ -282,6 +283,7 @@ export const transformAppData = (data: any) => {
           (app.context === "tenant" || app.context === "customer")
         );
       });
+      allFilteredApps.push(...filteredApps);
 
       if (item.isParent && filteredApps.length === 0) {
         return null;
@@ -290,6 +292,7 @@ export const transformAppData = (data: any) => {
       return { ...item, children: sortAppsByOrder(filteredApps) };
     })
     .filter(Boolean);
+    sessionStorage.setItem("filteredApps", JSON.stringify(allFilteredApps));
 
   const platformApps = categoryMap
     .map((item: any) => {

@@ -363,9 +363,9 @@ const DashBoard = () => {
 
   const loadAppBundles = () => {
     try {
-      const allApps = JSON.parse(sessionStorage.getItem("allapps") || "{}");
+      const filteredApps = JSON.parse(sessionStorage.getItem("filteredApps") || "{}");
       const selectedTenant = JSON.parse(localStorage.getItem("selectedTenant") || "{}");
-      const bundleUrlsVsRoutes = allApps.reduce((acc: any, curr: any) => {
+      const bundleUrlsVsRoutes = filteredApps.reduce((acc: any, curr: any) => {
         if (curr?.appConfig?.url && curr?.appConfig?.route) {
           acc[curr.appConfig.url] = curr.appConfig.route;
         }
@@ -377,8 +377,9 @@ const DashBoard = () => {
             if(!document.querySelector(`[src="${url}"]`)) {
               const iframeEle = document.createElement("iframe");
               iframeEle.setAttribute("src", url);
-              // iframeEle.setAttribute("style", "display:none;");
               iframeEle.setAttribute("style", "width: 100%; height: 500px;");
+              // iframeEle.setAttribute("style", "display:none;");
+
               iframeEle.onload = () => {
                 console.log(`Loaded app bundle: ${appRoute}`);
                 // document.body.removeChild(iframeEle);
