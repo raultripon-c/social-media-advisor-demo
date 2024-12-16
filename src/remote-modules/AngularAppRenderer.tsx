@@ -137,8 +137,6 @@ export function AngularAppRenderer(props: any) {
       if (props.scope && props.scope === "chatbotManagementDashboard") {
         removedStyles = removeStyles();  
         stylesToBeRemoved = [...stylesToBeRemoved,"cmsWebFont"];
-      }else{
-        restoreStyles(removedStyles);
       }
       removeStylesBasedOnContents(stylesToBeRemoved);
       loadComponent();
@@ -181,6 +179,7 @@ export function AngularAppRenderer(props: any) {
     return () => {
       window.__ckeditor__ = window.CKEDITOR;
       window.__$__ = window.$;
+      removedStyles && restoreStyles(removedStyles);
       setReady(false);
     };
   }, [ready]);
