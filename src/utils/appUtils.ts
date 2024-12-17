@@ -275,6 +275,11 @@ export const transformAppData = (data: any) => {
         if(!isAnalyticsPresent && app.name === "Analytics") {
           return false;
         }
+
+        const selectedTenant = JSON.parse(localStorage.getItem("selectedTenant") || "{}");
+        if(app?.enabledTenants && selectedTenant?.refNum && !app.enabledTenants.includes(selectedTenant.refNum)) {
+          return false;
+        }
       
         // Main filter conditions
         return (
