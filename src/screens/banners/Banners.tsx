@@ -115,7 +115,7 @@ const Banners = () => {
   return (
     <div>
       {isLoading && (
-        <div>
+        <div className="child-loading">
           <Loader title="Please Wait, Loading..." />
         </div>
       )}

@@ -259,6 +259,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
           }
           setAppsLoader(false);
         }
+        else {
+          console.error("Keycloak not initialized");
+        }
       }
       setPermissionsBasedApps();
     }

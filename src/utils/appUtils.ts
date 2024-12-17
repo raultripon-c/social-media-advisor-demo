@@ -252,7 +252,7 @@ export const transformAppData = (data: any) => {
   const customerTenantApps = categoryMap
     .map((item: any) => {
       const filteredApps = data?.filter((app: any) => {
-        const isAnalyticsPresent = Object.keys(window.keycloakInstance.userInfo.resources).some((key) =>
+        const isAnalyticsPresent = Object.keys(window?.keycloakInstance?.userInfo?.resources).some((key) =>
           key.toLowerCase().includes("analytics")
         );
         const userDetails = window?.keycloakInstance?.tokenParsed?.userDetails;
