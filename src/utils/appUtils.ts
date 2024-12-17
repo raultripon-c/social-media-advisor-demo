@@ -276,14 +276,17 @@ export const transformAppData = (data: any) => {
           return false;
         }
 
-        const selectedTenant = JSON.parse(localStorage.getItem('selectedTenant') || '{}')
-        const appConfig = app?.appConfig && JSON.parse(app.appConfig)
-        if (
-            appConfig?.enabledTenants &&
-            selectedTenant?.refNum &&
-            !appConfig.enabledTenants.includes(selectedTenant.refNum)
-        ) {
-            return false
+        if(!app.isParent) {  
+          const selectedTenant = JSON.parse(localStorage.getItem('selectedTenant') || '{}')
+          const appConfig = app?.appConfig
+          const enabledTenants = appConfig?.enabledTenants && appConfig?.enabledTenants.split(',')
+          if (
+            enabledTenants &&
+              selectedTenant?.refNum &&
+              !enabledTenants.includes(selectedTenant.refNum)
+          ) {
+              return false
+          }
         }
       
         // Main filter conditions
