@@ -103,8 +103,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
     const url: string = event.detail.url;
     const mfRoutes = JSON.parse(sessionStorage.getItem("mfRoutes") || "[]");
     if(!mfRoutes.some((route: { path: string; }) => route.path === url)){
-      sessionStorage.setItem("txeCustomPath", url);
-      console.log(allRoutes)
+      url.includes("dashboard") && sessionStorage.setItem("txeCustomPath", url);
+      console.log(allRoutes);
     }
     const path = window.location.pathname.split("/").filter(Boolean);
 
@@ -258,6 +258,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
             // console.log("All Apps", mfRoutes);
           }
           setAppsLoader(false);
+        }
+        else {
+          console.error("Keycloak not initialized");
         }
       }
       setPermissionsBasedApps();

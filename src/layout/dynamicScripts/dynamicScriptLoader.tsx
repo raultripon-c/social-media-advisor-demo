@@ -101,7 +101,7 @@ const ContentHub: React.FC = () => {
     <div>
       <div id="tools-body-container"></div>
       {isLoading && (
-        <div>
+        <div className="child-loading">
           <Loader title="Please Wait, Loading..." />
         </div>
       )}

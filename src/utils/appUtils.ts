@@ -248,10 +248,11 @@ export const transformAppData = (data: any) => {
     "Banners": "showBanners"
   };
 
+  const allFilteredApps: any[] = [];
   const customerTenantApps = categoryMap
     .map((item: any) => {
       const filteredApps = data?.filter((app: any) => {
-        const isAnalyticsPresent = Object.keys(window.keycloakInstance.userInfo.resources).some((key) =>
+        const isAnalyticsPresent = Object.keys(window?.keycloakInstance?.userInfo?.resources).some((key) =>
           key.toLowerCase().includes("analytics")
         );
         const userDetails = window?.keycloakInstance?.tokenParsed?.userDetails;
@@ -274,6 +275,19 @@ export const transformAppData = (data: any) => {
         if(!isAnalyticsPresent && app.name === "Analytics") {
           return false;
         }
+
+        if(!app.isParent) {  
+          const selectedTenant = JSON.parse(localStorage.getItem('selectedTenant') || '{}')
+          const appConfig = app?.appConfig
+          const enabledTenants = appConfig?.enabledTenants && appConfig?.enabledTenants.split(',')
+          if (
+            enabledTenants &&
+              selectedTenant?.refNum &&
+              !enabledTenants.includes(selectedTenant.refNum)
+          ) {
+              return false
+          }
+        }
       
         // Main filter conditions
         return (
@@ -282,6 +296,7 @@ export const transformAppData = (data: any) => {
           (app.context === "tenant" || app.context === "customer")
         );
       });
+      allFilteredApps.push(...filteredApps);
 
       if (item.isParent && filteredApps.length === 0) {
         return null;
@@ -290,6 +305,7 @@ export const transformAppData = (data: any) => {
       return { ...item, children: sortAppsByOrder(filteredApps) };
     })
     .filter(Boolean);
+    sessionStorage.setItem("filteredApps", JSON.stringify(allFilteredApps));
 
   const platformApps = categoryMap
     .map((item: any) => {
@@ -452,6 +468,27 @@ export const removeCrmStyles = () => {
 
   const crmStyles = document.getElementById("crm-styles");
   crmStyles && document.head.removeChild(crmStyles);
+};
+
+export const removeStyles = () => {
+  const styleTags = document.querySelectorAll("style");
+  const removedStyles: string[] = [];
+  styleTags.forEach((styleTag) => {
+    if (styleTag.textContent?.includes("Bootstrap v4.3.1")) {
+      removedStyles.push(styleTag.textContent);
+      styleTag.remove();
+      console.log("Removed a <style> tag containing 'Bootstrap v4.3.1'");
+    }
+  });
+  return removedStyles;
+};
+
+export const restoreStyles = (removedStyles: any[]) => {
+  removedStyles.forEach((styleContent) => {
+    const styleTag = document.createElement("style");
+    styleTag.textContent = styleContent;
+    document.head.appendChild(styleTag);
+  });
 };
 
 export const removeStylesBasedOnContents = (contents: string[]) => {

@@ -86,6 +86,10 @@ function Header({
     dispatch(setAppDetails({}));
     dispatch(setCustomerTenants([]));
     navigate("/");
+    const iframes = document.querySelectorAll("iframe[txe-pre-fetch-iframe]");
+    iframes.forEach((iframe) => {
+      document.body.removeChild(iframe);
+    });
   };
 
 

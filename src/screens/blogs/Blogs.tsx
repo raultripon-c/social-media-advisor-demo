@@ -124,7 +124,7 @@ const Blogs = () => {
     return (
         <div style={{ height: "100%"}}>
           {isLoading && (
-                <div>
+                <div className="child-loading">
                     <Loader title="Please Wait, Loading..." />
                 </div>
             )}

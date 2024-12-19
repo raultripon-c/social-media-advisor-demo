@@ -363,9 +363,9 @@ const DashBoard = () => {
 
   const loadAppBundles = () => {
     try {
-      const allApps = JSON.parse(sessionStorage.getItem("allapps") || "{}");
+      const filteredApps = JSON.parse(sessionStorage.getItem("filteredApps") || "{}");
       const selectedTenant = JSON.parse(localStorage.getItem("selectedTenant") || "{}");
-      const bundleUrlsVsRoutes = allApps.reduce((acc: any, curr: any) => {
+      const bundleUrlsVsRoutes = filteredApps.reduce((acc: any, curr: any) => {
         if (curr?.appConfig?.url && curr?.appConfig?.route) {
           acc[curr.appConfig.url] = curr.appConfig.route;
         }
@@ -378,6 +378,7 @@ const DashBoard = () => {
               const iframeEle = document.createElement("iframe");
               iframeEle.setAttribute("src", url);
               iframeEle.setAttribute("style", "display:none;");
+              iframeEle.setAttribute("txe-pre-fetch-iframe", "");
               iframeEle.onload = () => {
                 console.log(`Loaded app bundle: ${appRoute}`);
                 // document.body.removeChild(iframeEle);
@@ -389,6 +390,12 @@ const DashBoard = () => {
           }
         }
       );
+      setTimeout(() => {
+        const iframes = document.querySelectorAll('iframe[txe-pre-fetch-iframe]');
+        iframes.forEach((iframe) => {
+          document.body.removeChild(iframe);
+        });
+      }, 30000);
     } catch (error) {
       console.error("Error loading app bundles:", error);
     }
