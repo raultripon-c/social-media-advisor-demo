@@ -42,7 +42,7 @@ declare var phenomevent: any;
 
     const getAccessTokenForTracking = () => {
       let accessTokenJSON: any = {
-        storage: window.keycloakInstance.token
+        storage: window?.keycloakInstance?.token
       };
   
       accessTokenJSON.keycloak = window.keycloakInstance.token;
