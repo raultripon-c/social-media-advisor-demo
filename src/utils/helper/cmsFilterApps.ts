@@ -1,6 +1,7 @@
 import { APIService } from '../api.service';
 
 export const cmsFilterApps = async (refNum: string) => {
+  (window as any).isCMSFilterAPICompleted = false;
   if (document.cookie.includes('token')) {
     checkCanvasSite(refNum);
   }

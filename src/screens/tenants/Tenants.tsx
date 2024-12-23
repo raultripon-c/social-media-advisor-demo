@@ -187,10 +187,10 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
         customerCode = response.customerCode;
         refNum = response.refNum;
       }
+      setIsNavigationLoading(false);
       navigate(
       `/${customerCode}/${refNum}/summary`
       );
-      setIsNavigationLoading(false);
     });
     
   };

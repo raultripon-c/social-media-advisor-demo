@@ -87,7 +87,7 @@ export const APIService = {
         setRolesLoader(false);
       });
   },
-  getAllApps: async (setAppsLoader?: any) => {
+  getAllApps: async () => {
     return await API.get(`${(window as any)._env_.TOOLS_API_URL}api/apps`)
       .then((result: any) => {
         let apps = result?.data?.data;

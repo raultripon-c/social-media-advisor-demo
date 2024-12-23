@@ -3,6 +3,7 @@ import { CommonConstants } from "../../utils/common-constants";
 
 export const crmFilterApps = async (refNum: string, userRoles?: any) => {
     try {
+        (window as any).isCRMFilterAPICompleted = false;
         (window as any).showEvents = false;
         (window as any).showCandidates = false;
         (window as any).showLists = false;
@@ -31,8 +32,8 @@ export const crmFilterApps = async (refNum: string, userRoles?: any) => {
         const { code, type } = orgInfo;
 
         await APIService.registerToken(refNum, code, type);
-        APIService.getTenantConfig(paramObj).then(xx => {
-            const tenantConfigResp = xx;
+        APIService.getTenantConfig(paramObj).then(resp => {
+            const tenantConfigResp = resp;
             if (!tenantConfigResp || !tenantConfigResp.modules) {
                 throw new Error("Tenant config response or modules are missing");
             }
@@ -46,8 +47,8 @@ export const crmFilterApps = async (refNum: string, userRoles?: any) => {
                 applicationName,
                 tenantId: refNum
             };
-            APIService.getRecruiterPermissions(params).then(x => {
-                const recruiterPermissionsResp = x;
+            APIService.getRecruiterPermissions(params).then(permissions => {
+                const recruiterPermissionsResp = permissions;
                 if (!recruiterPermissionsResp || !recruiterPermissionsResp.data || !recruiterPermissionsResp.data[0]) {
                     throw new Error("Recruiter permissions response or data are missing");
                 }
@@ -77,9 +78,6 @@ export const crmFilterApps = async (refNum: string, userRoles?: any) => {
                 (window as any).isCRMFilterAPICompleted = true;
             })
         })
-
-
-
 
     } catch (error) {
         console.error("Error in crmFilterApps:", error);

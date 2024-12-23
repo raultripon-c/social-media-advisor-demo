@@ -187,10 +187,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
     if (detailsApp && Object.keys(detailsApp).length != 0 && !window.location.pathname.includes("summmary")) {
       sessionStorage.setItem("selectedApp", JSON.stringify(detailsApp));
       selectedAppFromSession = detailsApp;
-    } else {
-      // sessionStorage.removeItem("selectedApp");
     }
   }, [fetchedApps, selectedTenant, selectedTenant?.refNum]);
+
   useEffect(() => {
     if (userId) {
       sessionTracker.initiate(userId, sessionTrackerProjectKey, sessionTrackerIngestPoint);
@@ -204,6 +203,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
       (window as any).sessionTracker = sessionTracker;
     }
   }, [userId]);
+  
   useEffect(() => {
     if (logedUserRoles?.length > 0) {
       let rbaroles: any = [];
@@ -228,10 +228,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
     setRolesLoader(false);
     if (selectedTenant?.customerId) {
       setAppsLoader(true);
-      const setCmsSiteMetaData = async () => {
-        const tenantSupportedLangs = await APIService.getSupportedLangs(selectedTenant?.refNum)
-        return await handleDomainUrlForSite(tenantSupportedLangs, selectedTenant, dispatch, setSiteMetaData, siteMetaData);
-      }
       setCmsSiteMetaData();
       const setPermissionsBasedApps = async () => {
         if (window?.keycloakInstance?.userInfo?.userDetails?.id) {
@@ -255,6 +251,11 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
 
   }, [selectedTenant?.customerId]);
 
+  const setCmsSiteMetaData = async () => {
+    const tenantSupportedLangs = await APIService.getSupportedLangs(selectedTenant?.refNum)
+    return await handleDomainUrlForSite(tenantSupportedLangs, selectedTenant, dispatch, setSiteMetaData, siteMetaData);
+  }
+
   const handleCRMFilterAPICompletion = () => {
     let response = JSON.parse(sessionStorage.getItem("allapps") || "[]");
     const filteredApps: any = transformAppData(response); // filters customerTenantApps and platformApps
@@ -270,7 +271,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
 
   const getAllApps = async () => {
     try {
-      const response = allApps && allApps.length > 0 ? allApps : await APIService.getAllApps(setAppsLoader);
+      const response = allApps && allApps.length > 0 ? allApps : await APIService.getAllApps();
 
       if (!response) return;
       let res = [...response];
