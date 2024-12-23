@@ -59,7 +59,7 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
   const dispatch = useDispatch();
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isNavigationLoading, setNavigationLoading] = useState<boolean>(false);
+  const [isNavigationLoading, setIsNavigationLoading] = useState<boolean>(false);
   const [searchKey, setSearchKey] = useState<string>("");
   const [filteredData, setFilteredData] = useState(
     JSON.parse(sessionStorage.getItem("tenants") || "[]") as any
@@ -190,18 +190,8 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
       navigate(
       `/${customerCode}/${refNum}/summary`
       );
-      setNavigationLoading(false);
+      setIsNavigationLoading(false);
     });
-    // dispatch(setSelectedTenant(selectedTenant));
-    // localStorage.setItem("selectedTenant", JSON.stringify(selectedTenant));
-    // const tenantSupportedLangs = await APIService.getSupportedLangs(selectedTenant?.refNum);
-    // await handleDomainUrlForSite(
-    //   tenantSupportedLangs,
-    //   selectedTenant,
-    //   dispatch,
-    //   setSiteMetaData,
-    //   siteMetaData
-    // );
     
   };
 
@@ -240,7 +230,7 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
               className="tenant-card"
               key={eachTenant.id}
               onClick={async () => {
-                setNavigationLoading(true);
+                setIsNavigationLoading(true);
                 localStorage.removeItem("selectedTenant");
                 await navigateToDashBoard(eachTenant);
               }}

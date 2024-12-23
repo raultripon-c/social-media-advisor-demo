@@ -93,9 +93,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
   };
 
   const handleInternalNavigation = (event: CustomEvent) => {
-    // if((window as any).cpui?.init) {
-    //   return;
-    // }
     console.log(
       "Successfully listened internalNavigation event from CRM",
       event.detail.url
@@ -161,10 +158,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
     } else {
       dispatch(setAppsFromAPI(response));
       const mfRoutes = getMfRoutes(response);
-      // const filteredApps: any = transformAppData(response); // filters customerTenantApps and platformApps
-      // setTransformedAppData(filteredApps);
-      // setCustomerTenantApps(filteredApps?.customerTenantApps); // customerTenantApps
-      // handleCanvasSite(filteredApps?.customerTenantApps);
       setAllRoutes([...appRoutes, ...mfRoutes]);
     }
 
@@ -248,14 +241,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
           if (response.length == 0) {
             getAllApps();
           } else {
-            // dispatch(setAppsFromAPI(response));       
-            // const mfRoutes = getMfRoutes(response);
-            const filteredApps: any = transformAppData(response); // filters customerTenantApps and platformApps
-            setTransformedAppData(filteredApps);
-            setCustomerTenantApps(filteredApps?.customerTenantApps); // customerTenantApps
-            // handleCanvasSite(filteredApps?.customerTenantApps);
-            // setAllRoutes([...appRoutes, ...mfRoutes]);
-            // console.log("All Apps", mfRoutes);
+            handleCRMFilterAPICompletion();
+            
           }
           setAppsLoader(false);
         }
@@ -268,40 +255,18 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
 
   }, [selectedTenant?.customerId]);
 
-  // useEffect(() => {
-  //   const currentApp = selectedApp.length > 0 ? selectedApp : selectedAppFromSession;
-  //   if (
-  //     currentApp &&
-  //     currentApp?.name &&
-  //     ((selectedTenant?.customerCode && selectedTenant?.refNum) || currentApp.context === "platform")
-  //   ) {
-  //     const appSelectionOptions: AppSelectionOptions = {
-  //       selectedApp: currentApp,
-  //       navigate: navigate,
-  //       customerCode: selectedTenant?.customerCode,
-  //       refNum: selectedTenant?.refNum,
-  //       siteMetaData: siteMetaData,
-  //       dispatch: dispatch,
-  //       openInNewTab: false,
-  //       setSiteMetaData: setSiteMetaData,
-  //       selectedTenant: selectedTenant,
-  //     }
-  //     appSelectionHandler(appSelectionOptions);
-  //   }
-  // }, [selectedTenant, selectedTenant?.refNum]);
+  const handleCRMFilterAPICompletion = () => {
+    let response = JSON.parse(sessionStorage.getItem("allapps") || "[]");
+    const filteredApps: any = transformAppData(response); // filters customerTenantApps and platformApps
+    setTransformedAppData(filteredApps);
+    setCustomerTenantApps(filteredApps?.customerTenantApps); // customerTenantApps
+  }
 
-  
-
-  // const handleCanvasSite = async (appsData: any) => {
-  //   if (document.cookie.includes('token')) {
-  //     await checkCanvasSite(appsData);
-  //   }
-  //   else {
-  //     window.addEventListener('txeLoginEvent', async () => {
-  //       await checkCanvasSite(appsData);
-  //     }, { once: true });
-  //   }
-  // }
+  useEffect(() => {
+    if((window as any).isCRMFilterAPICompleted === true) {
+      handleCRMFilterAPICompletion();
+    }
+  }, [(window as any).isCRMFilterAPICompleted])
 
   const getAllApps = async () => {
     try {
@@ -315,7 +280,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
       setTransformedAppData(transformedAppData);
       const filteredApps: any = transformedAppData;
       setCustomerTenantApps(filteredApps?.customerTenantApps);
-      // handleCanvasSite(filteredApps?.customerTenantApps);
       sessionStorage.setItem("allapps", JSON.stringify(res));
       setAllRoutes([...appRoutes, ...mfRoutes]);
       const filteredPaths = mfRoutes
