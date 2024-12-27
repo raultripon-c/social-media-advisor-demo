@@ -1,3 +1,4 @@
+@import "./../../variable.scss";
 .angular-module {
   .dropdown {
     padding: 0 !important;
@@ -53,4 +54,25 @@ ul#spotlight-list {
 .close-facet-serach .data-details.list-cntr .header-list-cntr {
   left: 286px !important;
   right: 10px !important;
+}
+.cmp-knowledge-base {
+  .cmp-sub-header {
+    // Targeting .text-2xl inside .cmp-sub-header
+    .text-2xl {
+      font-family: $font-family;
+      font-size: 20px;
+      color: $color-18;
+      line-height: 30px;
+      font-weight: 600;
+    }
+  }
+  .flex-col {
+    .py-4{
+      padding: 32px 32px 0px;
+    }
+    .px-5{
+      // Custom padding for this element
+      padding: 32px 32px 0px;
+    }
+  }
 }
