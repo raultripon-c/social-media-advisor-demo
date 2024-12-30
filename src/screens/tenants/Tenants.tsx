@@ -177,8 +177,6 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
   }, [totalTenantsData]);
 
   const navigateToDashBoard = async (selectedTenant: any = {}) => {
-    await crmFilterApps(selectedTenant?.refNum, user);
-    await cmsFilterApps(selectedTenant?.refNum);
     const tenantsUrl = `${(window as any)._env_.APP_API_URL}/customers/tenants/${selectedTenant?.refNum}`;
     APIService.getTenants(tenantsUrl, dispatch).then((response: any) => {
       let customerCode = selectedTenant.customerCode;
