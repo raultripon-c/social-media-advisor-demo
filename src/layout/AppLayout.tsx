@@ -167,17 +167,18 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
       "txeInternalNavigation",
       handleInternalNavigation as EventListener
     );
+
+    window.addEventListener("crmFilterAppsPermissionEvent", () => {
+      handleCRMFilterAPICompletion(true);
+    })
+
     return () => {
       window.removeEventListener(
         "txeInternalNavigation",
         handleInternalNavigation as EventListener
       );
     };
-
-    // Cleanup actions when component unmounts
-    return () => {
-
-    };
+  
   }, []);
 
 
@@ -256,11 +257,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
     return await handleDomainUrlForSite(tenantSupportedLangs, selectedTenant, dispatch, setSiteMetaData, siteMetaData);
   }
 
-  const handleCRMFilterAPICompletion = () => {
-    if(!(window as any).isCRMFilterAPICompleted) {
+  const handleCRMFilterAPICompletion = (completeOps?: boolean) => {
+    if(!completeOps && !(window as any).isCRMFilterAPICompleted) {
       return;
     }
-    let response = JSON.parse(sessionStorage.getItem("allapps") || "[]");
+
+    const response = JSON.parse(sessionStorage.getItem("allapps") || "[]");
     const filteredApps: any = transformAppData(response); // filters customerTenantApps and platformApps
     setTransformedAppData(filteredApps);
     setCustomerTenantApps(filteredApps?.customerTenantApps); // customerTenantApps

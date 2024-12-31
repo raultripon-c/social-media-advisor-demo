@@ -125,6 +125,8 @@ const DashBoard = () => {
     if ((window as any).isCMSFilterAPICompleted === true && (window as any).isCRMFilterAPICompleted === true) {
       setDoesUserHaveCMSAccess(true);
       handleDisplayDataForApps(true);
+      const crmFilterAppsPermissionEvt = new CustomEvent('crmFilterAppsPermissionEvent');
+      window.dispatchEvent(crmFilterAppsPermissionEvt);
     }
   }, [(window as any).isCMSFilterAPICompleted, (window as any).isCRMFilterAPICompleted]);
 
