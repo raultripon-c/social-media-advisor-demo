@@ -257,6 +257,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
   }
 
   const handleCRMFilterAPICompletion = () => {
+    if(!(window as any).isCRMFilterAPICompleted) {
+      return;
+    }
     let response = JSON.parse(sessionStorage.getItem("allapps") || "[]");
     const filteredApps: any = transformAppData(response); // filters customerTenantApps and platformApps
     setTransformedAppData(filteredApps);
@@ -280,7 +283,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
       const transformedAppData = transformAppData(res)
       setTransformedAppData(transformedAppData);
       const filteredApps: any = transformedAppData;
-      setCustomerTenantApps(filteredApps?.customerTenantApps);
+      if((window as any).isCRMFilterAPICompleted) {
+        setCustomerTenantApps(filteredApps?.customerTenantApps);
+      }
       sessionStorage.setItem("allapps", JSON.stringify(res));
       setAllRoutes([...appRoutes, ...mfRoutes]);
       const filteredPaths = mfRoutes
