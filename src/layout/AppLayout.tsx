@@ -19,15 +19,14 @@ import {
 } from "../utils/appUtils";
 
 import sessionTracker from "phenom-session-tracker";
-import { setAppDetails, setAppsFromAPI } from "../store/apps/actions";
+import { setAppDetails, setAppsFromAPI, setIsCMSFilterApiCompleted, setIsCRMFilterApiCompleted } from "../store/apps/actions";
 import { APIService } from "../utils/api.service";
 import "./AppLayout.scss";
 import { InitialLoader } from "./Loader";
 import ToolsSideBar from "./sideBar/SideBar";
 import { AppSelectionOptions } from "interfaces/AppSelectionOptions";
-import { crmFilterApps } from "../utils/helper/crmFilterApps";
-import { cmsFilterApps } from "../utils/helper/cmsFilterApps";
 import { Loader } from "@phenom/react-ui-components";
+import { CommonConstants } from "../utils/common-constants";
 
 interface AppLayoutProps {
   allApps: any;
@@ -72,7 +71,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
   const fetchedApps = useSelector((state: any) => state.app.allApps);
   const { user } = useSelector(
     (state: AppStore) => state.customer
-  );  
+  ); 
+  const storeIsCRMApiCompleted = useSelector((state: AppStore) => state.app.isCRMFilterAPICompleted);
+  const storeIsCMSApiCompleted = useSelector((state: AppStore) => state.app.isCMSFilterAPICompleted);
   
   const navigateToApp = (selectedApp: any, customerCode: string, refNum: string, customRoute?: any) => {
     localStorage.setItem("selectedApp", JSON.stringify(selectedApp));
@@ -168,10 +169,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
       handleInternalNavigation as EventListener
     );
 
-    window.addEventListener("crmFilterAppsPermissionEvent", () => {
-      handleCRMFilterAPICompletion(true);
-    })
-
     return () => {
       window.removeEventListener(
         "txeInternalNavigation",
@@ -181,6 +178,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
   
   }, []);
 
+
+  useEffect(() => {
+    if(storeIsCMSApiCompleted && storeIsCRMApiCompleted) {
+      handleCRMFilterAPICompletion();
+    }
+  }, [storeIsCMSApiCompleted, storeIsCRMApiCompleted]);
 
   //for setting selectedApp in session
   useEffect(() => {
@@ -237,9 +240,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
           let response = JSON.parse(sessionStorage.getItem("allapps") || "[]");
           if (response.length == 0) {
             getAllApps();
-          } else {
-            handleCRMFilterAPICompletion();
-            
           }
           setAppsLoader(false);
         }
@@ -258,9 +258,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
   }
 
   const handleCRMFilterAPICompletion = (completeOps?: boolean) => {
-    if(!completeOps && !(window as any).isCRMFilterAPICompleted) {
-      return;
-    }
 
     const response = JSON.parse(sessionStorage.getItem("allapps") || "[]");
     const filteredApps: any = transformAppData(response); // filters customerTenantApps and platformApps
@@ -268,11 +265,127 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
     setCustomerTenantApps(filteredApps?.customerTenantApps); // customerTenantApps
   }
 
-  useEffect(() => {
-    if((window as any).isCRMFilterAPICompleted === true) {
-      handleCRMFilterAPICompletion();
+  const cmsFilterApps = async (refNum: string) => {
+  
+    dispatch(setIsCMSFilterApiCompleted(false));
+    if (document.cookie.includes('token')) {
+      checkCanvasSite(refNum);
     }
-  }, [(window as any).isCRMFilterAPICompleted])
+    else {
+      await APIService.triggerTxeLogin();
+      checkCanvasSite(refNum);
+    }
+  }
+  
+  const checkCanvasSite = (refNum: string) => {
+    APIService.isCanvasSite(refNum).then(x => {
+      const isCanvasTenant = x;
+      const userHasCmsKeyCloakAccess = window?.keycloakInstance?.userInfo?.resources["cms"] &&
+        window?.keycloakInstance?.userInfo?.resources["cms"].roles.length > 0 ||
+        window?.keycloakInstance?.userInfo?.resources[`${(refNum).toLowerCase()}-cms`] &&
+        window?.keycloakInstance?.userInfo?.resources[`${(refNum).toLowerCase()}-cms`].roles.length > 0;
+      if (isCanvasTenant === null) {
+        (window as any).userHasCmsAccess = false;
+      } else {
+        (window as any).userHasCmsAccess = userHasCmsKeyCloakAccess;
+      }
+      sessionStorage.setItem('isCanvasSite', isCanvasTenant);
+      if (isCanvasTenant) {
+        (window as any).showBanners = true;
+      } else {
+        (window as any).showBanners = false;
+      }
+      dispatch(setIsCMSFilterApiCompleted(true));
+    })
+  
+  }
+
+  const crmFilterApps = async (refNum: string, userRoles?: any) => {
+      try {
+  
+          dispatch(setIsCRMFilterApiCompleted(false));
+  
+          (window as any).showEvents = false;
+          (window as any).showCandidates = false;
+          (window as any).showLists = false;
+          (window as any).showCampaigns = false;
+          (window as any).showTemplates = false;
+          (window as any).showTalentCommunities = false;
+          (window as any).showAutomations = false;
+          (window as any).showEvents = false;
+          console.log(userRoles);
+  
+          const keycloakInstance = (window as any).keycloakInstance;
+          if (!keycloakInstance || !keycloakInstance.userInfo || !keycloakInstance.userInfo.userDetails) {
+              throw new Error("Keycloak instance or user details are missing");
+          }
+          const recruiterUserId = keycloakInstance.userInfo.userDetails.id;
+          const applicationName = CommonConstants.APPLICATION_NAME;
+          const paramObj = {
+              refNum,
+              recruiterUserId
+          };
+  
+          const orgInfo = (window as any).orgInfo;
+          if (!orgInfo) {
+              throw new Error("Organization info is missing");
+          }
+          const { code, type } = orgInfo;
+  
+          await APIService.registerToken(refNum, code, type);
+          APIService.getTenantConfig(paramObj).then(resp => {
+              const tenantConfigResp = resp;
+              if (!tenantConfigResp || !tenantConfigResp.modules) {
+                  throw new Error("Tenant config response or modules are missing");
+              }
+              const isEventEnabledTC = tenantConfigResp.modules.activate?.events;
+              const hideCandidatesTab = tenantConfigResp.modules.agencies?.hideCandidatesTab ?? false;
+              const isTenantHasJTCEnabled = tenantConfigResp.modules.access?.jtc;
+              const isTenantHasAutomationFeatureEnabled = tenantConfigResp.modules.feature?.automation;
+              const isEventsEnabled = tenantConfigResp.modules.activate?.events;
+              const params = {
+                  loginId: recruiterUserId,
+                  applicationName,
+                  tenantId: refNum
+              };
+              APIService.getRecruiterPermissions(params).then(permissions => {
+                  const recruiterPermissionsResp = permissions;
+                  if (!recruiterPermissionsResp || !recruiterPermissionsResp.data || !recruiterPermissionsResp.data[0]) {
+                      throw new Error("Recruiter permissions response or data are missing");
+                  }
+                  let roleConfig = recruiterPermissionsResp.data[0].permissions;
+                  if (!roleConfig || !roleConfig.modules) {
+                      throw new Error("Role config or modules are missing");
+                  }
+                  const isEventEnabledRP = roleConfig.modules.events?.view;
+                  const isRecruiterHaveCandidatesViewAccess = roleConfig.modules.candidates?.view;
+                  const isListsEnabledRP = roleConfig.modules.list?.view;
+                  const isCampaignViewCampaignAccess = roleConfig.modules.campaigns?.view;
+                  const isCampaignViewTemplateAccess = roleConfig.modules.template?.view;
+                  const hasJTCTabViewAccess = roleConfig.modules.jtc?.view;
+                  const isRecruiterHaveAutomationSettingAccess = roleConfig.modules.automation?.view;
+                  const isRecruiterHaveViewEventsAccess = roleConfig.modules.events?.view;
+  
+                  const isJTCTabEnabled = roleConfig.modules.candidates?.view && isTenantHasJTCEnabled && hasJTCTabViewAccess;
+  
+                  (window as any).showEvents = isEventEnabledTC && isEventEnabledRP;
+                  (window as any).showCandidates = isRecruiterHaveCandidatesViewAccess && !hideCandidatesTab;
+                  (window as any).showLists = isListsEnabledRP;
+                  (window as any).showCampaigns = isCampaignViewCampaignAccess;
+                  (window as any).showTemplates = isCampaignViewTemplateAccess;
+                  (window as any).showTalentCommunities = isJTCTabEnabled;
+                  (window as any).showAutomations = isTenantHasAutomationFeatureEnabled && isRecruiterHaveAutomationSettingAccess;
+                  (window as any).showEvents = isEventsEnabled && isRecruiterHaveViewEventsAccess;
+  
+                  dispatch(setIsCRMFilterApiCompleted(true));
+  
+              })
+          })
+  
+      } catch (error) {
+          console.error("Error in crmFilterApps:", error);
+      }
+  };
 
   const getAllApps = async () => {
     try {
@@ -284,10 +397,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
       const mfRoutes = getMfRoutes(res);
       const transformedAppData = transformAppData(res)
       setTransformedAppData(transformedAppData);
-      const filteredApps: any = transformedAppData;
-      if((window as any).isCRMFilterAPICompleted) {
-        setCustomerTenantApps(filteredApps?.customerTenantApps);
-      }
       sessionStorage.setItem("allapps", JSON.stringify(res));
       setAllRoutes([...appRoutes, ...mfRoutes]);
       const filteredPaths = mfRoutes

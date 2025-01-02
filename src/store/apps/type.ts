@@ -4,5 +4,7 @@ export interface AppState {
     allApps: [];
     sidebarOpen:boolean;
     dashboardSelected: boolean;
+    isCRMFilterAPICompleted: boolean;
+    isCMSFilterAPICompleted: boolean;
   }
   

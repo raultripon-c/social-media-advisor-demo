@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
-  EmptyState,
   Button,
   Loader,
   GreetingCard,
@@ -42,6 +41,8 @@ const DashBoard = () => {
   const [doesUserHaveCMSAccess, setDoesUserHaveCMSAccess] = useState<boolean>(false);
   const [campaignData, setCampaignData] = useState<CampaignData[]>([]);
   const [displayDataForApps, setDisplayDataForApps] = useState<any>([]);
+  const storeIsCMSApiCompleted = useSelector((store: AppStore) => store.app.isCMSFilterAPICompleted);
+  const storeIsCRMApiCompleted = useSelector((store: AppStore) => store.app.isCRMFilterAPICompleted);
 
   const { code, type } = window.orgInfo;
 
@@ -122,13 +123,11 @@ const DashBoard = () => {
   }, []);
 
   useEffect(() => {
-    if ((window as any).isCMSFilterAPICompleted === true && (window as any).isCRMFilterAPICompleted === true) {
+    if(storeIsCMSApiCompleted && storeIsCRMApiCompleted) {
       setDoesUserHaveCMSAccess(true);
       handleDisplayDataForApps(true);
-      const crmFilterAppsPermissionEvt = new CustomEvent('crmFilterAppsPermissionEvent');
-      window.dispatchEvent(crmFilterAppsPermissionEvt);
     }
-  }, [(window as any).isCMSFilterAPICompleted, (window as any).isCRMFilterAPICompleted]);
+  }, [storeIsCMSApiCompleted, storeIsCRMApiCompleted])
 
   const handleDisplayDataForApps = (isCMSCompleted?: boolean) => {
     const cmsValToConsider = isCMSCompleted || doesUserHaveCMSAccess;
