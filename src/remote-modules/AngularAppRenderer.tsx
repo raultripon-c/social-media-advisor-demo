@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { AppStore } from "store";
 import { MessageService } from "../MessageService";
 import { useDynamicMFLoader } from "./useDynamicMFLoader";
-import { removeStylesBasedOnContents, setObjectReferenceFromString } from "../utils/appUtils";
+import { removeStyles, removeStylesBasedOnContents, restoreStyles, setObjectReferenceFromString } from "../utils/appUtils";
 import CrmStylesRenderer from "./CrmStylesRenderer";
 import { Loader } from "@phenom/react-ui-components";
 import "./AngularApp.scss";
@@ -19,6 +19,7 @@ declare global {
 }
 
 export function AngularAppRenderer(props: any) {
+  let removedStyles: any[] = [];
   const containerRef = useRef(null);
   const selectedTenant = useSelector((state: AppStore) => state.customer.selectedTenant);
   // const approute = props?.selectedApp?.route;
@@ -132,7 +133,12 @@ export function AngularAppRenderer(props: any) {
       if (!document.getElementById("crm-styles") && props.scope === 'cpui') {
         fetchAndLoadScript();
       }
-      removeStylesBasedOnContents(["https://github.com/h5bp/html5-boilerplate/blob/master/src/css/main.css", "assets-management-new-body"]);
+      let stylesToBeRemoved = ["https://github.com/h5bp/html5-boilerplate/blob/master/src/css/main.css", "assets-management-new-body"];
+      if (props.scope && props.scope === "chatbotManagementDashboard") {
+        removedStyles = removeStyles();  
+        stylesToBeRemoved = [...stylesToBeRemoved,"cmsWebFont"];
+      }
+      removeStylesBasedOnContents(stylesToBeRemoved);
       loadComponent();
       (async () => {
         const scope = props.scope;
@@ -173,6 +179,7 @@ export function AngularAppRenderer(props: any) {
     return () => {
       window.__ckeditor__ = window.CKEDITOR;
       window.__$__ = window.$;
+      removedStyles && restoreStyles(removedStyles);
       setReady(false);
     };
   }, [ready]);

@@ -17,7 +17,7 @@ import {
 import { CUSTOMER_LEVEL, PLATFORM, TENANT } from "../../utils/constants";
 import "./SideBar.scss";
 import { AppSelectionOptions } from "../../interfaces/AppSelectionOptions";
-import { appSelectionHandler } from "../../utils/appUtils";
+import { appSelectionHandler, findAppConfigByRoutes } from "../../utils/appUtils";
 
 function ToolsSideBar(props: any) {
   const { categories, setCategories } = props;
@@ -30,11 +30,16 @@ function ToolsSideBar(props: any) {
   );
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [disableAutoClose, setDisableAutoClose] = useState(true);
+  let fetchedApps = useSelector((state: any) => state.app.allApps);
+  if(!fetchedApps || fetchedApps.length === 0) {
+    fetchedApps = JSON.parse(sessionStorage.getItem("allapps") || "[]");
+  }
+  let detailsApp = fetchedApps && fetchedApps.length && findAppConfigByRoutes(fetchedApps, window.location.pathname)[0];
   const selectedApp = useSelector((state: any) => {
     const selectedAppFromSession = JSON.parse(
       sessionStorage.getItem("selectedApp") || "null"
     );
-    return selectedAppFromSession || state.app?.selectedApp;
+    return detailsApp ?? (selectedAppFromSession || state.app?.selectedApp);
   });
   const navigate = useNavigate();
   const dispatch = useDispatch();

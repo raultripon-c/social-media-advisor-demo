@@ -4,7 +4,7 @@ import { AppStore } from "store";
 import { Loader } from "@phenom/react-ui-components";
 import { removeElementsById } from "../../utils/helper/utilizer";
 import './Assets.css';
-import { removeCrmStyles } from "../../utils/appUtils";
+import { findAppConfigByRoutes, removeCrmStyles } from "../../utils/appUtils";
 import { triggerRefreshToken } from "../../utils/api";
 
 declare global {
@@ -23,9 +23,16 @@ const Assets = () => {
         );
         return selectedAppFromSession || state.app?.selectedApp;
       });
-    var selectedApp = selectedModuleAppObject?.appConfig || {};
+    let fetchedApps = useSelector((state: any) => state.app.allApps);
+    if(!fetchedApps || fetchedApps.length === 0) {
+      fetchedApps = JSON.parse(sessionStorage.getItem("allapps") || "[]");
+    }
+    let detailsApp = fetchedApps && fetchedApps.length && findAppConfigByRoutes(fetchedApps, window.location.pathname)[0];
+    var selectedApp = detailsApp?.appConfig ?? selectedModuleAppObject?.appConfig;
 
     useEffect(() => {
+      const tokenBkp = localStorage.getItem("token");
+      localStorage.removeItem("token");
       const fetchData = async () => {
         await triggerRefreshToken();
         const embedScriptId = selectedApp?.scriptId;
@@ -36,18 +43,18 @@ const Assets = () => {
 
         const loadScript = () => {
             return new Promise<void>((resolve) => {
-                
-                if (!existsScrElem) {
-                    const scrElem = document.createElement("script");
-                    scrElem.id = embedScriptId;
-                    scrElem.src = selectedApp?.url;
-                    scrElem.onload = () => {
-                        resolve();
-                    };
-                    document.querySelector("head")?.appendChild(scrElem);
-                } else {
-                    resolve();
-                }
+              const existsScrElem = document.querySelector(`#${embedScriptId}`);
+              if (!existsScrElem) {
+                  const scrElem = document.createElement("script");
+                  scrElem.id = embedScriptId;
+                  scrElem.src = selectedApp?.url;
+                  scrElem.onload = () => {
+                      resolve();
+                  };
+                  document.querySelector("head")?.appendChild(scrElem);
+              } else {
+                  resolve();
+              }
             });
         };
 
@@ -57,8 +64,8 @@ const Assets = () => {
           storeData.selectedTenant.refNum
         ) {
           loadScript().then(() => {
-            if (window.txEmbed) {
-              window.txEmbed.embedModules(
+            if (window.txEmbed && window.txEmbed.embedCaasModules) {
+              window.txEmbed.embedCaasModules(
                 "assets",
                 "#tools-body-container",
                 {
@@ -76,13 +83,16 @@ const Assets = () => {
         }
       }
       fetchData();
+      return () => {
+        tokenBkp && localStorage.setItem("token", tokenBkp);
+      }
     }, [storeData]);
 
     return (
         <div>
             <div id="tools-body-container"></div>
             {isLoading && (
-                <div>
+                <div className="child-loading">
                     <Loader title="Please Wait, Loading..." />
                 </div>
             )}

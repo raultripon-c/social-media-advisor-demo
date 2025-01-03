@@ -6,7 +6,7 @@ import {
   removeElementsById,
   loadScriptById,
 } from "../../utils/helper/utilizer";
-import { removeCrmStyles } from "../../utils/appUtils";
+import { findAppConfigByRoutes, removeCrmStyles } from "../../utils/appUtils";
 import { APIService } from "../../utils/api.service";
 import { triggerRefreshToken } from "../../utils/api";
 
@@ -25,7 +25,12 @@ const Banners = () => {
     );
     return selectedAppFromSession || state.app?.selectedApp;
   });
-  var selectedApp = selectedModuleAppObject?.appConfig || {};
+  let fetchedApps = useSelector((state: any) => state.app.allApps);
+  if(!fetchedApps || fetchedApps.length === 0) {
+    fetchedApps = JSON.parse(sessionStorage.getItem("allapps") || "[]");
+  }
+  let detailsApp = fetchedApps && fetchedApps.length && findAppConfigByRoutes(fetchedApps, window.location.pathname)[0];
+  var selectedApp = detailsApp?.appConfig ?? selectedModuleAppObject?.appConfig;
 
   // TODO: Will remove this in future
   const deleteCmsLoader = () => {
@@ -53,6 +58,7 @@ const Banners = () => {
 
       const loadScript = () => {
         return new Promise<void>((resolve) => {
+          const existsScrElem = document.querySelector(`#${embedScriptId}`);
           if (!existsScrElem) {
             const scrElem = document.createElement("script");
             scrElem.id = embedScriptId;
@@ -79,7 +85,7 @@ const Banners = () => {
               "canvas-bootstrapper1",
               scriptUrl
             );
-            if (window.txEmbed) {
+            if (window.txEmbed && window.txEmbed.embedModules) {
               window.txEmbed.embedModules(
                 "banners",
                 "#tools-body-container",
@@ -109,7 +115,7 @@ const Banners = () => {
   return (
     <div>
       {isLoading && (
-        <div>
+        <div className="child-loading">
           <Loader title="Please Wait, Loading..." />
         </div>
       )}

@@ -7,11 +7,42 @@ import { GenericErrorBoundary } from "../remote-modules/ReactAppRenderer";
 import Tenants from "../screens/tenants/Tenants";
 import AppLayout from "./AppLayout";
 import Header from "./header/Header";
+import { toast } from "react-toastify";
+import { Loader } from "@phenom/react-ui-components";
 
 const Layout = () => {
   
   const navigate = useNavigate();
+  const { keycloak, orgInfo } = useKeycloak();
+  const userDetails = window?.keycloakInstance?.tokenParsed?.userDetails;
+  const customerTenants = useSelector(
+    (state: AppStore) => state.customer.customerTenants
+  );
+  const [initialized, setInitialized] = useState(false);
+  window.keycloakInstance = keycloak;
+  window.orgInfo = orgInfo;
+  (window as any).keycloakInstance = keycloak;
+  (window as any).orgInfo = orgInfo;
+  let pendo = (window as any).pendo;
+  const [allApps, setAllApps] = useState<any[]>([]);
+  const [keycloakAvailable, setKeycloakAvailable] = useState(false);
   const selectedTenant = localStorage.getItem("selectedTenant") ? JSON.parse(localStorage.getItem("selectedTenant") || "{}") : {};
+
+  useEffect(()=>{
+    if(window?.keycloakInstance?.userInfo) {
+      setKeycloakAvailable(true);
+    } else {
+      (async () => {
+        await keycloak?.loadUserInfo();
+        if(window?.keycloakInstance?.userInfo) {
+          setKeycloakAvailable(true);
+        } else {
+          toast.dismiss();
+          toast.error("KeyCloak is not available. Please try again later.");
+        }
+      })();
+    }
+  }, [window?.keycloakInstance]);
 
   useEffect(()=>{
     if(window.location.pathname === "/" || !selectedTenant || !Object.keys(selectedTenant).length) {
@@ -21,24 +52,14 @@ const Layout = () => {
     }
     const currentPath = window.location.pathname.replace("/dashboard/dashboard", "/dashboard");
     if(!currentPath.startsWith(`/${selectedTenant.customerCode}/${selectedTenant.refNum}`) && currentPath.includes("dashboard")) {
-      sessionStorage.setItem("txeCustomPath", currentPath)
+      currentPath.includes("dashboard") && sessionStorage.setItem("txeCustomPath", currentPath)
       navigate(`/${selectedTenant.customerCode}/${selectedTenant.refNum}${currentPath}`)
     } else {
-      sessionStorage.setItem("txeCustomPath", currentPath.split('/').filter(Boolean).splice(2).join('/'))
+      currentPath.includes("dashboard") && sessionStorage.setItem("txeCustomPath", currentPath.split('/').filter(Boolean).splice(2).join('/'))
     }
     sessionStorage.removeItem("allapps")
   },[])
   
-  const { keycloak, orgInfo } = useKeycloak();
-  const userDetails = window?.keycloakInstance?.tokenParsed?.userDetails;
-  const customerTenants = useSelector(
-    (state: AppStore) => state.customer.customerTenants
-  );
-  const [initialized, setInitialized] = useState(false);
-  window.keycloakInstance = keycloak;
-  window.orgInfo = orgInfo;
-  let pendo = (window as any).pendo;
-  const [allApps, setAllApps] = useState<any[]>([]);
   useEffect(()=>{
     sessionStorage.removeItem("allapps")
   },[])
@@ -59,11 +80,16 @@ const Layout = () => {
     }
   });
 
-  (window as any).keycloakInstance = keycloak;
-  (window as any).orgInfo = orgInfo;
+  if(!keycloakAvailable) {
+    return (
+          <div className="tenants-loader">
+            <Loader title="Please Wait, Loading User Details" />
+          </div>
+        );
+  }
   return (
     <>
-      {initialized && (
+      {keycloakAvailable && initialized && (
         <div className="servicehub-tools">
           <div className="service-tools-app-header">
             <Header

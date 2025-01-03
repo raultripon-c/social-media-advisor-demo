@@ -323,6 +323,7 @@ const DashBoard = () => {
       dispatch(setAppsFromAPI(apps));
       setIsLoading(false);
     }
+    loadAppBundles();
   }, [dispatch]);
 
   useEffect(() => {
@@ -359,6 +360,46 @@ const DashBoard = () => {
       window.removeEventListener("txeLoginEvent", () => { });
     };
   }, []);
+
+  const loadAppBundles = () => {
+    try {
+      const filteredApps = JSON.parse(sessionStorage.getItem("filteredApps") || "{}");
+      const selectedTenant = JSON.parse(localStorage.getItem("selectedTenant") || "{}");
+      const bundleUrlsVsRoutes = filteredApps.reduce((acc: any, curr: any) => {
+        if (curr?.appConfig?.url && curr?.appConfig?.route) {
+          acc[curr.appConfig.url] = curr.appConfig.route;
+        }
+        return acc;
+      }, {});
+      Object.values(bundleUrlsVsRoutes).forEach((appRoute: any) => {
+          try {
+            const url = `${window.location.origin}/${selectedTenant.customerCode}/${selectedTenant.refNum}${appRoute}`;
+            if(!document.querySelector(`[src="${url}"]`)) {
+              const iframeEle = document.createElement("iframe");
+              iframeEle.setAttribute("src", url);
+              iframeEle.setAttribute("style", "display:none;");
+              iframeEle.setAttribute("txe-pre-fetch-iframe", "");
+              iframeEle.onload = () => {
+                console.log(`Loaded app bundle: ${appRoute}`);
+                // document.body.removeChild(iframeEle);
+              }
+              document.body.appendChild(iframeEle);
+            }
+          } catch (error) {
+            console.error("Error loading app bundles:", error);
+          }
+        }
+      );
+      setTimeout(() => {
+        const iframes = document.querySelectorAll('iframe[txe-pre-fetch-iframe]');
+        iframes.forEach((iframe) => {
+          document.body.removeChild(iframe);
+        });
+      }, 30000);
+    } catch (error) {
+      console.error("Error loading app bundles:", error);
+    }
+  };
 
   if (isLoading) {
     return (
