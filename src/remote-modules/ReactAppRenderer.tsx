@@ -102,7 +102,13 @@ export function ReactAppRenderer(props: Props) {
       const originalReplaceState = history.replaceState;
       history.replaceState = function (...args) {
         if(args && args.length) {
-          if(window.location.href.includes("ae") && !args[2].includes("ae")) {
+          const automationEngineCase = window.location.href.includes("ae") && !args[2].includes("ae");
+          const currentUrl = window.location.pathname;
+          let dontredirectForCRM = false;
+          if(window.location.pathname.includes('dashboard') && !args[2].includes("dashboard")) {
+            dontredirectForCRM = true;
+          }
+          if(automationEngineCase || dontredirectForCRM) {
             return function(){};
           }
         } 
