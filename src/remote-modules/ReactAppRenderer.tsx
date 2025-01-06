@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import React, { Suspense, useEffect } from "react";
 import { Route, useNavigate } from "react-router";
 
 import { Loader } from "@phenom/react-ui-components";
@@ -48,7 +48,9 @@ function loadComponent(scope: any, module: any, component: any) {
 }
 export function ReactAppRenderer(props: Props) {
  
-  
+  useEffect(() => {
+    handleBackNavigation();
+  }, []);
   
   const loadEnvs = (fileName: any) => {
     const isEnvConfigAlreadyLoaded = (scriptSrc: string) => {
@@ -123,7 +125,6 @@ export function ReactAppRenderer(props: Props) {
     
       // Listen for popstate events (triggered by back/forward navigation)
       window.addEventListener('popstate', (event) => {
-        debugger; // Trigger debugger on popstate
         console.log('URL changed via popstate:', event);
     
         
@@ -131,9 +132,6 @@ export function ReactAppRenderer(props: Props) {
     
     
   }
-
-  handleBackNavigation();
-
   return (
     <>
       {ready ? (
