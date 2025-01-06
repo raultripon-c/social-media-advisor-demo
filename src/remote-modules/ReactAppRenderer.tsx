@@ -92,6 +92,42 @@ export function ReactAppRenderer(props: Props) {
     loadComponent(props.scope, props.module, props.component)
   );
 
+  const handleBackNavigation = () => {
+      const originalPushState = history.pushState;
+      history.pushState = function (...args) {
+        return originalPushState.apply(this, args);
+      };
+    
+      // Hook into replaceState
+      const originalReplaceState = history.replaceState;
+      history.replaceState = function (...args) {
+        if(args && args.length) {
+          if(window.location.href.includes("ae") && !args[2].includes("ae")) {
+            return function(){};
+          }
+        } 
+    
+        console.log('URL changed via replaceState:', args);
+        return originalReplaceState.apply(this, args);
+      };
+    
+      //if(window.location.href.includes("ae") && event.currentTarget.location.href.includes("dashboard")) {
+       //   history.pushState({}, '', '/WOT/WORKUS/ae/');
+        //  }
+    
+      // Listen for popstate events (triggered by back/forward navigation)
+      window.addEventListener('popstate', (event) => {
+        debugger; // Trigger debugger on popstate
+        console.log('URL changed via popstate:', event);
+    
+        
+      });
+    
+    
+  }
+
+  handleBackNavigation();
+
   return (
     <>
       {ready ? (
