@@ -47,7 +47,7 @@ const Layout = () => {
   useEffect(()=>{
     if(window.location.pathname === "/" || !selectedTenant || !Object.keys(selectedTenant).length) {
       localStorage.removeItem("selectedTenant");
-      navigate('/');
+      // navigate('/');
       return;
     }
     const currentPath = window.location.pathname.replace("/dashboard/dashboard", "/dashboard");

@@ -63,7 +63,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
   const { selectedApp, allApps } = useSelector((state: any) => state.app);
   let selectedAppFromSession = JSON.parse(sessionStorage.getItem("selectedApp") || "null");
   // const selectedTenant = useSelector((state: AppStore) => state.customer.selectedTenant);
-  let selectedTenant = JSON.parse(localStorage.getItem("selectedTenant") || "null");
+  let selectedTenant = JSON.parse(localStorage.getItem("selectedTenant") || "[]");
   const siteMetaData = useSelector((state: AppStore) => state.customer.siteMetaData);
   const logedUserRoles = useSelector((state: AppStore) => state.customer.logedUserRoles);
   const sessionTrackerProjectKey = `${(window as any)._env_.SESSION_TRACKER_PROJECT_KEY || ""}`;
@@ -148,10 +148,13 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
 
   useEffect(() => {
     const refNum = window.location.pathname.split("/")[2];
-
+    const CustomerCode = window.location.pathname.split("/")[1];
     if (!selectedTenant.length && refNum) {
+      selectedTenant = {'customerCode':CustomerCode, 'refNum':refNum}
+      localStorage.setItem("selectedTenant", JSON.stringify(selectedTenant));
       const tenantsUrl = `${(window as any)._env_.APP_API_URL}/customers/tenants/${refNum}`;
       APIService.getTenants(tenantsUrl, dispatch);
+      
     }
 
     let response = JSON.parse(sessionStorage.getItem("allapps") || "[]");
