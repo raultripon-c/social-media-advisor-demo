@@ -62,7 +62,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
   const [showSidebarMenu, toggleSidebarMenu] = useState(false);
   const { selectedApp, allApps } = useSelector((state: any) => state.app);
   let selectedAppFromSession = JSON.parse(sessionStorage.getItem("selectedApp") || "null");
-  const selectedTenant = useSelector((state: AppStore) => state.customer.selectedTenant);
+  // const selectedTenant = useSelector((state: AppStore) => state.customer.selectedTenant);
+  let selectedTenant = JSON.parse(localStorage.getItem("selectedTenant") || "null");
   const siteMetaData = useSelector((state: AppStore) => state.customer.siteMetaData);
   const logedUserRoles = useSelector((state: AppStore) => state.customer.logedUserRoles);
   const sessionTrackerProjectKey = `${(window as any)._env_.SESSION_TRACKER_PROJECT_KEY || ""}`;
@@ -249,12 +250,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
       }
       setPermissionsBasedApps();
     }
-
+    setAppsLoader(false);
   }, [selectedTenant?.customerId]);
 
   const setCmsSiteMetaData = async () => {
     const tenantSupportedLangs = await APIService.getSupportedLangs(selectedTenant?.refNum)
-    return await handleDomainUrlForSite(tenantSupportedLangs, selectedTenant, dispatch, setSiteMetaData, siteMetaData);
+    return handleDomainUrlForSite(tenantSupportedLangs, selectedTenant, dispatch, setSiteMetaData, siteMetaData);
   }
 
   const handleCRMFilterAPICompletion = (completeOps?: boolean) => {
@@ -413,13 +414,13 @@ const AppLayout: React.FC<AppLayoutProps> = ({ }) => {
     }
   };
 
-  if (appsLoader) {
-    return (
-      <div className="tenants-loader">
-        <Loader title="Please Wait, Loading Dashboard" />
-      </div>
-    );
-  }
+  // if (appsLoader) {
+  //   return (
+  //     <div className="tenants-loader">
+  //       <Loader title="Please Wait, Loading Dashboard" />
+  //     </div>
+  //   );
+  // }
 
   return (
     <>

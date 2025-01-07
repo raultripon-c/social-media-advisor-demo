@@ -27,7 +27,8 @@ const DashBoard = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const selectedTenant = useSelector((state: AppStore) => state.customer.selectedTenant);
+  // const selectedTenant = useSelector((state: AppStore) => state.customer.selectedTenant);
+  let selectedTenant = JSON.parse(localStorage.getItem("selectedTenant") || "null");
   const siteMetaData = useSelector((state: AppStore) => state.customer.siteMetaData);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [filteredData, setFilteredData] = useState<any[]>([]);
