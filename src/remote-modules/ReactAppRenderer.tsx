@@ -95,40 +95,35 @@ export function ReactAppRenderer(props: Props) {
   );
 
   const handleBackNavigation = () => {
-      const originalPushState = history.pushState;
-      history.pushState = function (...args) {
-        return originalPushState.apply(this, args);
-      };
-    
+    localStorage.setItem("allowBackNavigation", "true");
+    (function () {
       // Hook into replaceState
       const originalReplaceState = history.replaceState;
       history.replaceState = function (...args) {
-        if(args && args.length) {
-          const automationEngineCase = window.location.href.includes("ae") && !args[2].includes("ae");
-          const currentUrl = window.location.pathname;
-          let dontredirectForCRM = false;
-          if(window.location.pathname.includes('dashboard') && !args[2].includes("dashboard")) {
-            dontredirectForCRM = true;
-          }
-          if(automationEngineCase || dontredirectForCRM) {
+        const isBackAllowed = localStorage.getItem("allowBackNavigation");
+        if(isBackAllowed && isBackAllowed == "true") {
+          localStorage.setItem("allowBackNavigation", "false");
+          console.log('URL changed via replaceState:', args);
+          setTimeout(() => {
+              localStorage.setItem("allowBackNavigation", "true");
+          }, 1000);
+          return originalReplaceState.apply(this, args);
+          
+        }
+        else {
+            setTimeout(() => {
+                localStorage.setItem("allowBackNavigation", "true");
+            }, 1000);
             return function(){};
-          }
-        } 
-    
-        console.log('URL changed via replaceState:', args);
-        return originalReplaceState.apply(this, args);
+        }
+        
       };
     
-      //if(window.location.href.includes("ae") && event.currentTarget.location.href.includes("dashboard")) {
-       //   history.pushState({}, '', '/WOT/WORKUS/ae/');
-        //  }
-    
-      // Listen for popstate events (triggered by back/forward navigation)
       window.addEventListener('popstate', (event) => {
-        console.log('URL changed via popstate:', event);
-    
-        
-      });
+      console.log('URL changed via popstate:', event);
+      localStorage.setItem("allowBackNavigation", "false");
+    });
+    })();
     
     
   }
