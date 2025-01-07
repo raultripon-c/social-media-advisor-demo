@@ -12,7 +12,7 @@ import {
 import { AppStore } from "store";
 import { setAppDetails, setAppsFromAPI } from "../../store/apps/actions";
 import { setSiteMetaData } from "../../store/customer/actions";
-import { appSelectionHandler, handleDomainUrlForSite } from "../../utils/appUtils";
+import { appSelectionHandler, getRefnumFromLink, handleDomainUrlForSite } from "../../utils/appUtils";
 import "./DashBoard.scss";
 import { apiUrl } from "../../utils/constants";
 import { API } from "../../utils/api";
@@ -60,7 +60,7 @@ const DashBoard = () => {
   };
 
   const fetchCurrentTenantData = async () => {
-    const tenantResp: any = await APIService.getTenantDetails(selectedTenant.refNum);
+    const tenantResp: any = await APIService.getTenantDetails(getRefnumFromLink(window.location.href, selectedTenant));
     if (tenantResp.data.status === "success") {
       return tenantResp.data.data.docs;
     }
@@ -102,7 +102,7 @@ const DashBoard = () => {
     };
     getLoggedInUserInfo();
     window.addEventListener("txeLoginEvent", async () => {
-      const tenantSupportedLangs = await APIService.getSupportedLangs(selectedTenant.refNum);
+      const tenantSupportedLangs = await APIService.getSupportedLangs(getRefnumFromLink(window.location.href, selectedTenant));      
       const metaData = await handleDomainUrlForSite(
         tenantSupportedLangs,
         selectedTenant,
@@ -210,7 +210,7 @@ const DashBoard = () => {
 
   const handleLiveUrlForSite = async (url: string): Promise<string | null> => {
     try {
-      const response = await APIService.getDomainUrl(selectedTenant.refNum, url);
+      const response = await APIService.getDomainUrl(getRefnumFromLink(window.location.href, selectedTenant), url);
       if (response?.data?.status === "success") {
         const domainUrl = response?.data?.data;
         if (domainUrl && new URL(domainUrl.toString()).hostname) {

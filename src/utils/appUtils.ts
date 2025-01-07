@@ -506,7 +506,7 @@ export const removeStylesBasedOnContents = (contents: string[]) => {
 export const handleDomainUrlForSite = async (supportedLangs: Array<any>, selectedTenant: any, dispatch: any, setSiteMetaData: any, siteMetaData: any) => {
   try {
     let domainUrl;
-    const siteMetaDataResp: any = await APIService.getSiteMetaData(selectedTenant.refNum);
+    const siteMetaDataResp: any = await APIService.getSiteMetaData(getRefnumFromLink(window.location.href, selectedTenant));
     if (siteMetaDataResp.data.status === "success") {
       domainUrl = siteMetaDataResp?.data?.data?.domain;
     }
@@ -532,3 +532,18 @@ export const handleDomainUrlForSite = async (supportedLangs: Array<any>, selecte
     console.error("Error fetching domain URL for site", error);
   }
 };
+
+export function getRefnumFromLink(url:string, selectedTenant?:any) {
+  try {
+    const parsedUrl = new URL(url);
+    const segments = parsedUrl.pathname.split("/");
+    if (segments.length > 3) {
+      return segments[2]; // Access the value safely
+    } else {
+      return selectedTenant?.refNum;
+    }
+  } catch (error) {
+    console.error("Error extracting value:", error);
+    return selectedTenant?.refNum; // Return a fallback value
+  }
+}

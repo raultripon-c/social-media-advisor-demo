@@ -13,8 +13,6 @@ import { Loader } from "@phenom/react-ui-components";
 import { APIService } from "../../utils/api.service";
 import { apiUrl, loginSessionTimeIntervals } from "../../utils/constants";
 import "./Tenants.scss";
-import { crmFilterApps } from "../../utils/helper/crmFilterApps";
-import { cmsFilterApps } from "../../utils/helper/cmsFilterApps";
 import { handleDomainUrlForSite } from "../../utils/appUtils";
 
 /**
