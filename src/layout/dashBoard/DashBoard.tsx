@@ -84,7 +84,7 @@ const DashBoard = () => {
       dispatch(setAppsFromAPI(apps));
       setIsLoading(false);
     }
-    loadAppBundles();
+    // loadAppBundles();// Need to check why iFrame are not loading ...
   }, [dispatch]);
 
   useEffect(() => {
