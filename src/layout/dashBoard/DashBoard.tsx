@@ -323,7 +323,7 @@ const DashBoard = () => {
       dispatch(setAppsFromAPI(apps));
       setIsLoading(false);
     }
-    loadAppBundles();
+    // loadAppBundles();
   }, [dispatch]);
 
   useEffect(() => {

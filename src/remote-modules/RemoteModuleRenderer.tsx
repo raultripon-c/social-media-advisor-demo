@@ -263,17 +263,6 @@ export const RemoteModuleRenderer = () => {
             moduleRoute={selectedApp.moduleRoute}
             appWindowConfig={selectedApp.appWindowConfig}
             key={key} />
-          <AngularAppRenderer
-            scope={selectedApp.scope}
-            module={selectedApp.module}
-            url={selectedApp.url}
-            selectedApp={selectedApp}
-            component={selectedApp.component}
-            moduleRoute={selectedApp.moduleRoute}
-            appWindowConfig={selectedApp.appWindowConfig}
-            key={key}
-          // selectedAppTitle={selectedAppTitle}
-          />
         </Fragment>
         )}
     </div>
