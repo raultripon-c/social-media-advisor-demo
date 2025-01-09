@@ -2,7 +2,7 @@ import { SideBar } from "@phenom/react-ui-components";
 import sessionTracker from "phenom-session-tracker";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { AppStore } from "store";
 import arrowRight from "../../assets/images/dashboard/arrowRight.svg";
 import dashboardInfo from "../../assets/images/dashboard/dashboardInfo.svg";

@@ -255,6 +255,9 @@ export const transformAppData = (data: any) => {
         const isAnalyticsPresent = Object.keys(window?.keycloakInstance?.userInfo?.resources).some((key) =>
           key.toLowerCase().includes("analytics")
         );
+        const isAutomationEnginePresent = Object.keys(window?.keycloakInstance?.userInfo?.resources).some((key) =>
+          key.toLowerCase().includes("automation-service")
+        );
         const userDetails = window?.keycloakInstance?.tokenParsed?.userDetails;
         
         // Define the exclusion mapping between app names and window variables
@@ -273,6 +276,9 @@ export const transformAppData = (data: any) => {
 
         // Exclude "Analytics" if "analytics" is not present in the resources
         if(!isAnalyticsPresent && app.name === "Analytics") {
+          return false;
+        }
+        if(!isAutomationEnginePresent && app.name === "Journey Manager") {
           return false;
         }
 
@@ -355,8 +361,7 @@ export const getMfRoutes = (data: any) => {
       }
 
       return [
-        { path: updatedPath, component: RemoteModuleRenderer },
-        { path: `${updatedPath}/*`, component: RemoteModuleRenderer },
+        { path: updatedPath,component: RemoteModuleRenderer },
       ];
     });
   return mfRoutes;

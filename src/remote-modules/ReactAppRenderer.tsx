@@ -1,5 +1,5 @@
-import React, { Suspense } from "react";
-import { Route, useNavigate } from "react-router-dom";
+import React, { Suspense, useEffect } from "react";
+import { Route, useNavigate } from "react-router";
 
 import { Loader } from "@phenom/react-ui-components";
 import { GenericErrorBoundary } from "../components/ErrorBoundary/GenericErrorBoundary";
@@ -7,7 +7,6 @@ import UnAuthorizedPage from "../components/UnAuthorizedPage/UnAuthorizedPage";
 import { ErrorBoundary } from "./error-component/ErrorBoundary";
 import { useDynamicMFLoader } from "./useDynamicMFLoader";
 
-import { Routes } from 'react-router-dom';
 import "./error-component/ErrorBoundary.scss";
 
 interface Props {
@@ -49,7 +48,9 @@ function loadComponent(scope: any, module: any, component: any) {
 }
 export function ReactAppRenderer(props: Props) {
  
-  
+  useEffect(() => {
+    handleBackNavigation();
+  }, []);
   
   const loadEnvs = (fileName: any) => {
     const isEnvConfigAlreadyLoaded = (scriptSrc: string) => {
@@ -93,6 +94,39 @@ export function ReactAppRenderer(props: Props) {
     loadComponent(props.scope, props.module, props.component)
   );
 
+  const handleBackNavigation = () => {
+    localStorage.setItem("allowBackNavigation", "true");
+    (function () {
+      // Hook into replaceState
+      const originalReplaceState = history.replaceState;
+      history.replaceState = function (...args) {
+        const isBackAllowed = localStorage.getItem("allowBackNavigation");
+        if(isBackAllowed && isBackAllowed == "true") {
+          localStorage.setItem("allowBackNavigation", "false");
+          console.log('URL changed via replaceState:', args);
+          setTimeout(() => {
+              localStorage.setItem("allowBackNavigation", "true");
+          }, 1000);
+          return originalReplaceState.apply(this, args);
+          
+        }
+        else {
+            setTimeout(() => {
+                localStorage.setItem("allowBackNavigation", "true");
+            }, 1000);
+            return function(){};
+        }
+        
+      };
+    
+      window.addEventListener('popstate', (event) => {
+      console.log('URL changed via popstate:', event);
+      localStorage.setItem("allowBackNavigation", "false");
+    });
+    })();
+    
+    
+  }
   return (
     <>
       {ready ? (
@@ -115,9 +149,6 @@ export function ReactAppRenderer(props: Props) {
                 height: props.style ? "calc(100vh - 48px)" : "100%",
               }}
             >
-              <Routes>
-                <Route path={`/:customerCode/:refnum${props.moduleRoute}/*`} element={<RemoteComponent {...props.props} />} />
-              </Routes>
               <RemoteComponent {...props.props} />
             </div>
           </Suspense>
