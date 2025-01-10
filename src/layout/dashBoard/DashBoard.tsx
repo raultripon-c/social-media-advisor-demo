@@ -71,7 +71,7 @@ const DashBoard = () => {
       fetchMetrics();
       campaignsList();
     }
-  }, [selectedTenant]);
+  }, []);
 
   useEffect(() => {
     dispatch(setAppDetails({}));
