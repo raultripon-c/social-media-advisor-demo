@@ -1,3 +1,4 @@
+import { refnumContainInCrmTenants } from "../../utils/appUtils";
 import { APIService } from "../../utils/api.service";
 import { CommonConstants } from "../../utils/common-constants";
 
@@ -12,7 +13,11 @@ export const crmFilterApps = async (refNum: string, userRoles?: any) => {
         (window as any).showAutomations = false;
         (window as any).showEvents = false;
         console.log(userRoles);
-
+        if(!refnumContainInCrmTenants(refNum))
+        {
+            return false;
+        }
+            
         const keycloakInstance = (window as any).keycloakInstance;
         if (!keycloakInstance || !keycloakInstance.userInfo || !keycloakInstance.userInfo.userDetails) {
             throw new Error("Keycloak instance or user details are missing");

@@ -82,7 +82,13 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
       console.error("Error:", error);
     }
   };
-
+  const fetchCrmTenants = async  (): Promise<any[]> => {
+    const paramObj = {
+      refNum:"ALL",
+      applicationName:"Candidate App"
+  };
+    return await APIService.getCrmTenantList(paramObj);
+  };
   const getAllTenants = async () => {
     let getTenantUrl = `${PROVISIONING_API}/${apiUrl.getTenantDetails}`;
     if (APP_DC_REGION?.toLocaleUpperCase() !== "US".toLocaleUpperCase()) {
@@ -120,6 +126,7 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
         APIService.getCustomerDetails(userDetails?.userOrg, dispatch);
       } else {
         getAllTenants();
+        fetchCrmTenants();
       }
     } else {
       dispatch(setAllTenants(storedTenants));
