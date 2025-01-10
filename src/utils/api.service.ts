@@ -88,7 +88,9 @@ export const APIService = {
       });
   },
   getAllApps: async (setAppsLoader?: any) => {
-    return await API.get(`${(window as any)._env_.TOOLS_API_URL}api/apps`)
+    return await API.get(`${(window as any)._env_.TOOLS_API_URL}api/apps`, {
+      withCredentials: false,
+    })
       .then((result: any) => {
         let apps = result?.data?.data;
         let appNamesList = apps
