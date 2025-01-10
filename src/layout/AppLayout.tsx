@@ -367,8 +367,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
 
   const crmFilterApps = async (refNum: string, userRoles?: any) => {
     try {
-      dispatch(setIsCRMFilterApiCompleted(false));
-
       (window as any).showEvents = false;
       (window as any).showCandidates = false;
       (window as any).showLists = false;
@@ -378,8 +376,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       (window as any).showAutomations = false;
       (window as any).showEvents = false;
       console.log(userRoles);
-      if(!refnumContainInCrmTenants(refNum))
-        {
+      if(!refnumContainInCrmTenants(refNum)) {
+        dispatch(setIsCRMFilterApiCompleted(true));
             return false;
         }
         
