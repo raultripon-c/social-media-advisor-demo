@@ -552,3 +552,30 @@ export function getRefnumFromLink(url:string, selectedTenant?:any) {
     return selectedTenant?.refNum; // Return a fallback value
   }
 }
+export function refnumContainInCrmTenants(refNum: string): boolean {
+  // Retrieve the data from sessionStorage and parse it safely
+  const crmTenants = sessionStorage.getItem("crmTenants");
+
+  // Check if the data exists and is valid
+  if (!crmTenants) {
+      console.warn("No crmTenants data found in sessionStorage.");
+      return false;
+  }
+
+  try {
+      // Parse the JSON data
+      const tenantsList = JSON.parse(crmTenants);
+
+      // Validate if the parsed data is an array
+      if (!Array.isArray(tenantsList)) {
+          console.error("crmTenants data is not a valid array.");
+          return false;
+      }
+
+      // Check if the refNum exists in the list
+      return tenantsList.some(customer => customer.refNum === refNum);
+  } catch (error) {
+      console.error("Failed to parse crmTenants data:", error);
+      return false;
+  }
+}

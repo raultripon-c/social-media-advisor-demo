@@ -170,7 +170,28 @@ export const APIService = {
       return null;
     }
   },
+  getCrmTenantList: async (props: any): Promise<any> => {
+    try {
+      const url = `${(window as any)._env_.CRM_HUB_URL}/tenant-config/getNewTenantsList`;
+      const response = await API.post(url, props, {
+        headers: {
+          Authorization: `${window.keycloakInstance.token}`,
+          'Content-Type': 'application/json',
+          'Accept': '*/*'
+        },
+      });
 
+      if (response?.data) {
+        sessionStorage.setItem("crmTenants", JSON.stringify(response.data.tenants?.customersList));
+        return response.data;
+      } else {
+        throw new Error("No metadata found for the provided refNum.");
+      }
+    } catch (error) {
+      console.error("Error in getCrmTenantList: ", error);
+      return null;
+    }
+  },
   getRecruiterPermissions: async (props: any): Promise<any> => {
     try {
       const url = `${(window as any)._env_.CANDIDATES_USER_MANAGEMENT_URL}/loginPermissionsId`;
