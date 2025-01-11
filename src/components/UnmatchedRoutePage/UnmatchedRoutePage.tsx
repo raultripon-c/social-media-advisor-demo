@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setCustomerTenants, setSelectedTenant } from "../../store/customer/actions";
-import { useNavigate } from 'react-router-dom';
-import { useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router';
+import { useLocation } from 'react-router';
 
 const UnmatchedRoutePage = () => {
   const location = useLocation();

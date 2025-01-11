@@ -290,7 +290,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       setAppsLoader(true);
       setCmsSiteMetaData();
       const setPermissionsBasedApps = async () => {
-        if (window?.keycloakInstance?.userInfo?.userDetails?.id) {
           await crmFilterApps(selectedTenant?.refNum, user);
           await cmsFilterApps(selectedTenant?.refNum);
           let response = JSON.parse(sessionStorage.getItem("allapps") || "[]");
@@ -298,13 +297,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
             getAllApps();
           }
           setAppsLoader(false);
-        } else {
-          console.error("Keycloak not initialized");
-        }
       };
       setPermissionsBasedApps();
     }
-    setAppsLoader(false);
   }, [selectedTenant?.customerId]);
 
   const setCmsSiteMetaData = async () => {
@@ -376,18 +371,14 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       (window as any).showAutomations = false;
       (window as any).showEvents = false;
       console.log(userRoles);
-      if(!refnumContainInCrmTenants(refNum)) {
+      if (!refnumContainInCrmTenants(refNum)) {
         dispatch(setIsCRMFilterApiCompleted(true));
-            return false;
-        }
-        
+        return false;
+      }
+
       const keycloakInstance = (window as any).keycloakInstance;
-      if (
-        !keycloakInstance ||
-        !keycloakInstance.userInfo ||
-        !keycloakInstance.userInfo.userDetails
-      ) {
-        throw new Error("Keycloak instance or user details are missing");
+      if (!keycloakInstance?.userInfo) {
+        await keycloakInstance?.loadUserInfo();
       }
       const recruiterUserId = keycloakInstance.userInfo.userDetails.id;
       const applicationName = CommonConstants.APPLICATION_NAME;
@@ -408,12 +399,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
         if (!tenantConfigResp || !tenantConfigResp.modules) {
           throw new Error("Tenant config response or modules are missing");
         }
-        const isEventEnabledTC = tenantConfigResp.modules.activate?.events;
-        const hideCandidatesTab =
-          tenantConfigResp.modules.agencies?.hideCandidatesTab ?? false;
+        const hideCandidatesTab = tenantConfigResp.modules.agencies?.hideCandidatesTab ?? false;
         const isTenantHasJTCEnabled = tenantConfigResp.modules.access?.jtc;
-        const isTenantHasAutomationFeatureEnabled =
-          tenantConfigResp.modules.feature?.automation;
+        const isTenantHasAutomationFeatureEnabled = tenantConfigResp.modules.feature?.automation;
         const isEventsEnabled = tenantConfigResp.modules.activate?.events;
         const params = {
           loginId: recruiterUserId,
@@ -422,50 +410,31 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
         };
         APIService.getRecruiterPermissions(params).then((permissions) => {
           const recruiterPermissionsResp = permissions;
-          if (
-            !recruiterPermissionsResp ||
-            !recruiterPermissionsResp.data ||
-            !recruiterPermissionsResp.data[0]
-          ) {
-            throw new Error(
-              "Recruiter permissions response or data are missing"
-            );
+          if (!recruiterPermissionsResp || !recruiterPermissionsResp.data || !recruiterPermissionsResp.data[0]) {
+            throw new Error("Recruiter permissions response or data are missing");
           }
           let roleConfig = recruiterPermissionsResp.data[0].permissions;
           if (!roleConfig || !roleConfig.modules) {
             throw new Error("Role config or modules are missing");
           }
-          const isEventEnabledRP = roleConfig.modules.events?.view;
-          const isRecruiterHaveCandidatesViewAccess =
-            roleConfig.modules.candidates?.view;
+          const isRecruiterHaveCandidatesViewAccess = roleConfig.modules.candidates?.view;
           const isListsEnabledRP = roleConfig.modules.list?.view;
-          const isCampaignViewCampaignAccess =
-            roleConfig.modules.campaigns?.view;
-          const isCampaignViewTemplateAccess =
-            roleConfig.modules.template?.view;
+          const isCampaignViewCampaignAccess = roleConfig.modules.campaigns?.view;
+          const isCampaignViewTemplateAccess = roleConfig.modules.template?.view;
           const hasJTCTabViewAccess = roleConfig.modules.jtc?.view;
-          const isRecruiterHaveAutomationSettingAccess =
-            roleConfig.modules.automation?.view;
-          const isRecruiterHaveViewEventsAccess =
-            roleConfig.modules.events?.view;
+          const isRecruiterHaveAutomationSettingAccess = roleConfig.modules.automation?.view;
+          const isRecruiterHaveViewEventsAccess = roleConfig.modules.events?.view;
 
-          const isJTCTabEnabled =
-            roleConfig.modules.candidates?.view &&
-            isTenantHasJTCEnabled &&
-            hasJTCTabViewAccess;
+          const isJTCTabEnabled = roleConfig.modules.candidates?.view && isTenantHasJTCEnabled && hasJTCTabViewAccess;
 
-          (window as any).showEvents = isEventEnabledTC && isEventEnabledRP;
-          (window as any).showCandidates =
-            isRecruiterHaveCandidatesViewAccess && !hideCandidatesTab;
+          (window as any).showCandidates = isRecruiterHaveCandidatesViewAccess && !hideCandidatesTab;
           (window as any).showLists = isListsEnabledRP;
           (window as any).showCampaigns = isCampaignViewCampaignAccess;
           (window as any).showTemplates = isCampaignViewTemplateAccess;
           (window as any).showTalentCommunities = isJTCTabEnabled;
           (window as any).showAutomations =
-            isTenantHasAutomationFeatureEnabled &&
-            isRecruiterHaveAutomationSettingAccess;
-          (window as any).showEvents =
-            isEventsEnabled && isRecruiterHaveViewEventsAccess;
+            isTenantHasAutomationFeatureEnabled && isRecruiterHaveAutomationSettingAccess;
+          (window as any).showEvents = isEventsEnabled && isRecruiterHaveViewEventsAccess;
 
           dispatch(setIsCRMFilterApiCompleted(true));
         });

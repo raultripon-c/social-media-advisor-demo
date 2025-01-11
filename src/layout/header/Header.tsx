@@ -14,7 +14,7 @@ import {
 } from "../../store/customer/actions";
 import HeaderDropdown from "../HeaderDropdown/HeaderDropdown";
 
-import { setAppDetails, setSidebarState } from "../../store/apps/actions";
+import { setAppDetails, setIsCMSFilterApiCompleted, setIsCRMFilterApiCompleted, setSidebarState } from "../../store/apps/actions";
 import { TENANT } from "../../utils/constants";
 import "./Header.scss";
 
@@ -85,6 +85,8 @@ function Header({
     dispatch(setSidebarState(false));
     dispatch(setAppDetails({}));
     dispatch(setCustomerTenants([]));
+    dispatch(setIsCRMFilterApiCompleted(false));
+    dispatch(setIsCMSFilterApiCompleted(false));
     navigate("/");
     const iframes = document.querySelectorAll("iframe[txe-pre-fetch-iframe]");
     iframes.forEach((iframe) => {

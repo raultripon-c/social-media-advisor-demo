@@ -1,7 +1,7 @@
 import React from "react";
 import UnauthorizedImg from "../../assets/images/un-authorized.png";
 import "./UnAuthorizedPage.scss";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import {useDispatch} from "react-redux";
 import { setCustomerTenants, setSelectedTenant } from "../../store/customer/actions";
 
