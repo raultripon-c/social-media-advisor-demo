@@ -1,8 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setCustomerTenants, setSelectedTenant } from "../../store/customer/actions";
-import { useNavigate } from 'react-router';
-import { useLocation } from 'react-router';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const UnmatchedRoutePage = () => {
   const location = useLocation();
@@ -41,7 +40,7 @@ const UnmatchedRoutePage = () => {
       const currentPath = window.location.pathname.replace("/dashboard/dashboard", "/dashboard");
       let customRoute = "summary";
       let urlToNavigate;
-      if(!currentPath.startsWith(`/${selectedTenant.customerCode}/${selectedTenant.refNum}`)) {
+      if(currentPath !== '/' && !currentPath.startsWith(`/${selectedTenant.customerCode}/${selectedTenant.refNum}`)) {
         urlToNavigate = `/${selectedTenant.customerCode}/${selectedTenant.refNum}${currentPath}`;
       } else {
         customRoute = window.location.pathname.replace("/dashboard/dashboard", "/dashboard").split('/').filter(Boolean).splice(2).join('/') || 'summary';
