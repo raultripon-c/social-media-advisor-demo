@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Navigate, Route, Routes, useNavigate } from "react-router";
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 
 import { EmptyState } from "@phenom/react-ui-components";
 import { useKeycloak } from "phenom-auth-react-adapter";

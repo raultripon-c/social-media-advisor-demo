@@ -1,5 +1,5 @@
 import React, { Suspense, useEffect } from "react";
-import { Route, useNavigate } from "react-router";
+import { Route, useNavigate } from "react-router-dom";
 
 import { Loader } from "@phenom/react-ui-components";
 import { GenericErrorBoundary } from "../components/ErrorBoundary/GenericErrorBoundary";
