@@ -19,7 +19,6 @@ import {
   refnumContainInCrmTenants,
 } from "../utils/appUtils";
 
-import sessionTracker from "phenom-session-tracker";
 import {
   setAppDetails,
   setAppsFromAPI,
@@ -241,26 +240,26 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
     }
   }, [fetchedApps, selectedTenant, selectedTenant?.refNum]);
 
-  useEffect(() => {
-    if (userId) {
-      sessionTracker.initiate(
-        userId,
-        sessionTrackerProjectKey,
-        sessionTrackerIngestPoint
-      );
+  // useEffect(() => {
+  //   if (userId) {
+  //     sessionTracker.initiate(
+  //       userId,
+  //       sessionTrackerProjectKey,
+  //       sessionTrackerIngestPoint
+  //     );
 
-      sessionTracker.setMetadata("user-org", window?.orgInfo?.code);
-      sessionTracker.setMetadata("user-type", window?.orgInfo?.type);
-      sessionTracker.setMetadata("environment", (window as any)?._env_.APP_ENV);
-      let entitlements = window.keycloakInstance?.tokenParsed?.entitlements;
-      sessionTracker.setMetadata(
-        "user-entitlement",
-        entitlements && entitlements.length > 0 ? entitlements[0] : ""
-      );
+  //     sessionTracker.setMetadata("user-org", window?.orgInfo?.code);
+  //     sessionTracker.setMetadata("user-type", window?.orgInfo?.type);
+  //     sessionTracker.setMetadata("environment", (window as any)?._env_.APP_ENV);
+  //     let entitlements = window.keycloakInstance?.tokenParsed?.entitlements;
+  //     sessionTracker.setMetadata(
+  //       "user-entitlement",
+  //       entitlements && entitlements.length > 0 ? entitlements[0] : ""
+  //     );
 
-      (window as any).sessionTracker = sessionTracker;
-    }
-  }, [userId]);
+  //     (window as any).sessionTracker = sessionTracker;
+  //   }
+  // }, [userId]);
 
   useEffect(() => {
     if (logedUserRoles?.length > 0) {

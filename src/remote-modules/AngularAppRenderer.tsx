@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { AppStore } from "store";
+import { useTracker } from "../customHooks/TrackerProvider";
 import { MessageService } from "../MessageService";
 import { useDynamicMFLoader } from "./useDynamicMFLoader";
 import { removeStyles, removeStylesBasedOnContents, restoreStyles, setObjectReferenceFromString } from "../utils/appUtils";
@@ -168,9 +168,15 @@ export function AngularAppRenderer(props: any) {
                 body.style.pointerEvents = "";
                 body.style.cursor = "";
               }
+              // const tracker = useTracker();
+                    // tracker.event("CRM Module available, Component Loaded", { message: "Component loaded successfully!" });
+                    // tracker.event("CRM Module available, componentloaded", "true");
+                    (window as any).__OPENREPLAY__?.event("window component loaded", "true");
+                    (window as any).__OPENREPLAY__?.event("window component loaded", {message: "Component loaded successfully!"});
               setReady(true);
             });
           } else {
+            // sessionTracker?.event("Anlaytics Module available");
             setReady(true);
           }
             

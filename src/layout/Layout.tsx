@@ -1,5 +1,5 @@
 import { useKeycloak } from "phenom-auth-react-adapter";
-import React, { useEffect, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { AppStore } from "store";
@@ -9,6 +9,8 @@ import AppLayout from "./AppLayout";
 import Header from "./header/Header";
 import { toast } from "react-toastify";
 import { Loader } from "@phenom/react-ui-components";
+import Tracker from '@openreplay/tracker';
+import { TrackerProvider } from "../customHooks/TrackerProvider";
 
 const Layout = () => {
   
@@ -27,6 +29,9 @@ const Layout = () => {
   const [allApps, setAllApps] = useState<any[]>([]);
   const [keycloakAvailable, setKeycloakAvailable] = useState(false);
   const selectedTenant = localStorage.getItem("selectedTenant") ? JSON.parse(localStorage.getItem("selectedTenant") || "{}") : {};
+  const sessionTrackerProjectKey = `${(window as any)._env_.SESSION_TRACKER_PROJECT_KEY || ""}`;
+  const sessionTrackerIngestPoint = `${(window as any)._env_.SESSION_TRACKER_INGEST_POINT || ""}`;
+  const userId = userDetails?.userName;
 
   useEffect(()=>{
     if(window?.keycloakInstance?.userInfo) {
@@ -59,10 +64,7 @@ const Layout = () => {
     }
     sessionStorage.removeItem("allapps")
   },[])
-  
-  useEffect(()=>{
-    sessionStorage.removeItem("allapps")
-  },[])
+
   useEffect(() => {
     if (keycloak.authenticated && !initialized) {
       pendo?.initialize({
@@ -80,6 +82,29 @@ const Layout = () => {
     }
   });
 
+  useEffect(() => {
+    if (keycloakAvailable) {
+      const tracker = new Tracker({
+        projectKey: sessionTrackerProjectKey,
+        ingestPoint: sessionTrackerIngestPoint,
+        network: {
+          capturePayload: true,
+          sessionTokenHeader: "",
+          failuresOnly: false,
+          ignoreHeaders: false,
+          captureInIframes: false
+        }
+      })
+      tracker.setUserID(userId);
+      tracker.setMetadata("user-org", window?.orgInfo?.code);
+      tracker.setMetadata("user-type", window?.orgInfo?.type);
+      tracker.setMetadata("environment", (window as any)?._env_.APP_ENV);
+      let entitlements = window.keycloakInstance?.tokenParsed?.entitlements;
+      tracker.setMetadata("user-entitlement", entitlements && entitlements.length > 0 ? entitlements[0] : "");
+      tracker.start();
+    }
+  }, [keycloakAvailable]);
+
   if(!keycloakAvailable) {
     return (
           <div className="tenants-loader">
@@ -88,7 +113,7 @@ const Layout = () => {
         );
   }
   return (
-    <>
+    <TrackerProvider>
       {keycloakAvailable && initialized && (
         <div className="servicehub-tools">
           <div className="service-tools-app-header">
@@ -114,7 +139,7 @@ const Layout = () => {
           )}
         </div>
       )}
-    </>
+    </TrackerProvider>
   );
 };
 

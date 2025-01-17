@@ -1,5 +1,4 @@
 import { SideBar } from "@phenom/react-ui-components";
-import sessionTracker from "phenom-session-tracker";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -14,7 +13,7 @@ import {
   setCustomerTenants,
   setSelectedTenant,
 } from "../../store/customer/actions";
-import { CUSTOMER_LEVEL, PLATFORM, TENANT } from "../../utils/constants";
+import { useTracker } from "../../customHooks/TrackerProvider";
 import "./SideBar.scss";
 import { AppSelectionOptions } from "../../interfaces/AppSelectionOptions";
 import { appSelectionHandler, findAppConfigByRoutes } from "../../utils/appUtils";
@@ -115,9 +114,11 @@ function ToolsSideBar(props: any) {
       }
       sessionStorage.removeItem("txeCustomPath");
       appSelectionHandler(appSelectionOptions);
-      sessionTracker.setCustomEvent("App Selected", {
-        "App Name": app?.name,
-      });
+      const tracker = useTracker();
+      tracker.event("Component Loaded", { message: "Component loaded successfully!" });
+      tracker.event("componentloaded", "true");
+      (window as any).__OPENREPLAY__?.event("window component loaded", "true");
+      (window as any).__OPENREPLAY__?.event("window component loaded", {message: "Component loaded successfully!"});
     }
   };
 
