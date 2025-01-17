@@ -171,7 +171,7 @@ export function AngularAppRenderer(props: any) {
               setReady(true);
             });
           } else {
-            // sessionTracker?.event("Anlaytics Module available");
+            (window as any).__OPENREPLAY__?.event("Anlaytics Module available");
             setReady(true);
           }
             
