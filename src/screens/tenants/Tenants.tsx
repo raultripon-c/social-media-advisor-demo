@@ -107,6 +107,8 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
       }
 
       // Fetch tenants from the API
+      const {code, type} = window?.orgInfo;
+      await APIService.registerToken(null, code, type);
       const fetchedTenants: CrmTenant[] = await APIService.getCrmTenantList(paramObj);
       return fetchedTenants;
     } catch (error) {

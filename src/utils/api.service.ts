@@ -386,7 +386,7 @@ export const APIService = {
     }
   },
   
-  registerToken: async (refNum: string, code: string, type: string) => {
+  registerToken: async (refNum: any, code: string, type: string) => {
     const data = {
         "product_ver": "1.0",
         "newLogin": true,
