@@ -113,8 +113,9 @@ function ToolsSideBar(props: any) {
       }
       sessionStorage.removeItem("txeCustomPath");
       appSelectionHandler(appSelectionOptions);
-      (window as any).__OPENREPLAY__?.event("window component loaded", "true");
-      (window as any).__OPENREPLAY__?.event("window component loaded", {message: "Component loaded successfully!"});
+      (window as any).__OPENREPLAY__?.event("App Selected", {
+        "App Name": app?.name,
+      });
     }
   };
 

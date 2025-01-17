@@ -167,11 +167,7 @@ export function AngularAppRenderer(props: any) {
                 body.style.pointerEvents = "";
                 body.style.cursor = "";
               }
-              // const tracker = useTracker();
-                    // tracker.event("CRM Module available, Component Loaded", { message: "Component loaded successfully!" });
-                    // tracker.event("CRM Module available, componentloaded", "true");
-                    (window as any).__OPENREPLAY__?.event("window component loaded", "true");
-                    (window as any).__OPENREPLAY__?.event("window component loaded", {message: "Component loaded successfully!"});
+              (window as any).__OPENREPLAY__?.event("CRM component loaded successfully", {message: "Component loaded successfully!"});
               setReady(true);
             });
           } else {
