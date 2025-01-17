@@ -1,7 +1,7 @@
 import { useKeycloak } from "phenom-auth-react-adapter";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { AppStore } from "store";
 import { GenericErrorBoundary } from "../remote-modules/ReactAppRenderer";
 import Tenants from "../screens/tenants/Tenants";

@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, Route, Outlet, Routes } from "react-router";
+import { useNavigate, Route, Outlet, Routes } from "react-router-dom";
 
 import { ReactAppRenderer } from "./ReactAppRenderer";
 import { AngularAppRenderer } from "./AngularAppRenderer";

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 import { EmptyState } from "@phenom/react-ui-components";
 import { AppStore } from "store";
@@ -91,18 +91,21 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
       refNum: window.keycloakInstance?.userInfo?.tenant_id,
       applicationName: "Candidate App",
     };
-  
+
     try {
       // Retrieve cached tenants from sessionStorage
-      const crmTenants: any[] = (typeof window !== "undefined" && sessionStorage.getItem("crmTenants") && sessionStorage.getItem("crmTenants") !== "undefined" && sessionStorage.getItem("crmTenants") !== "null")
-  ? JSON.parse(sessionStorage.getItem("crmTenants") as string)
-  : [];
+      const crmTenants: any[] =
+        typeof window !== "undefined" &&
+        sessionStorage.getItem("crmTenants") &&
+        sessionStorage.getItem("crmTenants") !== "undefined" &&
+        sessionStorage.getItem("crmTenants") !== "null"
+          ? JSON.parse(sessionStorage.getItem("crmTenants") as string)
+          : [];
 
-  
       if (Array.isArray(crmTenants) && crmTenants.length > 0) {
         return crmTenants;
       }
-  
+
       // Fetch tenants from the API
       const fetchedTenants: CrmTenant[] = await APIService.getCrmTenantList(paramObj);
       return fetchedTenants;
