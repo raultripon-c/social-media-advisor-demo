@@ -1,5 +1,5 @@
 import { useKeycloak } from "phenom-auth-react-adapter";
-import React, { createContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { AppStore } from "store";
@@ -10,7 +10,6 @@ import Header from "./header/Header";
 import { toast } from "react-toastify";
 import { Loader } from "@phenom/react-ui-components";
 import Tracker from '@openreplay/tracker';
-import { TrackerProvider } from "../customHooks/TrackerProvider";
 
 const Layout = () => {
   
@@ -102,6 +101,7 @@ const Layout = () => {
       let entitlements = window.keycloakInstance?.tokenParsed?.entitlements;
       tracker.setMetadata("user-entitlement", entitlements && entitlements.length > 0 ? entitlements[0] : "");
       tracker.start();
+      (window as any).__OPENREPLAY__ = tracker;
     }
   }, [keycloakAvailable]);
 
@@ -113,7 +113,7 @@ const Layout = () => {
         );
   }
   return (
-    <TrackerProvider>
+    <>
       {keycloakAvailable && initialized && (
         <div className="servicehub-tools">
           <div className="service-tools-app-header">
@@ -139,7 +139,7 @@ const Layout = () => {
           )}
         </div>
       )}
-    </TrackerProvider>
+    </>
   );
 };
 

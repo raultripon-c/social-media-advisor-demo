@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { useTracker } from "../customHooks/TrackerProvider";
 import { MessageService } from "../MessageService";
 import { useDynamicMFLoader } from "./useDynamicMFLoader";
 import { removeStyles, removeStylesBasedOnContents, restoreStyles, setObjectReferenceFromString } from "../utils/appUtils";

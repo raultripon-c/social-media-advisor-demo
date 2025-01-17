@@ -13,7 +13,6 @@ import {
   setCustomerTenants,
   setSelectedTenant,
 } from "../../store/customer/actions";
-import { useTracker } from "../../customHooks/TrackerProvider";
 import "./SideBar.scss";
 import { AppSelectionOptions } from "../../interfaces/AppSelectionOptions";
 import { appSelectionHandler, findAppConfigByRoutes } from "../../utils/appUtils";
@@ -114,9 +113,6 @@ function ToolsSideBar(props: any) {
       }
       sessionStorage.removeItem("txeCustomPath");
       appSelectionHandler(appSelectionOptions);
-      const tracker = useTracker();
-      tracker.event("Component Loaded", { message: "Component loaded successfully!" });
-      tracker.event("componentloaded", "true");
       (window as any).__OPENREPLAY__?.event("window component loaded", "true");
       (window as any).__OPENREPLAY__?.event("window component loaded", {message: "Component loaded successfully!"});
     }
