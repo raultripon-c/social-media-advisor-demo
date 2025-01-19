@@ -6,6 +6,7 @@ import { loadScriptById, removeElementsById } from "../../utils/helper/utilizer"
 import { findAppConfigByRoutes, removeCrmStyles } from "../../utils/appUtils";
 import { triggerRefreshToken } from "../../utils/api";
 import { APIService } from "../../utils/api.service";
+import "./DynamicScriptLoader.css"; 
 
 declare global {
   interface Window {
