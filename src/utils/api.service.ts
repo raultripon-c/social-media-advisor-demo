@@ -12,12 +12,8 @@ interface Campaign {
   campaignName: string;
   status: string;
 }
-interface CrmTenant {
-  id: string;
-  name: string;
-  // Add other tenant properties as required
-}
-export const fetchCrmTenants = async (): Promise<CrmTenant[]> => {
+
+export const fetchCrmTenants = async () => {
     const paramObj = {
       refNum: window.keycloakInstance?.userInfo?.tenant_id,
       applicationName: "Candidate App",
@@ -40,7 +36,7 @@ export const fetchCrmTenants = async (): Promise<CrmTenant[]> => {
       // Fetch tenants from the API
       const {code, type} = window?.orgInfo;
       await APIService.registerToken(null, code, type);
-      const fetchedTenants: CrmTenant[] = await APIService.getCrmTenantList(paramObj);
+      const fetchedTenants=await APIService.getCrmTenantList(paramObj);
       return fetchedTenants;
     } catch (error) {
       console.error("Failed to fetch CRM tenants:", error);
