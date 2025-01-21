@@ -10,6 +10,7 @@ import Header from "./header/Header";
 import { toast } from "react-toastify";
 import { Loader } from "@phenom/react-ui-components";
 import Tracker from '@openreplay/tracker';
+import { fetchCrmTenants } from "../utils/api.service";
 
 const Layout = () => {
   
@@ -39,6 +40,7 @@ const Layout = () => {
       (async () => {
         await keycloak?.loadUserInfo();
         if(window?.keycloakInstance?.userInfo) {
+          fetchCrmTenants();
           setKeycloakAvailable(true);
         } else {
           toast.dismiss();

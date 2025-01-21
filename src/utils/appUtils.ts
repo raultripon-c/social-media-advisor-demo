@@ -558,6 +558,8 @@ export function refnumContainInCrmTenants(refNum: string): boolean {
 
   // Check if the data exists and is valid
   if (!crmTenants) {
+      toast.dismiss();
+      toast.error("No crmTenants data found.");
       console.warn("No crmTenants data found in sessionStorage.");
       return false;
   }

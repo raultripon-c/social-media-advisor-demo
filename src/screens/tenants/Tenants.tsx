@@ -80,42 +80,9 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
       console.error("Error:", error);
     }
   };
-  interface CrmTenant {
-    id: string;
-    name: string;
-    // Add other tenant properties as required
-  }
+ 
   
-  const fetchCrmTenants = async (): Promise<CrmTenant[]> => {
-    const paramObj = {
-      refNum: window.keycloakInstance?.userInfo?.tenant_id,
-      applicationName: "Candidate App",
-    };
-
-    try {
-      // Retrieve cached tenants from sessionStorage
-      const crmTenants: any[] =
-        typeof window !== "undefined" &&
-        sessionStorage.getItem("crmTenants") &&
-        sessionStorage.getItem("crmTenants") !== "undefined" &&
-        sessionStorage.getItem("crmTenants") !== "null"
-          ? JSON.parse(sessionStorage.getItem("crmTenants") as string)
-          : [];
-
-      if (Array.isArray(crmTenants) && crmTenants.length > 0) {
-        return crmTenants;
-      }
-
-      // Fetch tenants from the API
-      const {code, type} = window?.orgInfo;
-      await APIService.registerToken(null, code, type);
-      const fetchedTenants: CrmTenant[] = await APIService.getCrmTenantList(paramObj);
-      return fetchedTenants;
-    } catch (error) {
-      console.error("Failed to fetch CRM tenants:", error);
-      throw error; // Re-throw the error to ensure the caller is aware of the issue
-    }
-  };
+  
   const getAllTenants = async () => {
     let getTenantUrl = `${PROVISIONING_API}/${apiUrl.getTenantDetails}`;
     if (APP_DC_REGION?.toLocaleUpperCase() !== "US".toLocaleUpperCase()) {
@@ -147,7 +114,6 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
 
   useEffect(() => {
     let storedTenants = JSON.parse(sessionStorage.getItem("tenants") || "[]");
-    fetchCrmTenants();
     if (storedTenants.length === 0) {
       if (!(userDetails?.userType === "PARTNER")) {
         APIService.getCustomerDetails(userDetails?.userOrg, dispatch);
