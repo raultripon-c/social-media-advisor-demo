@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { AppStore } from "store";
 import { MessageService } from "../MessageService";
 import { useDynamicMFLoader } from "./useDynamicMFLoader";
 import { removeStyles, removeStylesBasedOnContents, restoreStyles, setObjectReferenceFromString } from "../utils/appUtils";
@@ -168,9 +167,11 @@ export function AngularAppRenderer(props: any) {
                 body.style.pointerEvents = "";
                 body.style.cursor = "";
               }
+              (window as any).__OPENREPLAY__?.event("CRM component loaded successfully", {message: "Component loaded successfully!"});
               setReady(true);
             });
           } else {
+            (window as any).__OPENREPLAY__?.event("Anlaytics Module available");
             setReady(true);
           }
             
