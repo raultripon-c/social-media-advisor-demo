@@ -1,10 +1,11 @@
 
 import DashBoard from "../layout/dashBoard/DashBoard";
-import ContentHub from "../layout/dynamicScripts/dynamicScriptLoader"
+import DynamicScriptLoader from "../layout/dynamicScripts/DynamicScriptLoader"
 import Assets from "../screens/assets/Assets"
 import Blogs from "../screens/blogs/Blogs";
 import Banners from "../screens/banners/Banners";
 import UnmatchedRoutePage from "../components/UnmatchedRoutePage/UnmatchedRoutePage";
+import { withDynamicScript } from "../layout/dynamicScripts/WithDynamicScript";
 
 export interface IRoute {
   path: string;
@@ -19,21 +20,22 @@ const dashBoard = {
 
 const ContenthubComponent = {
   path: "/:customerCode/:refnum/contenthub",
-  component: ContentHub,
+  component: withDynamicScript("contenthub")
 };
+
 const AssetManager = {
   path: "/:customerCode/:refnum/assets",
-  component: Assets,
+  component: withDynamicScript("assets"),
 };
 
 const BlogsManger = {
   path: "/:customerCode/:refnum/blogs",
-  component: Blogs,
+  component: withDynamicScript("blogs"),
 }
 
 const BannersManager = {
   path: "/:customerCode/:refnum/banners",
-  component: Banners,
+  component: withDynamicScript("banners"),
 }
 
 const unmatchedRoutePage = {
