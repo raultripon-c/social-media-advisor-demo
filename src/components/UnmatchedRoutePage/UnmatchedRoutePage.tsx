@@ -43,7 +43,7 @@ const UnmatchedRoutePage = () => {
       if(currentPath !== '/' && !currentPath.startsWith(`/${selectedTenant.customerCode}/${selectedTenant.refNum}`)) {
         urlToNavigate = `/${selectedTenant.customerCode}/${selectedTenant.refNum}${currentPath}`;
       } else {
-        customRoute = window.location.pathname.replace("/dashboard/dashboard", "/dashboard").split('/').filter(Boolean).splice(2).join('/') || 'summary';
+        customRoute = (window.location.pathname.includes("/dashboard")&& window.location.pathname.replace("/dashboard/dashboard", "/dashboard").split('/').filter(Boolean).splice(2).join('/')) || 'summary';
         urlToNavigate = `/${selectedTenant.customerCode}/${selectedTenant.refNum}/${customRoute}`;
       }
 
