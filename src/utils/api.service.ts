@@ -40,7 +40,6 @@ export const fetchCrmTenants = async () => {
       return fetchedTenants;
     } catch (error) {
       console.error("Failed to fetch CRM tenants:", error);
-      throw error; // Re-throw the error to ensure the caller is aware of the issue
     }
   };
 export const APIService = {
