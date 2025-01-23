@@ -54,12 +54,25 @@ const Layout = () => {
       // navigate('/');
       return;
     }
+    const tenantsList = JSON.parse(sessionStorage.getItem("tenants") || "[]");
     const currentPath = window.location.pathname.replace("/dashboard/dashboard", "/dashboard");
-    if(!currentPath.startsWith(`/${selectedTenant.customerCode}/${selectedTenant.refNum}`) && currentPath.includes("dashboard")) {
-      currentPath.includes("dashboard") && sessionStorage.setItem("txeCustomPath", currentPath)
-      navigate(`/${selectedTenant.customerCode}/${selectedTenant.refNum}${currentPath}`)
-    } else {
+    const splitPath = currentPath.split('/')
+    const urlRefnum = splitPath[2];
+    const urlCustomerCode = splitPath[1];
+    const isRefnumValid = Array.isArray(tenantsList) && tenantsList.some(customer => customer.refNum === urlRefnum);
+    const isCustomerCodeValid = Array.isArray(tenantsList) && tenantsList.some(customer => customer.customerCode === urlCustomerCode);
+    if(isCustomerCodeValid && isRefnumValid) {
       currentPath.includes("dashboard") && sessionStorage.setItem("txeCustomPath", currentPath.split('/').filter(Boolean).splice(2).join('/'))
+      navigate(`${currentPath}`)
+    } else {
+      if(!currentPath.startsWith(`/${selectedTenant.customerCode}/${selectedTenant.refNum}`)){
+        navigate(`${selectedTenant.customerCode}/${selectedTenant.refNum}/summary`)
+        sessionStorage.removeItem("txeCustomPath");
+        sessionStorage.removeItem("selectedApp");
+      }
+      else{
+        currentPath.includes("dashboard") && sessionStorage.setItem("txeCustomPath", currentPath.split('/').filter(Boolean).splice(2).join('/'))
+      }
     }
     sessionStorage.removeItem("allapps")
   },[])
