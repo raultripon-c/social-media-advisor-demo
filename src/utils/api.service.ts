@@ -13,6 +13,35 @@ interface Campaign {
   status: string;
 }
 
+export const fetchCrmTenants = async () => {
+    const paramObj = {
+      refNum: window.keycloakInstance?.userInfo?.tenant_id,
+      applicationName: "Candidate App",
+    };
+
+    try {
+      // Retrieve cached tenants from sessionStorage
+      const crmTenants: any[] =
+        typeof window !== "undefined" &&
+        sessionStorage.getItem("crmTenants") &&
+        sessionStorage.getItem("crmTenants") !== "undefined" &&
+        sessionStorage.getItem("crmTenants") !== "null"
+          ? JSON.parse(sessionStorage.getItem("crmTenants") as string)
+          : [];
+
+      if (Array.isArray(crmTenants) && crmTenants.length > 0) {
+        return crmTenants;
+      }
+
+      // Fetch tenants from the API
+      const {code, type} = window?.orgInfo;
+      await APIService.registerToken(null, code, type);
+      const fetchedTenants=await APIService.getCrmTenantList(paramObj);
+      return fetchedTenants;
+    } catch (error) {
+      console.error("Failed to fetch CRM tenants:", error);
+    }
+  };
 export const APIService = {
   getCustomerDetails: async (
     orgCode: any,
