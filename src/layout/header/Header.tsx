@@ -157,7 +157,7 @@ function Header({
             env={(window as any)._env_.APP_ENV}
             kcObject={JSON.stringify(window.keycloakInstance)}
             themeName="new"
-            icon="https://servicehub-qa.phenompro.com/public/logos/app-switcher/appswitcher_new.svg"
+            icon={`${(window as any)._env_.APP_API_URL.replace(/\/api$/, "")}/public/logos/app-switcher/appswitcher_new.svg`}
           ></app-switcher>
           <user-info
             clientId={window.keycloakInstance.clientId}

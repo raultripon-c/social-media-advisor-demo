@@ -53,12 +53,13 @@
       }
       document.head.appendChild(script);
   </script> -->
-
-    <script
-      type="module"
-      src="https://servicehub-qa.phenompro.com/public/header/HeaderComponents.js"
-      crossorigin="anonymous"
-    ></script>
+    <script>
+      const script = document.createElement("script");
+      script.src = `${window._env_.APP_API_URL.replace(/\/api$/, "")}/public/header/HeaderComponents.js`;
+      script.type = "module";
+      script.crossOrigin = "anonymous";
+      document.head.appendChild(script);
+    </script>
     <script type="text/javascript">document.domain = "phenompro.com"</script>
   </head>
 
