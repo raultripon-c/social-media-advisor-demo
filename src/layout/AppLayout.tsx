@@ -436,6 +436,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
           (window as any).showEvents = isEventsEnabled && isRecruiterHaveViewEventsAccess;
 
           dispatch(setIsCRMFilterApiCompleted(true));
+        }).catch((error) => {
+          console.error("Error in getRecruiterPermissions:", error);
+          dispatch(setIsCRMFilterApiCompleted(true));
         });
       });
     } catch (error) {
