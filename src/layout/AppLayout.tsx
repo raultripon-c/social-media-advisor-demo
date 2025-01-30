@@ -440,6 +440,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       });
     } catch (error) {
       console.error("Error in crmFilterApps:", error);
+      dispatch(setIsCRMFilterApiCompleted(true));
     }
   };
 
