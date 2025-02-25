@@ -1,0 +1,177 @@
+.genai-container {
+  padding: 20px;
+}
+
+.prompt-container {
+  padding: 80px;
+}
+
+.prompt-actions {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.prompt-heading {
+  color: var(--neutrals-nn-500, #353b46);
+  text-align: center;
+  font-feature-settings: "liga" off, "clig" off;
+
+  /* Title/Headline 5 */
+  font-family: var(--family-title, Poppins);
+  font-size: var(--size-font-size-3xl, 24px);
+  font-style: normal;
+  font-weight: 600;
+  line-height: var(--line-height-line-height-2xl, 36px); /* 150% */
+  letter-spacing: 0.18px;
+}
+
+.prompt-area {
+  border-radius: 10px;
+  border: 1px solid var(--suggestion-stroke, #ff661f);
+  background: var(--Core-White, #fff);
+
+  /* Depth 0.5 */
+  box-shadow: 0px 2px 3px 0px rgba(53, 59, 70, 0.15);
+  display: flex;
+  height: 164px;
+  padding: 8px 12px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  align-self: stretch;
+}
+
+.prompt-input {
+  border: none;
+  background: none;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  color: var(--neutrals-nn-500, #353b46);
+  width: 100%;
+  height: 100%;
+  outline: none;
+  overflow: auto;
+}
+
+.prompt-submit-btn {
+  color: var(--Core-White, #fff);
+  font-feature-settings: "liga" off, "clig" off;
+  font-family: var(--family-body, Poppins);
+  font-size: var(--size-font-size-base, 14px);
+  font-style: normal;
+  font-weight: 500;
+  line-height: var(--line-height-line-height-md, 20px);
+  display: flex;
+  padding: var(--spacing-spacing-md, 6px) var(--spacing-spacing-2xl, 12px);
+  justify-content: center;
+  align-items: center;
+  gap: var(--spacing-spacing-lg, 8px);
+  border-radius: var(--border-border-radius-lg, 8px);
+  background: var(--primary-myrtle-green-gp-400, #3c6d68);
+}
+
+.prompt-suggestions,
+.prompt-enhancements {
+  display: flex;
+  width: 88%;
+  padding: 48px 24px 24px 24px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  margin: auto;
+  border-radius: 10px;
+  background: var(--neutrals-nn-40, #f4f6fa);
+}
+
+.prompt-suggestions-heading {
+  color: var(--neutrals-nn-400, #464f5e);
+  font-feature-settings: "liga" off, "clig" off;
+
+  /* Body 1/SemiBold */
+  font-family: var(--family-body, Poppins);
+  font-size: var(--size-font-size-lg, 16px);
+  font-style: normal;
+  font-weight: 600;
+  line-height: var(--line-height-line-height-lg, 24px); /* 150% */
+}
+
+.prompt-suggested-content-tags {
+  color: var(--neutrals-nn-400, #464f5e);
+  font-feature-settings: "liga" off, "clig" off;
+
+  /* Body 2/SemiBold */
+  font-family: var(--family-body, Poppins);
+  font-size: var(--size-font-size-base, 14px);
+  font-style: normal;
+  font-weight: 600;
+  line-height: var(--line-height-line-height-lg, 24px); /* 171.429% */
+  letter-spacing: 0.25px;
+}
+
+.prompt-reset-image {
+  margin-right: 24px;
+  cursor: pointer;
+}
+
+.selection-list-container {
+  padding: 10px;
+  background-color: white;
+  border-radius: 20px;
+}
+
+.multi-select-container {
+  padding: 10px;
+}
+
+.prompt-enhancements {
+  background: none;
+  margin-top: 24px;
+    padding: 24px;
+    border: 1px solid lightgray;
+    border-radius: 8px 8px 0px 0px;
+    margin-bottom: 24px;
+}
+
+.prompt-enhancements-heading {
+  color: var(--neutrals-nn-400, #464f5e);
+  font-feature-settings: "liga" off, "clig" off;
+
+  /* Title/Subtitle 1 */
+  font-family: var(--family-title, Poppins);
+  font-size: var(--size-font-size-xl, 18px);
+  font-style: normal;
+  font-weight: 600;
+  line-height: var(--line-height-line-height-lg, 24px); /* 133.333% */
+  letter-spacing: 0.15px;
+}
+
+.prompt-enhancements-subheading {
+  font-feature-settings: "liga" off, "clig" off;
+
+  /* Body 2/Medium (C) */
+  font-family: var(--family-body, Poppins);
+  font-size: var(--size-font-size-base, 14px);
+  font-style: normal;
+  font-weight: 500;
+  line-height: var(--line-height-line-height-md, 20px); /* 142.857% */
+}
+
+.generate-cluster-btn {
+  display: flex;
+  padding: var(--spacing-spacing-xl, 10px) var(--spacing-spacing-4xl, 16px);
+  justify-content: center;
+  align-items: center;
+  gap: var(--spacing-spacing-lg, 8px);
+  border-radius: var(--border-border-radius-xl, 10px);
+  background: var(--primary-myrtle-green-gp-400, #3c6d68);
+  color: var(--Core-White, #fff);
+  font-feature-settings: "liga" off, "clig" off;
+  margin-right: 64px;  /* Body 2/Medium (C) */
+  font-family: var(--family-body, Poppins);
+  font-size: var(--size-font-size-base, 14px);
+  font-style: normal;
+  font-weight: 500;
+  line-height: var(--line-height-line-height-md, 20px); /* 142.857% */
+}

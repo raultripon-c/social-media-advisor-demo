@@ -14,34 +14,34 @@ interface Campaign {
 }
 
 export const fetchCrmTenants = async () => {
-    const paramObj = {
-      refNum: window.keycloakInstance?.userInfo?.tenant_id,
-      applicationName: "Candidate App",
-    };
+  const paramObj = {
+    refNum: window.keycloakInstance?.userInfo?.tenant_id,
+    applicationName: "Candidate App",
+  };
 
-    try {
-      // Retrieve cached tenants from sessionStorage
-      const crmTenants: any[] =
-        typeof window !== "undefined" &&
+  try {
+    // Retrieve cached tenants from sessionStorage
+    const crmTenants: any[] =
+      typeof window !== "undefined" &&
         sessionStorage.getItem("crmTenants") &&
         sessionStorage.getItem("crmTenants") !== "undefined" &&
         sessionStorage.getItem("crmTenants") !== "null"
-          ? JSON.parse(sessionStorage.getItem("crmTenants") as string)
-          : [];
+        ? JSON.parse(sessionStorage.getItem("crmTenants") as string)
+        : [];
 
-      if (Array.isArray(crmTenants) && crmTenants.length > 0) {
-        return crmTenants;
-      }
-
-      // Fetch tenants from the API
-      const {code, type} = window?.orgInfo;
-      await APIService.registerToken(null, code, type);
-      const fetchedTenants=await APIService.getCrmTenantList(paramObj);
-      return fetchedTenants;
-    } catch (error) {
-      console.error("Failed to fetch CRM tenants:", error);
+    if (Array.isArray(crmTenants) && crmTenants.length > 0) {
+      return crmTenants;
     }
-  };
+
+    // Fetch tenants from the API
+    const { code, type } = window?.orgInfo;
+    await APIService.registerToken(null, code, type);
+    const fetchedTenants = await APIService.getCrmTenantList(paramObj);
+    return fetchedTenants;
+  } catch (error) {
+    console.error("Failed to fetch CRM tenants:", error);
+  }
+};
 export const APIService = {
   getCustomerDetails: async (
     orgCode: any,
@@ -414,17 +414,17 @@ export const APIService = {
       return [];
     }
   },
-  
+
   registerToken: async (refNum: any, code: string, type: string) => {
     const data = {
-        "product_ver": "1.0",
-        "newLogin": true,
-        "applicationName": "candidate-app",
-        "expiryTime": 900,
-        "recruiterUserId": window.keycloakInstance.subject,
-        "ph-org-code": code,
-        "ph-org-type": type,
-        "refNum": refNum
+      "product_ver": "1.0",
+      "newLogin": true,
+      "applicationName": "candidate-app",
+      "expiryTime": 900,
+      "recruiterUserId": window.keycloakInstance.subject,
+      "ph-org-code": code,
+      "ph-org-type": type,
+      "refNum": refNum
     };
     try {
       const url = `${(window as any)._env_.CANDIDATES_USER_MANAGEMENT_URL}/tokenDetail`;
@@ -454,6 +454,28 @@ export const APIService = {
       return response;
     } catch (error) {
 
+    }
+  },
+
+  getPagesForContent: async (payload: any) => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/cms/getPagesForContent`;
+      const response = await API.post(url, payload, { withCredentials: false });
+      return response.data.data;
+    } catch (error) {
+      console.error('Error fetching pages for content:', error);
+      return null;
+    }
+  },
+
+  getBlogsForContent: async (payload: any) => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/cms/getBlogDetailsForContent`;
+      const response = await API.post(url, payload, { withCredentials: false });
+      return response.data.data;
+    } catch (error) {
+      console.error('Error fetching blogs for content:', error);
+      return null;
     }
   }
 };

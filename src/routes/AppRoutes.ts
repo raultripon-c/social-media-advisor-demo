@@ -1,10 +1,8 @@
 
 import DashBoard from "../layout/dashBoard/DashBoard";
-import DynamicScriptLoader from "../layout/dynamicScripts/DynamicScriptLoader"
-import Assets from "../screens/assets/Assets"
-import Blogs from "../screens/blogs/Blogs";
-import Banners from "../screens/banners/Banners";
 import UnmatchedRoutePage from "../components/UnmatchedRoutePage/UnmatchedRoutePage";
+import ContentCluster from "../screens/genai/ContentCluster";
+import ClusterDetails from "../screens/ClusterDetails/ClusterDetails";
 import { withDynamicScript } from "../layout/dynamicScripts/WithDynamicScript";
 
 export interface IRoute {
@@ -38,6 +36,17 @@ const BannersManager = {
   component: withDynamicScript("banners"),
 }
 
+const genai = {
+  path: "/:customerCode/:refnum/content-cluster/create",
+  component: ContentCluster,
+}
+
+const clusterDetail = {
+  path: "/:customerCode/:refnum/content-cluster/:clusterId",
+  component: ClusterDetails
+}
+
+
 const unmatchedRoutePage = {
   path: "*",
   component: UnmatchedRoutePage
@@ -49,5 +58,7 @@ export const appRoutes = [
   BlogsManger,
   BannersManager,
   dashBoard,
+  genai,
+  clusterDetail,
   unmatchedRoutePage
 ];
