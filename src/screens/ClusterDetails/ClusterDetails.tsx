@@ -12,7 +12,7 @@ interface ClusterDetailsProps {
 // No API Call is supposed to be made here
 const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
   const location = useLocation();
-  const { pages, blogs } = location.state || {};
+  const { pages, blogs, aiBlog } = location.state || {};
 
   const [activeTab, setActiveTab] = useState(0);
 
@@ -60,7 +60,9 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                     pages.landingPages &&
                     pages.landingPages.map((page: any) => <ClusterDetailCard data={data} landingPage={page} />)}
                 </div>
-                <p className="cluster-tab-data-subheading">Blog Articles</p>
+                <p className="cluster-tab-data-subheading">AI Generated Blog</p>
+                <ClusterDetailCard data={data} aiBlog={aiBlog} />
+                <p className="cluster-tab-data-subheading">Matched Blog Articles</p>
                 <div className="cluster-detail-card-container">
                   {blogs &&
                    blogs.map((blog: any) => <ClusterDetailCard data={data} blog={blog} />)}

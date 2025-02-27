@@ -477,5 +477,66 @@ export const APIService = {
       console.error('Error fetching blogs for content:', error);
       return null;
     }
+  },
+
+  getAllBlogsDetails: async (payload: any) => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/cms/getAllBlogsDetails`;
+      const response = await API.post(url, payload, { withCredentials: false });
+      return response.data.data;
+    }
+    catch (error) {
+      console.error('Error fetching all blog details:', error);
+      return null;
+    }
+  },
+
+  generateCMSAIBlog: async (payload: any) => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/cms/generateAIBlogArticle`;
+      const response = await API.post(url, payload, { withCredentials: false });
+      return response.data.data;
+    }
+    catch (error) {
+      console.error('Error generating CMS AI blog:', error);
+      return null;
+    }
+  },
+
+  generateCMSAIPage: async (payload: any) => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/cms/generateContentPage`;
+      const response = await API.post(url, payload, { withCredentials: false });
+      return response.data.data;
+    }
+    catch (error) {
+      console.error('Error generating CMS AI page:', error);
+      return null;
+    }
+  },
+
+  getCRMUserInfo: async () => {
+    try {
+      const url = `https://usermanagement-intqa.phenompro.com/userInfo`;
+      const response = await API.get(url, {
+
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching CRM user info:', error);
+      return null;
+    }
+  },
+
+  generateCRMEmailTemplate: async (payload: any) => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/crm/generateCRMEmailTemplate`;
+      const response = await API.post(url, payload, { withCredentials: false });
+      return response.data.data;
+    }
+    catch (error) {
+      console.error('Error generating CRM email template:', error);
+      return null;
+    }
   }
 };
