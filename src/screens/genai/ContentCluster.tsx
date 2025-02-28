@@ -27,9 +27,13 @@ const ContentCluster: React.FC<ContentClusterProps> = () => {
   const selectedTenant = JSON.parse(localStorage.getItem("selectedTenant") || "[]");
 
   const [showLoader, setShowLoader] = useState<boolean>(false);
-  const [matchedPagesData, setMatchedPagesData] = useState();
-  const [matchedBlogsData, setMatchedBlogsData] = useState();
-  const [aiGeneratedBlogData, setAiGeneratedBlogData] = useState();
+  const [matchedPagesData, setMatchedPagesData] = useState<any>();
+  const [matchedBlogsData, setMatchedBlogsData] = useState<any>();
+  const [matchedEmailTemplatesData, setMatchedEmailTemplateData] = useState<any>();
+  const [aiGeneratedBlogData, setAiGeneratedBlogData] = useState<any>();
+  const [aiGeneratedContentPageData, setAiGeneratedContentPageData] = useState<any>();
+  const [createdEmailTemplate, setCreatedEmailTemplate] = useState<any>();
+
   const [promptInput, setPromptInput] = useState<string>("");
   const [sampleSelectionListItems, setSampleSelectionListItems] = useState<string[]>([
     "First",
@@ -39,11 +43,15 @@ const ContentCluster: React.FC<ContentClusterProps> = () => {
     "Fifth",
   ]);
   const [showPromptSuggestions, setShowPromptSuggestions] = useState<boolean>(false);
+  const [crmUserInfo, setCrmUserInfo] = useState<any>({});
+  // State to hold the selected options from MultiSelectButton
+  const [selectedContentTypes, setSelectedContentTypes] = useState<string[]>(["Content Page", "Landing Page", "Blog"]);
 
   useEffect(() => {
     APIService.getCRMUserInfo()
       .then((userInfo) => {
         console.log("CRM User Info:", userInfo);
+        setCrmUserInfo(userInfo);
       })
       .catch((err: any) => console.error("Error getting CRM user info", err));
   }, []);
@@ -69,8 +77,7 @@ const ContentCluster: React.FC<ContentClusterProps> = () => {
     return APIService.generateCMSAIPage(payload);
   };
 
-  const createCRMEmailTemplate = async(locale: string) => {
-    const crmUserInfo: any = await APIService.getCRMUserInfo();
+  const createCRMEmailTemplate = async (locale: string) => {
     const payload = {
       refNum: selectedTenant.refNum,
       locale: locale,
@@ -82,6 +89,23 @@ const ContentCluster: React.FC<ContentClusterProps> = () => {
     };
 
     return APIService.generateCRMEmailTemplate(payload);
+  };
+
+  const fetchEmailTemplatesForContent = () => {
+    const payload = {
+      recruiterUserId: crmUserInfo.userDetails.id,
+      refNum: selectedTenant.refNum,
+      keywords: promptInput.split(" "),
+    };
+    return APIService.getEmailTemplatesForContent(payload);
+  };
+
+  const fetchAllEmailTemplates = () => {
+    const payload = {
+      recruiterUserId: crmUserInfo.userDetails.id,
+      refNum: selectedTenant.refNum,
+    };
+    return APIService.getAllEmailTemplates(payload);
   };
 
   const fetchBlogsForContent = (keywords: string[], locale: string) => {
@@ -117,55 +141,104 @@ const ContentCluster: React.FC<ContentClusterProps> = () => {
   };
 
   const handlePromptSubmit = () => {
-    console.log("Prompt Submitted:", promptInput);
-    const keywords = promptInput.split(" ");
-    const locale = JSON.parse(sessionStorage.getItem("locale") || "") || "en_us";
-
-    setShowLoader(true);
-    Promise.all([
-      fetchPagesForContent(keywords, locale),
-      fetchBlogsForContent(keywords, locale),
-      createCMSAiBlog(locale),
-      createCMSAIPage(locale),
-      createCRMEmailTemplate(locale),
-    ]).then((proms) => {
-      const pages = proms[0];
-      const blogs = proms[1].blogDetails;
-
-      const createdBlog = proms[2];
-      const createdAIPage = proms[3];
-      const createdEmailTemplate = proms[4];
-
-      console.log("Created AI Page:", createdAIPage);
-      console.log("Created Email Template:", createdEmailTemplate);
-
-      fetchAllBlogsDetails(locale).then((allBlogs: any) => {
-        const createdBlogDetail = allBlogs["all"].find((blog: any) => blog.articleId === createdBlog.articleId);
-        setAiGeneratedBlogData(createdBlogDetail);
-        console.log("Created AI Blog Data:", createdBlogDetail);
-      });
-
-      setMatchedBlogsData(blogs);
-      setMatchedPagesData(pages);
-      setShowLoader(false);
-      setShowPromptSuggestions(true);
-    });
+    setShowPromptSuggestions(true);
   };
 
   const handleClusterCreation = () => {
-    // Hit Cluster Create API and will get an cluster ID in return from API response
-    // Navigate to that cluster ID
-    const newPath = location.pathname.replace(/\/create$/, "");
+    const keywords = promptInput.split(" ");
+    const locale = JSON.parse(sessionStorage.getItem("locale") || '"en_us"') || "en_us";
 
-    // Append the ID
-    const finalPath = `${newPath}/${clusterId}`;
-    navigate(finalPath, {
-      state: {
-        pages: matchedPagesData,
-        blogs: matchedBlogsData,
-        aiBlog: aiGeneratedBlogData,
-      },
-    });
+    setShowLoader(true);
+
+    const apiCalls: Promise<any>[] = [];
+
+    if (selectedContentTypes.includes("Content Page") || selectedContentTypes.includes("Landing Page")) {
+      apiCalls.push(fetchPagesForContent(keywords, locale));
+      apiCalls.push(createCMSAIPage(locale));
+    }
+
+    if (selectedContentTypes.includes("Blog")) {
+      apiCalls.push(fetchBlogsForContent(keywords, locale));
+      apiCalls.push(createCMSAiBlog(locale));
+    }
+
+    if (selectedContentTypes.includes("Email Template")) {
+      apiCalls.push(createCRMEmailTemplate(locale));
+      apiCalls.push(fetchEmailTemplatesForContent());
+    }
+
+    Promise.all(apiCalls)
+      .then(async (proms) => {
+        // You need to process the responses based on the order of the API calls added.
+        // For demonstration, assume the following:
+        // - First response: pages data (if applicable)
+        // - Second response: AI content page data (if applicable)
+        // - Third response: blogs data (if applicable)
+        // - Fourth response: AI blog data (if applicable)
+        // - Next response: email template (if applicable)
+        // You might need to adjust this based on your requirements.
+        let responseIndex = 0;
+        let createdEmailTemplateData: any,
+          pages: any,
+          blogs: any,
+          createdBlogDetail: any,
+          aiContentPage: any,
+          filteredEmailTemplates: any;
+        if (selectedContentTypes.includes("Content Page") || selectedContentTypes.includes("Landing Page")) {
+          pages = proms[responseIndex++];
+          aiContentPage = proms[responseIndex++]["data"];
+          setMatchedPagesData(pages);
+          setAiGeneratedContentPageData(aiContentPage);
+          console.log("Pages:", pages);
+          console.log("AI Content Page:", aiContentPage);
+        }
+
+        if (selectedContentTypes.includes("Blog")) {
+          const blogsResponse = proms[responseIndex++];
+          const createdBlog = proms[responseIndex++];
+          blogs = blogsResponse.blogDetails;
+          setMatchedBlogsData(blogs);
+          const allBlogs = await fetchAllBlogsDetails(locale);
+          createdBlogDetail = allBlogs["all"].find((blog: any) => blog.articleId === createdBlog.articleId);
+          setAiGeneratedBlogData(createdBlogDetail);
+          console.log("Created AI Blog Data:", createdBlogDetail);
+        }
+
+        if (selectedContentTypes.includes("Email Template")) {
+          const emailTemplate = proms[responseIndex++];
+          filteredEmailTemplates = proms[responseIndex++];
+
+          setMatchedEmailTemplateData(filteredEmailTemplates);
+          console.log("Created Email Template:", emailTemplate);
+          const allEmailTemplates = await fetchAllEmailTemplates();
+          createdEmailTemplateData = allEmailTemplates.find(
+            (emailTemplate: any) => emailTemplate.templateName === promptInput
+          );
+
+          setCreatedEmailTemplate(createdEmailTemplateData);
+          console.log("Created Email Template Data:", createdEmailTemplateData);
+        }
+
+        setShowLoader(false);
+
+        const newPath = location.pathname.replace(/\/create$/, "");
+        // Append the ID for navigation.
+        const finalPath = `${newPath}/${clusterId}`;
+        navigate(finalPath, {
+          state: {
+            pages: pages,
+            blogs: blogs,
+            aiBlog: createdBlogDetail,
+            aiContentPage: aiContentPage,
+            emailTemplates: filteredEmailTemplates,
+            createdEmailTemplate: createdEmailTemplateData,
+          },
+        });
+      })
+      .catch((err) => {
+        console.error("Error during cluster creation:", err);
+        setShowLoader(false);
+      });
   };
 
   return (
@@ -224,8 +297,11 @@ const ContentCluster: React.FC<ContentClusterProps> = () => {
                   <div className="multi-select-container">
                     <MultiSelectButton
                       options={["Content Page", "Landing Page", "Blog", "Email Template"]}
-                      onSelectionChange={(selected) => console.log("Selected Content Types:", selected)}
-                      initialSelected={["Content Page", "Landing Page", "Blog"]}
+                      onSelectionChange={(selected) => {
+                        console.log("Selected Content Types:", selected);
+                        setSelectedContentTypes(selected);
+                      }}
+                      initialSelected={selectedContentTypes}
                     />
                   </div>
                 </div>

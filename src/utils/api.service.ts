@@ -538,5 +538,30 @@ export const APIService = {
       console.error('Error generating CRM email template:', error);
       return null;
     }
+  },
+
+  getEmailTemplatesForContent: async (payload: any) => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/crm/getEmailTemplatesForContent`;
+      const response = await API.post(url, payload, { withCredentials: false });
+      return response.data.data;
+    }
+    catch (error) {
+      console.error('Error fetching email templates for content:', error);
+      return null;
+    }
+  },
+
+  getAllEmailTemplates: async (payload: any) => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/crm/getAllEmailTemplates`;
+      const response = await API.post(url, payload, { withCredentials: false });
+      return response.data.data;
+    }
+    catch (error) {
+      console.error('Error fetching all email templates:', error);
+      return null;
+    }
   }
+
 };
