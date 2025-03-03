@@ -66,7 +66,7 @@
 .cluster-detail-card-container {
   display: flex; /* Places cards side by side */
   gap: 20px; /* Spacing between cards */
-  max-width: 1200px; /* Adjust as needed */
+  max-width: 100%; /* Adjust as needed */
   margin: 0 auto; /* Centers container on the page */
   flex-wrap: wrap; /* Allows wrapping on smaller screens */
 }
