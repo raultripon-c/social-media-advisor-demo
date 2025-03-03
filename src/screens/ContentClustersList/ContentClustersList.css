@@ -1,0 +1,27 @@
+.content-clusters-list-container {
+  padding: 24px;
+  background: var(--grays-grgr-25, #F8F9FB);
+}
+
+.content-clusters-list-title {
+  overflow: hidden;
+  color: var(--neutrals-nn-500, #353b46);
+  font-feature-settings: "liga" off, "clig" off;
+  text-overflow: ellipsis;
+
+  /* Title/Subtitle 1 */
+  font-family: var(--family-title, Poppins);
+  font-size: var(--size-font-size-xl, 18px);
+  font-style: normal;
+  font-weight: 600;
+  line-height: var(--line-height-line-height-lg, 24px); /* 133.333% */
+  letter-spacing: 0.15px;
+  margin-bottom: 16px;
+}
+
+.content-cluster-list-card-container {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}

@@ -517,7 +517,7 @@ export const APIService = {
 
   getCRMUserInfo: async () => {
     try {
-      const url = `https://usermanagement-intqa.phenompro.com/userInfo`;
+      const url = `${(window as any)._env_.CANDIDATES_USER_MANAGEMENT_URL}/userInfo`;
       const response = await API.get(url, {
 
       });
@@ -560,6 +560,30 @@ export const APIService = {
     }
     catch (error) {
       console.error('Error fetching all email templates:', error);
+      return null;
+    }
+  },
+
+  createContentCluster: async (payload: any) => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/content-cluster/save`;
+      const response = await API.post(url, payload, { withCredentials: false });
+      return response.data.data;
+    }
+    catch (error) {
+      console.error('Error creating content cluster:', error);
+      return null;
+    }
+  },
+
+  getAllContentClusters: async (payload: any) => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/content-cluster/getAllClusters`;
+      const response = await API.post(url, payload, { withCredentials: false });
+      return response.data.data;
+    }
+    catch (error) {
+      console.error('Error fetching all content clusters:', error);
       return null;
     }
   }

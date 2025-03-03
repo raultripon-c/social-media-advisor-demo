@@ -48,54 +48,140 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
           case 0:
             return (
               <div className="cluster-tab-data">
-                <p className="cluster-tab-data-subheading">Content Pages</p>
-                <div className="cluster-detail-card-container">
-                  {pages &&
-                    pages.contentPages &&
-                    pages.contentPages.map((page: any) => <ClusterDetailCard data={data} contentPage={page} />)}
-                </div>
-                <p className="cluster-tab-data-subheading">Landing Pages</p>
-                <div className="cluster-detail-card-container">
-                  {pages &&
-                    pages.landingPages &&
-                    pages.landingPages.map((page: any) => <ClusterDetailCard data={data} landingPage={page} />)}
-                </div>
-                <p className="cluster-tab-data-subheading">AI Generated Content Page</p>
-                <ClusterDetailCard data={data} aiContentPage={aiContentPage} />
-                <p className="cluster-tab-data-subheading">AI Generated Blog</p>
-                <ClusterDetailCard data={data} aiBlog={aiBlog} />
-                <p className="cluster-tab-data-subheading">Matched Blog Articles</p>
-                <div className="cluster-detail-card-container">
-                  {blogs && blogs.map((blog: any) => <ClusterDetailCard data={data} blog={blog} />)}
-                </div>
-                <p className="cluster-tab-data-subheading">Matched Email Templates</p>
-                <div className="cluster-detail-card-container">
-                  {emailTemplates &&
-                    emailTemplates.map((emailTemplate: any) => (
-                      <ClusterDetailCard data={data} emailTemplate={emailTemplate} />
-                    ))}
-                </div>
+                {pages && (
+                  <>
+                    <>
+                      <p className="cluster-tab-data-subheading">Content Pages</p>
+                      <div className="cluster-detail-card-container">
+                        {pages.contentPages &&
+                          pages.contentPages.map((page: any) => <ClusterDetailCard data={data} contentPage={page} />)}
+                      </div>
+                    </>
+                    <>
+                      <p className="cluster-tab-data-subheading">Landing Pages</p>
+                      <div className="cluster-detail-card-container">
+                        {pages.landingPages &&
+                          pages.landingPages.map((page: any) => <ClusterDetailCard data={data} landingPage={page} />)}
+                      </div>
+                    </>
+                  </>
+                )}
 
-                <p className="cluster-tab-data-subheading">Created Email Templates</p>
-                <ClusterDetailCard data={data} createdEmailTemplate={createdEmailTemplate} />
+                {aiContentPage && (
+                  <>
+                    <p className="cluster-tab-data-subheading">AI Generated Content Page</p>
+                    <ClusterDetailCard data={data} aiContentPage={aiContentPage} />
+                  </>
+                )}
+
+                {aiBlog && (
+                  <>
+                    <p className="cluster-tab-data-subheading">AI Generated Blog</p>
+                    <ClusterDetailCard data={data} aiBlog={aiBlog} />
+                  </>
+                )}
+                {blogs && (
+                  <>
+                    <p className="cluster-tab-data-subheading">Matched Blog Articles</p>
+                    <div className="cluster-detail-card-container">
+                      {blogs.map((blog: any) => (
+                        <ClusterDetailCard data={data} blog={blog} />
+                      ))}
+                    </div>
+                  </>
+                )}
+
+                {emailTemplates && (
+                  <>
+                    <p className="cluster-tab-data-subheading">Matched Email Templates</p>
+                    <div className="cluster-detail-card-container">
+                      {emailTemplates.map((emailTemplate: any) => (
+                        <ClusterDetailCard data={data} emailTemplate={emailTemplate} />
+                      ))}
+                    </div>
+                  </>
+                )}
+
+                {createdEmailTemplate && (
+                  <>
+                    <p className="cluster-tab-data-subheading">Created Email Templates</p>
+                    <ClusterDetailCard data={data} createdEmailTemplate={createdEmailTemplate} />
+                  </>
+                )}
               </div>
             );
           case 1:
             return (
               <div className="cluster-tab-data">
-                <p className="cluster-tab-data-subheading">Pages</p>
-                <ClusterDetailCard data={data} />
+                {pages && (
+                  <>
+                    <>
+                      <p className="cluster-tab-data-subheading">Content Pages</p>
+                      <div className="cluster-detail-card-container">
+                        {pages.contentPages &&
+                          pages.contentPages.map((page: any) => <ClusterDetailCard data={data} contentPage={page} />)}
+                      </div>
+                    </>
+                    <>
+                      <p className="cluster-tab-data-subheading">Landing Pages</p>
+                      <div className="cluster-detail-card-container">
+                        {pages.landingPages &&
+                          pages.landingPages.map((page: any) => <ClusterDetailCard data={data} landingPage={page} />)}
+                      </div>
+                    </>
+                  </>
+                )}
+                {aiContentPage && (
+                  <>
+                    <p className="cluster-tab-data-subheading">AI Generated Content Page</p>
+                    <ClusterDetailCard data={data} aiContentPage={aiContentPage} />
+                  </>
+                )}
               </div>
             );
           case 2:
             return (
               <div className="cluster-tab-data">
-                <p className="cluster-tab-data-subheading">Blogs</p>
-                <ClusterDetailCard data={data} />
+                {aiBlog && (
+                  <>
+                    <p className="cluster-tab-data-subheading">AI Generated Blog</p>
+                    <ClusterDetailCard data={data} aiBlog={aiBlog} />
+                  </>
+                )}
+                {blogs && (
+                  <>
+                    <p className="cluster-tab-data-subheading">Matched Blog Articles</p>
+                    <div className="cluster-detail-card-container">
+                      {blogs.map((blog: any) => (
+                        <ClusterDetailCard data={data} blog={blog} />
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
             );
           case 3:
-            return <div className="cluster-tab-data">Email Templates</div>;
+            return (
+              <div className="cluster-tab-data">
+                {emailTemplates && (
+                  <>
+                    <p className="cluster-tab-data-subheading">Matched Email Templates</p>
+                    <div className="cluster-detail-card-container">
+                      {emailTemplates.map((emailTemplate: any) => (
+                        <ClusterDetailCard data={data} emailTemplate={emailTemplate} />
+                      ))}
+                    </div>
+                  </>
+                )}
+
+                {createdEmailTemplate && (
+                  <>
+                    <p className="cluster-tab-data-subheading">Created Email Templates</p>
+                    <ClusterDetailCard data={data} createdEmailTemplate={createdEmailTemplate} />
+                  </>
+                )}
+              </div>
+            );
           default:
             return <div className="cluster-tab-data">All</div>;
         }

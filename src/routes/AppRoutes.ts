@@ -3,6 +3,7 @@ import DashBoard from "../layout/dashBoard/DashBoard";
 import UnmatchedRoutePage from "../components/UnmatchedRoutePage/UnmatchedRoutePage";
 import ContentCluster from "../screens/genai/ContentCluster";
 import ClusterDetails from "../screens/ClusterDetails/ClusterDetails";
+import ContentClustersList from "../screens/ContentClustersList/ContentClustersList";
 import { withDynamicScript } from "../layout/dynamicScripts/WithDynamicScript";
 
 export interface IRoute {
@@ -36,7 +37,7 @@ const BannersManager = {
   component: withDynamicScript("banners"),
 }
 
-const genai = {
+const clusterCreate = {
   path: "/:customerCode/:refnum/content-cluster/create",
   component: ContentCluster,
 }
@@ -44,6 +45,11 @@ const genai = {
 const clusterDetail = {
   path: "/:customerCode/:refnum/content-cluster/:clusterId",
   component: ClusterDetails
+}
+
+const clusterList = {
+  path: "/:customerCode/:refnum/content-clusters",
+  component: ContentClustersList
 }
 
 
@@ -58,7 +64,8 @@ export const appRoutes = [
   BlogsManger,
   BannersManager,
   dashBoard,
-  genai,
+  clusterCreate,
   clusterDetail,
+  clusterList,
   unmatchedRoutePage
 ];
