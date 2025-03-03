@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
-import "./ClusterDetails.css";
+import { useLocation, useParams } from "react-router-dom";
+import "./ContentClusterDetails.css";
 import ClusterDetailCard from "./ClusterDetailCard/ClusterDetailCard";
 import ClusterAnalyticsCard from "./ClusterAnalyticsCard/ClusterAnalyticsCard";
+import { APIService } from "../../../src/utils/api.service";
 
 interface ClusterDetailsProps {
   data: any;
@@ -12,14 +13,35 @@ interface ClusterDetailsProps {
 // No API Call is supposed to be made here
 const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
   const location = useLocation();
-  const { pages, blogs, aiBlog, aiContentPage, emailTemplates, createdEmailTemplate } = location.state || {};
+  const { clusterId } = useParams();
+  let { pages, blogs, aiBlog, aiContentPage, emailTemplates, createdEmailTemplate } = location.state || {};
 
   const [activeTab, setActiveTab] = useState(0);
+  const selectedTenant = JSON.parse(localStorage.getItem("selectedTenant") || "[]");
+  const locale = JSON.parse(sessionStorage.getItem("locale") || '"en_us"') || "en_us";
 
   const tabs = ["All", "Pages", "Blogs", "Email Templates"];
 
   useEffect(() => {
-    console.log("Pages FROM PARENT------->", pages);
+    if (!pages || !blogs || !aiBlog || !aiContentPage || !emailTemplates || !createdEmailTemplate) {
+      const payload = {
+        refNum: selectedTenant.refNum,
+        locale: locale,
+        siteVariant: "external",
+      };
+      APIService.getAllContentClusters(payload).then((clusters: any) => {
+        const cluster = clusters.find((cluster: any) => cluster.id === clusterId);
+        if (cluster) {
+          pages = { contentPages: cluster?.contentPages, landingPages: cluster?.landingPages };
+          blogs = cluster?.blogs;
+          aiBlog = cluster?.aiCreatedBlog[0];
+          aiContentPage = cluster?.aiCreatedContentPage[0];
+          emailTemplates = cluster?.emailTemplates;
+          createdEmailTemplate = cluster?.createdEmailTemplate[0];
+        }
+        location.state = { pages, blogs, aiBlog, aiContentPage, emailTemplates, createdEmailTemplate };
+      });
+    }
   }, []);
 
   return (
@@ -54,14 +76,14 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                       <p className="cluster-tab-data-subheading">Content Pages</p>
                       <div className="cluster-detail-card-container">
                         {pages.contentPages &&
-                          pages.contentPages.map((page: any) => <ClusterDetailCard data={data} contentPage={page} />)}
+                          pages.contentPages.map((page: any) => <ClusterDetailCard contentPage={page} />)}
                       </div>
                     </>
                     <>
                       <p className="cluster-tab-data-subheading">Landing Pages</p>
                       <div className="cluster-detail-card-container">
                         {pages.landingPages &&
-                          pages.landingPages.map((page: any) => <ClusterDetailCard data={data} landingPage={page} />)}
+                          pages.landingPages.map((page: any) => <ClusterDetailCard landingPage={page} />)}
                       </div>
                     </>
                   </>
@@ -70,14 +92,14 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                 {aiContentPage && (
                   <>
                     <p className="cluster-tab-data-subheading">AI Generated Content Page</p>
-                    <ClusterDetailCard data={data} aiContentPage={aiContentPage} />
+                    <ClusterDetailCard aiContentPage={aiContentPage} />
                   </>
                 )}
 
                 {aiBlog && (
                   <>
                     <p className="cluster-tab-data-subheading">AI Generated Blog</p>
-                    <ClusterDetailCard data={data} aiBlog={aiBlog} />
+                    <ClusterDetailCard aiBlog={aiBlog} />
                   </>
                 )}
                 {blogs && (
@@ -85,7 +107,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                     <p className="cluster-tab-data-subheading">Matched Blog Articles</p>
                     <div className="cluster-detail-card-container">
                       {blogs.map((blog: any) => (
-                        <ClusterDetailCard data={data} blog={blog} />
+                        <ClusterDetailCard blog={blog} />
                       ))}
                     </div>
                   </>
@@ -96,7 +118,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                     <p className="cluster-tab-data-subheading">Matched Email Templates</p>
                     <div className="cluster-detail-card-container">
                       {emailTemplates.map((emailTemplate: any) => (
-                        <ClusterDetailCard data={data} emailTemplate={emailTemplate} />
+                        <ClusterDetailCard emailTemplate={emailTemplate} />
                       ))}
                     </div>
                   </>
@@ -105,7 +127,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                 {createdEmailTemplate && (
                   <>
                     <p className="cluster-tab-data-subheading">Created Email Templates</p>
-                    <ClusterDetailCard data={data} createdEmailTemplate={createdEmailTemplate} />
+                    <ClusterDetailCard createdEmailTemplate={createdEmailTemplate} />
                   </>
                 )}
               </div>
@@ -119,14 +141,14 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                       <p className="cluster-tab-data-subheading">Content Pages</p>
                       <div className="cluster-detail-card-container">
                         {pages.contentPages &&
-                          pages.contentPages.map((page: any) => <ClusterDetailCard data={data} contentPage={page} />)}
+                          pages.contentPages.map((page: any) => <ClusterDetailCard contentPage={page} />)}
                       </div>
                     </>
                     <>
                       <p className="cluster-tab-data-subheading">Landing Pages</p>
                       <div className="cluster-detail-card-container">
                         {pages.landingPages &&
-                          pages.landingPages.map((page: any) => <ClusterDetailCard data={data} landingPage={page} />)}
+                          pages.landingPages.map((page: any) => <ClusterDetailCard landingPage={page} />)}
                       </div>
                     </>
                   </>
@@ -134,7 +156,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                 {aiContentPage && (
                   <>
                     <p className="cluster-tab-data-subheading">AI Generated Content Page</p>
-                    <ClusterDetailCard data={data} aiContentPage={aiContentPage} />
+                    <ClusterDetailCard aiContentPage={aiContentPage} />
                   </>
                 )}
               </div>
@@ -145,7 +167,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                 {aiBlog && (
                   <>
                     <p className="cluster-tab-data-subheading">AI Generated Blog</p>
-                    <ClusterDetailCard data={data} aiBlog={aiBlog} />
+                    <ClusterDetailCard aiBlog={aiBlog} />
                   </>
                 )}
                 {blogs && (
@@ -153,7 +175,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                     <p className="cluster-tab-data-subheading">Matched Blog Articles</p>
                     <div className="cluster-detail-card-container">
                       {blogs.map((blog: any) => (
-                        <ClusterDetailCard data={data} blog={blog} />
+                        <ClusterDetailCard blog={blog} />
                       ))}
                     </div>
                   </>
@@ -168,7 +190,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                     <p className="cluster-tab-data-subheading">Matched Email Templates</p>
                     <div className="cluster-detail-card-container">
                       {emailTemplates.map((emailTemplate: any) => (
-                        <ClusterDetailCard data={data} emailTemplate={emailTemplate} />
+                        <ClusterDetailCard emailTemplate={emailTemplate} />
                       ))}
                     </div>
                   </>
@@ -177,7 +199,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                 {createdEmailTemplate && (
                   <>
                     <p className="cluster-tab-data-subheading">Created Email Templates</p>
-                    <ClusterDetailCard data={data} createdEmailTemplate={createdEmailTemplate} />
+                    <ClusterDetailCard createdEmailTemplate={createdEmailTemplate} />
                   </>
                 )}
               </div>

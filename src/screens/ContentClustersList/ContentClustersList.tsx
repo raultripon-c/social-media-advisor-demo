@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import "./ContentClustersList.css";
+import { useNavigate } from "react-router-dom";
+import { Loader } from "@phenom/react-ui-components";
+
 import ContentClusterListCard from "./ContentClusterListCard/ContentClusterListCard";
 import { APIService } from "../../../src/utils/api.service";
-import { useNavigate } from "react-router-dom";
+import "./ContentClustersList.css";
 
 const contentTypesMap: any = {
   Pages: ["aiCreatedContentPage", "contentPages", "landingPages"],
@@ -21,8 +23,10 @@ const ContentClustersList: React.FC<ContentClustersListProps> = ({}) => {
   const locale = JSON.parse(sessionStorage.getItem("locale") || '"en_us"') || "en_us";
 
   const [contentClustersList, setContentClustersList] = useState([]);
+  const [showLoader, setShowLoader] = useState<boolean>(false);
 
   useEffect(() => {
+    setShowLoader(true);
     const payload = {
       refNum: selectedTenant.refNum,
       locale: locale,
@@ -31,10 +35,12 @@ const ContentClustersList: React.FC<ContentClustersListProps> = ({}) => {
     APIService.getAllContentClusters(payload)
       .then((clusters: any) => {
         setContentClustersList(clusters);
+        setShowLoader(false);
       })
       .catch((error) => {
         console.error("Error fetching content clusters:", error);
         setContentClustersList([]);
+        setShowLoader(false);
       });
   }, []);
 
@@ -71,17 +77,23 @@ const ContentClustersList: React.FC<ContentClustersListProps> = ({}) => {
 
   return (
     <div className="content-clusters-list-container">
-      <div className="content-clusters-list-title">Content Clusters List</div>
-      <div className="content-cluster-list-card-container">
-        {contentClustersList &&
-          contentClustersList.map((cluster: any) => (
-            <ContentClusterListCard
-              title={cluster.clusterTitle}
-              contentTypes={contentTypesForCluster(cluster)}
-              handleClick={() => handleClusterClick(cluster)}
-            />
-          ))}
-      </div>
+      {showLoader ? (
+        <Loader title="Loading Content Clusters.." />
+      ) : (
+        <>
+          <div className="content-clusters-list-title">Content Clusters List</div>
+          <div className="content-cluster-list-card-container">
+            {contentClustersList &&
+              contentClustersList.map((cluster: any) => (
+                <ContentClusterListCard
+                  title={cluster.clusterTitle}
+                  contentTypes={contentTypesForCluster(cluster)}
+                  handleClick={() => handleClusterClick(cluster)}
+                />
+              ))}
+          </div>
+        </>
+      )}
     </div>
   );
 };

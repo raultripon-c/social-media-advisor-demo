@@ -1,8 +1,8 @@
 
 import DashBoard from "../layout/dashBoard/DashBoard";
 import UnmatchedRoutePage from "../components/UnmatchedRoutePage/UnmatchedRoutePage";
-import ContentCluster from "../screens/genai/ContentCluster";
-import ClusterDetails from "../screens/ClusterDetails/ClusterDetails";
+import CreateContentCluster from "../screens/CreateContentCluster/CreateContentCluster";
+import ClusterDetails from "../screens/ContentClusterDetails/ContentClusterDetails";
 import ContentClustersList from "../screens/ContentClustersList/ContentClustersList";
 import { withDynamicScript } from "../layout/dynamicScripts/WithDynamicScript";
 
@@ -39,7 +39,7 @@ const BannersManager = {
 
 const clusterCreate = {
   path: "/:customerCode/:refnum/content-cluster/create",
-  component: ContentCluster,
+  component: CreateContentCluster,
 }
 
 const clusterDetail = {

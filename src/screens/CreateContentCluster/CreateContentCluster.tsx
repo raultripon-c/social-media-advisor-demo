@@ -3,16 +3,16 @@ import { useNavigate, Routes, Route, useLocation } from "react-router-dom";
 import MultiSelectButton from "../../components/MultiSelectButton/MultiSelectButton";
 import SelectionList from "../../components/SelectionList/SelectionList";
 import SupportingMaterial from "./SupportingMaterial/SupportingMaterial";
-import ClusterDetails from "../../screens/ClusterDetails/ClusterDetails";
+import ClusterDetails from "../ContentClusterDetails/ContentClusterDetails";
 import { Loader } from "@phenom/react-ui-components";
 import { APIService } from "../../utils/api.service";
 import segmentIcon from "../../assets/svg/users.svg";
 import refreshIcon from "../../assets/svg/refresh.svg";
 import sparkleIcon from "../../assets/svg/sparkle.svg";
 import linkIcon from "../../assets/svg/link.svg";
-import "./ContentCluster.css";
+import "./CreateContentCluster.css";
 
-interface ContentClusterProps {}
+interface CreateContentClusterProps {}
 
 const supportingMaterialsConfig = [
   { name: "Segments", icon: segmentIcon },
@@ -20,21 +20,13 @@ const supportingMaterialsConfig = [
   { name: "Reference Page", icon: linkIcon },
 ];
 
-const clusterId = "aycb2ncskncma62";
-
-const ContentCluster: React.FC<ContentClusterProps> = () => {
+const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const selectedTenant = JSON.parse(localStorage.getItem("selectedTenant") || "[]");
+  const locale = JSON.parse(sessionStorage.getItem("locale") || '"en_us"') || "en_us";
 
-  // State declarations
   const [showLoader, setShowLoader] = useState<boolean>(false);
-  const [matchedPagesData, setMatchedPagesData] = useState<any>();
-  const [matchedBlogsData, setMatchedBlogsData] = useState<any>();
-  const [matchedEmailTemplatesData, setMatchedEmailTemplateData] = useState<any>();
-  const [aiGeneratedBlogData, setAiGeneratedBlogData] = useState<any>();
-  const [aiGeneratedContentPageData, setAiGeneratedContentPageData] = useState<any>();
-  const [createdEmailTemplate, setCreatedEmailTemplate] = useState<any>();
   const [promptInput, setPromptInput] = useState<string>("");
   const [sampleSelectionListItems, setSampleSelectionListItems] = useState<string[]>([
     "First",
@@ -46,8 +38,6 @@ const ContentCluster: React.FC<ContentClusterProps> = () => {
   const [showPromptSuggestions, setShowPromptSuggestions] = useState<boolean>(false);
   const [crmUserInfo, setCrmUserInfo] = useState<any>({});
   const [selectedContentTypes, setSelectedContentTypes] = useState<string[]>(["Content Page", "Landing Page", "Blog"]);
-
-  // Fetch CRM user info on mount
 
   const saveContentCluster = (payload: any) => {
     APIService.createContentCluster(payload).then((clusterDetail) => {
@@ -77,19 +67,6 @@ const ContentCluster: React.FC<ContentClusterProps> = () => {
   };
 
   useEffect(() => {
-    // APIService.createContentCluster(payload).then((createdCluster) => {
-    //   const getPayload = {
-    //     refNum: selectedTenant.refNum,
-    //     locale: selectedTenant.locale,
-    //     siteVariant: "external",
-    //   };
-    //   APIService.getAllContentClusters(getPayload).then((data) => {
-    //     console.log("GET ALL CONTENT CLUSTERS:", data);
-    //   });
-    // });
-  }, []);
-
-  useEffect(() => {
     APIService.getCRMUserInfo()
       .then((userInfo) => {
         setCrmUserInfo(userInfo);
@@ -97,8 +74,7 @@ const ContentCluster: React.FC<ContentClusterProps> = () => {
       .catch((err) => console.error("Error getting CRM user info", err));
   }, []);
 
-  // API Call helper functions
-  const fetchPagesForContent = (keywords: string[], locale: string) => {
+  const fetchPagesForContent = (keywords: string[]) => {
     return APIService.getPagesForContent({
       keywords,
       deviceType: "desktop",
@@ -108,7 +84,7 @@ const ContentCluster: React.FC<ContentClusterProps> = () => {
     });
   };
 
-  const createCMSAIPage = (locale: string) => {
+  const createCMSAIPage = () => {
     return APIService.generateCMSAIPage({
       refNum: selectedTenant.refNum,
       locale,
@@ -117,7 +93,7 @@ const ContentCluster: React.FC<ContentClusterProps> = () => {
     });
   };
 
-  const createCRMEmailTemplate = (locale: string) => {
+  const createCRMEmailTemplate = () => {
     return APIService.generateCRMEmailTemplate({
       refNum: selectedTenant.refNum,
       locale,
@@ -144,7 +120,7 @@ const ContentCluster: React.FC<ContentClusterProps> = () => {
     });
   };
 
-  const fetchBlogsForContent = (keywords: string[], locale: string) => {
+  const fetchBlogsForContent = (keywords: string[]) => {
     return APIService.getBlogsForContent({
       keywords,
       applyFilters: false,
@@ -154,7 +130,7 @@ const ContentCluster: React.FC<ContentClusterProps> = () => {
     });
   };
 
-  const fetchAllBlogsDetails = (locale: string) => {
+  const fetchAllBlogsDetails = () => {
     return APIService.getAllBlogsDetails({
       refNum: selectedTenant.refNum,
       locale,
@@ -163,7 +139,7 @@ const ContentCluster: React.FC<ContentClusterProps> = () => {
     });
   };
 
-  const createCMSAiBlog = (locale: string) => {
+  const createCMSAiBlog = () => {
     return APIService.generateCMSAIBlog({
       companyName: selectedTenant.tenantName,
       refNum: selectedTenant.refNum,
@@ -173,28 +149,26 @@ const ContentCluster: React.FC<ContentClusterProps> = () => {
     });
   };
 
-  // Handlers
   const handlePromptSubmit = () => setShowPromptSuggestions(true);
 
   const handleClusterCreation = () => {
     const keywords = promptInput.split(" ");
-    const locale = JSON.parse(sessionStorage.getItem("locale") || '"en_us"') || "en_us";
     setShowLoader(true);
 
     const apiCalls: Promise<any>[] = [];
 
     if (selectedContentTypes.includes("Content Page") || selectedContentTypes.includes("Landing Page")) {
-      apiCalls.push(fetchPagesForContent(keywords, locale));
-      apiCalls.push(createCMSAIPage(locale));
+      apiCalls.push(fetchPagesForContent(keywords));
+      apiCalls.push(createCMSAIPage());
     }
 
     if (selectedContentTypes.includes("Blog")) {
-      apiCalls.push(fetchBlogsForContent(keywords, locale));
-      apiCalls.push(createCMSAiBlog(locale));
+      apiCalls.push(fetchBlogsForContent(keywords));
+      apiCalls.push(createCMSAiBlog());
     }
 
     if (selectedContentTypes.includes("Email Template")) {
-      apiCalls.push(createCRMEmailTemplate(locale));
+      apiCalls.push(createCRMEmailTemplate());
       apiCalls.push(fetchEmailTemplatesForContent());
     }
 
@@ -211,27 +185,23 @@ const ContentCluster: React.FC<ContentClusterProps> = () => {
         if (selectedContentTypes.includes("Content Page") || selectedContentTypes.includes("Landing Page")) {
           pages = responses[responseIndex++];
           aiContentPage = responses[responseIndex++].data;
-          setMatchedPagesData(pages);
-          setAiGeneratedContentPageData(aiContentPage);
         }
 
         if (selectedContentTypes.includes("Blog")) {
           const blogsResponse = responses[responseIndex++];
           const createdBlog = responses[responseIndex++];
           blogs = blogsResponse.blogDetails;
-          setMatchedBlogsData(blogs);
-          const allBlogs = await fetchAllBlogsDetails(locale);
+
+          const allBlogs = await fetchAllBlogsDetails();
           createdBlogDetail = allBlogs["all"].find((blog: any) => blog.articleId === createdBlog.articleId);
-          setAiGeneratedBlogData(createdBlogDetail);
         }
 
         if (selectedContentTypes.includes("Email Template")) {
           const emailTemplate = responses[responseIndex++];
           filteredEmailTemplates = responses[responseIndex++]["filteredEmailTemplates"];
-          setMatchedEmailTemplateData(filteredEmailTemplates);
+
           const allEmailTemplates = await fetchAllEmailTemplates();
           createdEmailTemplateData = allEmailTemplates.find((template: any) => template.templateName === promptInput);
-          setCreatedEmailTemplate(createdEmailTemplateData);
         }
 
         saveContentCluster({
@@ -256,9 +226,9 @@ const ContentCluster: React.FC<ContentClusterProps> = () => {
 
   return (
     <>
-      <Routes>
+      {/* <Routes>
         <Route path={`/content-cluster/${clusterId}`} element={<ClusterDetails data={""} />} />
-      </Routes>
+      </Routes> */}
       {showLoader ? (
         <Loader title="Generating Content Cluster.." />
       ) : (
@@ -333,4 +303,4 @@ const ContentCluster: React.FC<ContentClusterProps> = () => {
   );
 };
 
-export default ContentCluster;
+export default CreateContentCluster;

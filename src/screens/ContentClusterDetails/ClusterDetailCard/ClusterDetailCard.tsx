@@ -3,7 +3,6 @@ import "./ClusterDetailCard.css";
 import { create } from "lodash";
 
 interface ClusterDetailCardProps {
-  data: any;
   contentPage?: any;
   landingPage?: any;
   blog?: any;
@@ -16,7 +15,6 @@ interface ClusterDetailCardProps {
 // This component is responsible for just showing details of the cluster
 // No API Call is supposed to be made here
 const ClusterDetailCard: React.FC<ClusterDetailCardProps> = ({
-  data,
   contentPage,
   landingPage,
   blog,
