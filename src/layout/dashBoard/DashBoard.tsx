@@ -415,31 +415,33 @@ const DashBoard = () => {
           )}
         </div>
       )}
-      <div>
-        <h2 className="overview-heading">Content Clusters</h2>
-        <div className="button-row">
-          <Button
-            size="small"
-            buttonType="primary"
-            text={"Create"}
-            iconLeft={campaignIcon}
-            className="primary-button-grey"
-            onClick={() => {
-              handleClusterClick("create");
-            }}
-          />
-          <Button
-            size="small"
-            buttonType="primary"
-            text={"List"}
-            iconLeft={campaignIcon}
-            className="primary-button-grey"
-            onClick={() => {
-              handleClusterClick("");
-            }}
-          />
+      {selectedTenant?.refNum === "MYCPDRUS" && (
+        <div>
+          <h2 className="overview-heading">Content Clusters</h2>
+          <div className="button-row">
+            <Button
+              size="small"
+              buttonType="primary"
+              text={"Create"}
+              iconLeft={campaignIcon}
+              className="primary-button-grey"
+              onClick={() => {
+                handleClusterClick("create");
+              }}
+            />
+            <Button
+              size="small"
+              buttonType="primary"
+              text={"List"}
+              iconLeft={campaignIcon}
+              className="primary-button-grey"
+              onClick={() => {
+                handleClusterClick("");
+              }}
+            />
+          </div>
         </div>
-      </div>
+      )}
       <div className="overview-container">
         {metricsData.length > 0 && <h2 className="overview-heading">Overview</h2>}
         {[0, 1].map((rowIndex) => (
