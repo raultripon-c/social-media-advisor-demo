@@ -90,6 +90,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       locale,
       siteVariant: "external",
       content: promptInput,
+      isCanvasSite: Boolean(sessionStorage.getItem("isCanvasSite")) || false
     });
   };
 
