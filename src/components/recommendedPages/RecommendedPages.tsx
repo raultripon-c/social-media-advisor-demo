@@ -34,7 +34,7 @@ export const RecommendedPages = (props: any) => {
         window.dispatchEvent(txeLoginCustomEvent);
 
         const refNum = selectedTenant?.refNum;
-        const locale = "en_us";
+        const locale = sessionStorage.getItem("locale") || "en_us";
         const recommendationsResponse = await APIService.getPageRecommendations(locale, refNum);
 
         if (recommendationsResponse?.status) {

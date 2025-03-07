@@ -531,6 +531,7 @@ export const handleDomainUrlForSite = async (supportedLangs: Array<any>, selecte
       dispatch(setSiteMetaData(metaData));
       sessionStorage.setItem("site", JSON.stringify(metaData));
       sessionStorage.setItem("refnum", JSON.stringify(selectedTenant?.refNum));
+      sessionStorage.setItem("locale", JSON.stringify(metaData.defaultLang.language));
     }
     return metaData;
   } catch (error) {
