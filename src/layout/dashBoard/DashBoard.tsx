@@ -39,6 +39,7 @@ const DashBoard = () => {
   const [doesUserHaveCMSAccess, setDoesUserHaveCMSAccess] = useState<boolean>(false);
   const [campaignData, setCampaignData] = useState<CampaignData[]>([]);
   const [displayDataForApps, setDisplayDataForApps] = useState<any>([]);
+  const [isContentClusterEnabled, setIsContentClusterEnabled] = useState<boolean>(false);
   const storeIsCMSApiCompleted = useSelector((store: AppStore) => store.app.isCMSFilterAPICompleted);
   const storeIsCRMApiCompleted = useSelector((store: AppStore) => store.app.isCRMFilterAPICompleted);
 
@@ -67,6 +68,9 @@ const DashBoard = () => {
     if (selectedTenant?.refNum) {
       fetchMetrics();
       campaignsList();
+      (window as any)?._env_?.CONTENT_CLUSTERS_ENABLED_TENANTS?.split(",").includes(selectedTenant?.refNum)
+        ? setIsContentClusterEnabled(true)
+        : setIsContentClusterEnabled(false);
     }
   }, []);
 
@@ -415,7 +419,7 @@ const DashBoard = () => {
           )}
         </div>
       )}
-      {selectedTenant?.refNum === "MYCPDRUS" && (
+      {isContentClusterEnabled && (
         <div>
           <h2 className="overview-heading">Content Clusters</h2>
           <div className="button-row">
