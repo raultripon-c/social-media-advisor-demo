@@ -1,0 +1,40 @@
+.cluster-analytics-card {
+  display: flex;
+  width: 436px;
+  height: 150px;
+  padding: 24px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+  border-radius: 10px;
+  border: 1px solid var(--neutrals-nn-75, #d1d5dc);
+  background: var(--Core-White, #fff);
+}
+
+.cluster-analytics-card-title {
+  overflow: hidden;
+  color: var(--neutrals-nn-400, #464f5e);
+  font-feature-settings: "liga" off, "clig" off;
+  text-overflow: ellipsis;
+
+  /* Body 1 - Medium */
+  font-family: Poppins;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 24px; /* 150% */
+}
+
+.cluster-analytics-card-count {
+  color: var(--secondary-blue-bb-300, #2927b2);
+  text-align: center;
+  font-feature-settings: "liga" off, "clig" off;
+
+  /* Headline 5 */
+  font-family: Poppins;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 36px; /* 150% */
+  letter-spacing: 0.18px;
+}

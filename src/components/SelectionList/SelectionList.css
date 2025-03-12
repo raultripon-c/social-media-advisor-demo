@@ -1,0 +1,64 @@
+.selection-list {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #ccc;
+  padding: 8px 12px;
+  border-radius: 20px;
+  max-width: 100%;
+  overflow-x: auto; /* Allows horizontal scrolling if content is wider than container */
+}
+
+/* Individual chip-like item */
+.selection-item {
+  display: inline-flex;
+  align-items: center;
+  background-color: #f3f3f3;
+  border-radius: 20px;
+  padding: 4px 8px;
+  margin-right: 4px;
+  white-space: nowrap; /* Keeps text on one line */
+}
+
+.item-name {
+  margin-right: 8px;
+  font-family: sans-serif;
+}
+
+/* "X" button to remove an item */
+.remove-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  color: #555;
+}
+
+/* Hover state for the remove button */
+.remove-button:hover {
+  color: #ff0000;
+}
+
+/* "+N" chip styling */
+.plus-item {
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* Optional toggle button for "Show Less" */
+.toggle-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6c40d8;
+  font-size: 0.9rem;
+  padding: 4px 8px;
+  border-radius: 20px;
+  margin-left: 4px;
+  white-space: nowrap;
+}
+
+.toggle-button:hover {
+  text-decoration: underline;
+}

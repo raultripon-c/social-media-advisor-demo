@@ -1,0 +1,72 @@
+.cluster-details-container {
+  display: flex;
+  width: 100%;
+  padding: 10px;
+}
+
+.cluster-details-tabs {
+  display: flex;
+  justify-content: space-around;
+  padding: 10px;
+}
+
+.cluster-tab {
+  padding: 10px 20px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  transition: background-color 0.3s ease;
+  color: var(--neutrals-nn-400, #464f5e);
+  font-feature-settings: "liga" off, "clig" off;
+
+  /* Body 2/Regular (C) */
+  font-family: var(--family-body, Poppins);
+  font-size: var(--size-font-size-base, 14px);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-line-height-md, 20px); /* 142.857% */
+}
+
+.cluster-tab:active,
+.cluster-tab:focus {
+  outline: none;
+  border: none;
+  box-shadow: none;
+}
+
+.cluster-tab.cluster-tab-active {
+  font-weight: bold;
+  border-bottom: 4px solid blue;
+}
+
+.cluster-analytics {
+  padding: 20px;
+  display: flex;
+  gap: 24px;
+}
+
+.cluster-tab-data {
+  padding: 20px;
+}
+
+.cluster-tab-data-subheading {
+  overflow: hidden;
+  color: var(--components-accordion-accordion-text-active, #353b46);
+  font-feature-settings: "liga" off, "clig" off;
+  text-overflow: ellipsis;
+
+  /* Body 1/Medium */
+  font-family: var(--family-body, Poppins);
+  font-size: var(--size-font-size-lg, 16px);
+  font-style: normal;
+  font-weight: 500;
+  line-height: var(--line-height-line-height-lg, 24px); /* 150% */
+}
+
+.cluster-detail-card-container {
+  display: flex; /* Places cards side by side */
+  gap: 20px; /* Spacing between cards */
+  max-width: 100%; /* Adjust as needed */
+  margin: 0 auto; /* Centers container on the page */
+  flex-wrap: wrap; /* Allows wrapping on smaller screens */
+}

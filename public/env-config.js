@@ -47,4 +47,5 @@ window._env_ = {
   SEGMENT_MANAGER_API_URL: "https://txe-segment-manager-intqa.phenompro.com/api",
   PHENOM_TRACK_SCRIPT_URL: "https://cdn.phenompeople.com/CareerConnectResources/prod/pcs/common/txe-intqa-phenomtrack.min.js",
   REFRESH_TOKEN_TIMEOUT_CMS: 10 * 60 * 1000,
+  CONTENT_CLUSTERS_ENABLED_TENANTS: "MYCPDRUS,PETTDFUS,WORKUS"
 }

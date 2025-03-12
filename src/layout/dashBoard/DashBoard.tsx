@@ -1,14 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import {
-  Button,
-  Loader,
-  GreetingCard,
-  OverviewCard,
-  TenantDetailCard,
-  Table,
-} from "@phenom/react-ui-components";
+import { Button, Loader, GreetingCard, OverviewCard, TenantDetailCard, Table } from "@phenom/react-ui-components";
 import { AppStore } from "store";
 import { setAppDetails, setAppsFromAPI } from "../../store/apps/actions";
 import { setSiteMetaData } from "../../store/customer/actions";
@@ -22,9 +15,13 @@ import { RecommendedPages } from "../../components/recommendedPages/RecommendedP
 import { tenantData, staticData, metricsDataForAllRegions, campaignColumns, tenantImageUrl } from "./mockData";
 import { AppSelectionOptions } from "interfaces/AppSelectionOptions";
 import { MetricData, CampaignData } from "./Interfaces";
+import campaignIcon from "../../assets/svg/Campaigner.svg";
+import { useLocation } from "react-router-dom";
 
 const DashBoard = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
   const dispatch = useDispatch();
 
   // const selectedTenant = useSelector((state: AppStore) => state.customer.selectedTenant);
@@ -42,6 +39,7 @@ const DashBoard = () => {
   const [doesUserHaveCMSAccess, setDoesUserHaveCMSAccess] = useState<boolean>(false);
   const [campaignData, setCampaignData] = useState<CampaignData[]>([]);
   const [displayDataForApps, setDisplayDataForApps] = useState<any>([]);
+  const [isContentClusterEnabled, setIsContentClusterEnabled] = useState<boolean>(false);
   const storeIsCMSApiCompleted = useSelector((store: AppStore) => store.app.isCMSFilterAPICompleted);
   const storeIsCRMApiCompleted = useSelector((store: AppStore) => store.app.isCRMFilterAPICompleted);
 
@@ -70,6 +68,9 @@ const DashBoard = () => {
     if (selectedTenant?.refNum) {
       fetchMetrics();
       campaignsList();
+      (window as any)?._env_?.CONTENT_CLUSTERS_ENABLED_TENANTS?.split(",").includes(selectedTenant?.refNum)
+        ? setIsContentClusterEnabled(true)
+        : setIsContentClusterEnabled(false);
     }
   }, []);
 
@@ -102,7 +103,9 @@ const DashBoard = () => {
     };
     getLoggedInUserInfo();
     window.addEventListener("txeLoginEvent", async () => {
-      const tenantSupportedLangs = await APIService.getSupportedLangs(getRefnumFromLink(window.location.href, selectedTenant));      
+      const tenantSupportedLangs = await APIService.getSupportedLangs(
+        getRefnumFromLink(window.location.href, selectedTenant)
+      );
       const metaData = await handleDomainUrlForSite(
         tenantSupportedLangs,
         selectedTenant,
@@ -124,11 +127,11 @@ const DashBoard = () => {
   }, []);
 
   useEffect(() => {
-    if(storeIsCMSApiCompleted && storeIsCRMApiCompleted) {
+    if (storeIsCMSApiCompleted && storeIsCRMApiCompleted) {
       setDoesUserHaveCMSAccess(true);
       handleDisplayDataForApps(true);
     }
-  }, [storeIsCMSApiCompleted, storeIsCRMApiCompleted])
+  }, [storeIsCMSApiCompleted, storeIsCRMApiCompleted]);
 
   const handleDisplayDataForApps = (isCMSCompleted?: boolean) => {
     const cmsValToConsider = isCMSCompleted || doesUserHaveCMSAccess;
@@ -363,6 +366,15 @@ const DashBoard = () => {
     }
   };
 
+  const handleClusterClick = (route: string) => {
+    const basePath = location.pathname.split("/").slice(0, 3).join("/");
+    if (route) {
+      navigate(`${basePath}/content-cluster/create`);
+    } else {
+      navigate(`${basePath}/content-clusters`);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="tenants-loader">
@@ -405,6 +417,33 @@ const DashBoard = () => {
           ) : (
             <Loader title="Loading tenant details.." />
           )}
+        </div>
+      )}
+      {isContentClusterEnabled && (
+        <div>
+          <h2 className="overview-heading">Content Clusters</h2>
+          <div className="button-row">
+            <Button
+              size="small"
+              buttonType="primary"
+              text={"Create"}
+              iconLeft={campaignIcon}
+              className="primary-button-grey"
+              onClick={() => {
+                handleClusterClick("create");
+              }}
+            />
+            <Button
+              size="small"
+              buttonType="primary"
+              text={"List"}
+              iconLeft={campaignIcon}
+              className="primary-button-grey"
+              onClick={() => {
+                handleClusterClick("");
+              }}
+            />
+          </div>
         </div>
       )}
       <div className="overview-container">
