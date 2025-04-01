@@ -188,6 +188,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
     if (!selectedTenant.length && refNum) {
       selectedTenant = { customerCode: CustomerCode, refNum: refNum };
       localStorage.setItem("selectedTenant", JSON.stringify(selectedTenant));
+      (window as any).txeTenant = selectedTenant;
       const tenantsUrl = `${
         (window as any)._env_.APP_API_URL
       }/customers/tenants/${refNum}`;
