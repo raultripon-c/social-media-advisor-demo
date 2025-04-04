@@ -123,7 +123,7 @@ const handleModuleFederation = (
         route: `${routeWithoutRefNum}`,
         },
       });
-      window.dispatchEvent(event);
+      document.getElementById("child-module-renderer")?.dispatchEvent(event);
     }
     if(selectedApp?.appConfig?.scope === 'chatbotManagementDashboard') {
       const event = new CustomEvent('triggeredCmp', {
