@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, Routes, Route, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import MultiSelectButton from "../../components/MultiSelectButton/MultiSelectButton";
 import SelectionList from "../../components/SelectionList/SelectionList";
 import SupportingMaterial from "./SupportingMaterial/SupportingMaterial";
-import ClusterDetails from "../ContentClusterDetails/ContentClusterDetails";
 import { Loader } from "@phenom/react-ui-components";
 import { APIService } from "../../utils/api.service";
 import segmentIcon from "../../assets/svg/users.svg";
@@ -28,13 +27,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
 
   const [showLoader, setShowLoader] = useState<boolean>(false);
   const [promptInput, setPromptInput] = useState<string>("");
-  const [sampleSelectionListItems, setSampleSelectionListItems] = useState<string[]>([
-    "First",
-    "Second",
-    "Third",
-    "Fourth",
-    "Fifth",
-  ]);
+  const [sampleSelectionListItems, setSampleSelectionListItems] = useState<string[]>([]);
   const [showPromptSuggestions, setShowPromptSuggestions] = useState<boolean>(false);
   const [crmUserInfo, setCrmUserInfo] = useState<any>({});
   const [selectedContentTypes, setSelectedContentTypes] = useState<string[]>(["Content Page", "Landing Page", "Blog"]);
@@ -90,7 +83,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       locale,
       siteVariant: "external",
       content: promptInput,
-      isCanvasSite: Boolean(sessionStorage.getItem("isCanvasSite")) || false
+      isCanvasSite: Boolean(sessionStorage.getItem("isCanvasSite")) || false,
     });
   };
 
@@ -150,7 +143,10 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
     });
   };
 
-  const handlePromptSubmit = () => setShowPromptSuggestions(true);
+  const handlePromptSubmit = () => {
+    setShowPromptSuggestions(true);
+    setSampleSelectionListItems(promptInput.split(" "));
+  };
 
   const handleClusterCreation = () => {
     const keywords = promptInput.split(" ");
@@ -227,9 +223,6 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
 
   return (
     <>
-      {/* <Routes>
-        <Route path={`/content-cluster/${clusterId}`} element={<ClusterDetails data={""} />} />
-      </Routes> */}
       {showLoader ? (
         <Loader title="Generating Content Cluster.." />
       ) : (

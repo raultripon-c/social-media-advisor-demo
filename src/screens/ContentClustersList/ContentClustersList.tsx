@@ -81,7 +81,12 @@ const ContentClustersList: React.FC<ContentClustersListProps> = ({}) => {
         <Loader title="Loading Content Clusters.." />
       ) : (
         <>
-          <div className="content-clusters-list-title">Content Clusters List</div>
+          <div className="content-clusters-list-header">
+            <div className="content-clusters-list-title">Content Clusters List</div>
+            <button className="create-content-cluster-btn" onClick={() => navigate(location.pathname.replace(/\/content-clusters$/, "/content-cluster/create"))}>
+              + Create
+            </button>
+          </div>
           <div className="content-cluster-list-card-container">
             {contentClustersList &&
               contentClustersList.map((cluster: any) => (

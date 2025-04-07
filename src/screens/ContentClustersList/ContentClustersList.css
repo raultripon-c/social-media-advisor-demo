@@ -1,6 +1,12 @@
 .content-clusters-list-container {
+  height: 100vh;
   padding: 24px;
-  background: var(--grays-grgr-25, #F8F9FB);
+  background: var(--grays-grgr-25, #f8f9fb);
+}
+
+.content-clusters-list-header {
+  display: flex;
+  justify-content: space-between;
 }
 
 .content-clusters-list-title {
@@ -17,6 +23,25 @@
   line-height: var(--line-height-line-height-lg, 24px); /* 133.333% */
   letter-spacing: 0.15px;
   margin-bottom: 16px;
+}
+
+.create-content-cluster-btn {
+  color: var(--Core-White, #fff);
+  font-feature-settings: "liga" off, "clig" off;
+  font-family: var(--family-body, Poppins);
+  font-size: var(--size-font-size-base, 14px);
+  font-style: normal;
+  font-weight: 500;
+  line-height: var(--line-height-line-height-md, 20px);
+  display: flex;
+  padding: var(--spacing-spacing-md, 6px) var(--spacing-spacing-2xl, 12px);
+  justify-content: center;
+  align-items: center;
+  gap: var(--spacing-spacing-lg, 8px);
+  border-radius: var(--border-border-radius-lg, 8px);
+  background: var(--primary-myrtle-green-gp-400, #3c6d68);
+  margin-right: 6%;
+  margin-bottom: 10px;
 }
 
 .content-cluster-list-card-container {
