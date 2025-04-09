@@ -321,6 +321,9 @@ export const APIService = {
         },
         { withCredentials: true }
       );
+      if(res?.data?.data) {
+        document.cookie = 'token=' + res?.data?.data + ';path=/';
+      }
       return res;
     }
     catch (err) {
