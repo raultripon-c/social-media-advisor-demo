@@ -144,9 +144,11 @@ export const APIService = {
     try {
       const response = await API.get(url);
       if (response.data.data) {
-        dispatch(setSelectedTenant(response.data.data));
-        localStorage.setItem("selectedTenant", JSON.stringify(response.data.data));
-        return response.data.data;
+        const selectedTenant = response.data.data;
+        dispatch(setSelectedTenant(selectedTenant));
+        localStorage.setItem("selectedTenant", JSON.stringify(selectedTenant));
+        (window as any).txeTenant = selectedTenant;
+        return selectedTenant;
       } else {
         dispatch(setSelectedTenant({}));
         return;
@@ -319,6 +321,9 @@ export const APIService = {
         },
         { withCredentials: true }
       );
+      if(res?.data?.data) {
+        document.cookie = 'token=' + res?.data?.data + ';path=/';
+      }
       return res;
     }
     catch (err) {
