@@ -1,11 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useSelector } from "react-redux";
+import { Loader } from "@phenom/react-ui-components";
 import { MessageService } from "../MessageService";
-import { useDynamicMFLoader } from "./useDynamicMFLoader";
 import { removeStyles, removeStylesBasedOnContents, restoreStyles, setObjectReferenceFromString } from "../utils/appUtils";
 import CrmStylesRenderer from "./CrmStylesRenderer";
-import { Loader } from "@phenom/react-ui-components";
 import "./AngularApp.scss";
+import { CommonConstants } from "../utils/common-constants";
 
 // Extend the Window interface to include __ckeditor__
 declare global {
@@ -19,13 +18,33 @@ declare global {
 
 export function AngularAppRenderer(props: any) {
   let removedStyles: any[] = [];
-  const containerRef = useRef(null);
-  // const selectedTenant = useSelector((state: AppStore) => state.customer.selectedTenant);
   let selectedTenant = JSON.parse(localStorage.getItem("selectedTenant") || "[]");
-  // const approute = props?.selectedApp?.route;
   const moduleRoute = props?.moduleRoute;
-  // const appTitle = (props?.selectedAppTitle === 'SMS Manager' || props?.selectedAppTitle === 'Email Manager') ? props.selectedAppTitle : null;
   const [isReady, setReady] = useState(false);
+  const [isComponentLoaded, setComponentLoaded] = useState(false);
+  const [isRemoteEntryFileReady, setRemoteEntryFileReady] = useState(false);
+
+  useEffect(() => {
+    setComponentLoaded(false);
+    const isScriptAlreadyDownloaded = (scriptSrc: string) => {
+      const existingScript = document.querySelector(`script[src="${scriptSrc}"]`);
+      return existingScript !== null;
+    };
+    if(isScriptAlreadyDownloaded(props.url)) {
+      setRemoteEntryFileReady(true);
+    } else {
+      const scriptElement = document.createElement("script");
+      scriptElement.src = props.url;
+      scriptElement.type = "text/javascript";
+      scriptElement.async = true;
+      scriptElement.onload = () => {
+        setRemoteEntryFileReady(true);
+      }
+      document.head.appendChild(scriptElement);
+    }
+
+  }, [props?.url])
+
   if(!isReady && props?.scope === 'cpui') {
     document.body.style.pointerEvents = "none";
     document.body.style.cursor = "not-allowed";
@@ -61,17 +80,30 @@ export function AngularAppRenderer(props: any) {
       await __webpack_init_sharing__("default");
       const newContainer = window[scope];
       await newContainer.init(__webpack_share_scopes__.default);
+    } else {
+      (window as any)[`${scope}_exports`] = (window as any).__webpack_exports__;
+      (window as any)[`${scope}_require`] = (window as any).__webpack_require__;
+      (window as any)[`${scope}_modules`] = (window as any).__webpack_modules__;
+      (window as any)[`${scope}_module_cache`] = (window as any).__webpack_module_cache__;
     }
 
     const factory = await window[scope].get(module);
     return factory();
   };
 
-  // Load dynamic module script
-  const { ready, failed } = useDynamicMFLoader({ url: props.url });
+
+
+
 
   // Check if CRM script is loaded, if not, load it
   useEffect(() => {
+    console.log('added for scope', props.scope);
+    if((window as any)[`${props.scope}_exports`]) {
+      (window as any).__webpack_exports__ = (window as any)[`${props.scope}_exports`];
+      (window as any).__webpack_require__ = (window as any)[`${props.scope}_require`];
+      (window as any).__webpack_modules__ = (window as any)[`${props.scope}_modules`];
+      (window as any).__webpack_module_cache__ = (window as any)[`${props.scope}_module_cache`];
+    }
     if (props.scope === 'cpui' && !document.getElementById('crm-script')) {
       const scriptElement = document.createElement("script");
       scriptElement.src = "https://pie-dev-onephenom.phenompro.com/scripts.js";
@@ -87,7 +119,6 @@ export function AngularAppRenderer(props: any) {
       const styleElement = document.getElementById(styleId);
       if (styleElement) styleElement.remove();
     });
-
   }, [props.scope]);
 
   // Fetch and load the CRM script and its associated CSS
@@ -129,14 +160,18 @@ export function AngularAppRenderer(props: any) {
 
   // Handle module mounting after script loading
   useEffect(() => {
-    if (ready) {
-      if (!document.getElementById("crm-styles") && props.scope === 'cpui') {
+    if (isRemoteEntryFileReady) {
+      setRemoteEntryFileReady(false);
+      if (!document.getElementById("crm-styles") && props.scope === "cpui") {
         fetchAndLoadScript();
       }
-      let stylesToBeRemoved = ["https://github.com/h5bp/html5-boilerplate/blob/master/src/css/main.css", "assets-management-new-body"];
+      let stylesToBeRemoved = [
+        "https://github.com/h5bp/html5-boilerplate/blob/master/src/css/main.css",
+        "assets-management-new-body",
+      ];
       if (props.scope && props.scope === "chatbotManagementDashboard") {
-        removedStyles = removeStyles();  
-        stylesToBeRemoved = [...stylesToBeRemoved,"cmsWebFont"];
+        removedStyles = removeStyles();
+        stylesToBeRemoved = [...stylesToBeRemoved, "cmsWebFont"];
       }
       removeStylesBasedOnContents(stylesToBeRemoved);
       loadComponent();
@@ -158,45 +193,70 @@ export function AngularAppRenderer(props: any) {
             // txeAppHeader: appTitle,
             companyName: selectedTenant?.tenantName,
           };
-          console.log('angular app props', { props });
+          console.log("angular app props", { props });
           await module.mount(props);
-          if( scope === 'cpui' ) {
+          if (scope === "cpui") {
             window.addEventListener("crmModuleAvailable", () => {
               const body = document.querySelector("body");
               if (body) {
                 body.style.pointerEvents = "";
                 body.style.cursor = "";
               }
-              (window as any).__OPENREPLAY__?.event("CRM component loaded successfully", {message: "Component loaded successfully!"});
-              setReady(true);
+              (window as any).__OPENREPLAY__?.event("CRM component loaded successfully", {
+                message: "Component loaded successfully!",
+              });
+              setComponentLoaded(true);
             });
           } else {
-            (window as any).__OPENREPLAY__?.event("Anlaytics Module available");
-            setReady(true);
+            window.addEventListener("AnalyticsModuleAvailable", () => {
+              const mfeRoot = document.querySelector("app-root-mfe");
+
+              if (mfeRoot) {
+                const observer = new MutationObserver(() => {
+                  mfeRoot.querySelectorAll("img").forEach((img) => {
+                    if (img.src.includes("/assets/images")) {
+                      img.src = img.src.replace(
+                        /^(.*?)\/assets\/images/,
+                        `${(window as any)._env_.ANALYTICS_MFE_URL}/assets/images`
+                      );
+                    }
+                  });
+                });
+
+                observer.observe(mfeRoot, { childList: true, subtree: true });
+              }
+
+              const body = document.querySelector("body");
+              if (body) {
+                body.style.pointerEvents = "";
+                body.style.cursor = "";
+              }
+              (window as any).__OPENREPLAY__?.event("Anlaytics Module available");
+              setComponentLoaded(true);
+            });
           }
-            
         }
       })();
     }
     return () => {
+      localStorage.removeItem(CommonConstants.TENANT_REFNUM);
       window.__ckeditor__ = window.CKEDITOR;
       window.__$__ = window.$;
       removedStyles && restoreStyles(removedStyles);
       setReady(false);
     };
-  }, [ready]);
+  }, [isRemoteEntryFileReady]);
 
   return (
     <div>
       <div
         id="child-module-renderer"
-        ref={containerRef}
-        style={{ display: isReady ? "block" : "none" }}
+        style={{ display: isComponentLoaded ? "block" : "none" }}
       ></div>
 
       {props.scope === 'cpui' && <CrmStylesRenderer />}
 
-      {!isReady && (
+      {!isComponentLoaded && (
         <div className="child-loading">
           <Loader title={"loading"} />
         </div>

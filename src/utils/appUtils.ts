@@ -117,7 +117,7 @@ const handleModuleFederation = (
       // window.dispatchEvent(event);
       document.getElementById("child-module-renderer")?.dispatchEvent(event);
     }
-    if(selectedApp?.appConfig?.scope === 'analyticsUiPro') {
+    if(selectedApp?.appConfig?.scope === 'txeAnalyticsMfe') {
       const event = new CustomEvent('triggeredAnalytics', {
         detail: {
         route: `${routeWithoutRefNum}`,
