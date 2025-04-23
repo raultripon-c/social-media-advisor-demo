@@ -92,14 +92,15 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
       .then((response: any) => {
         const result = response.data;
         if (response.status == 200 && result.status) {
-          setTotalTenantsData(response.data.data);
+          const tenants = result.data;
+          setTotalTenantsData(tenants);
           setFilteredData(
-            response.data.data.sort((a: any, b: any) =>
+            tenants.sort((a: any, b: any) =>
               a.tenantName.localeCompare(b.tenantName)
             )
           );
-          dispatch(setAllTenants(response.data.data));
-          sessionStorage.setItem("tenants", JSON.stringify(response.data.data));
+          dispatch(setAllTenants(tenants));
+          sessionStorage.setItem("tenants", JSON.stringify(tenants));
         } else {
           setTotalTenantsData([]);
         }

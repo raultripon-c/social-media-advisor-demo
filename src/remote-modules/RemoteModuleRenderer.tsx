@@ -14,39 +14,34 @@ import { AppSelectionOptions } from "interfaces/AppSelectionOptions";
 
 export const RemoteModuleRenderer = () => {
   delete (window as any).isCmsModule;
-  const selectedTenant = useSelector(
-    (state: AppStore) => state.customer.selectedTenant
-  );
+  const selectedTenant = useSelector((state: AppStore) => state.customer.selectedTenant);
 
-  const siteMetaData = useSelector(
-    (state: AppStore) => state.customer.siteMetaData
-  );
+  const siteMetaData = useSelector((state: AppStore) => state.customer.siteMetaData);
 
-  const { data, user, allTenants, customerTenants } = useSelector(
-    (state: AppStore) => state.customer
-  );  
+  const { data, user, allTenants, customerTenants } = useSelector((state: AppStore) => state.customer);
 
-  useEffect(()=>{
-    (window as any).TXEMessageService=MessageService;
-  },[])
+  useEffect(() => {
+    (window as any).TXEMessageService = MessageService;
+  }, []);
   const APP_ENV = (window as any)._env_.APP_ENV;
   let fetchedAppsFromStorage = useSelector((state: any) => state.app.allApps);
-  if(!fetchedAppsFromStorage || fetchedAppsFromStorage.length === 0) {
+  if (!fetchedAppsFromStorage || fetchedAppsFromStorage.length === 0) {
     fetchedAppsFromStorage = JSON.parse(sessionStorage.getItem("allapps") || "[]");
   }
-  let detailsApp = fetchedAppsFromStorage && fetchedAppsFromStorage.length && findAppConfigByRoutes(fetchedAppsFromStorage, window.location.pathname)[0];
+  let detailsApp =
+    fetchedAppsFromStorage &&
+    fetchedAppsFromStorage.length &&
+    findAppConfigByRoutes(fetchedAppsFromStorage, window.location.pathname)[0];
   var selectedApp = detailsApp?.appConfig;
   const selectedModuleAppObject = useSelector((state: any) => {
-    const selectedAppFromSession = JSON.parse(
-      sessionStorage.getItem("selectedApp") || "null"
-    );
+    const selectedAppFromSession = JSON.parse(sessionStorage.getItem("selectedApp") || "null");
 
     return detailsApp ?? (selectedAppFromSession || state.app?.selectedApp);
   });
   var selectedAppTitle = selectedModuleAppObject?.hoverText || null;
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [moduleProps, setModuleProps] = useState(selectedApp.props);
+  const [moduleProps, setModuleProps] = useState(selectedApp?.props);
 
   const fetchedApps = useSelector((state: any) => state.app.allApps);
   const allEvents = fetchedApps.reduce(
@@ -74,27 +69,18 @@ export const RemoteModuleRenderer = () => {
       const appInputs = allEvents.inputs[app];
       appInputs.forEach((input: any) => {
         if (input === output) {
-          console.log(
-            "Output matched with input, dispatching event...",
-            app + "_" + input,
-            currentEventData
-          );
+          console.log("Output matched with input, dispatching event...", app + "_" + input, currentEventData);
           MessageService.dispatchEvent(app + "_" + input, currentEventData);
         }
       });
     });
   };
-  const handleOutputs = (
-    output: any,
-    eventData: any,
-    currentEventData: any
-  ) => {
+  const handleOutputs = (output: any, eventData: any, currentEventData: any) => {
     switch (output) {
       case "NAVIGATE":
         console.log("navigating to other app", eventData?.appName);
         const navigatingApp = getAppByName(fetchedApps, eventData.appName);
-        navigatingApp &&
-          sessionStorage.setItem("selectedApp", JSON.stringify(navigatingApp));
+        navigatingApp && sessionStorage.setItem("selectedApp", JSON.stringify(navigatingApp));
         dispatch(setAppDetails(navigatingApp));
         const appSelectionOptions: AppSelectionOptions = {
           selectedApp: navigatingApp,
@@ -105,7 +91,7 @@ export const RemoteModuleRenderer = () => {
           dispatch: dispatch,
           openInNewTab: false,
           setSiteMetaData: setSiteMetaData,
-          selectedTenant: selectedTenant
+          selectedTenant: selectedTenant,
         };
         appSelectionHandler(appSelectionOptions);
         break;
@@ -124,12 +110,10 @@ export const RemoteModuleRenderer = () => {
       appOutputs.forEach((output: any) => {
         let currentEventData = {};
         console.log("listening output", output);
-        const subscription = MessageService.on(appId + "_" + output).subscribe(
-          (eventData: any) => {
-            currentEventData = eventData;
-            handleOutputs(output, eventData, currentEventData);
-          }
-        );
+        const subscription = MessageService.on(appId + "_" + output).subscribe((eventData: any) => {
+          currentEventData = eventData;
+          handleOutputs(output, eventData, currentEventData);
+        });
         subscriptions.push(subscription);
       });
     });
@@ -181,7 +165,7 @@ export const RemoteModuleRenderer = () => {
     document.title = title;
 
     // Safely get the title element
-    const titleElement = document.querySelector('title');
+    const titleElement = document.querySelector("title");
 
     if (titleElement) {
       // Observer to revert any title changes
@@ -198,12 +182,16 @@ export const RemoteModuleRenderer = () => {
       return () => observer.disconnect();
     }
   }, []);
- useEffect(() => {
+  useEffect(() => {
     // Update key whenever subPath or refNum changes
-    if((selectedModuleAppObject?.appConfig?.scope !== "cpui") && (selectedModuleAppObject?.appConfig?.scope !== 'analyticsUiPro') && (selectedModuleAppObject?.appConfig?.scope !== 'chatbotManagementDashboard')) {
+    if (
+      selectedModuleAppObject?.appConfig?.scope !== "cpui" &&
+      selectedModuleAppObject?.appConfig?.scope !== "txeAnalyticsMfe" &&
+      selectedModuleAppObject?.appConfig?.scope !== "chatbotManagementDashboard"
+    ) {
       setKey((prevKey) => prevKey + 1);
     }
-  }, [moduleProps?.subPath, moduleProps?.refNum,selectedModuleAppObject?.name, window.keycloakInstance?.token]);
+  }, [moduleProps?.subPath, moduleProps?.refNum, selectedModuleAppObject?.name, window.keycloakInstance?.token]);
   const getSelectedAppUrl = (selectedApp: any, isEnvconfig: boolean) => {
     let overriding = sessionStorage.getItem("overriding");
     if (APP_ENV?.toUpperCase() !== "QA" || !overriding) {
@@ -233,26 +221,28 @@ export const RemoteModuleRenderer = () => {
       {selectedModuleAppObject.framework === "REACT" && (
         <Fragment>
           <Routes>
-            <Route path={"*"} index={true} element={<ReactAppRenderer
-              module={selectedApp.module}
-              component={selectedApp.component}
-              url={getSelectedAppUrl(selectedApp, false) || selectedApp.url}
-              scope={selectedApp.scope}
-              props={moduleProps}
-              loading={selectedApp.loadingMessage}
-              envconfig={
-                getSelectedAppUrl(selectedApp, true) || selectedApp.envconfig
+            <Route
+              path={"*"}
+              index={true}
+              element={
+                <ReactAppRenderer
+                  module={selectedApp.module}
+                  component={selectedApp.component}
+                  url={getSelectedAppUrl(selectedApp, false) || selectedApp.url}
+                  scope={selectedApp.scope}
+                  props={moduleProps}
+                  loading={selectedApp.loadingMessage}
+                  envconfig={getSelectedAppUrl(selectedApp, true) || selectedApp.envconfig}
+                  moduleRoute={selectedApp.moduleRoute}
+                  key={key}
+                />
               }
-              moduleRoute={selectedApp.moduleRoute}
-              key={key}
-            />} />
+            />
           </Routes>
           <Outlet />
         </Fragment>
       )}
-      {selectedModuleAppObject.framework == "ANGULAR" &&
-        selectedApp.scope &&
-        selectedApp && (
+      {selectedModuleAppObject.framework == "ANGULAR" && selectedApp.scope && selectedApp && (
         <Fragment>
           <AngularAppRenderer
             scope={selectedApp.scope}
@@ -262,9 +252,9 @@ export const RemoteModuleRenderer = () => {
             component={selectedApp.component}
             moduleRoute={selectedApp.moduleRoute}
             appWindowConfig={selectedApp.appWindowConfig}
-            key={key} />
+          />
         </Fragment>
-        )}
+      )}
     </div>
   );
 };
