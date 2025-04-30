@@ -49,6 +49,6 @@ window._env_ = {
   REFRESH_TOKEN_TIMEOUT_CMS: 10 * 60 * 1000,
   CONTENT_CLUSTERS_ENABLED_TENANTS: "MYCPDRUS,PETTDFUS,WORKUS",
   ANALYTICS_REMOTE_ENTRY_URL: 'https://qa-analyticsui.phenompro.com/remoteEntry.js',
-  ANALYTICS_MFE_URL: 'https://txe-analytics-mfe-intqa.phenompro.com/txe-analytics-mfe',
+  ANALYTICS_MFE_URL: 'https://txe-analytics-mfe-intqa.phenompro.com/txe-analytics-mfe-prod',
   ANALYTICS_URL: 'https://qa-analyticsui.phenompro.com'
 }
