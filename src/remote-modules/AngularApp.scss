@@ -76,3 +76,26 @@ ul#spotlight-list {
     }
   }
 }
+.analytics-mfe {
+  .root-main-page {
+    width: 100% !important;
+    .phnm-side-nav {
+      display: none !important;
+    }
+    .header-cum-body .main-page .new-ds-header {
+      display: none !important;
+    }
+  }
+  .root-main-page.notForPdf {
+    height: 100% !important;
+  }
+  .offcanvas-header {
+    width: max-content !important;
+  }
+  .tenants-list-page .new-ds-header {
+    display: none !important;
+  }
+  .main-header-bar {
+    display: none !important;
+  }
+}
