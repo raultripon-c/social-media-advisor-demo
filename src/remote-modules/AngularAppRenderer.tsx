@@ -45,16 +45,6 @@ export function AngularAppRenderer(props: any) {
 
   }, [props?.url])
 
-  if(!isReady && props?.scope === 'cpui') {
-    document.body.style.pointerEvents = "none";
-    document.body.style.cursor = "not-allowed";
-
-    setTimeout(() => {
-      document.body.style.pointerEvents = "";
-      document.body.style.cursor = "";
-    }, 10000);
-  }
-
   if (window.__ckeditor__) {
     window.CKEDITOR = window.__ckeditor__;
     window.$ = window.__$__;
@@ -197,11 +187,6 @@ export function AngularAppRenderer(props: any) {
           await module.mount(props);
           if (scope === "cpui") {
             window.addEventListener("crmModuleAvailable", () => {
-              const body = document.querySelector("body");
-              if (body) {
-                body.style.pointerEvents = "";
-                body.style.cursor = "";
-              }
               (window as any).__OPENREPLAY__?.event("CRM component loaded successfully", {
                 message: "Component loaded successfully!",
               });
@@ -217,7 +202,7 @@ export function AngularAppRenderer(props: any) {
                     if (img.src.includes("/assets/images")) {
                       img.src = img.src.replace(
                         /^(.*?)\/assets\/images/,
-                        `${(window as any)._env_.ANALYTICS_MFE_URL}/assets/images`
+                        `${(window as any)._env_.ANALYTICS_URL}/assets/images`
                       );
                     }
                   });
@@ -227,10 +212,6 @@ export function AngularAppRenderer(props: any) {
               }
 
               const body = document.querySelector("body");
-              if (body) {
-                body.style.pointerEvents = "";
-                body.style.cursor = "";
-              }
               (window as any).__OPENREPLAY__?.event("Anlaytics Module available");
               setComponentLoaded(true);
             });

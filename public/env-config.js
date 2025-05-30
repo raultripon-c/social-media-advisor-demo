@@ -24,7 +24,7 @@ window._env_ = {
   CONFIG_HUB_API_URL: "https://servicehub-qa.phenompro.com/servicehub-config-service",
   MF_API_URL: "https://servicehub-qa.phenompro.com/v1/api",
   TOOLS_API_URL: "https://txe-intqa.phenompro.com/",
-  DISCOVERY_HOSTED_API: "https://provisioning-qa.phenompro.com/api",
+  DISCOVERY_HOSTED_API: "https://provisioning-intqa.phenompro.com/api",
   STATUS_API: "https://api.statuspage.io/v1",
   STATUS_PAGE_URL: "https://status.phenom.com/",
   STATUS_API_AUTH_KEY: "OAuth bb6f44f0-f381-4a1d-8b58-ca979ecc2c7d",
@@ -48,7 +48,6 @@ window._env_ = {
   PHENOM_TRACK_SCRIPT_URL: "https://cdn.phenompeople.com/CareerConnectResources/prod/pcs/common/txe-intqa-phenomtrack.min.js",
   REFRESH_TOKEN_TIMEOUT_CMS: 10 * 60 * 1000,
   CONTENT_CLUSTERS_ENABLED_TENANTS: "MYCPDRUS,PETTDFUS,WORKUS",
-  ANALYTICS_REMOTE_ENTRY_URL: 'https://qa-analyticsui.phenompro.com/remoteEntry.js',
-  ANALYTICS_MFE_URL: 'https://txe-analytics-mfe-intqa.phenompro.com/txe-analytics-mfe-prod',
-  ANALYTICS_URL: 'https://qa-analyticsui.phenompro.com'
+  ANALYTICS_REMOTE_ENTRY_URL: 'http://localhost:3001/remoteEntry.js',
+  ANALYTICS_URL: 'http://localhost:3001'
 }
