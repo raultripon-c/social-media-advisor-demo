@@ -48,6 +48,6 @@ window._env_ = {
   PHENOM_TRACK_SCRIPT_URL: "https://cdn.phenompeople.com/CareerConnectResources/prod/pcs/common/txe-intqa-phenomtrack.min.js",
   REFRESH_TOKEN_TIMEOUT_CMS: 10 * 60 * 1000,
   CONTENT_CLUSTERS_ENABLED_TENANTS: "MYCPDRUS,PETTDFUS,WORKUS",
-  ANALYTICS_REMOTE_ENTRY_URL: 'http://localhost:3001/remoteEntry.js',
-  ANALYTICS_URL: 'http://localhost:3001'
+  ANALYTICS_REMOTE_ENTRY_URL: 'https://qa-analyticsui.phenompro.com/remoteEntry.js',
+  ANALYTICS_URL: 'https://qa-analyticsui.phenompro.com'
 }
