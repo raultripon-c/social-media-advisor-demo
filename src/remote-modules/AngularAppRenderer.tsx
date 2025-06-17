@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Loader } from "@phenom/react-ui-components";
 import { MessageService } from "../MessageService";
-import { removeStyles, removeStylesBasedOnContents, restoreStyles, setObjectReferenceFromString } from "../utils/appUtils";
+import { removeStyles, removeStylesBasedOnContents, restoreStyles } from "../utils/appUtils";
 import CrmStylesRenderer from "./CrmStylesRenderer";
 import "./AngularApp.scss";
 import { CommonConstants } from "../utils/common-constants";
@@ -23,6 +23,30 @@ export function AngularAppRenderer(props: any) {
   const [isReady, setReady] = useState(false);
   const [isComponentLoaded, setComponentLoaded] = useState(false);
   const [isRemoteEntryFileReady, setRemoteEntryFileReady] = useState(false);
+  const [isInteractionBlocked, setIsInteractionBlocked] = useState(true);
+
+  useEffect(() => {
+    // Block interaction on the service-tools-app-body div
+    const appBody = document.querySelector('.service-tools-app-body');
+    if (appBody instanceof HTMLElement) {
+      appBody.style.pointerEvents = 'none';
+    }
+
+    return () => {
+      // Cleanup: restore pointer events when component unmounts
+      if (appBody instanceof HTMLElement) {
+        appBody.style.pointerEvents = 'auto';
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    // Update pointer events whenever blocking state changes
+    const appBody = document.querySelector('.service-tools-app-body');
+    if (appBody instanceof HTMLElement) {
+      appBody.style.pointerEvents = isInteractionBlocked ? 'none' : 'auto';
+    }
+  }, [isInteractionBlocked]);
 
   useEffect(() => {
     setComponentLoaded(false);
@@ -53,15 +77,6 @@ export function AngularAppRenderer(props: any) {
     window.Promise = (window as any).___prmise___;
   }
 
-  // Effect for setting up window object configuration
-  useEffect(() => {
-    if (props?.appWindowConfig) {
-      const appWindowConfig = JSON.parse(props.appWindowConfig);
-      setObjectReferenceFromString(window, appWindowConfig?.keyPath, appWindowConfig?.value);
-    }
-  }, [props.appWindowConfig]);
-
-
   // Load the remote module dynamically
   const loadRemoteModule = async (scope: any, module: any) => {
     const container = window[scope];
@@ -80,10 +95,6 @@ export function AngularAppRenderer(props: any) {
     const factory = await window[scope].get(module);
     return factory();
   };
-
-
-
-
 
   // Check if CRM script is loaded, if not, load it
   useEffect(() => {
@@ -177,24 +188,33 @@ export function AngularAppRenderer(props: any) {
             subPath: `/${selectedTenant?.customerCode}/${selectedTenant?.refNum}`,
             userId: window.keycloakInstance.userInfo.userDetails.id,
             userEmail: window.keycloakInstance.userInfo.userDetails.email,
-            // appName: appName,
             MessageService: JSON.stringify(MessageService),
             moduleRoute: moduleRoute,
-            // txeAppHeader: appTitle,
             companyName: selectedTenant?.tenantName,
           };
           console.log("angular app props", { props });
           await module.mount(props);
+
+          // Set a 5 second timeout to unblock interaction
+          const timeoutId = setTimeout(() => {
+            setIsInteractionBlocked(false);
+          }, 10000);
+
           if (scope === "cpui") {
             window.addEventListener("crmModuleAvailable", () => {
+              console.log("crm module available");
               (window as any).__OPENREPLAY__?.event("CRM component loaded successfully", {
                 message: "Component loaded successfully!",
               });
               setComponentLoaded(true);
+              setIsInteractionBlocked(false);
+              clearTimeout(timeoutId);
             });
           } else {
-            window.addEventListener("AnalyticsModuleAvailable", () => {
+            (window as any).document.getElementById('child-module-renderer').addEventListener("AnalyticsModuleAvailable", () => {
               const mfeRoot = document.querySelector("app-root-mfe");
+
+              console.log("analytics module available", mfeRoot);
 
               if (mfeRoot) {
                 const observer = new MutationObserver(() => {
@@ -211,20 +231,21 @@ export function AngularAppRenderer(props: any) {
                 observer.observe(mfeRoot, { childList: true, subtree: true });
               }
 
-              const body = document.querySelector("body");
               (window as any).__OPENREPLAY__?.event("Anlaytics Module available");
               setComponentLoaded(true);
+              setIsInteractionBlocked(false);
+              clearTimeout(timeoutId);
             });
           }
         }
       })();
     }
     return () => {
-      localStorage.removeItem(CommonConstants.TENANT_REFNUM);
       window.__ckeditor__ = window.CKEDITOR;
       window.__$__ = window.$;
       removedStyles && restoreStyles(removedStyles);
       setReady(false);
+      setIsInteractionBlocked(true);
     };
   }, [isRemoteEntryFileReady]);
 
@@ -232,7 +253,9 @@ export function AngularAppRenderer(props: any) {
     <div>
       <div
         id="child-module-renderer"
-        style={{ display: isComponentLoaded ? "block" : "none" }}
+        style={{ 
+          display: isComponentLoaded ? "block" : "none"
+        }}
       ></div>
 
       {props.scope === 'cpui' && <CrmStylesRenderer />}

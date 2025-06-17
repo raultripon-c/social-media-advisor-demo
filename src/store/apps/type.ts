@@ -6,5 +6,6 @@ export interface AppState {
     dashboardSelected: boolean;
     isCRMFilterAPICompleted: boolean;
     isCMSFilterAPICompleted: boolean;
+    isAnalyticsChildAvailable: boolean;
   }
   

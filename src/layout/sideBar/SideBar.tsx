@@ -9,16 +9,14 @@ import dashboardActive from "../../assets/svg/HomeVector.svg";
 import dashboardGrey from "../../assets/svg/HomeVectorGrey.svg";
 import { setAppDetails, setSidebarState, setDashboardSelected } from "../../store/apps/actions";
 import { setSiteMetaData } from "../../store/customer/actions";
-import {
-  setCustomerTenants,
-  setSelectedTenant,
-} from "../../store/customer/actions";
 import "./SideBar.scss";
 import { AppSelectionOptions } from "../../interfaces/AppSelectionOptions";
 import { appSelectionHandler, findAppConfigByRoutes } from "../../utils/appUtils";
+import { MessageService } from "../../MessageService";
 
 function ToolsSideBar(props: any) {
   const { categories, setCategories } = props;
+  const isAnalyticsChildAvailable = useSelector((state: any) => state.app.isAnalyticsChildAvailable);
   const dashboardSelected = useSelector((state: any) => state.app.dashboardSelected);
   const selectedTenant = useSelector(
     (state: AppStore) => state.customer.selectedTenant
@@ -28,11 +26,12 @@ function ToolsSideBar(props: any) {
   );
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [disableAutoClose, setDisableAutoClose] = useState(true);
+  const [analyticsTenantSelected, setAnalyticsTenantSelected] = useState(false);
   let fetchedApps = useSelector((state: any) => state.app.allApps);
   if(!fetchedApps || fetchedApps.length === 0) {
     fetchedApps = JSON.parse(sessionStorage.getItem("allapps") || "[]");
   }
-  let detailsApp = fetchedApps && fetchedApps.length && findAppConfigByRoutes(fetchedApps, window.location.pathname)[0];
+  let detailsApp = fetchedApps && fetchedApps.length && findAppConfigByRoutes(fetchedApps, `/${window.location.pathname.split('/').slice(3).join('/')}`)[0];
   const selectedApp = useSelector((state: any) => {
     const selectedAppFromSession = JSON.parse(
       sessionStorage.getItem("selectedApp") || "null"
@@ -45,6 +44,7 @@ function ToolsSideBar(props: any) {
     dispatch(setDashboardSelected(true));
     setDisableAutoClose(false);
     dispatch(setAppDetails({}));
+    setAnalyticsTenantSelected(false);
     sessionStorage.removeItem("selectedApp");
     navigate(`${selectedTenant?.customerCode}/${selectedTenant?.refNum}/summary`);
   };
@@ -68,10 +68,16 @@ function ToolsSideBar(props: any) {
     }
   };
   useEffect(()=>{
+    MessageService.on("ANALYTICS_TENANT_SELECTED").subscribe((tenant) => {
+      setAnalyticsTenantSelected(true);
+    });
     handleCrmStyles();
     if(window.location.pathname.includes("summary")){
       dispatch(setDashboardSelected(true));
     }
+    return () => {
+      setAnalyticsTenantSelected(false);
+    };
   }, []);
   useEffect(() => {
     dispatch(setSidebarState(sidebarOpen));
@@ -109,7 +115,9 @@ function ToolsSideBar(props: any) {
         openInNewTab: false,
         setSiteMetaData: setSiteMetaData,
         selectedTenant: selectedTenant,
-        customeRoute: true
+        isAnalyticsChildAvailable: app.parentName === "Analytics" && isAnalyticsChildAvailable && !analyticsTenantSelected,
+        customeRoute: true,
+        setShowAnalyticsTenant: setAnalyticsTenantSelected
       }
       sessionStorage.removeItem("txeCustomPath");
       appSelectionHandler(appSelectionOptions);

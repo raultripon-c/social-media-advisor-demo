@@ -60,10 +60,10 @@ API.interceptors.request.use(async (config: any) => {
   await waitForToken();
   const token = keycloak.token;
   if (token) {
-    if (config.url.includes('/getMetaData') || config.url.includes('/analytics')) {
+    if (config.url.includes((window as any)?._env_?.ANALYTICS_SB_URL) || config.url.includes((window as any)?._env_?.ANALYTICS_SF_URL)) {
       config.headers.Authorization = token ? `${token}` : "";
       config.headers.Logintype = 'keycloak';
-    } else {
+  } else {
       config.headers.Authorization = token ? `Bearer ${token}` : "";
     }
     config.headers["ph-org-type"] = type;

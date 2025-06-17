@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Button, Loader, GreetingCard, OverviewCard, TenantDetailCard, Table } from "@phenom/react-ui-components";
@@ -57,6 +57,8 @@ const DashBoard = () => {
     Banners: "showBanners",
   };
 
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   const fetchCurrentTenantData = async () => {
     const tenantResp: any = await APIService.getTenantDetails(getRefnumFromLink(window.location.href, selectedTenant));
     if (tenantResp.data.status === "success") {
@@ -66,13 +68,40 @@ const DashBoard = () => {
 
   useEffect(() => {
     if (selectedTenant?.refNum) {
-      fetchMetrics();
-      campaignsList();
+      // Create new AbortController for this effect
+      abortControllerRef.current = new AbortController();
+      const signal = abortControllerRef.current.signal;
+
+      const fetchData = async () => {
+        try {
+          await Promise.all([
+            fetchMetrics(signal),
+            campaignsList(signal)
+          ]);
+        } catch (error: any) {
+          if (error.name === 'AbortError') {
+            console.log('Fetch operations aborted');
+            return;
+          }
+          console.error('Error fetching dashboard data:', error);
+        }
+      };
+
+      fetchData();
+
       (window as any)?._env_?.CONTENT_CLUSTERS_ENABLED_TENANTS?.split(",").includes(selectedTenant?.refNum)
         ? setIsContentClusterEnabled(true)
         : setIsContentClusterEnabled(false);
+
+      // Cleanup function
+      return () => {
+        if (abortControllerRef.current) {
+          abortControllerRef.current.abort();
+          abortControllerRef.current = null;
+        }
+      };
     }
-  }, []);
+  }, [selectedTenant?.refNum]); // Add dependency to re-run when tenant changes
 
   useEffect(() => {
     dispatch(setAppDetails({}));
@@ -116,7 +145,9 @@ const DashBoard = () => {
       const tenantData = await fetchCurrentTenantData();
       const liveUrl = await handleLiveUrlForSite(`https://${metaData.domain}`);
       const x = tenantData;
-      x[0].domain = liveUrl;
+      if(x[0]) {
+        x[0].domain = liveUrl;
+      }
       metaData && setCurrentTenantData(x);
     });
 
@@ -226,34 +257,37 @@ const DashBoard = () => {
     return url;
   };
 
-  const fetchMetrics = async () => {
+  const fetchMetrics = async (signal?: AbortSignal) => {
     try {
-      const metaData = await APIService.getMetaDataByRefNum(selectedTenant.refNum);
+      const metaData = await APIService.getMetaDataByRefNum(selectedTenant.refNum, { signal });
+      if (!metaData) return; // Exit if metadata fetch was aborted or failed
+      
       setAnalyticsMetaData(metaData);
       const isTrackerEnabled = checkJobTrackerEnabled(new Date().toString());
       setIsJobTrackerEnabled(isTrackerEnabled);
       const metrics = metricsDataForAllRegions;
+      
       const metricResponses = await Promise.all(
         metrics.map(async (metric) => {
           try {
-            const currentResponse = await APIService.getMetrics(metric.name, metaData, isTrackerEnabled);
+            const [currentResponse, previousResponse] = await Promise.all([
+              APIService.getMetrics(metric.name, metaData, isTrackerEnabled, { signal }),
+              APIService.getMetrics(`${metric.name.replace("Current", "Previous")}`, metaData, isTrackerEnabled, { signal })
+            ]);
+
+            if (!currentResponse || !previousResponse) return null; // Exit if any metric fetch was aborted
+
             const currentValue =
               currentResponse.data[0]?.current ||
               currentResponse.data[0]?.CURRENT_VALUE ||
               currentResponse.data[0].value;
 
-            let previousValue = null;
-            let rate = null;
-
-            const previousResponse = await APIService.getMetrics(
-              `${metric.name.replace("Current", "Previous")}`,
-              metaData,
-              isTrackerEnabled
-            );
-            previousValue =
+            let previousValue =
               previousResponse.data[0]?.previous ||
               previousResponse.data[0]?.PREVIOUS_VALUE ||
               previousResponse.data[0].value;
+
+            let rate = null;
 
             // Calculate rate of change
             if (previousValue) {
@@ -268,12 +302,20 @@ const DashBoard = () => {
                 : currentResponse.data[0]?.rate || currentResponse.data[0]?.PERC_CHANGE || currentResponse.data[0].rate,
               text: metric.text,
             };
-          } catch (error) {
+          } catch (error: any) {
+            if (error.name === 'AbortError') {
+              console.log(`Metrics fetch aborted for ${metric.name}`);
+              return null;
+            }
             console.error(`Error fetching ${metric.name}:`, error);
             return null;
           }
         })
       );
+
+      const filteredMetricResponses = metricResponses.filter((metric) => metric !== null);
+      if (filteredMetricResponses.length === 0) return; // Exit if all metric fetches were aborted
+
       const formatAvgTimeOnPage = (value: any) => {
         const totalSeconds = parseFloat(value);
         const minutes = Math.floor(totalSeconds / 60);
@@ -285,7 +327,7 @@ const DashBoard = () => {
         if (rate === undefined) return "N/A";
         return rate >= 0 ? `+${rate}%` : `${rate}%`;
       };
-      const filteredMetricResponses = metricResponses.filter((metric) => metric !== null);
+
       const formattedData = filteredMetricResponses.map((metric) => {
         let value = metric.current !== null && metric.current !== undefined ? `${metric.current}` : "N/A";
         let change = formatChange(metric.rate);
@@ -302,16 +344,22 @@ const DashBoard = () => {
         };
       });
       setMetricsData(formattedData);
-    } catch (error) {
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        console.log('Metrics fetch aborted');
+        return;
+      }
       console.error("Error fetching metrics:", error);
     }
   };
 
-  const campaignsList = async () => {
+  const campaignsList = async (signal?: AbortSignal) => {
     try {
       const refNum = selectedTenant?.refNum;
-      await APIService.registerToken(refNum, code, type);
-      const campaigns = await APIService.getCampaigns(selectedTenant);
+      await APIService.registerToken(refNum, code, type, { signal });
+      const campaigns = await APIService.getCampaigns(selectedTenant, 1, 5, { signal });
+      if (!campaigns) return; // Exit if campaigns fetch was aborted
+
       const formattedData = campaigns.map((campaign: any) => ({
         "Campaign Name": {
           name: campaign.campaignName,
@@ -322,7 +370,11 @@ const DashBoard = () => {
         Audience: campaign.audience ? `${campaign.audience}` : "N/A",
       }));
       setCampaignData(formattedData);
-    } catch (error) {
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        console.log('Campaigns fetch aborted');
+        return;
+      }
       console.error("Error fetching campaigns list:", error);
     }
   };

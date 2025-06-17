@@ -22,6 +22,7 @@ import {
 import {
   setAppDetails,
   setAppsFromAPI,
+  setIsAnalyticsChildAvailable,
   setIsCMSFilterApiCompleted,
   setIsCRMFilterApiCompleted,
 } from "../store/apps/actions";
@@ -66,10 +67,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   const userDetails = window?.keycloakInstance?.tokenParsed?.userDetails;
   const [showSidebarMenu, toggleSidebarMenu] = useState(false);
   const { selectedApp, allApps } = useSelector((state: any) => state.app);
-  let selectedAppFromSession = JSON.parse(
-    sessionStorage.getItem("selectedApp") || "null"
-  );
-  // const selectedTenant = useSelector((state: AppStore) => state.customer.selectedTenant);
   let selectedTenant = JSON.parse(
     localStorage.getItem("selectedTenant") || "[]"
   );
@@ -182,18 +179,33 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
     }
   };
 
-  useEffect(() => {
-    const refNum = window.location.pathname.split("/")[2];
-    const CustomerCode = window.location.pathname.split("/")[1];
-    if (!selectedTenant.length && refNum) {
-      selectedTenant = { customerCode: CustomerCode, refNum: refNum };
-      localStorage.setItem("selectedTenant", JSON.stringify(selectedTenant));
-      (window as any).txeTenant = selectedTenant;
-      const tenantsUrl = `${
-        (window as any)._env_.APP_API_URL
-      }/customers/tenants/${refNum}`;
-      APIService.getTenants(tenantsUrl, dispatch);
+  const checkAnalyticsTenant = async (refNum: string) => {
+    const analyticsTenants = await APIService.getAnalyticsTenants(refNum);
+    if (analyticsTenants && analyticsTenants.customersList[0] && analyticsTenants.customersList[0].areChildrenAvailable) {
+      dispatch(setIsAnalyticsChildAvailable(true));
+    } else {
+      dispatch(setIsAnalyticsChildAvailable(false));
+      (window as any).TXEMessageService && (window as any).TXEMessageService.dispatchEvent('TXE_UPDATE_METADATA', {
+        refNum: refNum,
+        persona: analyticsTenants.customersDetailList[refNum][0]?.persona || null
+      });
     }
+
+  }
+
+  useEffect(() => {
+    (async () => {
+      const refNum = window.location.pathname.split("/")[2];
+      const CustomerCode = window.location.pathname.split("/")[1];
+      await checkAnalyticsTenant(refNum);
+      if (!selectedTenant.length && refNum) {
+        selectedTenant = { customerCode: CustomerCode, refNum: refNum };
+        localStorage.setItem("selectedTenant", JSON.stringify(selectedTenant));
+        (window as any).txeTenant = selectedTenant;
+        const tenantsUrl = `${(window as any)._env_.APP_API_URL}/customers/tenants/${refNum}`;
+        APIService.getTenants(tenantsUrl, dispatch);
+      }
+    })();
 
     let response = JSON.parse(sessionStorage.getItem("allapps") || "[]");
     if (response.length == 0) {
@@ -230,37 +242,15 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   useEffect(() => {
     let detailsApp =
       fetchedApps &&
-      findAppConfigByRoutes(fetchedApps, window.location.pathname)[0];
+      findAppConfigByRoutes(fetchedApps, `/${window.location.pathname.split('/').slice(3).join('/')}`)[0];
     if (
       detailsApp &&
       Object.keys(detailsApp).length != 0 &&
       !window.location.pathname.includes("summmary")
     ) {
       sessionStorage.setItem("selectedApp", JSON.stringify(detailsApp));
-      selectedAppFromSession = detailsApp;
     }
   }, [fetchedApps, selectedTenant, selectedTenant?.refNum]);
-
-  // useEffect(() => {
-  //   if (userId) {
-  //     sessionTracker.initiate(
-  //       userId,
-  //       sessionTrackerProjectKey,
-  //       sessionTrackerIngestPoint
-  //     );
-
-  //     sessionTracker.setMetadata("user-org", window?.orgInfo?.code);
-  //     sessionTracker.setMetadata("user-type", window?.orgInfo?.type);
-  //     sessionTracker.setMetadata("environment", (window as any)?._env_.APP_ENV);
-  //     let entitlements = window.keycloakInstance?.tokenParsed?.entitlements;
-  //     sessionTracker.setMetadata(
-  //       "user-entitlement",
-  //       entitlements && entitlements.length > 0 ? entitlements[0] : ""
-  //     );
-
-  //     (window as any).sessionTracker = sessionTracker;
-  //   }
-  // }, [userId]);
 
   useEffect(() => {
     if (logedUserRoles?.length > 0) {
@@ -475,14 +465,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       console.error("Error:", error);
     }
   };
-
-  // if (appsLoader) {
-  //   return (
-  //     <div className="tenants-loader">
-  //       <Loader title="Please Wait, Loading Dashboard" />
-  //     </div>
-  //   );
-  // }
 
   return (
     <>

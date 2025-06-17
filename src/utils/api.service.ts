@@ -159,13 +159,14 @@ export const APIService = {
     }
   },
 
-  getMetaDataByRefNum: async (refNum: string): Promise<any> => {
+  getMetaDataByRefNum: async (refNum: string, options?: { signal?: AbortSignal }): Promise<any> => {
     try {
       const url = `${(window as any)._env_.ANALYTICS_SF_URL}/getMetaData?refNum=${refNum}`;
       const response = await API.get(url, {
         headers: {
           Authorization: `${window.keycloakInstance.token}`,
         },
+        signal: options?.signal
       });
 
       if (response?.data) {
@@ -173,8 +174,10 @@ export const APIService = {
       } else {
         throw new Error("No metadata found for the provided refNum.");
       }
-    } catch (error) {
-      // toast.error("Error fetching metadata");
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        throw error;
+      }
       console.error("Error in getMetaDataByRefNum: ", error);
       return null;
     }
@@ -261,7 +264,7 @@ export const APIService = {
     };
   },
 
-  getMetrics: async (metric: string, analyticsMetaData: any, isJobTrackerEnabled: boolean) => {
+  getMetrics: async (metric: string, analyticsMetaData: any, isJobTrackerEnabled: boolean, options?: { signal?: AbortSignal }) => {
     const dateRanges = APIService.getDateRanges();
     const data = {
       filters: {
@@ -274,9 +277,12 @@ export const APIService = {
     };
     try {
       const url = `${(window as any)._env_.ANALYTICS_SB_URL}/analytics-data`
-      const response = await API.post(url, data);
+      const response = await API.post(url, data, { signal: options?.signal });
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        throw error;
+      }
       console.error('Error fetching metrics:', error);
       throw error;
     }
@@ -388,7 +394,7 @@ export const APIService = {
     }
   },
 
-  getCampaigns: async (tenantData: any, startIndex: number = 1, pageSize: number = 5): Promise<Campaign[]> => {
+  getCampaigns: async (tenantData: any, startIndex: number = 1, pageSize: number = 5, options?: { signal?: AbortSignal }): Promise<Campaign[]> => {
     const data = {
       refNum: tenantData?.refNum,
       browserBaseDate: new Date().toISOString(),
@@ -407,20 +413,22 @@ export const APIService = {
     };
     try {
       const url = `${(window as any)._env_.CRM_HUB_URL}/ecampaign/getCampaignsV3`;
-      const response: any = await API.post(url, data, {});
-      const campaigns: Campaign[] = response.results.map((item: any) => ({
+      const response: any = await API.post(url, data, { signal: options?.signal });
+      const campaigns: Campaign[] = response?.results?.map((item: any) => ({
         campaignName: item.campaignName,
         status: item.status
       }));
       return campaigns;
-    } catch (error) {
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        throw error;
+      }
       console.error('Error fetching campaigns:', error);
-      // toast.error("Error fetching campaigns");
       return [];
     }
   },
 
-  registerToken: async (refNum: any, code: string, type: string) => {
+  registerToken: async (refNum: any, code: string, type: string, options?: { signal?: AbortSignal }) => {
     const data = {
       "product_ver": "1.0",
       "newLogin": true,
@@ -433,11 +441,13 @@ export const APIService = {
     };
     try {
       const url = `${(window as any)._env_.CANDIDATES_USER_MANAGEMENT_URL}/tokenDetail`;
-      const response = await API.post(url, data, {});
+      const response = await API.post(url, data, { signal: options?.signal });
       console.log('Token registration response:', response);
-    } catch (error) {
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        throw error;
+      }
       console.error('Error registering token:', error);
-      // throw error;
     }
   },
 
@@ -589,6 +599,24 @@ export const APIService = {
     }
     catch (error) {
       console.error('Error fetching all content clusters:', error);
+      return null;
+    }
+  },
+
+  getAnalyticsTenants: async (refNum: string) => {
+    try {
+      const url = `${(window as any)._env_.ANALYTICS_SB_URL}/customers-list?refNum=${refNum}`;
+      const response = await API.get(url, {
+        headers: {
+          Authorization: `${window.keycloakInstance.token}`,
+        },
+      });
+      if(response?.data?.data) {
+        return response.data.data;
+      } 
+      return [];
+    } catch (error) {
+      console.error('Error fetching analytics tenants:', error);
       return null;
     }
   }

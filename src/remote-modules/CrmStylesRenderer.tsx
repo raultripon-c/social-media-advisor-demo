@@ -40,9 +40,6 @@ const CrmStylesRenderer = () => {
         position: sticky !important;
       }
 
-      .main-header-bar {
-        display: none !important;
-      }
 
       * {
         padding: 0;

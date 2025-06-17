@@ -3,15 +3,15 @@ import { toast } from "react-toastify";
 
 import { RemoteModuleRenderer } from "../remote-modules/RemoteModuleRenderer";
 
-import { DATE_FORMAT, navigationHeaderApps, noShowSideBar } from "./constants";
-import { setAppDetails, setDashboardSelected } from "../store/apps/actions";
+import { navigationHeaderApps, noShowSideBar } from "./constants";
+import { setAppDetails } from "../store/apps/actions";
 import { APIService } from "./api.service";
 import { AppSelectionOptions } from "interfaces/AppSelectionOptions";
-import { CommonConstants } from "./common-constants";
 
-export const appSelectionHandler = (
+
+export const appSelectionHandler = async (
   options: AppSelectionOptions
-): void => {
+): Promise<void> => {
   const {
     selectedApp,
     navigate,
@@ -22,7 +22,9 @@ export const appSelectionHandler = (
     openInNewTab,
     setSiteMetaData,
     selectedTenant,
-    customeRoute
+    customeRoute,
+    isAnalyticsChildAvailable,
+    setShowAnalyticsTenant
   } = options;
 
   if (!selectedApp) {
@@ -31,7 +33,12 @@ export const appSelectionHandler = (
   }
 
   const appType = selectedApp.appType;
-  const mfRoute = selectedApp.appConfig?.route || "";
+  let mfRoute = selectedApp.appConfig?.route || "";
+
+  if (selectedApp.appConfig?.scope === "txeAnalyticsMfe" && isAnalyticsChildAvailable && setShowAnalyticsTenant) {
+    mfRoute = selectedApp.appConfig?.moduleRoute || "";
+    setShowAnalyticsTenant(false);
+  }
   const routeWithoutRefNum = mfRoute.replace("/:refnum", "");
   let updatedRoute = "";
 
@@ -101,34 +108,34 @@ const handleModuleFederation = (
     if (isEmpty(updatedRoute) && selectedApp?.context !== "platform") {
       sessionStorage.removeItem("selectedApp");
     }
-    if(customRoute) {
+    if (customRoute) {
       navigate(
         !isEmpty(updatedRoute)
           ? `/${updatedRoute}${routeWithoutRefNum}`
           : `${routeWithoutRefNum}`
       );
     }
-    if(selectedApp?.appConfig?.scope === "cpui") {
+    if (selectedApp?.appConfig?.scope === "cpui") {
       const event = new CustomEvent("txeAppChange", {
         detail: {
-        route: `${routeWithoutRefNum}`,
+          route: `${routeWithoutRefNum}`,
         },
       });
       // window.dispatchEvent(event);
       document.getElementById("child-module-renderer")?.dispatchEvent(event);
     }
-    if(selectedApp?.appConfig?.scope === 'txeAnalyticsMfe') {
+    if (selectedApp?.appConfig?.scope === 'txeAnalyticsMfe') {
       const event = new CustomEvent('triggeredAnalytics', {
         detail: {
-        route: `${routeWithoutRefNum}`,
+          route: `${routeWithoutRefNum}`,
         },
       });
       document.getElementById("child-module-renderer")?.dispatchEvent(event);
     }
-    if(selectedApp?.appConfig?.scope === 'chatbotManagementDashboard') {
+    if (selectedApp?.appConfig?.scope === 'chatbotManagementDashboard') {
       const event = new CustomEvent('triggeredCmp', {
         detail: {
-        route: `${routeWithoutRefNum}`,
+          route: `${routeWithoutRefNum}`,
         },
       });
       window.dispatchEvent(event);
@@ -235,7 +242,7 @@ export const transformAppData = (data: any) => {
     let newApps = apps.sort((a, b) => a.order - b.order);
     return newApps;
   };
-  
+
   let exclusionMapping: any = {
     Events: "showEvents",
     Campaigns: "showCampaigns",
@@ -243,7 +250,7 @@ export const transformAppData = (data: any) => {
     Lists: "showLists",
     "Talent Community": "showTalentCommunities",
     Candidates: "showCandidates",
-    "Email Manager" : "showTemplates",
+    "Email Manager": "showTemplates",
     "SMS Manager": "showTemplates",
     "Banners": "showBanners"
   };
@@ -259,42 +266,39 @@ export const transformAppData = (data: any) => {
           key.toLowerCase().includes("automation-service")
         );
         const userDetails = window?.keycloakInstance?.tokenParsed?.userDetails;
-        
-        // Define the exclusion mapping between app names and window variables
-        
-      
+
         // Check if the app should be excluded based on the mapping
         const shouldExclude = exclusionMapping[app.name] && !(window as any)[exclusionMapping[app.name]];
-      
+
         // If the app should be excluded, return false
         if (shouldExclude) return false;
 
         // Exclude "Bot Settings" and "Knowledge Base" if userType is not "PARTNER"
-        if(userDetails?.userType !== "PARTNER" && (app.name === "Bot Settings" || app.name === "Knowledge Base")) {
+        if (userDetails?.userType !== "PARTNER" && (app.name === "Bot Settings" || app.name === "Knowledge Base")) {
           return false;
         }
 
         // Exclude "Analytics" if "analytics" is not present in the resources
-        if(!isAnalyticsPresent && app.name === "Analytics") {
+        if (!isAnalyticsPresent && app.name === "Analytics") {
           return false;
         }
-        if(!isAutomationEnginePresent && app.name === "Journey Manager") {
+        if (!isAutomationEnginePresent && app.name === "Journey Manager") {
           return false;
         }
 
-        if(!app.isParent) {  
+        if (!app.isParent) {
           const selectedTenant = JSON.parse(localStorage.getItem('selectedTenant') || '{}')
           const appConfig = app?.appConfig
           const enabledTenants = appConfig?.enabledTenants && appConfig?.enabledTenants.split(',')
           if (
             enabledTenants &&
-              selectedTenant?.refNum &&
-              !enabledTenants.includes(selectedTenant.refNum)
+            selectedTenant?.refNum &&
+            !enabledTenants.includes(selectedTenant.refNum)
           ) {
-              return false
+            return false
           }
         }
-      
+
         // Main filter conditions
         return (
           !app.isParent &&
@@ -311,7 +315,7 @@ export const transformAppData = (data: any) => {
       return { ...item, children: sortAppsByOrder(filteredApps) };
     })
     .filter(Boolean);
-    sessionStorage.setItem("filteredApps", JSON.stringify(allFilteredApps));
+  sessionStorage.setItem("filteredApps", JSON.stringify(allFilteredApps));
 
   const platformApps = categoryMap
     .map((item: any) => {
@@ -348,21 +352,31 @@ export const transformAppData = (data: any) => {
 export const getMfRoutes = (data: any) => {
   const mfRoutes = data
     .filter(({ appType }: { appType: string }) => appType === "module-federation")
-    .flatMap(({ context, appConfig }: { context: string; appConfig: { route?: string } }) => {
+    .flatMap(({ context, appConfig }: { context: string; appConfig: { route?: string, moduleRoute?: string } }) => {
       if (!appConfig?.route) return [];
 
-      const { route } = appConfig;
+      const { route, moduleRoute } = appConfig;
       let updatedPath: string;
+      let updatedModulePath: string;
 
       if (context === "tenant" || context === "customer") {
         updatedPath = `/:customerCode/:refNum${route}`;
+        updatedModulePath = moduleRoute ? `/:customerCode/:refNum${moduleRoute}` : "";
       } else {
         updatedPath = route;
+        updatedModulePath = "";
       }
 
-      return [
-        { path: `${updatedPath}/*`, component: RemoteModuleRenderer },
+      const routes = [
+        { path: `${updatedPath}/*`, component: RemoteModuleRenderer }
       ];
+
+      // Only add module path route if updatedModulePath is not null or empty
+      if (updatedModulePath && updatedModulePath.trim() !== "") {
+        routes.push({ path: `${updatedModulePath}/*`, component: RemoteModuleRenderer });
+      }
+
+      return routes;
     });
   return mfRoutes;
 };
@@ -412,9 +426,11 @@ export function findAppConfigByRoutes(apps: any = [], value: string): any {
   try {
     return apps.filter((element: any) => {
       try {
-        return value
-          .toLowerCase()
-          .includes(element?.appConfig?.route?.toLowerCase());
+        let filterCondition = value.toLowerCase().includes(element?.appConfig?.route?.toLowerCase());
+        if (!filterCondition) {
+          filterCondition = element?.appConfig?.moduleRoute && value.toLowerCase().includes(element?.appConfig?.moduleRoute?.toLowerCase())
+        }
+        return filterCondition;
       } catch (error) {
         console.error("An error occurred while filtering: ", error);
         return false;
@@ -450,13 +466,6 @@ export function getLink(selectedApp: any, request: any): any {
   }
 }
 
-export function setObjectReferenceFromString(obj: any, str: string, value: any) {
-  if (!str.length) return;
-  const keys = str.split(".");
-  const lastKey = keys.pop();
-  const lastObj = keys.reduce((a, i) => (a[i] = a[i] || {}), obj);
-  if (lastKey) lastObj[lastKey] = value;
-}
 
 export const removeCrmStyles = () => {
   const styleTags = document.querySelectorAll("style");
@@ -539,7 +548,7 @@ export const handleDomainUrlForSite = async (supportedLangs: Array<any>, selecte
   }
 };
 
-export function getRefnumFromLink(url:string, selectedTenant?:any) {
+export function getRefnumFromLink(url: string, selectedTenant?: any) {
   try {
     const parsedUrl = new URL(url);
     const segments = parsedUrl.pathname.split("/");
@@ -559,26 +568,26 @@ export function refnumContainInCrmTenants(refNum: string): boolean {
 
   // Check if the data exists and is valid
   if (!crmTenants) {
-      toast.dismiss();
-      toast.error("No crmTenants data found.");
-      console.warn("No crmTenants data found in sessionStorage.");
-      return false;
+    toast.dismiss();
+    toast.error("No crmTenants data found.");
+    console.warn("No crmTenants data found in sessionStorage.");
+    return false;
   }
 
   try {
-      // Parse the JSON data
-      const tenantsList = JSON.parse(crmTenants);
+    // Parse the JSON data
+    const tenantsList = JSON.parse(crmTenants);
 
-      // Validate if the parsed data is an array
-      if (!Array.isArray(tenantsList)) {
-          console.error("crmTenants data is not a valid array.");
-          return false;
-      }
-
-      // Check if the refNum exists in the list
-      return tenantsList.some(customer => customer.refNum === refNum);
-  } catch (error) {
-      console.error("Failed to parse crmTenants data:", error);
+    // Validate if the parsed data is an array
+    if (!Array.isArray(tenantsList)) {
+      console.error("crmTenants data is not a valid array.");
       return false;
+    }
+
+    // Check if the refNum exists in the list
+    return tenantsList.some(customer => customer.refNum === refNum);
+  } catch (error) {
+    console.error("Failed to parse crmTenants data:", error);
+    return false;
   }
 }

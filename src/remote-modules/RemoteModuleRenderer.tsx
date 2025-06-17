@@ -31,7 +31,7 @@ export const RemoteModuleRenderer = () => {
   let detailsApp =
     fetchedAppsFromStorage &&
     fetchedAppsFromStorage.length &&
-    findAppConfigByRoutes(fetchedAppsFromStorage, window.location.pathname)[0];
+    findAppConfigByRoutes(fetchedAppsFromStorage, `/${window.location.pathname.split('/').slice(3).join('/')}`)[0];
   var selectedApp = detailsApp?.appConfig;
   const selectedModuleAppObject = useSelector((state: any) => {
     const selectedAppFromSession = JSON.parse(sessionStorage.getItem("selectedApp") || "null");

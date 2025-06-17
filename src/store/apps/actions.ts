@@ -4,7 +4,7 @@ export const SET_SIDEBAR_OPEN = "SET_SIDEBAR_OPEN";
 export const SET_DASHBOARD_SELECTED = "SET_DASHBOARD_SELECTED";
 export const SET_IS_CRM_FILTER_API_COMPLETED = "SET_IS_CRM_FILTER_API_COMPLETED";
 export const SET_IS_CMS_FILTER_API_COMPLETED = "SET_IS_CMS_FILTER_API_COMPLETED";
-
+export const SET_IS_ANALYTICS_CHILD_AVAILABLE = "SET_IS_ANALYTICS_CHILD_AVAILABLE";
 interface SetApp {
   type: typeof SET_APP_DETAILS;
   data: any;
@@ -34,7 +34,12 @@ interface SetIsCMSFilterApiCompleted {
   data: boolean;
 }
 
-export type AppActions = SetApp | SetAppsFromAPI | SetSidebarOpen | SetDashboardSelected | SetIsCRMFilterApiCompleted | SetIsCMSFilterApiCompleted;
+interface SetIsAnalyticsChildAvailable {
+  type: typeof SET_IS_ANALYTICS_CHILD_AVAILABLE;
+  data: boolean;
+}
+
+export type AppActions = SetApp | SetAppsFromAPI | SetSidebarOpen | SetDashboardSelected | SetIsCRMFilterApiCompleted | SetIsCMSFilterApiCompleted | SetIsAnalyticsChildAvailable;
 
 export function setAppDetails(app: any): SetApp {
   return {
@@ -76,5 +81,12 @@ export function setIsCMSFilterApiCompleted(isCompleted: boolean): SetIsCMSFilter
   return {
     type: SET_IS_CMS_FILTER_API_COMPLETED,
     data: isCompleted,
+  };
+}
+
+export function setIsAnalyticsChildAvailable(isAvailable: boolean): SetIsAnalyticsChildAvailable {
+  return {
+    type: SET_IS_ANALYTICS_CHILD_AVAILABLE,
+    data: isAvailable,
   };
 }

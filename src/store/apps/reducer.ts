@@ -1,4 +1,4 @@
-import { AppActions, SET_APPS_FROM_API, SET_APP_DETAILS, SET_SIDEBAR_OPEN, SET_DASHBOARD_SELECTED, SET_IS_CRM_FILTER_API_COMPLETED, SET_IS_CMS_FILTER_API_COMPLETED } from "./actions";
+import { AppActions, SET_APPS_FROM_API, SET_APP_DETAILS, SET_SIDEBAR_OPEN, SET_DASHBOARD_SELECTED, SET_IS_CRM_FILTER_API_COMPLETED, SET_IS_CMS_FILTER_API_COMPLETED, SET_IS_ANALYTICS_CHILD_AVAILABLE } from "./actions";
 import { AppState } from "./type";
 
 const initialState: AppState = {
@@ -7,7 +7,8 @@ const initialState: AppState = {
   sidebarOpen: false,
   dashboardSelected: false,
   isCRMFilterAPICompleted: false,
-  isCMSFilterAPICompleted: false
+  isCMSFilterAPICompleted: false,
+  isAnalyticsChildAvailable: false
 };
 
 export const appReducer = (
@@ -51,6 +52,12 @@ export const appReducer = (
       return {
         ...state,
         isCMSFilterAPICompleted: data,
+      };
+    }
+    case SET_IS_ANALYTICS_CHILD_AVAILABLE: {
+      return {
+        ...state,
+        isAnalyticsChildAvailable: data,
       };
     }
     default:
