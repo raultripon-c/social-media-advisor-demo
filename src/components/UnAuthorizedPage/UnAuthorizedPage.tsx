@@ -10,8 +10,9 @@ const UnAuthorizedPage = (): JSX.Element => {
   const dispatch=useDispatch()
   const backNavigation = () => {
     navigate("/");
-    dispatch(setSelectedTenant({}));
-    dispatch(setCustomerTenants([]));
+    // Don't clear tenant information as it's needed for app selection
+    // dispatch(setSelectedTenant({}));
+    // dispatch(setCustomerTenants([]));
     sessionStorage.removeItem("selectedApp");
   };
 

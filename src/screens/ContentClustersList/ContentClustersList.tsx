@@ -65,12 +65,14 @@ const ContentClustersList: React.FC<ContentClustersListProps> = ({}) => {
     };
     navigate(`${newPath}/${cluster.id}`, {
       state: {
+        currentPage: "content-clusters",
         pages: pagesObj,
         blogs: cluster?.blogs,
         aiBlog: cluster?.aiCreatedBlog[0],
         aiContentPage: cluster?.aiCreatedContentPage[0],
         emailTemplates: cluster?.emailTemplates,
         createdEmailTemplate: cluster?.createdEmailTemplate[0],
+        clusterName: cluster?.clusterName,
       },
     });
   };
@@ -91,7 +93,7 @@ const ContentClustersList: React.FC<ContentClustersListProps> = ({}) => {
             {contentClustersList &&
               contentClustersList.map((cluster: any) => (
                 <ContentClusterListCard
-                  title={cluster.clusterTitle}
+                  title={cluster.clusterName || cluster.clusterTitle}
                   contentTypes={contentTypesForCluster(cluster)}
                   handleClick={() => handleClusterClick(cluster)}
                 />

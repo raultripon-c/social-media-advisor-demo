@@ -12,11 +12,10 @@ const ContentClusterListCard: React.FC<ContentClusterListCardProps> = ({ title, 
   return (
     <div className="content-cluster-list-card" onClick={handleClick}>
       <div className="content-cluster-list-card-title">
-        <span>
-          <img src={campaignerIcon} alt="campaign icon"></img>
-          {title}
-        </span>
+        <img src={campaignerIcon} alt="campaign icon" />
+        <span className="title-text">{title}</span>
       </div>
+
       <div>
         <h6 className="content-cluster-list-card-content-types-heading">Content Types:</h6>
       </div>

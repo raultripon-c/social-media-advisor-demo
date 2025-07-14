@@ -49,7 +49,7 @@ const DynamicScriptLoader: React.FunctionComponent<DynamicScriptLoaderProps> = (
       if (!document.querySelector(`#${embedScriptId}`)) {
         const scrElem = document.createElement("script");
         scrElem.id = embedScriptId;
-        scrElem.src = selectedApp?.url;
+        scrElem.src = "https://cmsqa1.phenompro.com:9000/embed.js";
         scrElem.onload = () => initializeModules();
         document.querySelector("head")?.appendChild(scrElem);
       } else {

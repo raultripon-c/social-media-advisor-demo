@@ -3,7 +3,7 @@
 /* Each card */
 .cluster-detail-card {
   background-color: #fff;
-  width: 30%; /* Approximately 3 cards per row */
+  width: 32%; /* Approximately 3 cards per row */
   min-width: 280px; /* Ensures a minimum width for smaller screens */
   border: 1px solid #ddd;
   border-radius: 8px;
@@ -29,16 +29,33 @@
 }
 
 /* Label in the top-right corner of the image */
+.cluster-detail-card-label-ai{
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  color: #333;
+  font-size: 0.85rem;
+}
 .cluster-detail-card-label {
   position: absolute;
   top: 8px;
   right: 8px;
-  background-color: #f2f2f2;
   color: #333;
   padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.85rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  background: var(--components-tag-informational-bg, #E8EAEE);
+  overflow: hidden;
+  color: var(--components-tag-informational-text, #353B46);
+  text-align: center;
+  font-feature-settings: 'liga' off, 'clig' off;
+  text-overflow: ellipsis;
+  font-family: var(--family-body, Poppins);
+  font-size: var(--size-font-size-sm, 12px);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-line-height-sm, 16px);
+  letter-spacing: 0.4px;
 }
 
 /* Card content area */
@@ -63,7 +80,8 @@
 
 /* Footer area with score and preview link */
 .cluster-detail-card-footer {
-  margin-top: auto; /* Pushes footer to bottom if content grows */
+  padding-top: 12px;
+  border-top: 1px solid #D1D5DC; /* Pushes footer to bottom if content grows */
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -83,4 +101,41 @@
 
 .preview-link:hover {
   text-decoration: underline;
+}
+
+.cluster-detail-card-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cluster-detail-card-icon {
+  display: flex;
+  align-items: center;
+}
+
+.cluster-detail-card-status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 16px 0;
+}
+
+.score-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #28a745;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.2rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.cluster-detail-card-score-badge {
+  display: flex;
+  align-items: center;
 }

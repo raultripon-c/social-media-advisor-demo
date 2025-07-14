@@ -314,6 +314,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
 
   const cmsFilterApps = async (refNum: string) => {
     dispatch(setIsCMSFilterApiCompleted(false));
+    await APIService.triggerTxeLogin();
     if (document.cookie.includes("token")) {
       checkCanvasSite(refNum);
     } else {
