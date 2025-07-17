@@ -95,6 +95,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
         blogs: clusterDetails?.blogs,
         aiBlog: clusterDetails?.aiCreatedBlog[0],
         aiContentPage: clusterDetails?.aiCreatedContentPage[0],
+        aiLandingPage: clusterDetails?.aiCreatedLandingPage[0],
         emailTemplates: clusterDetails?.emailTemplates,
         createdEmailTemplate: clusterDetails?.createdEmailTemplate[0],
         clusterName: clusterDetails?.clusterName,
@@ -357,6 +358,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       console.log("Prompt Based Suggestions", response);
     }).catch((err) => {
       console.error("Error fetching prompt based suggestions:", err);
+      setShowSaveOrDiscardModal(false);
       setShowLoader(false);
     });
   }
@@ -380,25 +382,31 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       const successfulBlog = successfulContent.find((item: any) => item.contentType === "blog-article");
       const successfulContentPage = successfulContent.find((item: any) => item.contentType === "content-page");
       const successfulEmailTemplate = successfulContent.find((item: any) => item.contentType === "email-template");
-      
+      const landingPage = successfulContent.find((item: any) => item.contentType === "landing-page");
       // Prepare cluster data for saving
       let createdBlogDetail = null;
       if (successfulBlog) {
         const allBlogs = await fetchAllBlogsDetails();
         createdBlogDetail = allBlogs["all"]?.find((blog: any) => blog.articleId === successfulBlog.data?.articleId);
       }
-      
+      let createdEmailTemplateData = null;
+      if (successfulEmailTemplate) {
+        const allEmailTemplates = await fetchAllEmailTemplates();
+        createdEmailTemplateData = allEmailTemplates.find((template: any) => template.templateName === successfulEmailTemplate.data.templateName);
+      }
+
       const clusterData = {
         refNum: selectedTenant.refNum,
         locale,
         siteVariant: "external",
-        contentPages: fetchedPages?.contentPages,
+        contentPages: fetchedPages?.contentPages, 
         landingPages: fetchedPages?.landingPages,
         blogs: fetchedPages?.blogs,
+        aiCreatedLandingPage: landingPage ? [landingPage.data.data] : [],
         aiCreatedBlog: createdBlogDetail ? [createdBlogDetail] : [],
-        aiCreatedContentPage: successfulContentPage ? [successfulContentPage.data] : [],
+        aiCreatedContentPage: successfulContentPage ? [successfulContentPage.data.data] : [],
         emailTemplates: [],
-        createdEmailTemplate: successfulEmailTemplate ? [successfulEmailTemplate.data] : [],
+        createdEmailTemplate: createdEmailTemplateData ? [createdEmailTemplateData] : [],
         clusterTitle: promptInput,
         clusterName: clusterTitle,
       };
@@ -468,8 +476,8 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
           // filteredEmailTemplates = responses[responseIndex++]["filteredEmailTemplates"];
           setFetchedPages((prev: any) => ({ ...prev, emailTemplates: filteredEmailTemplates }));
 
-          // const allEmailTemplates = await fetchAllEmailTemplates();
-          // createdEmailTemplateData = allEmailTemplates.find((template: any) => template.templateName === promptInput);
+          const allEmailTemplates = await fetchAllEmailTemplates();
+          createdEmailTemplateData = allEmailTemplates.find((template: any) => template.templateName === promptInput);
         }
 
         //   saveContentCluster({

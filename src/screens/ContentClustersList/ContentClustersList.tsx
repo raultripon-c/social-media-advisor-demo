@@ -70,6 +70,7 @@ const ContentClustersList: React.FC<ContentClustersListProps> = ({}) => {
         blogs: cluster?.blogs,
         aiBlog: cluster?.aiCreatedBlog[0],
         aiContentPage: cluster?.aiCreatedContentPage[0],
+        aiLandingPage: cluster?.aiCreatedLandingPage[0],
         emailTemplates: cluster?.emailTemplates,
         createdEmailTemplate: cluster?.createdEmailTemplate[0],
         clusterName: cluster?.clusterName,
