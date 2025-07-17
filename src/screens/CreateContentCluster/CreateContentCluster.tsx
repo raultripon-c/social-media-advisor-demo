@@ -382,7 +382,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       const successfulBlog = successfulContent.find((item: any) => item.contentType === "blog-article");
       const successfulContentPage = successfulContent.find((item: any) => item.contentType === "content-page");
       const successfulEmailTemplate = successfulContent.find((item: any) => item.contentType === "email-template");
-      const landingPage = successfulContent.find((item: any) => item.contentType === "landing-page");
+      const aiLandingPage = successfulContent.find((item: any) => item.contentType === "landing-page");
       // Prepare cluster data for saving
       let createdBlogDetail = null;
       if (successfulBlog) {
@@ -402,7 +402,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
         contentPages: fetchedPages?.contentPages, 
         landingPages: fetchedPages?.landingPages,
         blogs: fetchedPages?.blogs,
-        aiCreatedLandingPage: landingPage ? [landingPage.data.data] : [],
+        aiCreatedLandingPage: aiLandingPage ? [aiLandingPage.data.data] : [],
         aiCreatedBlog: createdBlogDetail ? [createdBlogDetail] : [],
         aiCreatedContentPage: successfulContentPage ? [successfulContentPage.data.data] : [],
         emailTemplates: [],

@@ -4,6 +4,7 @@ import "./ContentClusterDetails.css";
 import ClusterDetailCard from "./ClusterDetailCard/ClusterDetailCard";
 import ClusterAnalyticsCard from "./ClusterAnalyticsCard/ClusterAnalyticsCard";
 import { APIService } from "../../../src/utils/api.service";
+import InlineLoader from "../../components/loader/InlineLoader";
 
 
 import backIcon from "../../assets/svg/leftArrow.svg";
@@ -18,9 +19,10 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
   const location = useLocation();
   const { clusterId } = useParams();
   const navigate = useNavigate();
-  let { pages, blogs, aiBlog, aiContentPage, emailTemplates, createdEmailTemplate, clusterName } = location.state || {};
+  let { pages, blogs, aiBlog, aiContentPage, emailTemplates, createdEmailTemplate, clusterName, aiLandingPage } = location.state || {};
 
   const [activeTab, setActiveTab] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
   const sectionKeys = [
     'contentPages',
     'landingPages',
@@ -29,6 +31,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
     'blogs',
     'emailTemplates',
     'createdEmailTemplate',
+    'aiLandingPage',
   ];
   const [openSections, setOpenSections] = useState<{[key:string]: boolean}>(
     sectionKeys.reduce((acc, key) => ({ ...acc, [key]: true }), {})
@@ -53,6 +56,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
 
   useEffect(() => {
     if (!pages && !blogs && !aiBlog && !aiContentPage && !emailTemplates && !createdEmailTemplate) {
+      setIsLoading(true);
       const payload = {
         refNum: selectedTenant.refNum,
         locale: locale,
@@ -67,8 +71,13 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
           aiContentPage = cluster?.aiCreatedContentPage[0];
           emailTemplates = cluster?.emailTemplates;
           createdEmailTemplate = cluster?.createdEmailTemplate[0];
+          aiLandingPage = cluster?.aiCreatedLandingPage[0];
         }
-        location.state = { pages, blogs, aiBlog, aiContentPage, emailTemplates, createdEmailTemplate };
+        location.state = { pages, blogs, aiBlog, aiContentPage, emailTemplates, createdEmailTemplate, aiLandingPage };
+        setIsLoading(false);
+      }).catch((error) => {
+        console.error("Error fetching cluster data:", error);
+        setIsLoading(false);
       });
     }
   }, []);
@@ -102,12 +111,17 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
           })}
         </div>
       </div>
+      
+      {isLoading && (
+        <InlineLoader loadingMessage="Please wait, loading cluster details..." />
+      )}
+      
       {/* <div className="cluster-analytics">
         <ClusterAnalyticsCard title="Avg. Content Impressions" count={0} />
         <ClusterAnalyticsCard title="Content Interactions" count={0} />
         <ClusterAnalyticsCard title="Content Performance" count={0} />
       </div> */}
-      {(() => {
+      {!isLoading && (() => {
         switch (activeTab) {
           case 0:
             return (
@@ -291,12 +305,34 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                     )}
                   </div>
                 )}
+                {aiLandingPage && (
+                  <div className="cluster-tab-data-container">
+                    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+                      <p className="cluster-tab-data-subheading">AI Generated Landing Page</p>
+                      <img
+                        src={arrowUp}
+                        alt="Toggle"
+                        style={{
+                          width: 24,
+                          height: 24,
+                          transform: openSections['aiLandingPage'] === true ? 'rotate(0deg)' : 'rotate(180deg)',
+                          cursor: 'pointer',
+                          transition: 'transform 0.2s',
+                        }}
+                        onClick={() => toggleSection('aiLandingPage')}
+                      />
+                    </div>  
+                    {openSections['aiLandingPage'] === true && (
+                      <ClusterDetailCard aiLandingPage={aiLandingPage} />
+                    )}
+                  </div>
+                )}
               </div>
             );
           case 1:
             return (
               <div className="cluster-tab-data">
-                {pages?.contentPages || pages?.landingPages ? (
+                {pages && (
                   <>
                     {pages.contentPages && (
                       <div className="cluster-tab-data-container">
@@ -320,12 +356,20 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                       </div>
                     )}
                   </>
-                ) : aiContentPage ? (
+                )}
+                {aiContentPage && (
                   <div className="cluster-tab-data-container">
                     <p className="cluster-tab-data-subheading">AI Generated Content Page</p>
                     <ClusterDetailCard aiContentPage={aiContentPage} />
                   </div>
-                ) : (
+                )}
+                {aiLandingPage && (
+                  <div className="cluster-tab-data-container">
+                    <p className="cluster-tab-data-subheading">AI Generated Landing Page</p>
+                    <ClusterDetailCard aiLandingPage={aiLandingPage} />
+                  </div>
+                )}
+                {(!pages?.contentPages && !pages?.landingPages && !aiContentPage && !aiLandingPage) && (
                   <div>No Pages Data</div>
                 )}
               </div>

@@ -13,6 +13,7 @@ interface ClusterDetailCardProps {
   aiContentPage?: any;
   emailTemplate?: any;
   createdEmailTemplate?: any;
+  aiLandingPage?: any;
 }
 
 // This component is responsible for just showing details of the cluster
@@ -25,18 +26,22 @@ const ClusterDetailCard: React.FC<ClusterDetailCardProps> = ({
   aiContentPage,
   emailTemplate,
   createdEmailTemplate,
+  aiLandingPage,
 }) => {
   const formatDate = (timestamp: number) => {
     const options: Intl.DateTimeFormatOptions = { month: "short", day: "numeric", year: "numeric" };
     const formattedDate = new Date(timestamp).toLocaleDateString("en-US", options);
     return formattedDate;
   };
-
+  if(createdEmailTemplate){
+    console.log(createdEmailTemplate);
+  }
   return (
     <div className="cluster-detail-card">
       <div className="cluster-detail-card-image">
         <img
           src={
+            aiLandingPage?.avatarUrl ||
             blog?.desktopThumbnailImage ||
             blog?.avatarUrl ||
             aiBlog?.avatarUrl ||
@@ -64,17 +69,18 @@ const ClusterDetailCard: React.FC<ClusterDetailCardProps> = ({
             <img src={pageIcon} alt="Page Icon" />
           </span>
           <h3 className="cluster-detail-card-title" style={{ margin: 0 }}>
-            {contentPage?.displayName || landingPage?.displayName || "Sample Name"}
+            {contentPage?.displayName || landingPage?.displayName || aiLandingPage?.name || emailTemplate?.templateName || createdEmailTemplate?.templateName || aiBlog?.title || aiContentPage?.name || blog?.title || "Sample Name"}
           </h3>
         </div>
         {/* Status and Date Row */}
         <div className="cluster-detail-card-status-row" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '8px 0 16px 0' }}>
           <span style={{ width: 10, height: 10, background: '#28a745', borderRadius: '50%', display: 'inline-block' }}></span>
-          <span style={{ color: '#666', fontWeight: 500, fontSize: '0.95rem' }}>Unpublished</span>
+          <span style={{ color: '#666', fontWeight: 500, fontSize: '0.95rem' }}>published</span>
           <span style={{ color: '#aaa', fontSize: '0.95rem' }}>|</span>
           <span style={{ color: '#666', fontSize: '0.95rem' }}>
             Created {blog?.lastModifiedDisplayDate ||
               aiBlog?.lastModifiedDisplayDate ||
+              aiLandingPage?.lastModifiedDisplayDate ||
               (emailTemplate && formatDate(emailTemplate?.createdDate)) ||
               (createdEmailTemplate && formatDate(createdEmailTemplate?.createdDate)) ||
               "Jun 2, 2021"}
@@ -85,7 +91,7 @@ const ClusterDetailCard: React.FC<ClusterDetailCardProps> = ({
             <span className="score-circle">A</span>
           </span> */}
           <a
-            href={contentPage?.url || landingPage?.url || blog?.fullUrl || aiBlog?.fullUrl || aiContentPage?.url}
+            href={contentPage?.url || landingPage?.url || blog?.fullUrl || aiBlog?.fullUrl || aiContentPage?.url || aiLandingPage?.url}
             target="_blank"
             className="preview-link"
           >
