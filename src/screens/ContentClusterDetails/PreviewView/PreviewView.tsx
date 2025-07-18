@@ -18,7 +18,7 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack }) => {
   useEffect(() => {
     if (pageData) {
       // Extract URL from page data
-      const url = pageData?.fullUrl || pageData?.url || pageData?.previewUrl || "";
+      const url = pageData?.previewUrl || pageData?.fullUrl || pageData?.url  || "";
       setCurrentUrl(url);
       setIsLoading(true);
     }
@@ -114,8 +114,8 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack }) => {
     <div className="preview-view-container">
       <div className="preview-header">
             <div className="preview-header-left">
-          <button className="preview-back-btn" onClick={onBack}>
-            <img src={crossIcon} alt="Back" />
+          <button className="preview-back-btn">
+            <img src={crossIcon} alt="Back" onClick={onBack}/>
             <span className="preview-title">{getPageTitle()}</span>
           </button>
             </div>
