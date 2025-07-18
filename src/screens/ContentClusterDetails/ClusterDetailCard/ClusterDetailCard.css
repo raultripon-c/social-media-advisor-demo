@@ -93,7 +93,7 @@
 }
 
 .preview-link {
-  color: #6c40d8; /* Purple link color */
+  color: #2927B2 !important; /* Purple link color */
   text-decoration: none;
   font-weight: 500;
   font-size: 0.95rem;

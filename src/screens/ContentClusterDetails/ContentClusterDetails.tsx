@@ -3,6 +3,7 @@ import { useLocation, useParams, useNavigate } from "react-router-dom";
 import "./ContentClusterDetails.css";
 import ClusterDetailCard from "./ClusterDetailCard/ClusterDetailCard";
 import ClusterAnalyticsCard from "./ClusterAnalyticsCard/ClusterAnalyticsCard";
+import PreviewView from "./PreviewView/PreviewView";
 import { APIService } from "../../../src/utils/api.service";
 import InlineLoader from "../../components/loader/InlineLoader";
 
@@ -23,6 +24,8 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
 
   const [activeTab, setActiveTab] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [previewDiv, setPreviewDiv] = useState(false);
+  const [selectedPageData, setSelectedPageData] = useState<any>(null);
   const sectionKeys = [
     'contentPages',
     'landingPages',
@@ -54,6 +57,16 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
     }
   };
 
+  const handlePreviewOpen = (pageData: any) => {
+    setSelectedPageData(pageData);
+    setPreviewDiv(true);
+  };
+
+  const handlePreviewClose = () => {
+    setPreviewDiv(false);
+    setSelectedPageData(null);
+  };
+
   useEffect(() => {
     if (!pages && !blogs && !aiBlog && !aiContentPage && !emailTemplates && !createdEmailTemplate) {
       setIsLoading(true);
@@ -67,11 +80,11 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
         if (cluster) {
           pages = { contentPages: cluster?.contentPages, landingPages: cluster?.landingPages };
           blogs = cluster?.blogs;
-          aiBlog = cluster?.aiCreatedBlog[0];
-          aiContentPage = cluster?.aiCreatedContentPage[0];
+          aiBlog = cluster?.aiCreatedBlog?.[0];
+          aiContentPage = cluster?.aiCreatedContentPage?.[0];
           emailTemplates = cluster?.emailTemplates;
-          createdEmailTemplate = cluster?.createdEmailTemplate[0];
-          aiLandingPage = cluster?.aiCreatedLandingPage[0];
+          createdEmailTemplate = cluster?.createdEmailTemplate?.[0];
+          aiLandingPage = cluster?.aiCreatedLandingPage?.[0];
         }
         location.state = { pages, blogs, aiBlog, aiContentPage, emailTemplates, createdEmailTemplate, aiLandingPage };
         setIsLoading(false);
@@ -89,6 +102,12 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
 
   return (
     <>
+    {previewDiv ? (
+      <PreviewView 
+        pageData={selectedPageData} 
+        onBack={handlePreviewClose} 
+      />
+    ) : (
     <div className="cluster-details-wrapper">
       <div className="cluster-details-header">
         <div className="cluster-details-back-btn" onClick={handleBackNavigation}>
@@ -148,7 +167,10 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                         {openSections['contentPages'] === true && (
                           <div className="cluster-detail-card-container">
                             {pages.contentPages.map((page: any) => (
-                              <ClusterDetailCard contentPage={page} />
+                              <ClusterDetailCard 
+                                contentPage={page} 
+                                setPreviewDiv={handlePreviewOpen}
+                              />
                             ))}
                           </div>
                         )}
@@ -175,7 +197,10 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                         {openSections['landingPages'] === true && (
                           <div className="cluster-detail-card-container">
                             {pages.landingPages.map((page: any) => (
-                              <ClusterDetailCard landingPage={page} />
+                              <ClusterDetailCard 
+                                landingPage={page} 
+                                setPreviewDiv={handlePreviewOpen}
+                              />
                             ))}
                           </div>
                         )}
@@ -202,7 +227,10 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                       />
                     </div>
                     {openSections['aiContentPage'] === true && (
-                      <ClusterDetailCard aiContentPage={aiContentPage} />
+                      <ClusterDetailCard 
+                        aiContentPage={aiContentPage} 
+                        setPreviewDiv={handlePreviewOpen}
+                      />
                     )}
                   </div>
                 )}
@@ -225,7 +253,10 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                       />
                     </div>
                     {openSections['aiBlog'] === true && (
-                      <ClusterDetailCard aiBlog={aiBlog} />
+                      <ClusterDetailCard 
+                        aiBlog={aiBlog} 
+                        setPreviewDiv={handlePreviewOpen}
+                      />
                     )}
                   </div>
                 )}
@@ -249,7 +280,10 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                     {openSections['blogs'] === true && (
                       <div className="cluster-detail-card-container">
                         {blogs.map((blog: any) => (
-                          <ClusterDetailCard blog={blog} />
+                          <ClusterDetailCard 
+                            blog={blog} 
+                            setPreviewDiv={handlePreviewOpen}
+                          />
                         ))}
                       </div>
                     )}
@@ -276,7 +310,10 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                     {openSections['emailTemplates'] === true && (
                       <div className="cluster-detail-card-container">
                         {emailTemplates.map((emailTemplate: any) => (
-                          <ClusterDetailCard emailTemplate={emailTemplate} />
+                          <ClusterDetailCard 
+                            emailTemplate={emailTemplate} 
+                            setPreviewDiv={handlePreviewOpen}
+                          />
                         ))}
                       </div>
                     )}
@@ -301,7 +338,10 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                       />
                     </div>
                     {openSections['createdEmailTemplate'] === true && (
-                      <ClusterDetailCard createdEmailTemplate={createdEmailTemplate} />
+                      <ClusterDetailCard 
+                        createdEmailTemplate={createdEmailTemplate} 
+                        setPreviewDiv={handlePreviewOpen}
+                      />
                     )}
                   </div>
                 )}
@@ -323,7 +363,10 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                       />
                     </div>  
                     {openSections['aiLandingPage'] === true && (
-                      <ClusterDetailCard aiLandingPage={aiLandingPage} />
+                      <ClusterDetailCard 
+                        aiLandingPage={aiLandingPage} 
+                        setPreviewDiv={handlePreviewOpen}
+                      />
                     )}
                   </div>
                 )}
@@ -339,7 +382,10 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                         <p className="cluster-tab-data-subheading">Content Pages</p>
                         <div className="cluster-detail-card-container">
                           {pages.contentPages.map((page: any) => (
-                            <ClusterDetailCard contentPage={page} />
+                            <ClusterDetailCard 
+                              contentPage={page} 
+                              setPreviewDiv={handlePreviewOpen}
+                            />
                           ))}
                         </div>
                       </div>
@@ -350,7 +396,10 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                         <p className="cluster-tab-data-subheading">Landing Pages</p>
                         <div className="cluster-detail-card-container">
                           {pages.landingPages.map((page: any) => (
-                            <ClusterDetailCard landingPage={page} />
+                            <ClusterDetailCard 
+                              landingPage={page} 
+                              setPreviewDiv={handlePreviewOpen}
+                            />
                           ))}
                         </div>
                       </div>
@@ -360,13 +409,19 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                 {aiContentPage && (
                   <div className="cluster-tab-data-container">
                     <p className="cluster-tab-data-subheading">AI Generated Content Page</p>
-                    <ClusterDetailCard aiContentPage={aiContentPage} />
+                    <ClusterDetailCard 
+                      aiContentPage={aiContentPage} 
+                      setPreviewDiv={handlePreviewOpen}
+                    />
                   </div>
                 )}
                 {aiLandingPage && (
                   <div className="cluster-tab-data-container">
                     <p className="cluster-tab-data-subheading">AI Generated Landing Page</p>
-                    <ClusterDetailCard aiLandingPage={aiLandingPage} />
+                    <ClusterDetailCard 
+                      aiLandingPage={aiLandingPage} 
+                      setPreviewDiv={handlePreviewOpen}
+                    />
                   </div>
                 )}
                 {(!pages?.contentPages && !pages?.landingPages && !aiContentPage && !aiLandingPage) && (
@@ -380,14 +435,20 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                 {aiBlog ? (
                   <>
                     <p className="cluster-tab-data-subheading">AI Generated Blog</p>
-                    <ClusterDetailCard aiBlog={aiBlog} />
+                    <ClusterDetailCard 
+                      aiBlog={aiBlog} 
+                      setPreviewDiv={handlePreviewOpen}
+                    />
                   </>
                 ) : blogs ? (
                   <>
                     <p className="cluster-tab-data-subheading">Matched Blog Articles</p>
                     <div className="cluster-detail-card-container">
                       {blogs.map((blog: any) => (
-                        <ClusterDetailCard blog={blog} />
+                        <ClusterDetailCard 
+                          blog={blog} 
+                          setPreviewDiv={handlePreviewOpen}
+                        />
                       ))}
                     </div>
                   </>
@@ -404,14 +465,20 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                     <p className="cluster-tab-data-subheading">Matched Email Templates</p>
                     <div className="cluster-detail-card-container">
                       {emailTemplates.map((emailTemplate: any) => (
-                        <ClusterDetailCard emailTemplate={emailTemplate} />
+                        <ClusterDetailCard 
+                          emailTemplate={emailTemplate} 
+                          setPreviewDiv={handlePreviewOpen}
+                        />
                       ))}
                     </div>
                   </div>
                 ) : createdEmailTemplate ? (
                   <div className="cluster-tab-data-container">
                     <p className="cluster-tab-data-subheading">Created Email Templates</p>
-                    <ClusterDetailCard createdEmailTemplate={createdEmailTemplate} />
+                    <ClusterDetailCard 
+                      createdEmailTemplate={createdEmailTemplate} 
+                      setPreviewDiv={handlePreviewOpen}
+                    />
                   </div>
                 ) : (
                   <div>No Email Templates Data</div>
@@ -423,6 +490,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
         }
       })()}
     </div>
+    )}
     </>
   );
 };
