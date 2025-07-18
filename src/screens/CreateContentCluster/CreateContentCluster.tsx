@@ -93,11 +93,11 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       state: {
         pages: pagesObj,
         blogs: clusterDetails?.blogs,
-        aiBlog: clusterDetails?.aiCreatedBlog[0],
-        aiContentPage: clusterDetails?.aiCreatedContentPage[0],
-        aiLandingPage: clusterDetails?.aiCreatedLandingPage[0],
+        aiBlog: clusterDetails?.aiCreatedBlog?.[0],
+        aiContentPage: clusterDetails?.aiCreatedContentPage?.[0],
+        aiLandingPage: clusterDetails?.aiCreatedLandingPage?.[0],
         emailTemplates: clusterDetails?.emailTemplates,
-        createdEmailTemplate: clusterDetails?.createdEmailTemplate[0],
+        createdEmailTemplate: clusterDetails?.createdEmailTemplate?.[0],
         clusterName: clusterDetails?.clusterName,
       },
     });
@@ -107,7 +107,11 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
     // setShowPromptSuggestions(true)
     APIService.getCRMUserInfo()
       .then((userInfo) => {
-        setCrmUserInfo(userInfo);
+        if(userInfo?.userDetails?.id){
+          setCrmUserInfo(userInfo);
+        }else{
+          setCrmUserInfo(window?.keycloakInstance?.tokenParsed?.userDetails);
+        }
       })
       .catch((err) => console.error("Error getting CRM user info", err));
   }, []);
@@ -260,9 +264,9 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       landingPages: fetchedPages?.landingPages,
       blogs: fetchedPages?.blogs,
       clusterName: clusterTitle,
-      recruiterUserId: crmUserInfo.userDetails.id,
-      displayName: crmUserInfo.displayName,
-      userEmail: crmUserInfo.userName,
+      recruiterUserId: crmUserInfo?.userDetails?.id,
+      displayName: crmUserInfo?.displayName,
+      userEmail: crmUserInfo?.userName,
       
     });
   };
