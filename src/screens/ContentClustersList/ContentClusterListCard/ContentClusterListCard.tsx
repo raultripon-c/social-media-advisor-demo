@@ -13,7 +13,7 @@ const ContentClusterListCard: React.FC<ContentClusterListCardProps> = ({ title, 
     <div className="content-cluster-list-card" onClick={handleClick}>
       <div className="content-cluster-list-card-title">
         <img src={campaignerIcon} alt="campaign icon" />
-        <span className="title-text">{title}</span>
+        <span title={title} className="title-text">{title}</span>
       </div>
 
       <div>

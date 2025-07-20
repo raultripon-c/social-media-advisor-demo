@@ -70,6 +70,15 @@
   margin: 0 0 8px;
   font-size: 1.1rem;
   font-weight: 600;
+  color: var(--neutrals-nn-400, #464F5E);
+  font-feature-settings: 'liga' off, 'clig' off;
+
+  /* Body 2/SemiBold (C) */
+  font-family: var(--family-body, Poppins);
+  font-size: var(--size-font-size-base, 14px);
+  font-style: normal;
+  font-weight: 600;
+  line-height: var(--line-height-line-height-md, 20px); /* 142.857% */
 }
 
 .cluster-detail-card-meta {
@@ -78,6 +87,19 @@
   font-size: 0.9rem;
 }
 
+.cluster-detail-card-status-text {
+  color: var(--neutrals-nn-400, #464F5E);
+  text-align: center;
+  font-feature-settings: 'liga' off, 'clig' off;
+
+  /* Body 3 */
+  font-family: Poppins;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 16px; /* 133.333% */
+  letter-spacing: 0.25px;
+}
 /* Footer area with score and preview link */
 .cluster-detail-card-footer {
   padding-top: 12px;
@@ -85,6 +107,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-direction:row-reverse;
 }
 
 .cluster-detail-card-score {
@@ -93,15 +116,19 @@
 }
 
 .preview-link {
-  color: #2927B2 !important; /* Purple link color */
-  text-decoration: none;
+  color: var(--secondary-blue-bb-300, #2927B2);
+  font-feature-settings: 'liga' off, 'clig' off;
+
+  /* Body 2/Medium (C) */
+  font-family: var(--family-body, Poppins);
+  font-size: var(--size-font-size-base, 14px);
+  font-style: normal;
   font-weight: 500;
-  font-size: 0.95rem;
+  line-height: var(--line-height-line-height-md, 20px); /* 142.857% */
+  letter-spacing: 0.3px;
+  cursor: pointer;
 }
 
-.preview-link:hover {
-  text-decoration: underline;
-}
 
 .cluster-detail-card-title-row {
   display: flex;

@@ -637,6 +637,19 @@ export const APIService = {
     }
   },
 
+  getPreview: async (payload: any) => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/crm/getPreview`;
+      const response = await API.post(url, payload, { withCredentials: false });
+      return response.data.data;
+    }
+    catch (error) {
+      console.error('Error fetching preview:', error);
+      return null;
+    }
+  },
+
+
   createContentCluster: async (payload: any) => {
     try {
       const url = `${(window as any)._env_.TOOLS_API_URL}api/content-cluster/save`;
