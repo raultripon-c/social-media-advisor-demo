@@ -1,8 +1,14 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { AppStore } from "store";
 import "./PreviewView.css";
 import crossIcon from "../../../assets/svg/white-cross.svg";
 import editIcon from "../../../assets/svg/white-editIcon.svg";
+import { AppSelectionOptions } from "../../../interfaces/AppSelectionOptions";
+import { appSelectionHandler } from "../../../utils/appUtils";
 import { APIService } from "../../../utils/api.service";
+import { setSiteMetaData } from "../../../store/customer/actions";
 
 interface PreviewViewProps {
     pageData?: any;
@@ -11,13 +17,20 @@ interface PreviewViewProps {
 }
 
 const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo }) => {
+    const navigate = useNavigate();
     const [currentUrl, setCurrentUrl] = useState<string>("");
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [htmlContent, setHtmlContent] = useState<string>("");
    
+    const { selectedApp, allApps } = useSelector((state: any) => state.app);
 
     const selectedTenant = JSON.parse(localStorage.getItem("selectedTenant") || "[]");
 
+      const siteMetaData = useSelector(
+        (state: AppStore) => state.customer.siteMetaData
+      );
+
+      const dispatch = useDispatch();
     useEffect(() => {
         if (pageData) {
             // Check if it's an email template with _id
@@ -81,6 +94,39 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
         // Handle error - maybe show a fallback content
     };
 
+    const navigateToExperienceManager = () => {
+        const app = allApps.find((app: any) => app.name === "Experience Manager");
+    
+        if (!app || !selectedTenant || !navigate || !dispatch) {
+            console.error("Missing dependencies for navigating to Experience Manager.");
+            return;
+        }
+    
+        const appSelectionOptions: AppSelectionOptions = {
+            selectedApp: app,
+            navigate,
+            customerCode: selectedTenant.customerCode,
+            refNum: selectedTenant.refNum,
+            siteMetaData,
+            dispatch,
+            openInNewTab: false,
+            setSiteMetaData,
+            selectedTenant,
+        };
+    
+        appSelectionHandler(appSelectionOptions);
+    };
+    
+    const handleEditClick = () => {
+        if (pageData?.application === "crm" && pageData?._id && selectedTenant) {
+            const editPath = `/${selectedTenant.customerCode}/${selectedTenant.refNum}/dashboard/email-management/templates/${pageData._id}`;
+            window.open(editPath, '_blank');
+        } else {
+            navigateToExperienceManager();
+        }
+    };
+    
+    
     // Function to check if URL is an image
     const isImageUrl = (url: string): boolean => {
         if (!url) return false;
@@ -163,7 +209,7 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
                 </div>
                 <div className="preview-header-right">
 
-                    <button className="preview-btn preview-btn-edit">
+                    <button className="preview-btn preview-btn-edit" onClick={handleEditClick}>
                         <img src={editIcon} alt="Edit" />
                         <span>Edit</span>
                     </button>

@@ -129,8 +129,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
     const path = window.location.pathname.split("/").filter(Boolean);
 
     const appRouteDictionary: { [key: string]: string } = {
+      // "email-management": "Email Manager",
       // "email-templates": "Email Manager",
-      // "sms-templates": "SMS Manager",
+      // "sms-templates": "SMS Manager",e
       "sms-campaign": "Campaigns",
       campaigns: "Campaigns",
       automations: "Automations",

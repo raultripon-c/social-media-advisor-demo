@@ -74,6 +74,16 @@
   border: none;
   box-shadow: none;
 }
+.no-data-container{
+  padding: 24px 0px 0px;
+  color: #464f5e;
+  font-family: var(--family-body, Poppins);
+  font-size: var(--size-font-size-base, 14px);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--line-height-line-height-md, 20px);
+  text-align: center;
+}
 
 .cluster-tab.cluster-tab-active {
   font-weight: bold;

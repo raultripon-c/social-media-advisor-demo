@@ -68,32 +68,48 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
     let blogsCount = 0;
     let emailTemplatesCount = 0;
 
-    // Count AI generated content
-    if (aiContentPage) allCount++;
-    if (aiBlog) allCount++;
-    if (aiLandingPage) allCount++;
-    if (createdEmailTemplate) allCount++;
-
-    // Count regular content pages
-    if (pages?.contentPages) {
-      allCount += pages.contentPages.length;
-      pagesCount += pages.contentPages.length;
-    }
-    if (pages?.landingPages) {
-      allCount += pages.landingPages.length;
-      pagesCount += pages.landingPages.length;
-    }
-
-    // Count blogs
-    if (blogs) {
-      allCount += blogs.length;
-      blogsCount += blogs.length;
+    // Count AI generated content (only if filter allows AI or all)
+    if (contentSourceFilter === "all" || contentSourceFilter === "ai") {
+      if (aiContentPage) {
+        allCount++;
+        pagesCount++;
+      }
+      if (aiBlog) {
+        allCount++;
+        blogsCount++;
+      }
+      if (aiLandingPage) {
+        allCount++;
+        pagesCount++;
+      }
+      if (createdEmailTemplate) {
+        allCount++;
+        emailTemplatesCount++;
+      }
     }
 
-    // Count email templates
-    if (emailTemplates) {
-      allCount += emailTemplates.length;
-      emailTemplatesCount += emailTemplates.length;
+    // Count regular content pages (only if filter allows manual or all)
+    if (contentSourceFilter === "all" || contentSourceFilter === "manual") {
+      if (pages?.contentPages) {
+        allCount += pages.contentPages.length;
+        pagesCount += pages.contentPages.length;
+      }
+      if (pages?.landingPages) {
+        allCount += pages.landingPages.length;
+        pagesCount += pages.landingPages.length;
+      }
+
+      // Count blogs
+      if (blogs) {
+        allCount += blogs.length;
+        blogsCount += blogs.length;
+      }
+
+      // Count email templates
+      if (emailTemplates) {
+        allCount += emailTemplates.length;
+        emailTemplatesCount += emailTemplates.length;
+      }
     }
 
     return { allCount, pagesCount, blogsCount, emailTemplatesCount };
@@ -136,6 +152,48 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
   const shouldShowContent = (contentType: 'ai' | 'manual') => {
     if (contentSourceFilter === "all") return true;
     return contentSourceFilter === contentType;
+  };
+
+  // Helper functions to check if sections have content to show
+  const hasAIContent = () => {
+    return (aiContentPage || aiBlog || aiLandingPage || createdEmailTemplate) && shouldShowContent('ai');
+  };
+
+  const hasContentPages = () => {
+    return pages?.contentPages && pages.contentPages.length > 0 && shouldShowContent('manual');
+  };
+
+  const hasLandingPages = () => {
+    return pages?.landingPages && pages.landingPages.length > 0 && shouldShowContent('manual');
+  };
+
+  const hasBlogs = () => {
+    return blogs && blogs.length > 0 && shouldShowContent('manual');
+  };
+
+  const hasEmailTemplates = () => {
+    return emailTemplates && emailTemplates.length > 0 && shouldShowContent('manual');
+  };
+
+  const hasAIPages = () => {
+    return (aiContentPage || aiLandingPage) && shouldShowContent('ai');
+  };
+
+  const hasAIBlogs = () => {
+    return aiBlog && shouldShowContent('ai');
+  };
+
+  const hasAIEmailTemplates = () => {
+    return createdEmailTemplate && shouldShowContent('ai');
+  };
+
+  // Helper to get the selected option label
+  const getSelectedOptionLabel = () => {
+    const selectedOption = contentSourceOptions.find(option => option.value === contentSourceFilter);
+    if (contentSourceFilter === "all") {
+      return "Content source";
+    }
+    return selectedOption ? selectedOption.label : "Content source";
   };
 
   useEffect(() => {
@@ -265,7 +323,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
               className="filter-dropdown-button"
               onClick={() => setShowContentSourceDropdown(!showContentSourceDropdown)}
             >
-              <span className="filter-dropdown-button-text">Content source</span>
+              <span className="filter-dropdown-button-text">{getSelectedOptionLabel()}</span>
               <img 
                 src={arrowUp} 
                 alt="dropdown" 
@@ -294,7 +352,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
           </div>
         </div>
                 {/* AI Generated Section - All AI content in one row */}
-                {(aiContentPage || aiBlog || aiLandingPage || createdEmailTemplate) && shouldShowContent('ai') && (
+                {hasAIContent() && (
                   <div className="cluster-tab-data-container ai-generated">
                     <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
                       <p className="cluster-tab-data-subheading">AI Generated</p>
@@ -343,7 +401,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                 )}
 
                 {/* Regular Content Pages */}
-                {pages && shouldShowContent('manual') && (
+                {hasContentPages() && (
                   <>
                     {pages.contentPages && (
                       <div className="cluster-tab-data-container">
@@ -375,7 +433,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                       </div>
                     )}
 
-                    {pages.landingPages && (
+                    {hasLandingPages() && (
                       <div className="cluster-tab-data-container">
                         <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
                           <p className="cluster-tab-data-subheading">Landing Page</p>
@@ -408,7 +466,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                 )}
 
                 {/* Regular Blog Articles */}
-                {blogs && shouldShowContent('manual') && (
+                {hasBlogs() && (
                   <div className="cluster-tab-data-container">
                     <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
                       <p className="cluster-tab-data-subheading">Blog Article</p>
@@ -439,7 +497,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                 )}
 
                 {/* Regular Email Templates */}
-                {emailTemplates && emailTemplates.length > 0 && shouldShowContent('manual') && (
+                {hasEmailTemplates() && (
                   <div className="cluster-tab-data-container">
                     <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
                       <p className="cluster-tab-data-subheading">Email Template</p>
@@ -468,6 +526,9 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                     )}
                   </div>
                 )}
+                {(!hasAIContent() && !hasContentPages() && !hasLandingPages() && !hasBlogs() && !hasEmailTemplates()) && (
+                  <div className="no-data-container">No Data</div>
+                )}
               </div>
             );
           case 1:
@@ -480,7 +541,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
               className="filter-dropdown-button"
               onClick={() => setShowContentSourceDropdown(!showContentSourceDropdown)}
             >
-              <span className="filter-dropdown-button-text">Content source</span>
+              <span className="filter-dropdown-button-text">{getSelectedOptionLabel()}</span>
               <img 
                 src={arrowUp} 
                 alt="dropdown" 
@@ -509,7 +570,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
           </div>
         </div>
                 {/* AI Generated Pages Section */}
-                {(aiContentPage || aiLandingPage) && shouldShowContent('ai') && (
+                {hasAIPages() && (
                   <div className="cluster-tab-data-container ai-generated">
                     <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
                       <p className="cluster-tab-data-subheading">AI Generated</p>
@@ -546,7 +607,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                 )}
 
                 {/* Regular Pages */}
-                {pages && shouldShowContent('manual') && (
+                {hasContentPages() && (
                   <>
                     {pages.contentPages && (
                       <div className="cluster-tab-data-container">
@@ -609,8 +670,8 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                     )}
                   </>
                 )}
-                {(!pages?.contentPages && !pages?.landingPages && !aiContentPage && !aiLandingPage) && (
-                  <div>No Pages Data</div>
+                {(!hasContentPages() && !hasLandingPages()) && (
+                  <div className="no-data-container">No Pages Data</div>
                 )}
               </div>
             );
@@ -624,7 +685,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
               className="filter-dropdown-button"
               onClick={() => setShowContentSourceDropdown(!showContentSourceDropdown)}
             >
-              <span className="filter-dropdown-button-text">Content source</span>
+              <span className="filter-dropdown-button-text">{getSelectedOptionLabel()}</span>
               <img 
                 src={arrowUp} 
                 alt="dropdown" 
@@ -653,7 +714,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
           </div>
         </div>
                 {/* AI Generated Blogs Section */}
-                {aiBlog && shouldShowContent('ai') && (
+                {hasAIBlogs() && (
                   <div className="cluster-tab-data-container ai-generated">
                     <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
                       <p className="cluster-tab-data-subheading">AI Generated</p>
@@ -682,7 +743,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                 )}
 
                 {/* Regular Blog Articles */}
-                {blogs && shouldShowContent('manual') && (
+                {hasBlogs() && (
                   <div className="cluster-tab-data-container">
                     <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
                       <p className="cluster-tab-data-subheading">Blog Article</p>
@@ -712,8 +773,8 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                   </div>
                 )}
 
-                {(!aiBlog && !blogs) && (
-                  <div>No Blogs Data</div>
+                {(!hasAIBlogs() && !hasBlogs()) && (
+                  <div className="no-data-container">No Blogs Data</div>
                 )}
               </div>
             );
@@ -727,7 +788,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
               className="filter-dropdown-button"
               onClick={() => setShowContentSourceDropdown(!showContentSourceDropdown)}
             >
-              <span className="filter-dropdown-button-text">Content source</span>
+              <span className="filter-dropdown-button-text">{getSelectedOptionLabel()}</span>
               <img 
                 src={arrowUp} 
                 alt="dropdown" 
@@ -756,7 +817,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
           </div>
         </div>
                 {/* AI Generated Email Templates Section */}
-                {createdEmailTemplate && shouldShowContent('ai') && (
+                {hasAIEmailTemplates() && (
                   <div className="cluster-tab-data-container ai-generated">
                     <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
                       <p className="cluster-tab-data-subheading">AI Generated</p>
@@ -785,7 +846,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                 )}
 
                 {/* Regular Email Templates */}
-                {emailTemplates && emailTemplates.length > 0 && shouldShowContent('manual') && (
+                {hasEmailTemplates() && (
                   <div className="cluster-tab-data-container">
                     <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
                       <p className="cluster-tab-data-subheading">Email Template</p>
@@ -815,8 +876,8 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                   </div>
                 )}
 
-                {(!createdEmailTemplate && (!emailTemplates || emailTemplates.length === 0)) && (
-                  <div>No Email Templates Data</div>
+                {(!hasAIEmailTemplates() && !hasEmailTemplates()) && (
+                  <div className="no-data-container">No Email Templates Data</div>
                 )}
               </div>
             );
