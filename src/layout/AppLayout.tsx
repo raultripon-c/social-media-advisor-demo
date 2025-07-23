@@ -199,7 +199,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       const refNum = window.location.pathname.split("/")[2];
       const CustomerCode = window.location.pathname.split("/")[1];
       await checkAnalyticsTenant(refNum);
-      if (!selectedTenant.length && refNum) {
+      if ( (!Object.keys(selectedTenant).length || !selectedTenant?.customerId) && refNum ) {
         selectedTenant = { customerCode: CustomerCode, refNum: refNum };
         localStorage.setItem("selectedTenant", JSON.stringify(selectedTenant));
         (window as any).txeTenant = selectedTenant;
