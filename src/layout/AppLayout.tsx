@@ -201,11 +201,11 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       if ( (!Object.keys(selectedTenant).length || !selectedTenant?.customerId) && refNum ) {
         selectedTenant = { customerCode: CustomerCode, refNum: refNum };
         localStorage.setItem("selectedTenant", JSON.stringify(selectedTenant));
-        (window as any).txeTenant = selectedTenant;
         const tenantsUrl = `${(window as any)._env_.APP_API_URL}/customers/tenants/${refNum}`;
         APIService.getTenants(tenantsUrl, dispatch);
       } else {
         dispatch(setSelectedTenant(selectedTenant));
+        (window as any).txeTenant = selectedTenant;
       }
     })();
 
