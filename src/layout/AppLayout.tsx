@@ -7,7 +7,7 @@ import { useKeycloak } from "phenom-auth-react-adapter";
 import { AppStore } from "store";
 import Toast from "../components/Toast/Toast";
 import { IRoute, appRoutes } from "../routes/AppRoutes";
-import { setUserRoles, setSiteMetaData } from "../store/customer/actions";
+import { setUserRoles, setSiteMetaData, setSelectedTenant } from "../store/customer/actions";
 import RBAJson from "../utils/RBA.json";
 import {
   appSelectionHandler,
@@ -205,6 +205,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
         (window as any).txeTenant = selectedTenant;
         const tenantsUrl = `${(window as any)._env_.APP_API_URL}/customers/tenants/${refNum}`;
         APIService.getTenants(tenantsUrl, dispatch);
+      } else {
+        dispatch(setSelectedTenant(selectedTenant));
       }
     })();
 
