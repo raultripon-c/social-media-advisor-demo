@@ -1,15 +1,26 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import segmentIcon from "../../../assets/svg/SegmentIcon.svg";
 import plusIcon from "../../../assets/svg/plus.svg";
 import crossIcon from "../../../assets/svg/cross.svg";
 import bluePlusIcon from "../../../assets/svg/blue-plus.svg";
 import pencilIcon from "../../../assets/svg/pen.svg";
 import trashIcon from "../../../assets/svg/trash-can.svg";
-import "./SupportingMaterial.css";
+import searchIcon from "../../../assets/images/search-grey.svg";
 import Select from "react-select";
-import { List } from "lodash";
+import "./SupportingMaterial.css";
 
 import AddedLinks from "./AddedLinks/AddedLinks";
+
+// Debounce utility function
+const debounce = (func: Function, delay: number) => {
+  let timeoutId: NodeJS.Timeout;
+  const debouncedFunc = (...args: any[]) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func(...args), delay);
+  };
+  debouncedFunc.cancel = () => clearTimeout(timeoutId);
+  return debouncedFunc;
+};
 
 interface SupportingMaterialOption {
   name: string;
@@ -21,6 +32,10 @@ interface SupportingMaterialProps {
   fetchedPages?: any;
   list?: any;
   setAddedurls?: any;
+  suggestedLists?: any;
+  onListSearch?: (searchTerm: string) => void;
+  selectedListsData?: any[];
+  setSelectedListsData?: (data: any[]) => void;
 }
 
 interface AddedLink {
@@ -31,11 +46,13 @@ interface AddedLink {
   page?: any;
 }
 
-const suggestedSegments = [
-  { icon: segmentIcon, title: "Healthcare Professionals", leads: 17, avatarColor: "#E6E3F7", avatarType: "doctor" },
-  { icon: segmentIcon, title: "Medical staff in Chicago", leads: 17, avatarColor: "#FDF3E6", avatarType: "woman" },
-  { icon: segmentIcon, title: "Registered nurses", leads: 17, avatarColor: "#E6F7F7", avatarType: "nurse" },
-];
+interface ListItem {
+  listId: string;
+  displayName: string;
+  listenerCount?: number;
+  type?: string;
+  status?: string;
+}
 
 const avatarIcons: Record<string, JSX.Element> = {
   doctor: (
@@ -61,23 +78,126 @@ const avatarIcons: Record<string, JSX.Element> = {
   ),
 };
 
-const SupportingMaterial: React.FC<SupportingMaterialProps> = ({ options, fetchedPages, list, setAddedurls }) : React.ReactElement => {
+const SupportingMaterial: React.FC<SupportingMaterialProps> = ({ options, fetchedPages, list, setAddedurls , suggestedLists, onListSearch, selectedListsData, setSelectedListsData}) : React.ReactElement => {
   const [openSections, setOpenSections] = useState<string[]>([]);
+  
+  // Helper function to format selected lists data
+  const formatSelectedListsData = (lists: any[]) => {
+    return lists.map((list) => {
+      // Handle react-select option format (from dropdown)
+      if (list.value && list.label) {
+        return {
+          listId: list.value,
+          name: list.label,
+          type: 'dynamic',
+          status: list.status || null
+        };
+      }
+      
+      // Handle suggested segments format
+      if (list.listId && list.title) {
+        return {
+          listId: list.listId,
+          name: list.title,
+          type: list.type || 'suggested',
+          status: list.status || null
+        };
+      }
+      
+      // Handle original list format
+      return {
+        listId: list.listId || list.id,
+        name: list.displayName || list.name,
+        type: list.type || '',
+        status: list.status || null
+      };
+    });
+  };
+
+  // Convert suggestedLists to the format we need
+  const suggestedSegments = suggestedLists && suggestedLists.length > 0 ? 
+    suggestedLists.map((item: any, index: number) => ({
+      icon: segmentIcon, 
+      title: item.displayName, 
+      leads: item.listenerCount || 0, 
+
+      listId: item.listId,
+      type: item.type || 'suggested',
+      status: item.status || ""
+    })) : [];
+  
   const [selectedSegments, setSelectedSegments] = useState<any>(suggestedSegments);
+  const [dynamicLists, setDynamicLists] = useState<ListItem[]>([]);
   const [selectedReferencePage, setSelectedReferencePage] = useState<string>("");
   const [externalLink, setExternalLink] = useState<string>("");
   const [addedLink, setAddedLink] = useState<AddedLink[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [listSearchTerm, setListSearchTerm] = useState<string>("");
   const [activeSegments, setActiveSegments] = useState<number[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [editValue, setEditValue] = useState<AddedLink | string>("");
+  const [selectedLists, setSelectedLists] = useState<any>([]);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
+  const debouncedGetSuggestedData = useRef<any>();
 
+  // Update suggested segments when suggestedLists changes
+  useEffect(() => {
+    if (suggestedLists && suggestedLists.length > 0) {
+      const newSuggestedSegments = suggestedLists.map((item: any, index: number) => ({
+        title: item.displayName, 
+        leads: item.listenerCount || 0, 
+        listId: item.listId,
+        type: item.type || '',
+        status: item.status || ""
+      }));
+      setSelectedSegments(newSuggestedSegments);
+      
+      // Don't set suggested segments as active by default
+      setActiveSegments([]);
+      
+      // Initialize selectedListsData with empty array since no lists are selected by default
+      if (setSelectedListsData) {
+        setSelectedListsData([]);
+      }
+    }
+  }, [suggestedLists, setSelectedListsData]);
+
+  // Initialize debounced search
+  useEffect(() => {
+    debouncedGetSuggestedData.current = debounce(
+      async (searchValue: string, onListSearch: Function) => {
+        if (searchValue && searchValue.length >= 1 && onListSearch) {
+          setIsSearching(true);
+          onListSearch(searchValue);
+          setIsSearching(false);
+        }
+      },
+      300
+    );
+
+    return () => {
+      debouncedGetSuggestedData.current.cancel(); // Cleanup on unmount
+    };
+  }, []);
+
+  // Update dynamic lists when list prop changes
+  useEffect(() => {
+    if (list && Array.isArray(list)) {
+      const dynamicListItems = list.map((item: any) => ({
+        listId: item.listId || item.id,
+        displayName: item.displayName || item.name,
+        listenerCount: item.listenerCount || 0,
+        status: item.status || "",
+        type: item.type || 'dynamic_candidates' as const
+      }));
+      setDynamicLists(dynamicListItems);
+    }
+  }, [list]);
 
   useEffect(() => {
     setAddedurls(addedLink.map((link: any) => link.url));
   }, [addedLink]);
-
 
   const toggleSection = (name: string) => {
     if (openSections.includes(name)) {
@@ -88,18 +208,49 @@ const SupportingMaterial: React.FC<SupportingMaterialProps> = ({ options, fetche
   };
 
   const filterSegments = (segment: any): void => {
-    setSelectedSegments(selectedSegments.filter((item: any) => item.title !== segment.title));
+    const updatedSegments = selectedSegments.filter((item: any) => item.title !== segment.title);
+    setSelectedSegments(updatedSegments);
+    
+    // Update active segments to remove the index of the filtered segment
+    const segmentIndex = selectedSegments.findIndex((item: any) => item.title === segment.title);
+    const updatedActiveSegments = activeSegments.filter(i => i !== segmentIndex);
+    setActiveSegments(updatedActiveSegments);
+    
+    // Update the selectedListsData with remaining selected lists
+    const activeSuggestedSegments = updatedSegments.filter((_: any, index: number) => 
+      updatedActiveSegments.includes(index)
+    );
+    
+    const allSelectedLists = [
+      ...(selectedLists || []),
+      ...activeSuggestedSegments
+    ];
+    
+    if (setSelectedListsData) {
+      setSelectedListsData(formatSelectedListsData(allSelectedLists));
+    }
   };
 
-  const filteredSegments = selectedSegments.filter((segment: any) =>
-    segment.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Handle list search
+  const handleListSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setListSearchTerm(value);
+  };
 
-  const segmentOptions = filteredSegments.map((segment: any, index: number) => ({
-    value: index,
-    label: segment.title,
-    segment,
-  }));
+  // Handle search button click or enter key
+  const handleSearchSubmit = () => {
+    if (onListSearch && listSearchTerm.trim()) {
+      setIsSearching(true);
+      onListSearch(listSearchTerm.trim());
+      setIsSearching(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearchSubmit();
+    }
+  };
 
   const handleEdit = (index: number) => {
     setEditIndex(index);
@@ -111,91 +262,127 @@ const SupportingMaterial: React.FC<SupportingMaterialProps> = ({ options, fetche
     setAddedLink(addedLink.filter((_, i) => i !== index));
   };
 
+  const handleListSelectionChange = (selectedOption: any) => {
+    setSelectedLists(selectedOption);
+    
+    // Get active suggested segments (those that are selected)
+    const activeSuggestedSegments = selectedSegments.filter((_: any, index: number) => activeSegments.includes(index));
+    
+    // Combine dropdown selections with suggested list selections
+    const allSelectedLists = [
+      ...(selectedOption || []),
+      ...activeSuggestedSegments
+    ];
+    
+    if (setSelectedListsData) {
+      setSelectedListsData(formatSelectedListsData(allSelectedLists));
+    }
+  };
+
   const renderSectionContent = (option: string) => {
     switch (option) {
       case "List":
         return (
-          <div className="option-section">
+          <div className="option-section-list">
             <div className="list-section-heading">List</div>
+            
             <Select
-              className="segment-search-select"
-              options={segmentOptions}
+              options={dynamicLists.map(item => ({
+                value: item.listId,
+                label: item.displayName,
+                status: item.status || "",
+                type: item.type || ""
+              }))}
+              value={selectedLists}
+              onChange={handleListSelectionChange}
+              placeholder="Search and select lists..."
               isMulti
-              onChange={(options: any) => {
-                if (!options) {
-                  setActiveSegments([]);
-                } else if (Array.isArray(options)) {
-                  setActiveSegments(options.map(opt => opt.value));
+              isSearchable
+              styles={{
+                control: (base) => ({
+                  ...base,
+                  border: "1px solid #E8EAEE",
+                  borderRadius: "10px",
+                  cursor: "pointer"
+                })
+              }}
+              isLoading={isSearching}
+              onInputChange={(inputValue, actionMeta) => {
+                if (actionMeta.action === 'input-change') {
+                  setListSearchTerm(inputValue);
+                  debouncedGetSuggestedData.current(inputValue, onListSearch);
                 }
               }}
-              placeholder="Search for a list"
-              isSearchable
-              isClearable
-              value={segmentOptions.filter((opt: any) => activeSegments.includes(opt.value))}
-              styles={{
-                control: (base) => ({ ...base, marginBottom: "16px", borderRadius: "10px", border: "1px solid #8C95A8", background: "#FFF" }),
-                menu: (base) => ({ ...base, zIndex: 9999 }),
-                multiValue: (base) => ({
-                  ...base,
-                  borderRadius: "10px",
-                }),
-                multiValueLabel: (base) => ({
-                  ...base,
-                  borderRadius: "10px",
-                }),
-                multiValueRemove: (base) => ({
-                  ...base,
-                  borderRadius: "10px",
-                }),
-              }}
-              formatOptionLabel={(option: any) => (
-                <div style={{ display: "flex", alignItems: "center", borderRadius:"10px"}}>
-                  {/* <span style={{ marginRight: 8 }}>{avatarIcons[filteredSegments[option.value]?.avatarType]}</span> */}
-                  <span style={{ fontWeight: 600, marginRight: 8, borderRadius: "10px" }}>{option.label}</span>
-                  <span style={{ color: "#8A94A6", borderRadius: "10px" }}>| {filteredSegments[option.value]?.leads} leads</span>
-                </div>
-              )}
+              noOptionsMessage={() => "No lists found. Try searching for a different term."}
+              loadingMessage={() => "Searching..."}
             />
-            <div className="segment-list">
-              {filteredSegments.map((segment: any, index: number) => (
-                <div
-                  key={`segment-${index}`}
-                  className="segment-item-container"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    // background: activeSegments.includes(index) ? "#F6F5FF" : "#fff",
-                    border: activeSegments.includes(index) ? "1px solid #6C63FF" : "1px solid #E8EAEE",
-                    borderRadius: "16px",
-                    marginBottom: "12px",
-                    padding: "16px 20px",
-                    boxShadow: activeSegments.includes(index) ? "0 0 0 2px #E6E3F7" : "none",
-                    cursor: "pointer"
-                  }}
-                  onClick={() => {
-                    if (activeSegments.includes(index)) {
-                      setActiveSegments(activeSegments.filter(i => i !== index));
-                    } else {
-                      setActiveSegments([...activeSegments, index]);
-                    }
-                  }}
-                >
-                  {/* <div style={{ marginRight: "16px" }}>
-                    {avatarIcons[segment.avatarType]}
-                  </div> */}
-                  <span className="suggested-tag">Suggested</span>
-                  <span className="suggested-list-title">{segment.title}</span>
-                  <span className="suggested-list-condidates">| {segment.leads} leads</span>
-                  <span
-                    className="close-icon"
-                    style={{ marginLeft: "auto", fontSize: "20px", color: "#8A94A6", cursor: "pointer" }}
-                    onClick={e => { e.stopPropagation(); filterSegments(segment); }}
-                  >
-                    &#10005;
-                  </span>
+            
+            {/* Suggested Lists Section */}
+            {selectedSegments.length > 0 && (
+              <div style={{ marginBottom: "16px" }}>
+                <div style={{ 
+                  fontSize: "14px", 
+                  fontWeight: "600", 
+                  color: "#333", 
+                  marginBottom: "8px" 
+                }}>
+                  Suggested Lists
                 </div>
-              ))}
-            </div>
+                <div className="segment-list">
+                  {selectedSegments.map((segment: any, index: number) => (
+                    <div
+                      key={`suggested-${index}`}
+                      className="segment-item-container"
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        border: activeSegments.includes(index) ? "1px solid #6C63FF" : "1px solid #E8EAEE",
+                        borderRadius: "16px",
+                        marginBottom: "12px",
+                        padding: "16px 20px",
+                        boxShadow: activeSegments.includes(index) ? "0 0 0 2px #E6E3F7" : "none",
+                        cursor: "pointer"
+                      }}
+                      onClick={() => {
+                        let newActiveSegments;
+                        if (activeSegments.includes(index)) {
+                          newActiveSegments = activeSegments.filter(i => i !== index);
+                        } else {
+                          newActiveSegments = [...activeSegments, index];
+                        }
+                        setActiveSegments(newActiveSegments);
+                        
+                        // Update the selectedListsData with all selected lists
+                        const activeSuggestedSegments = selectedSegments.filter((_: any, idx: number) => 
+                          newActiveSegments.includes(idx)
+                        );
+                        
+                        const allSelectedLists = [
+                          ...(selectedLists || []),
+                          ...activeSuggestedSegments
+                        ];
+                        
+                        if (setSelectedListsData) {
+                          setSelectedListsData(formatSelectedListsData(allSelectedLists));
+                        }
+                      }}
+                    >
+                      <span className="suggested-tag">Suggested</span>
+                      <span className="suggested-list-title">{segment.title}</span>
+                      <span className="suggested-list-condidates">| {segment.leads} leads</span>
+                      <span
+                        className="close-icon"
+                        style={{ marginLeft: "auto", fontSize: "20px", color: "#8A94A6", cursor: "pointer" }}
+                        onClick={e => { e.stopPropagation(); filterSegments(segment); }}
+                      >
+                        &#10005;
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
           </div>
         );
       case "Reference Page":

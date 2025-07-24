@@ -229,7 +229,28 @@ export const APIService = {
 
   getListItems: async (props: any): Promise<any> => {
     try {
-      const url = `${(window as any)._env_.CRM_HUB_URL}/v2/getLists`;
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/crm/getLists`;
+      const response = await API.post(url, props, {
+        headers: {
+          Authorization: `${window.keycloakInstance.token}`,
+          'Content-Type': 'application/json',
+          'Accept': '*/*'
+        },
+      });
+
+      if (response?.data) {
+        return response.data;
+      } else {
+        throw new Error("No list items found for the provided refNum.");
+      }
+    } catch (error) {
+      console.error("Error in getListItems: ", error);
+      return null;
+    }
+  },
+  getSuggestedLists: async (props: any): Promise<any> => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/crm/getSuggestedLists`;
       const response = await API.post(url, props, {
         headers: {
           Authorization: `${window.keycloakInstance.token}`,

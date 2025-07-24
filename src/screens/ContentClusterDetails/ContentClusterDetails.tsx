@@ -432,37 +432,38 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                         )}
                       </div>
                     )}
+                  </>
+                )}
 
-                    {hasLandingPages() && (
-                      <div className="cluster-tab-data-container">
-                        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
-                          <p className="cluster-tab-data-subheading">Landing Page</p>
-                          <img
-                            src={arrowUp}
-                            alt="Toggle"
-                            style={{
-                              width: 24,
-                              height: 24,
-                              transform: openSections['landingPages'] === true ? 'rotate(0deg)' : 'rotate(180deg)',
-                              cursor: 'pointer',
-                              transition: 'transform 0.2s',
-                            }}
-                            onClick={() => toggleSection('landingPages')}
+                {/* Regular Landing Pages */}
+                {hasLandingPages() && (
+                  <div className="cluster-tab-data-container">
+                    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+                      <p className="cluster-tab-data-subheading">Landing Page</p>
+                      <img
+                        src={arrowUp}
+                        alt="Toggle"
+                        style={{
+                          width: 24,
+                          height: 24,
+                          transform: openSections['landingPages'] === true ? 'rotate(0deg)' : 'rotate(180deg)',
+                          cursor: 'pointer',
+                          transition: 'transform 0.2s',
+                        }}
+                        onClick={() => toggleSection('landingPages')}
+                      />
+                    </div>
+                    {openSections['landingPages'] === true && (
+                      <div className="cluster-detail-card-container">
+                        {pages.landingPages.map((page: any) => (
+                          <ClusterDetailCard 
+                            landingPage={page} 
+                            setPreviewDiv={handlePreviewOpen}
                           />
-                        </div>
-                        {openSections['landingPages'] === true && (
-                          <div className="cluster-detail-card-container">
-                            {pages.landingPages.map((page: any) => (
-                              <ClusterDetailCard 
-                                landingPage={page} 
-                                setPreviewDiv={handlePreviewOpen}
-                              />
-                            ))}
-                          </div>
-                        )}
+                        ))}
                       </div>
                     )}
-                  </>
+                  </div>
                 )}
 
                 {/* Regular Blog Articles */}
@@ -638,37 +639,38 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                         )}
                       </div>
                     )}
+                  </>
+                )}
 
-                    {pages.landingPages && (
-                      <div className="cluster-tab-data-container">
-                        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
-                          <p className="cluster-tab-data-subheading">Landing Page</p>
-                          <img
-                            src={arrowUp}
-                            alt="Toggle"
-                            style={{
-                              width: 24,
-                              height: 24,
-                              transform: openSections['landingPages'] === true ? 'rotate(0deg)' : 'rotate(180deg)',
-                              cursor: 'pointer',
-                              transition: 'transform 0.2s',
-                            }}
-                            onClick={() => toggleSection('landingPages')}
+                {/* Regular Landing Pages */}
+                {hasLandingPages() && (
+                  <div className="cluster-tab-data-container">
+                    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+                      <p className="cluster-tab-data-subheading">Landing Page</p>
+                      <img
+                        src={arrowUp}
+                        alt="Toggle"
+                        style={{
+                          width: 24,
+                          height: 24,
+                          transform: openSections['landingPages'] === true ? 'rotate(0deg)' : 'rotate(180deg)',
+                          cursor: 'pointer',
+                          transition: 'transform 0.2s',
+                        }}
+                        onClick={() => toggleSection('landingPages')}
+                      />
+                    </div>
+                    {openSections['landingPages'] === true && (
+                      <div className="cluster-detail-card-container">
+                        {pages.landingPages.map((page: any) => (
+                          <ClusterDetailCard 
+                            landingPage={page} 
+                            setPreviewDiv={handlePreviewOpen}
                           />
-                        </div>
-                        {openSections['landingPages'] === true && (
-                          <div className="cluster-detail-card-container">
-                            {pages.landingPages.map((page: any) => (
-                              <ClusterDetailCard 
-                                landingPage={page} 
-                                setPreviewDiv={handlePreviewOpen}
-                              />
-                            ))}
-                          </div>
-                        )}
+                        ))}
                       </div>
                     )}
-                  </>
+                  </div>
                 )}
                 {(!hasContentPages() && !hasLandingPages()) && (
                   <div className="no-data-container">No Pages Data</div>
