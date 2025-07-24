@@ -107,6 +107,11 @@
   margin: 12px 0;
 }
 
+.option-section-list{
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
 .suggested-tag {
   display: -webkit-box;
   align-items: flex-start;

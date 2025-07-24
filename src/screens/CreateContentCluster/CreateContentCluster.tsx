@@ -115,7 +115,11 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
   const [searchTagTerm, setSearchTagTerm] = useState<string>("");
   const [showTagDropdown, setShowTagDropdown] = useState<boolean>(false);
   const [jobLink, setJobLink] = useState<string>("");
-
+  const [listInput, setListInput] = useState<string>("");
+  const [listItems, setListItems] = useState<any[]>([]);
+  const [suggestedLists, setSuggestedLists] = useState<any[]>([]);
+  const [selectedListsData, setSelectedListsData] = useState<any[]>([]);
+  
   const saveContentCluster = (payload: any) => {
     APIService.createContentCluster(payload).then((clusterDetail) => {
       console.log("Content Cluster created:", clusterDetail);
@@ -183,30 +187,58 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       });
   }, []);
 
-  // useEffect(() => {
-  //   if (!promptInput) {
-  //     setShowClustersList(false);
-  //   }
-  // }, [promptInput])
 
-  const getListItems = () => {
+  const getListItems = (searchTerm: string) => {
+    // Check if crmUserInfo and userDetails exist before making the API call
+    if (!crmUserInfo?.userDetails?.id) {
+      console.log("crmUserInfo not loaded yet, skipping getListItems");
+      return Promise.resolve();
+    }
+    
     return APIService.getListItems({
-    //   {
-    //     "refNum": "PHENA0059",
-    //     "filterType": "Candidates",
-    //     "status": "All",
-    //     "keywords": "hy",
-    //     "createdBy": "",
-    //     "recruiterUserId": "c1b7444d-91a0-4f74-865b-a0300752b7cc",
-    //     "from": 1,
-    //     "size": 20,
-    //     "type": "",
-    //     "sort": {
-    //         "field": "updatedDate",
-    //         "order": -1
-    //     }
-    // }
-    });
+        "refNum": selectedTenant.refNum,
+        "filterType": "Candidates",
+        "status": "All",
+        "keywords": searchTerm,
+        "createdBy": "",
+        "recruiterUserId": crmUserInfo.userDetails.id,
+        "from": 1,
+        "size": 20,
+        "type": "dynamic_candidates",
+        "sort": {
+          "field": "updatedDate",
+          "order": -1
+        }
+    }).then((res) => {
+      setListItems(res.data.message);
+    })
+  }
+  const getSuggestedLists = () => {
+    // Check if crmUserInfo and userDetails exist before making the API call
+    if (!crmUserInfo?.userDetails?.id) {
+      console.log("crmUserInfo not loaded yet, skipping getSuggestedLists");
+      return Promise.resolve();
+    }
+    
+    return APIService.getSuggestedLists({
+      "refNum": selectedTenant.refNum,
+      "filterType": "Candidates",
+      "status": "All",
+      "keywords": listInput,
+      "createdBy": "",
+      "recruiterUserId": crmUserInfo.userDetails.id,
+      "from": 1,
+      "size": 50,
+      "type": "dynamic_candidates",
+      "sort": {
+        "field": "updatedDate",
+        "order": -1
+      },
+      "content": promptInput,
+  }).then((res) => {
+      setSuggestedLists(res);
+      return res;
+    })
   }
   const fetchPagesForContent = (keywords: string[]) => {
     return APIService.getPagesForContent({
@@ -230,6 +262,12 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
   };
 
   const createCRMEmailTemplate = () => {
+    // Check if crmUserInfo and userDetails exist before making the API call
+    if (!crmUserInfo?.userDetails?.id) {
+      console.log("crmUserInfo not loaded yet, skipping createCRMEmailTemplate");
+      return Promise.resolve();
+    }
+    
     return APIService.generateCRMEmailTemplate({
       refNum: selectedTenant.refNum,
       locale,
@@ -242,6 +280,12 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
   };
 
   const fetchEmailTemplatesForContent = () => {
+    // Check if crmUserInfo and userDetails exist before making the API call
+    if (!crmUserInfo?.userDetails?.id) {
+      console.log("crmUserInfo not loaded yet, skipping fetchEmailTemplatesForContent");
+      return Promise.resolve();
+    }
+    
     return APIService.getEmailTemplatesForContent({
       recruiterUserId: crmUserInfo.userDetails.id,
       refNum: selectedTenant.refNum,
@@ -250,6 +294,12 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
   };
 
   const fetchAllEmailTemplates = () => {
+    // Check if crmUserInfo and userDetails exist before making the API call
+    if (!crmUserInfo?.userDetails?.id) {
+      console.log("crmUserInfo not loaded yet, skipping fetchAllEmailTemplates");
+      return Promise.resolve();
+    }
+    
     return APIService.getAllEmailTemplates({
       recruiterUserId: crmUserInfo.userDetails.id,
       refNum: selectedTenant.refNum,
@@ -311,7 +361,6 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       recruiterUserId: crmUserInfo?.userDetails?.id,
       displayName: crmUserInfo?.displayName,
       userEmail: crmUserInfo?.userName,
-      
     });
   };
 
@@ -341,6 +390,10 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
     });
   }
 
+  const handleListSearch = (searchTerm: string) => {
+    getListItems(searchTerm);
+  };
+
   const handlePromptSubmit = () => {
     if (promptInput) {
       setShowSaveOrDiscardModal(true);
@@ -358,27 +411,32 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
             "urlList": [jobLink]
         }
     ];
-    getPromptBasedSuggestions(payload).then((response) => {
-      // Update prompt input with master prompt from response
-      if (response?.masterPrompt) {
-        setPromptInput(response.masterPrompt);
+    
+    // Call both APIs in parallel
+    Promise.all([
+      getPromptBasedSuggestions(payload),
+      getSuggestedLists()
+    ]).then(([promptResponse, suggestedListsResponse]) => {
+      // Handle prompt based suggestions response
+      if (promptResponse?.masterPrompt) {
+        setPromptInput(promptResponse.masterPrompt);
       }
       
       // Set fetched pages with content from response
       const fetchedPagesData = {
-        contentPages: response?.contentPages || [],
-        landingPages: response?.landingPages || [],
-        blogs: response?.blogDetails || []
+        contentPages: promptResponse?.contentPages || [],
+        landingPages: promptResponse?.landingPages || [],
+        blogs: promptResponse?.blogDetails || []
       };
       setFetchedPages(fetchedPagesData);
       
       // Update content types based on response
-      if (response.data?.contentTypes) {
-        const contentTypeNames = response.contentTypes.map((type: any) => type.displayName);
+      if (promptResponse.data?.contentTypes) {
+        const contentTypeNames = promptResponse.contentTypes.map((type: any) => type.displayName);
         setSelectedContentTypes(contentTypeNames);
       }
       
-      let suggestedTagsData = response.contentTypes || [];
+      let suggestedTagsData = promptResponse.contentTypes || [];
       setSuggestedTags(suggestedTagsData);
       
       // Set default selectedTags and selectedContentId to first two content types
@@ -393,6 +451,10 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
         setSelectedContentId([suggestedTagsData[0].contentId]);
       }
       
+      // Handle suggested lists response
+      console.log("Suggested Lists Response:", suggestedListsResponse);
+      setSuggestedLists(suggestedListsResponse.data?.result || []);
+      
       setEditClusterTitle(true);
       setClusterTitle("");
       setShowLoader(false);
@@ -401,9 +463,9 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       setShowClustersList(true);
       setShowPromptSuggestions(true);
         
-      console.log("Prompt Based Suggestions", response);
+      console.log("Prompt Based Suggestions", promptResponse);
     }).catch((err) => {
-      console.error("Error fetching prompt based suggestions:", err);
+      console.error("Error fetching data:", err);
       setShowSaveOrDiscardModal(false);
       setShowLoader(false);
     });
@@ -464,6 +526,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
         createdEmailTemplate: createdEmailTemplateData ? [createdEmailTemplateData] : [],
         clusterTitle: promptInput,
         clusterName: clusterTitle,
+        selectedLists: selectedListsData,
       };
       
       // Save the cluster
@@ -807,7 +870,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
               <div className="section-divider" />
               <div style={{ width: "100%" }}>
                 <p className="prompt-enhancements-subheading">Add Supporting Materials</p>
-                <SupportingMaterial options={supportingMaterialsConfig} fetchedPages={fetchedPages} list={sampleSelectionListItems} setAddedurls={setAddedurls}/>
+                <SupportingMaterial options={supportingMaterialsConfig} fetchedPages={fetchedPages} list={listItems} setAddedurls={setAddedurls} suggestedLists={suggestedLists} onListSearch={handleListSearch} selectedListsData={selectedListsData} setSelectedListsData={setSelectedListsData}/>
               </div>
             </div>
             <div className="prompt-suggestions content-format-section">
