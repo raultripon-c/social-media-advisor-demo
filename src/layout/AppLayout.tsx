@@ -131,9 +131,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
     const path = window.location.pathname.split("/").filter(Boolean);
 
     const appRouteDictionary: { [key: string]: string } = {
-      // "email-management": "Email Manager",
       // "email-templates": "Email Manager",
-      // "sms-templates": "SMS Manager",e
+      // "sms-templates": "SMS Manager",
       "sms-campaign": "Campaigns",
       campaigns: "Campaigns",
       automations: "Automations",
@@ -204,11 +203,11 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       if ( (!Object.keys(selectedTenant).length || !selectedTenant?.customerId) && refNum ) {
         selectedTenant = { customerCode: CustomerCode, refNum: refNum };
         localStorage.setItem("selectedTenant", JSON.stringify(selectedTenant));
-        (window as any).txeTenant = selectedTenant;
         const tenantsUrl = `${(window as any)._env_.APP_API_URL}/customers/tenants/${refNum}`;
         APIService.getTenants(tenantsUrl, dispatch);
       } else {
         dispatch(setSelectedTenant(selectedTenant));
+        (window as any).txeTenant = selectedTenant;
       }
     })();
 
