@@ -40,7 +40,7 @@ const Layout = () => {
       (async () => {
         await keycloak?.loadUserInfo();
         if(window?.keycloakInstance?.userInfo) {
-          fetchCrmTenants();
+          await fetchCrmTenants();
           setKeycloakAvailable(true);
         } else {
           toast.dismiss();

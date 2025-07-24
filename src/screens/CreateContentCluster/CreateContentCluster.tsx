@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import SupportingMaterial from "./SupportingMaterial/SupportingMaterial";
 import { Loader } from "@phenom/react-ui-components";
@@ -23,15 +23,13 @@ import tickIcon from "../../assets/svg/tick-icon.svg";
 import "./CreateContentCluster.css";
 import AddedLinks from "./SupportingMaterial/AddedLinks/AddedLinks";
 
-// Simple component for displaying cluster title
 const ClusterTitleDisplay: React.FC<{ title: string; hasError: boolean }> = ({ title, hasError }) => (
   <span className={`create-content-cluster-header-title${hasError ? " error" : ""}`}>
     {title}
   </span>
 );
 
-// Simple component for editing cluster title
-const ClusterTitleInput: React.FC<{
+const ClusterTitleInput = React.forwardRef<HTMLInputElement, {
   value: string;
   onChange: (value: string) => void;
   onError: boolean;
@@ -39,9 +37,10 @@ const ClusterTitleInput: React.FC<{
   onUpdateMode: () => void;
   updateMode: boolean;
   onDone: () => void;
-}> = ({ value, onChange, onError, onClearError, onUpdateMode, updateMode, onDone }) => (
+}>(({ value, onChange, onError, onClearError, onUpdateMode, updateMode, onDone }, ref) => (
   <>
     <input 
+      ref={ref}
       id="cluster-title-input"
       name="clusterTitle"
       className={`create-content-cluster-header-title-input${onError ? " error" : ""}`}
@@ -67,7 +66,7 @@ const ClusterTitleInput: React.FC<{
       <button className="done-btn" onClick={onDone}>Done</button>
     )}
   </>
-);
+));
 
 interface CreateContentClusterProps { }
 
@@ -119,6 +118,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
   const [listItems, setListItems] = useState<any[]>([]);
   const [suggestedLists, setSuggestedLists] = useState<any[]>([]);
   const [selectedListsData, setSelectedListsData] = useState<any[]>([]);
+  const clusterTitleInputRef = useRef<HTMLInputElement>(null);
   
   const saveContentCluster = (payload: any) => {
     APIService.createContentCluster(payload).then((clusterDetail) => {
@@ -453,7 +453,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       
       // Handle suggested lists response
       console.log("Suggested Lists Response:", suggestedListsResponse);
-      setSuggestedLists(suggestedListsResponse.data?.result || []);
+      setSuggestedLists(suggestedListsResponse?.data?.result || []);
       
       setEditClusterTitle(true);
       setClusterTitle("");
@@ -477,6 +477,10 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
     
     if (isInEditMode && isTitleEmpty) {
       setClusterTitleError(true);
+      // Focus on the cluster title input when validation fails
+      if (clusterTitleInputRef.current) {
+        clusterTitleInputRef.current.focus();
+      }
       return;
     }
     
@@ -728,6 +732,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
         <div className="create-content-cluster-header">
           {editClusterTitle ? (
             <ClusterTitleInput 
+              ref={clusterTitleInputRef}
               value={clusterTitle}
               onChange={setClusterTitle}
               onError={clusterTitleError}
