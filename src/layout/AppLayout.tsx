@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 
@@ -64,6 +64,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   const [customerTenantApps, setCustomerTenantApps] = useState();
   const [appsLoader, setAppsLoader] = useState(true);
   const [rolesLoader, setRolesLoader] = useState(true);
+  const [isAppsLoaded, setIsAppsLoaded] = useState(false);
+  const isLoadingAppsRef = useRef(false);
   const userDetails = window?.keycloakInstance?.tokenParsed?.userDetails;
   const [showSidebarMenu, toggleSidebarMenu] = useState(false);
   const { selectedApp, allApps } = useSelector((state: any) => state.app);
@@ -210,12 +212,13 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
     })();
 
     let response = JSON.parse(sessionStorage.getItem("allapps") || "[]");
-    if (response.length == 0) {
+    if (response.length == 0 && !isLoadingAppsRef.current) {
       getAllApps();
-    } else {
+    } else if (response.length > 0) {
       dispatch(setAppsFromAPI(response));
       const mfRoutes = getMfRoutes(response);
       setAllRoutes([...appRoutes, ...mfRoutes]);
+      setIsAppsLoaded(true);
     }
 
     if (!window.keycloakInstance.bearer_token)
@@ -235,10 +238,10 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   }, []);
 
   useEffect(() => {
-    if (storeIsCMSApiCompleted && storeIsCRMApiCompleted) {
+    if (storeIsCMSApiCompleted && storeIsCRMApiCompleted && isAppsLoaded) {
       handleCRMFilterAPICompletion();
     }
-  }, [storeIsCMSApiCompleted, storeIsCRMApiCompleted]);
+  }, [storeIsCMSApiCompleted, storeIsCRMApiCompleted, isAppsLoaded]);
 
   //for setting selectedApp in session
   useEffect(() => {
@@ -285,7 +288,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
           await crmFilterApps(selectedTenant?.refNum, user);
           await cmsFilterApps(selectedTenant?.refNum);
           let response = JSON.parse(sessionStorage.getItem("allapps") || "[]");
-          if (response.length == 0) {
+          if (response.length == 0 && !isLoadingAppsRef.current) {
             getAllApps();
           }
           setAppsLoader(false);
@@ -307,8 +310,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
     );
   };
 
-  const handleCRMFilterAPICompletion = (completeOps?: boolean) => {
-    const response = JSON.parse(sessionStorage.getItem("allapps") || "[]");
+  const handleCRMFilterAPICompletion = async (completeOps?: boolean) => {
+    let response = JSON.parse(sessionStorage.getItem("allapps") || "[]");
+    if (response.length === 0) {
+      response = fetchedApps || [];
+    }
+
     const filteredApps: any = transformAppData(response); // filters customerTenantApps and platformApps
     setTransformedAppData(filteredApps);
     setCustomerTenantApps(filteredApps?.customerTenantApps); // customerTenantApps
@@ -441,9 +448,10 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   };
 
   const getAllApps = async () => {
+    if (isLoadingAppsRef.current) return;
+    isLoadingAppsRef.current = true;
     try {
-      const response =
-        allApps && allApps.length > 0 ? allApps : await APIService.getAllApps();
+      const response = allApps && allApps.length > 0 ? allApps : await APIService.getAllApps();
 
       if (!response) return;
       let res = [...response];
@@ -463,8 +471,11 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
       // Convert back to objects if needed
       const result = filteredPaths.map((path: any) => ({ path }));
       sessionStorage.setItem("mfRoutes", JSON.stringify(result));
+      setIsAppsLoaded(true);
     } catch (error) {
       console.error("Error:", error);
+    } finally {
+      isLoadingAppsRef.current = false;
     }
   };
 
