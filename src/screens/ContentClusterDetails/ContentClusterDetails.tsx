@@ -6,6 +6,7 @@ import ClusterAnalyticsCard from "./ClusterAnalyticsCard/ClusterAnalyticsCard";
 import PreviewView from "./PreviewView/PreviewView";
 import { APIService } from "../../../src/utils/api.service";
 import InlineLoader from "../../components/loader/InlineLoader";
+import { usePreview } from "../../hooks/usePreview";
 
 
 import backIcon from "../../assets/svg/leftArrow.svg";
@@ -27,12 +28,19 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
 
   const [activeTab, setActiveTab] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [previewDiv, setPreviewDiv] = useState(false);
-  const [selectedPageData, setSelectedPageData] = useState<any>(null);
   const [contentSourceFilter, setContentSourceFilter] = useState<string>("all");
   const [showContentSourceDropdown, setShowContentSourceDropdown] = useState(false);
   const [crmUserInfo, setCrmUserInfo] = useState<any>({});
   
+  // Use the custom preview hook
+  const {
+    previewDiv,
+    selectedPageData,
+    isCheckingTaskProgress,
+    handlePreviewOpen,
+    handlePreviewClose,
+  } = usePreview();
+
   const sectionKeys = [
     'aiGenerated',
     'contentPages',
@@ -126,16 +134,6 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
     else{
       navigate("/content-clusters");
     }
-  };
-
-  const handlePreviewOpen = (pageData: any) => {
-    setSelectedPageData(pageData);
-    setPreviewDiv(true);
-  };
-
-  const handlePreviewClose = () => {
-    setPreviewDiv(false);
-    setSelectedPageData(null);
   };
 
   const handleContentSourceFilterChange = (value: string) => {
@@ -306,12 +304,16 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
         <InlineLoader loadingMessage="Please wait, loading cluster details..." />
       )}
       
+      {isCheckingTaskProgress && (
+        <InlineLoader loadingMessage="Please wait, checking page status..." />
+      )}
+      
       {/* <div className="cluster-analytics">
         <ClusterAnalyticsCard title="Avg. Content Impressions" count={0} />
         <ClusterAnalyticsCard title="Content Interactions" count={0} />
         <ClusterAnalyticsCard title="Content Performance" count={0} />
       </div> */}
-      {!isLoading && (() => {
+      {!isLoading && !isCheckingTaskProgress ? (() => {
         switch (activeTab) {
           case 0:
             return (
@@ -373,26 +375,34 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                       <div className="cluster-detail-card-container" style={{display: 'flex', flexWrap: 'wrap', gap: '16px'}}>
                         {aiContentPage && (
                           <ClusterDetailCard 
+                            key={`ai-content-page-${aiContentPage.id || 'ai-content'}`}
                             aiContentPage={aiContentPage} 
                             setPreviewDiv={handlePreviewOpen}
+                            pageType="aiContentPage"
                           />
                         )}
                         {aiBlog && (
                           <ClusterDetailCard 
+                            key={`ai-blog-single-${aiBlog.id || 'ai-blog-single'}`}
                             aiBlog={aiBlog} 
                             setPreviewDiv={handlePreviewOpen}
+                            pageType="aiBlog"
                           />
                         )}
                         {aiLandingPage && (
                           <ClusterDetailCard 
+                            key={`ai-landing-page-${aiLandingPage.id || 'ai-landing'}`}
                             aiLandingPage={aiLandingPage} 
                             setPreviewDiv={handlePreviewOpen}
+                            pageType="aiLandingPage"
                           />
                         )}
                         {createdEmailTemplate && (
                           <ClusterDetailCard 
+                            key={`created-email-template-${createdEmailTemplate.id || 'created-email'}`}
                             createdEmailTemplate={createdEmailTemplate} 
                             setPreviewDiv={handlePreviewOpen}
+                            pageType="createdEmailTemplate"
                           />
                         )}
                       </div>
@@ -422,10 +432,12 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                         </div>
                         {openSections['contentPages'] === true && (
                           <div className="cluster-detail-card-container">
-                            {pages.contentPages.map((page: any) => (
+                            {pages.contentPages.map((page: any, index: number) => (
                               <ClusterDetailCard 
+                                key={`content-page-${page.id || index}`}
                                 contentPage={page} 
                                 setPreviewDiv={handlePreviewOpen}
+                                pageType="contentPage"
                               />
                             ))}
                           </div>
@@ -455,10 +467,12 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                     </div>
                     {openSections['landingPages'] === true && (
                       <div className="cluster-detail-card-container">
-                        {pages.landingPages.map((page: any) => (
+                        {pages.landingPages.map((page: any, index: number) => (
                           <ClusterDetailCard 
+                            key={`landing-page-${page.id || index}`}
                             landingPage={page} 
                             setPreviewDiv={handlePreviewOpen}
+                            pageType="landingPage"
                           />
                         ))}
                       </div>
@@ -486,10 +500,12 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                     </div>
                     {openSections['blogs'] === true && (
                       <div className="cluster-detail-card-container">
-                        {blogs.map((blog: any) => (
+                        {blogs.map((blog: any, index: number) => (
                           <ClusterDetailCard 
+                            key={`blog-tab-${blog.id || index}`}
                             blog={blog} 
                             setPreviewDiv={handlePreviewOpen}
+                            pageType="blog"
                           />
                         ))}
                       </div>
@@ -517,10 +533,12 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                     </div>
                     {openSections['emailTemplates'] === true && (
                       <div className="cluster-detail-card-container">
-                        {emailTemplates.map((emailTemplate: any) => (
+                        {emailTemplates.map((emailTemplate: any, index: number) => (
                           <ClusterDetailCard 
+                            key={`email-template-tab-${emailTemplate.id || index}`}
                             emailTemplate={emailTemplate} 
                             setPreviewDiv={handlePreviewOpen}
+                            pageType="emailTemplate"
                           />
                         ))}
                       </div>
@@ -839,8 +857,10 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                     {openSections['createdEmailTemplate'] !== false && (
                       <div className="cluster-detail-card-container">
                         <ClusterDetailCard 
+                          key={`created-email-template-single-${createdEmailTemplate.id || 'created-email-single'}`}
                           createdEmailTemplate={createdEmailTemplate} 
                           setPreviewDiv={handlePreviewOpen}
+                          pageType="createdEmailTemplate"
                         />
                       </div>
                     )}
@@ -886,7 +906,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
           default:
             return <div className="cluster-tab-data">All</div>;
         }
-      })()}
+      })() : null}
     </div>
     )}
     </>

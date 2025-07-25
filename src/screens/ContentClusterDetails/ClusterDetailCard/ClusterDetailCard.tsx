@@ -14,7 +14,8 @@ interface ClusterDetailCardProps {
   emailTemplate?: any;
   createdEmailTemplate?: any;
   aiLandingPage?: any;
-  setPreviewDiv?: any;
+  setPreviewDiv?: (pageDataOrObject: any) => Promise<void>;
+  pageType?: string;
 }
 
 // This component is responsible for just showing details of the cluster
@@ -29,6 +30,7 @@ const ClusterDetailCard: React.FC<ClusterDetailCardProps> = ({
   createdEmailTemplate,
   aiLandingPage,
   setPreviewDiv,
+  pageType,
 }) => {
   const formatDate = (timestamp: number) => {
     const options: Intl.DateTimeFormatOptions = { month: "short", day: "numeric", year: "numeric" };
@@ -104,9 +106,11 @@ const ClusterDetailCard: React.FC<ClusterDetailCardProps> = ({
           </span> */}
           <div
             className="preview-link"
-            onClick={() => {
+            onClick={async () => {
               const pageData = contentPage || landingPage || blog || aiBlog || aiContentPage || emailTemplate || createdEmailTemplate || aiLandingPage;
-              setPreviewDiv && setPreviewDiv(pageData);
+              if (setPreviewDiv) {
+                await setPreviewDiv({ pageData, pageType: pageType || 'unknown' });
+              }
             }}
           >
             Preview
