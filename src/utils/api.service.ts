@@ -357,6 +357,17 @@ export const APIService = {
     }
   },
 
+  getTaskProgress: async (payload: { refNum: string; type: string; pageId: string }) => {
+    try {
+      const url = `${(window as any)._env_.CMS_URL}/api/getTaskProgress`;
+      const response = await API.post(url, payload, { withCredentials: true });
+      return response;
+    } catch (error) {
+      console.error('Error fetching task progress:', error);
+      throw error;
+    }
+  },
+
   triggerTxeLogin: async () => {
     try {
       const { code, type } = window.orgInfo ?? {};
