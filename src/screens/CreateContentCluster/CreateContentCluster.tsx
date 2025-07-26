@@ -22,6 +22,7 @@ import tickIcon from "../../assets/svg/tick-icon.svg";
 
 import "./CreateContentCluster.css";
 import AddedLinks from "./SupportingMaterial/AddedLinks/AddedLinks";
+import { toast } from "react-toastify";
 
 interface CreateContentClusterProps { }
 
@@ -72,6 +73,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
   const [listItems, setListItems] = useState<any[]>([]);
   const [suggestedLists, setSuggestedLists] = useState<any[]>([]);
   const [selectedListsData, setSelectedListsData] = useState<any[]>([]);
+  const [clusterTitleError, setClusterTitleError] = useState<boolean>(false);
   
   const saveContentCluster = (payload: any) => {
     APIService.createContentCluster(payload).then((clusterDetail) => {
@@ -428,7 +430,41 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
   const handleClusterCreate = async () => {
     setShowLoader(true);
     setShowSaveOrDiscardModal(true);
+    setClusterTitleError(false);
+    
+    // Validate cluster name first
     try {
+      const validationPayload = {
+        refNum: selectedTenant.refNum,
+        clusterName: clusterTitle,
+        recruiterUserId: crmUserInfo?.userDetails?.id
+      };
+      
+      const validationResponse = await APIService.validateClusterFields(validationPayload);
+      
+      if (!validationResponse) {
+        setUpdateClusterTitle(true);
+        setClusterTitleError(true);
+        setShowLoader(false);
+        setShowSaveOrDiscardModal(false);
+        toast.error("Failed to validate cluster name. Please try again.");
+        return;
+      }
+      
+      if (validationResponse?.status === "success" && validationResponse?.data?.clusterNameUnique === false) {
+        // Cluster name already exists
+        setUpdateClusterTitle(true);
+        setClusterTitleError(true);
+        setShowLoader(false);
+        setShowSaveOrDiscardModal(false);
+        toast.error("Cluster name already exists");
+        return;
+      }
+      
+      // If validation passes, proceed with cluster creation
+      // setShowLoader(true);
+      // setShowSaveOrDiscardModal(true);
+      
       const res = await createCluster();
       console.log("res", res);
       
@@ -673,12 +709,16 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       <div className="create-content-cluster-container">
         <div className="create-content-cluster-header">
           {updateClusterTitle?(
-            <input className="create-content-cluster-header-title-input"  onKeyDown={(e) => {
+            <input className={clusterTitleError ? "create-content-cluster-header-title-input-error" : "create-content-cluster-header-title-input"}  onKeyDown={(e) => {
               if (e.key === 'Enter') {
-                setUpdateClusterTitle(false)
+                setUpdateClusterTitle(false);
+                setClusterTitleError(false);
               }
             }}
-            type="text" value={clusterTitle} onChange={(e) => setClusterTitle(e.target.value)} />
+            onClick={() => {
+              setClusterTitleError(false);
+            }}
+            type="text" value={clusterTitle} onChange={(e) => {setClusterTitle(e.target.value); setClusterTitleError(false);}} />
           ):(
             <span className="create-content-cluster-header-title">{clusterTitle}</span>
           )}
@@ -687,7 +727,10 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
             <img onClick={() => setUpdateClusterTitle(true)} src={pencilIcon} alt="edit-cluster-title" />
           )}
           {updateClusterTitle && (
-            <button className="done-btn" onClick={() => setUpdateClusterTitle(false)}>Done</button>
+            <button className="done-btn" onClick={() => {
+              setUpdateClusterTitle(false);
+              setClusterTitleError(false);
+            }}>Done</button>
           )}
            
         </div>

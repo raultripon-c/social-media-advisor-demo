@@ -32,6 +32,8 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
   const [contentSourceFilter, setContentSourceFilter] = useState<string>("all");
   const [showContentSourceDropdown, setShowContentSourceDropdown] = useState(false);
   const [crmUserInfo, setCrmUserInfo] = useState<any>({});
+  const [pagePublishStates, setPagePublishStates] = useState<any[]>([]);
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   
   const sectionKeys = [
     'aiGenerated',
@@ -67,55 +69,272 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
     let pagesCount = 0;
     let blogsCount = 0;
     let emailTemplatesCount = 0;
+    let draftCount = 0;
+    let publishedCount = 0;
+
+    // Helper function to check if content should be shown based on status filter
+    const shouldShowByStatus = (status: string) => {
+      if (statusFilter === "all") return true;
+      return statusFilter === status.toLowerCase();
+    };
 
     // Count AI generated content (only if filter allows AI or all)
     if (contentSourceFilter === "all" || contentSourceFilter === "ai") {
       if (aiContentPage) {
-        allCount++;
-        pagesCount++;
+        const status = aiContentPage.status?.toLowerCase() || "published";
+        if (shouldShowByStatus(status)) {
+          allCount++;
+          pagesCount++;
+          if (status === "draft") draftCount++;
+          else if (status === "published") publishedCount++;
+        }
       }
       if (aiBlog) {
-        allCount++;
-        blogsCount++;
+        const status = aiBlog.status?.toLowerCase() || "published";
+        if (shouldShowByStatus(status)) {
+          allCount++;
+          blogsCount++;
+          if (status === "draft") draftCount++;
+          else if (status === "published") publishedCount++;
+        }
       }
       if (aiLandingPage) {
-        allCount++;
-        pagesCount++;
+        const status = aiLandingPage.status?.toLowerCase() || "published";
+        if (shouldShowByStatus(status)) {
+          allCount++;
+          pagesCount++;
+          if (status === "draft") draftCount++;
+          else if (status === "published") publishedCount++;
+        }
       }
       if (createdEmailTemplate) {
-        allCount++;
-        emailTemplatesCount++;
+        const status = createdEmailTemplate.status?.toLowerCase() || "published";
+        if (shouldShowByStatus(status)) {
+          allCount++;
+          emailTemplatesCount++;
+          if (status === "draft") draftCount++;
+          else if (status === "published") publishedCount++;
+        }
       }
     }
 
     // Count regular content pages (only if filter allows manual or all)
     if (contentSourceFilter === "all" || contentSourceFilter === "manual") {
       if (pages?.contentPages) {
-        allCount += pages.contentPages.length;
-        pagesCount += pages.contentPages.length;
+        pages.contentPages.forEach((page: any) => {
+          const status = page.status?.toLowerCase() || "published";
+          if (shouldShowByStatus(status)) {
+            allCount++;
+            pagesCount++;
+            if (status === "draft") draftCount++;
+            else if (status === "published") publishedCount++;
+          }
+        });
       }
       if (pages?.landingPages) {
-        allCount += pages.landingPages.length;
-        pagesCount += pages.landingPages.length;
+        pages.landingPages.forEach((page: any) => {
+          const status = page.status?.toLowerCase() || "published";
+          if (shouldShowByStatus(status)) {
+            allCount++;
+            pagesCount++;
+            if (status === "draft") draftCount++;
+            else if (status === "published") publishedCount++;
+          }
+        });
       }
 
       // Count blogs
       if (blogs) {
-        allCount += blogs.length;
-        blogsCount += blogs.length;
+        blogs.forEach((blog: any) => {
+          const status = blog.status?.toLowerCase() || "published";
+          if (shouldShowByStatus(status)) {
+            allCount++;
+            blogsCount++;
+            if (status === "draft") draftCount++;
+            else if (status === "published") publishedCount++;
+          }
+        });
       }
 
       // Count email templates
       if (emailTemplates) {
-        allCount += emailTemplates.length;
-        emailTemplatesCount += emailTemplates.length;
+        emailTemplates.forEach((emailTemplate: any) => {
+          const status = emailTemplate.status?.toLowerCase() || "published";
+          if (shouldShowByStatus(status)) {
+            allCount++;
+            emailTemplatesCount++;
+            if (status === "draft") draftCount++;
+            else if (status === "published") publishedCount++;
+          }
+        });
       }
     }
 
-    return { allCount, pagesCount, blogsCount, emailTemplatesCount };
+    return { allCount, pagesCount, blogsCount, emailTemplatesCount, draftCount, publishedCount };
+  };
+
+  // Function to calculate total counts (always returns total counts regardless of filters)
+  const getTotalCounts = () => {
+    let totalDraftCount = 0;
+    let totalPublishedCount = 0;
+
+    // Count AI generated content (only if filter allows AI or all)
+    if (contentSourceFilter === "all" || contentSourceFilter === "ai") {
+      if (aiContentPage) {
+        const status = aiContentPage.status?.toLowerCase() || "published";
+        if (status === "draft") totalDraftCount++;
+        else if (status === "published") totalPublishedCount++;
+      }
+      if (aiBlog) {
+        const status = aiBlog.status?.toLowerCase() || "published";
+        if (status === "draft") totalDraftCount++;
+        else if (status === "published") totalPublishedCount++;
+      }
+      if (aiLandingPage) {
+        const status = aiLandingPage.status?.toLowerCase() || "published";
+        if (status === "draft") totalDraftCount++;
+        else if (status === "published") totalPublishedCount++;
+      }
+      if (createdEmailTemplate) {
+        const status = createdEmailTemplate.status?.toLowerCase() || "published";
+        if (status === "draft") totalDraftCount++;
+        else if (status === "published") totalPublishedCount++;
+      }
+    }
+
+    // Count regular content pages (only if filter allows manual or all)
+    if (contentSourceFilter === "all" || contentSourceFilter === "manual") {
+      if (pages?.contentPages) {
+        pages.contentPages.forEach((page: any) => {
+          const status = page.status?.toLowerCase() || "published";
+          if (status === "draft") totalDraftCount++;
+          else if (status === "published") totalPublishedCount++;
+        });
+      }
+      if (pages?.landingPages) {
+        pages.landingPages.forEach((page: any) => {
+          const status = page.status?.toLowerCase() || "published";
+          if (status === "draft") totalDraftCount++;
+          else if (status === "published") totalPublishedCount++;
+        });
+      }
+
+      // Count blogs
+      if (blogs) {
+        blogs.forEach((blog: any) => {
+          const status = blog.status?.toLowerCase() || "published";
+          if (status === "draft") totalDraftCount++;
+          else if (status === "published") totalPublishedCount++;
+        });
+      }
+
+      // Count email templates
+      if (emailTemplates) {
+        emailTemplates.forEach((emailTemplate: any) => {
+          const status = emailTemplate.status?.toLowerCase() || "published";
+          if (status === "draft") totalDraftCount++;
+          else if (status === "published") totalPublishedCount++;
+        });
+      }
+    }
+
+    return { totalDraftCount, totalPublishedCount };
+  };
+
+  // Function to calculate counts for specific tabs
+  const getTabSpecificCounts = () => {
+    let tabDraftCount = 0;
+    let tabPublishedCount = 0;
+
+    switch (activeTab) {
+      case 0: // All tab - show all content
+        return getTotalCounts();
+      
+      case 1: // Pages tab - show only pages
+        // Count AI pages
+        if (contentSourceFilter === "all" || contentSourceFilter === "ai") {
+          if (aiContentPage) {
+            const status = aiContentPage.status?.toLowerCase() || "published";
+            if (status === "draft") tabDraftCount++;
+            else if (status === "published") tabPublishedCount++;
+          }
+          if (aiLandingPage) {
+            const status = aiLandingPage.status?.toLowerCase() || "published";
+            if (status === "draft") tabDraftCount++;
+            else if (status === "published") tabPublishedCount++;
+          }
+        }
+        // Count regular pages
+        if (contentSourceFilter === "all" || contentSourceFilter === "manual") {
+          if (pages?.contentPages) {
+            pages.contentPages.forEach((page: any) => {
+              const status = page.status?.toLowerCase() || "published";
+              if (status === "draft") tabDraftCount++;
+              else if (status === "published") tabPublishedCount++;
+            });
+          }
+          if (pages?.landingPages) {
+            pages.landingPages.forEach((page: any) => {
+              const status = page.status?.toLowerCase() || "published";
+              if (status === "draft") tabDraftCount++;
+              else if (status === "published") tabPublishedCount++;
+            });
+          }
+        }
+        break;
+      
+      case 2: // Blogs tab - show only blogs
+        // Count AI blogs
+        if (contentSourceFilter === "all" || contentSourceFilter === "ai") {
+          if (aiBlog) {
+            const status = aiBlog.status?.toLowerCase() || "published";
+            if (status === "draft") tabDraftCount++;
+            else if (status === "published") tabPublishedCount++;
+          }
+        }
+        // Count regular blogs
+        if (contentSourceFilter === "all" || contentSourceFilter === "manual") {
+          if (blogs) {
+            blogs.forEach((blog: any) => {
+              const status = blog.status?.toLowerCase() || "published";
+              if (status === "draft") tabDraftCount++;
+              else if (status === "published") tabPublishedCount++;
+            });
+          }
+        }
+        break;
+      
+      case 3: // Email Templates tab - show only email templates
+        // Count AI email templates
+        if (contentSourceFilter === "all" || contentSourceFilter === "ai") {
+          if (createdEmailTemplate) {
+            const status = createdEmailTemplate.status?.toLowerCase() || "published";
+            if (status === "draft") tabDraftCount++;
+            else if (status === "published") tabPublishedCount++;
+          }
+        }
+        // Count regular email templates
+        if (contentSourceFilter === "all" || contentSourceFilter === "manual") {
+          if (emailTemplates) {
+            emailTemplates.forEach((emailTemplate: any) => {
+              const status = emailTemplate.status?.toLowerCase() || "published";
+              if (status === "draft") tabDraftCount++;
+              else if (status === "published") tabPublishedCount++;
+            });
+          }
+        }
+        break;
+      
+      default:
+        return getTotalCounts();
+    }
+
+    return { totalDraftCount: tabDraftCount, totalPublishedCount: tabPublishedCount };
   };
 
   const tabCounts = getTabCounts();
+  const totalCounts = getTotalCounts();
+  const tabSpecificCounts = getTabSpecificCounts();
 
   const handleBackNavigation = () => {
     if (currentPage === "content-clusters") {
@@ -143,12 +362,27 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
     setShowContentSourceDropdown(false);
   };
 
+  const handleStatusFilterChange = (value: string) => {
+    // If clicking the same filter, unfilter it (set to "all")
+    if (statusFilter === value) {
+      setStatusFilter("all");
+    } else {
+      setStatusFilter(value);
+    }
+  };
+
   // Helper to toggle section
   const toggleSection = (key: string) => {
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  // Helper to check if content should be shown based on filter
+  // Helper to check if content should be shown based on status
+  const shouldShowByStatus = (status: string) => {
+    if (statusFilter === "all") return true;
+    return statusFilter === status.toLowerCase();
+  };
+
+  // Helper to check if content should be shown based on both content source and status
   const shouldShowContent = (contentType: 'ai' | 'manual') => {
     if (contentSourceFilter === "all") return true;
     return contentSourceFilter === contentType;
@@ -156,35 +390,48 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
 
   // Helper functions to check if sections have content to show
   const hasAIContent = () => {
-    return (aiContentPage || aiBlog || aiLandingPage || createdEmailTemplate) && shouldShowContent('ai');
+    const hasAI = (aiContentPage || aiBlog || aiLandingPage || createdEmailTemplate) && shouldShowContent('ai');
+    if (!hasAI) return false;
+    
+    // Check if any AI content matches the status filter
+    const aiItems = [aiContentPage, aiBlog, aiLandingPage, createdEmailTemplate].filter(Boolean);
+    return aiItems.some(item => shouldShowByStatus(item.status?.toLowerCase() || "published"));
   };
 
   const hasContentPages = () => {
-    return pages?.contentPages && pages.contentPages.length > 0 && shouldShowContent('manual');
+    if (!pages?.contentPages || pages.contentPages.length === 0 || !shouldShowContent('manual')) return false;
+    return pages.contentPages.some((page: any) => shouldShowByStatus(page.status?.toLowerCase() || "published"));
   };
 
   const hasLandingPages = () => {
-    return pages?.landingPages && pages.landingPages.length > 0 && shouldShowContent('manual');
+    if (!pages?.landingPages || pages.landingPages.length === 0 || !shouldShowContent('manual')) return false;
+    return pages.landingPages.some((page: any) => shouldShowByStatus(page.status?.toLowerCase() || "published"));
   };
 
   const hasBlogs = () => {
-    return blogs && blogs.length > 0 && shouldShowContent('manual');
+    if (!blogs || blogs.length === 0 || !shouldShowContent('manual')) return false;
+    return blogs.some((blog: any) => shouldShowByStatus(blog.status?.toLowerCase() || "published"));
   };
 
   const hasEmailTemplates = () => {
-    return emailTemplates && emailTemplates.length > 0 && shouldShowContent('manual');
+    if (!emailTemplates || emailTemplates.length === 0 || !shouldShowContent('manual')) return false;
+    return emailTemplates.some((emailTemplate: any) => shouldShowByStatus(emailTemplate.status?.toLowerCase() || "published"));
   };
 
   const hasAIPages = () => {
-    return (aiContentPage || aiLandingPage) && shouldShowContent('ai');
+    const hasAI = (aiContentPage || aiLandingPage) && shouldShowContent('ai');
+    if (!hasAI) return false;
+    
+    const aiItems = [aiContentPage, aiLandingPage].filter(Boolean);
+    return aiItems.some(item => shouldShowByStatus(item.status?.toLowerCase() || "published"));
   };
 
   const hasAIBlogs = () => {
-    return aiBlog && shouldShowContent('ai');
+    return aiBlog && shouldShowContent('ai') && shouldShowByStatus(aiBlog.status?.toLowerCase() || "published");
   };
 
   const hasAIEmailTemplates = () => {
-    return createdEmailTemplate && shouldShowContent('ai');
+    return createdEmailTemplate && shouldShowContent('ai') && shouldShowByStatus(createdEmailTemplate.status?.toLowerCase() || "published");
   };
 
   // Helper to get the selected option label
@@ -216,13 +463,216 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
           aiLandingPage = cluster?.aiCreatedLandingPage?.[0];
         }
         location.state = { pages, blogs, aiBlog, aiContentPage, emailTemplates, createdEmailTemplate, aiLandingPage };
+        fetchPagePublishStates().then(() => {
+          setIsLoading(false);
+        }).catch((error) => {
+          console.error("Error fetching page publish states:", error);
+          setIsLoading(false);
+        })  ;
         setIsLoading(false);
       }).catch((error) => {
         console.error("Error fetching cluster data:", error);
         setIsLoading(false);
       });
     }
+    else{
+      setIsLoading(true);
+      fetchPagePublishStates().then(() => {
+        setIsLoading(false);
+      }).catch((error) => {
+        console.error("Error fetching page publish states:", error);
+        setIsLoading(false);
+      })  ;
+    }
   }, []);
+
+  const formatDate = (timestamp: number) => {
+    const options: Intl.DateTimeFormatOptions = { month: "short", day: "numeric", year: "numeric" };
+    const formattedDate = new Date(timestamp).toLocaleDateString("en-US", options);
+    return formattedDate;
+  };
+
+  const getContentStatus = (status: string) => {
+    if(status === "1"){
+      return "Published";
+    }else if(status === "3"){
+      return "Draft";
+    }else if(status === "2"){
+      return "Unpublished";
+    }
+    else{
+      return "Published";
+    }
+  }
+
+  const fetchPagePublishStates = async () => {
+    try {
+      // Collect all page IDs from different content types
+      const pageIds: string[] = [];
+      
+      // Get current state values
+      const currentPages = location.state?.pages || pages;
+      const currentBlogs = location.state?.blogs || blogs;
+      const currentAiBlog = location.state?.aiBlog || aiBlog;
+      const currentAiContentPage = location.state?.aiContentPage || aiContentPage;
+      const currentAiLandingPage = location.state?.aiLandingPage || aiLandingPage;
+      
+      // Add content pages
+      if (currentPages?.contentPages) {
+        currentPages.contentPages.forEach((page: any) => {
+          if (page.pageId) pageIds.push(page.pageId);
+        });
+      }
+      
+      // Add landing pages
+      if (currentPages?.landingPages) {
+        currentPages.landingPages.forEach((page: any) => {
+          if (page.pageId) pageIds.push(page.pageId);
+        });
+      }
+      
+      // Add AI content pages
+      if (currentAiContentPage?.pageId) {
+        pageIds.push(currentAiContentPage.pageId);
+      } else if (currentAiContentPage?.id) {
+        pageIds.push(currentAiContentPage.id);
+      } else if (currentAiContentPage?.articleId) {
+        pageIds.push(currentAiContentPage.articleId);
+      }
+      
+      // Add AI landing pages
+      if (currentAiLandingPage?.pageId) {
+        pageIds.push(currentAiLandingPage.pageId);
+      } else if (currentAiLandingPage?.id) {
+        pageIds.push(currentAiLandingPage.id);
+      } else if (currentAiLandingPage?.articleId) {
+        pageIds.push(currentAiLandingPage.articleId);
+      }
+      
+      // Add blogs
+      if (currentBlogs) {
+        currentBlogs.forEach((blog: any) => {
+          if (blog.articleId) pageIds.push(blog.articleId);
+        });
+      }
+      
+      // Add AI blogs
+      if (currentAiBlog?.articleId) {
+        pageIds.push(currentAiBlog.articleId);
+      } else if (currentAiBlog?.id) {
+        pageIds.push(currentAiBlog.id);
+      } else if (currentAiBlog?.pageId) {
+        pageIds.push(currentAiBlog.pageId);
+      }
+      
+      console.log("AI Content Page:", currentAiContentPage);
+      console.log("AI Landing Page:", currentAiLandingPage);
+      console.log("AI Blog:", currentAiBlog);
+      console.log("Page IDs to fetch:", pageIds);
+      
+      // Only make API call if we have page IDs
+      if (pageIds.length > 0) {
+        const payload = {
+          refNum: selectedTenant.refNum,
+          locale: locale,
+          pageIds: pageIds
+        };
+        
+        const publishStates = await APIService.getPagePublishStates(payload);
+        
+        console.log("Publish States from API:", publishStates);
+        setPagePublishStates(publishStates.data || []);
+        
+        // Create a map of pageId to publish state for easy lookup
+        const publishStateMap = new Map();
+        if (publishStates.data && Array.isArray(publishStates.data)) {
+          publishStates.data.forEach((state: any) => {
+            publishStateMap.set(state.pageId, {
+              status: getContentStatus(state.status),
+              createdDate: formatDate(state.timestamp)
+            });
+          });
+        }
+        
+        // Update content pages with status and createdDate
+        if (currentPages?.contentPages) {
+          currentPages.contentPages.forEach((page: any) => {
+            const pageId = page.pageId;
+            if (pageId && publishStateMap.has(pageId)) {
+              const state = publishStateMap.get(pageId);
+              page.status = state.status;
+              page.createdDate = state.createdDate;
+            }
+          });
+        }
+        
+        // Update landing pages with status and createdDate
+        if (currentPages?.landingPages) {
+          currentPages.landingPages.forEach((page: any) => {
+            const pageId = page.pageId;
+            if (pageId && publishStateMap.has(pageId)) {
+              const state = publishStateMap.get(pageId);
+              page.status = state.status;
+              page.createdDate = state.createdDate;
+            }
+          });
+        }
+        
+        // Update AI content page with status and createdDate
+        if (currentAiContentPage) {
+          const pageId = currentAiContentPage.pageId || currentAiContentPage.id || currentAiContentPage.articleId;
+          if (pageId && publishStateMap.has(pageId)) {
+            const state = publishStateMap.get(pageId);
+            currentAiContentPage.status = state.status;
+            currentAiContentPage.createdDate = state.createdDate;
+          }
+        }
+        
+        // Update AI landing page with status and createdDate
+        if (currentAiLandingPage) {
+          const pageId = currentAiLandingPage.pageId || currentAiLandingPage.id || currentAiLandingPage.articleId;
+          if (pageId && publishStateMap.has(pageId)) {
+            const state = publishStateMap.get(pageId);
+            currentAiLandingPage.status = state.status;
+            currentAiLandingPage.createdDate = state.createdDate;
+          }
+        }
+        
+        // Update blogs with status and createdDate
+        if (currentBlogs) {
+          currentBlogs.forEach((blog: any) => {
+            const pageId = blog.articleId;
+            if (pageId && publishStateMap.has(pageId)) {
+              const state = publishStateMap.get(pageId);
+              blog.status = state.status;
+              blog.createdDate = state.createdDate;
+            }
+          });
+        }
+        
+        // Update AI blog with status and createdDate
+        if (currentAiBlog) {
+          const pageId = currentAiBlog.articleId || currentAiBlog.id || currentAiBlog.pageId;
+          if (pageId && publishStateMap.has(pageId)) {
+            const state = publishStateMap.get(pageId);
+            currentAiBlog.status = state.status;
+            currentAiBlog.createdDate = state.createdDate;
+          }
+        }
+        
+        // Update the local variables that are used in the component
+        pages = currentPages;
+        blogs = currentBlogs;
+        aiBlog = currentAiBlog;
+        aiContentPage = currentAiContentPage;
+        aiLandingPage = currentAiLandingPage;
+      }
+    } catch (error) {
+      console.error("Error fetching page publish states:", error);
+      setIsLoading(false);
+      setPagePublishStates([]);
+    }
+  };
 
   useEffect(() => {
     // setShowPromptSuggestions(true)
@@ -317,41 +767,57 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
             return (
               <div className="cluster-tab-data">
                       {/* Content Source Filter */}
-        <div className="cluster-details-filter">
-          <div className="filter-dropdown">
-            <button
-              className="filter-dropdown-button"
-              onClick={() => setShowContentSourceDropdown(!showContentSourceDropdown)}
-            >
-              <span className="filter-dropdown-button-text">{getSelectedOptionLabel()}</span>
-              <img 
-                src={arrowUp} 
-                alt="dropdown" 
-                style={{
-                  width: 16,
-                  height: 16,
-                  transform: showContentSourceDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
-                  transition: 'transform 0.2s',
-                }}
-              />
-            </button>
-            {showContentSourceDropdown && (
-              <div className="filter-dropdown-menu">
-                {contentSourceOptions.map((option) => (
-                  <div
-                    key={option.value}
-                    className={`filter-dropdown-item ${contentSourceFilter === option.value ? 'active' : ''}`}
-                    onClick={() => handleContentSourceFilterChange(option.value)}
-                  >
-                    {option.icon && <img src={option.icon} alt={option.label} style={{ width: 16, height: 16, marginRight: 8 }} />}
-                    <span className="filter-dropdown-item-text">{option.label}</span>
+                <div className="cluster-details-filter-container">
+                  <div className="cluster-details-filter-1">
+                    <button 
+                      className={`cluster-details-filter-status-btn ${statusFilter === "draft" ? "active" : ""}`} 
+                      onClick={() => handleStatusFilterChange("draft")}
+                    >
+                      Draft <span className="cluster-details-filter-status-btn-count">{tabSpecificCounts.totalDraftCount}</span>
+                    </button>
+                    <button 
+                      className={`cluster-details-filter-status-btn ${statusFilter === "published" ? "active" : ""}`} 
+                      onClick={() => handleStatusFilterChange("published")}
+                    >
+                      Published <span className="cluster-details-filter-status-btn-count">{tabSpecificCounts.totalPublishedCount}</span>
+                    </button>
                   </div>
-                ))}
+              <div className="cluster-details-filter">
+                <div className="filter-dropdown">
+                  <button
+                    className="filter-dropdown-button"
+                    onClick={() => setShowContentSourceDropdown(!showContentSourceDropdown)}
+                  >
+                    <span className="filter-dropdown-button-text">{getSelectedOptionLabel()}</span>
+                    <img 
+                      src={arrowUp} 
+                      alt="dropdown" 
+                      style={{
+                        width: 16,
+                        height: 16,
+                        transform: showContentSourceDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
+                        transition: 'transform 0.2s',
+                      }}
+                    />
+                  </button>
+                  {showContentSourceDropdown && (
+                    <div className="filter-dropdown-menu">
+                      {contentSourceOptions.map((option) => (
+                        <div
+                          key={option.value}
+                          className={`filter-dropdown-item ${contentSourceFilter === option.value ? 'active' : ''}`}
+                          onClick={() => handleContentSourceFilterChange(option.value)}
+                        >
+                          {option.icon && <img src={option.icon} alt={option.label} style={{ width: 16, height: 16, marginRight: 8 }} />}
+                          <span className="filter-dropdown-item-text">{option.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
-          </div>
-        </div>
-                {/* AI Generated Section - All AI content in one row */}
+              </div>
+                      {/* AI Generated Section - All AI content in one row */}
                 {hasAIContent() && (
                   <div className="cluster-tab-data-container ai-generated">
                     <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
@@ -371,25 +837,25 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                     </div>
                     {openSections['aiGenerated'] !== false && (
                       <div className="cluster-detail-card-container" style={{display: 'flex', flexWrap: 'wrap', gap: '16px'}}>
-                        {aiContentPage && (
+                        {aiContentPage && shouldShowByStatus(aiContentPage.status?.toLowerCase() || "published") && (
                           <ClusterDetailCard 
                             aiContentPage={aiContentPage} 
                             setPreviewDiv={handlePreviewOpen}
                           />
                         )}
-                        {aiBlog && (
+                        {aiBlog && shouldShowByStatus(aiBlog.status?.toLowerCase() || "published") && (
                           <ClusterDetailCard 
                             aiBlog={aiBlog} 
                             setPreviewDiv={handlePreviewOpen}
                           />
                         )}
-                        {aiLandingPage && (
+                        {aiLandingPage && shouldShowByStatus(aiLandingPage.status?.toLowerCase() || "published") && (
                           <ClusterDetailCard 
                             aiLandingPage={aiLandingPage} 
                             setPreviewDiv={handlePreviewOpen}
                           />
                         )}
-                        {createdEmailTemplate && (
+                        {createdEmailTemplate && shouldShowByStatus(createdEmailTemplate.status?.toLowerCase() || "published") && (
                           <ClusterDetailCard 
                             createdEmailTemplate={createdEmailTemplate} 
                             setPreviewDiv={handlePreviewOpen}
@@ -423,10 +889,12 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                         {openSections['contentPages'] === true && (
                           <div className="cluster-detail-card-container">
                             {pages.contentPages.map((page: any) => (
-                              <ClusterDetailCard 
-                                contentPage={page} 
-                                setPreviewDiv={handlePreviewOpen}
-                              />
+                              shouldShowByStatus(page.status?.toLowerCase() || "published") && (
+                                <ClusterDetailCard 
+                                  contentPage={page} 
+                                  setPreviewDiv={handlePreviewOpen}
+                                />
+                              )
                             ))}
                           </div>
                         )}
@@ -456,10 +924,12 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                     {openSections['landingPages'] === true && (
                       <div className="cluster-detail-card-container">
                         {pages.landingPages.map((page: any) => (
-                          <ClusterDetailCard 
-                            landingPage={page} 
-                            setPreviewDiv={handlePreviewOpen}
-                          />
+                          shouldShowByStatus(page.status?.toLowerCase() || "published") && (
+                            <ClusterDetailCard 
+                              landingPage={page} 
+                              setPreviewDiv={handlePreviewOpen}
+                            />
+                          )
                         ))}
                       </div>
                     )}
@@ -487,10 +957,12 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                     {openSections['blogs'] === true && (
                       <div className="cluster-detail-card-container">
                         {blogs.map((blog: any) => (
-                          <ClusterDetailCard 
-                            blog={blog} 
-                            setPreviewDiv={handlePreviewOpen}
-                          />
+                          shouldShowByStatus(blog.status?.toLowerCase() || "published") && (
+                            <ClusterDetailCard 
+                              blog={blog} 
+                              setPreviewDiv={handlePreviewOpen}
+                            />
+                          )
                         ))}
                       </div>
                     )}
@@ -518,10 +990,12 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                     {openSections['emailTemplates'] === true && (
                       <div className="cluster-detail-card-container">
                         {emailTemplates.map((emailTemplate: any) => (
-                          <ClusterDetailCard 
-                            emailTemplate={emailTemplate} 
-                            setPreviewDiv={handlePreviewOpen}
-                          />
+                          shouldShowByStatus(emailTemplate.status?.toLowerCase() || "published") && (
+                            <ClusterDetailCard 
+                              emailTemplate={emailTemplate} 
+                              setPreviewDiv={handlePreviewOpen}
+                            />
+                          )
                         ))}
                       </div>
                     )}
@@ -536,40 +1010,56 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
             return (
               <div className="cluster-tab-data">
                       {/* Content Source Filter */}
-        <div className="cluster-details-filter">
-          <div className="filter-dropdown">
-            <button
-              className="filter-dropdown-button"
-              onClick={() => setShowContentSourceDropdown(!showContentSourceDropdown)}
-            >
-              <span className="filter-dropdown-button-text">{getSelectedOptionLabel()}</span>
-              <img 
-                src={arrowUp} 
-                alt="dropdown" 
-                style={{
-                  width: 16,
-                  height: 16,
-                  transform: showContentSourceDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
-                  transition: 'transform 0.2s',
-                }}
-              />
-            </button>
-            {showContentSourceDropdown && (
-              <div className="filter-dropdown-menu">
-                {contentSourceOptions.map((option) => (
-                  <div
-                    key={option.value}
-                    className={`filter-dropdown-item ${contentSourceFilter === option.value ? 'active' : ''}`}
-                    onClick={() => handleContentSourceFilterChange(option.value)}
-                  >
-                    {option.icon && <img src={option.icon} alt={option.label} style={{ width: 16, height: 16, marginRight: 8 }} />}
-                    <span className="filter-dropdown-item-text">{option.label}</span>
+                <div className="cluster-details-filter-container">
+                  <div className="cluster-details-filter-1">
+                    <button 
+                      className={`cluster-details-filter-status-btn ${statusFilter === "draft" ? "active" : ""}`} 
+                      onClick={() => handleStatusFilterChange("draft")}
+                    >
+                      Draft <span className="cluster-details-filter-status-btn-count">{tabSpecificCounts.totalDraftCount}</span>
+                    </button>
+                    <button 
+                      className={`cluster-details-filter-status-btn ${statusFilter === "published" ? "active" : ""}`} 
+                      onClick={() => handleStatusFilterChange("published")}
+                    >
+                      Published <span className="cluster-details-filter-status-btn-count">{tabSpecificCounts.totalPublishedCount}</span>
+                    </button>
                   </div>
-                ))}
+              <div className="cluster-details-filter">
+                <div className="filter-dropdown">
+                  <button
+                    className="filter-dropdown-button"
+                    onClick={() => setShowContentSourceDropdown(!showContentSourceDropdown)}
+                  >
+                    <span className="filter-dropdown-button-text">{getSelectedOptionLabel()}</span>
+                    <img 
+                      src={arrowUp} 
+                      alt="dropdown" 
+                      style={{
+                        width: 16,
+                        height: 16,
+                        transform: showContentSourceDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
+                        transition: 'transform 0.2s',
+                      }}
+                    />
+                  </button>
+                  {showContentSourceDropdown && (
+                    <div className="filter-dropdown-menu">
+                      {contentSourceOptions.map((option) => (
+                        <div
+                          key={option.value}
+                          className={`filter-dropdown-item ${contentSourceFilter === option.value ? 'active' : ''}`}
+                          onClick={() => handleContentSourceFilterChange(option.value)}
+                        >
+                          {option.icon && <img src={option.icon} alt={option.label} style={{ width: 16, height: 16, marginRight: 8 }} />}
+                          <span className="filter-dropdown-item-text">{option.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
-          </div>
-        </div>
+              </div>
                 {/* AI Generated Pages Section */}
                 {hasAIPages() && (
                   <div className="cluster-tab-data-container ai-generated">
@@ -590,13 +1080,13 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                     </div>
                     {openSections['aiContentPage'] !== false && (
                       <div className="cluster-detail-card-container" style={{display: 'flex', flexWrap: 'wrap', gap: '16px'}}>
-                        {aiContentPage && (
+                        {aiContentPage && shouldShowByStatus(aiContentPage.status?.toLowerCase() || "published") && (
                           <ClusterDetailCard 
                             aiContentPage={aiContentPage} 
                             setPreviewDiv={handlePreviewOpen}
                           />
                         )}
-                        {aiLandingPage && (
+                        {aiLandingPage && shouldShowByStatus(aiLandingPage.status?.toLowerCase() || "published") && (
                           <ClusterDetailCard 
                             aiLandingPage={aiLandingPage} 
                             setPreviewDiv={handlePreviewOpen}
@@ -630,10 +1120,12 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                         {openSections['contentPages'] === true && (
                           <div className="cluster-detail-card-container">
                             {pages.contentPages.map((page: any) => (
-                              <ClusterDetailCard 
-                                contentPage={page} 
-                                setPreviewDiv={handlePreviewOpen}
-                              />
+                              shouldShowByStatus(page.status?.toLowerCase() || "published") && (
+                                <ClusterDetailCard 
+                                  contentPage={page} 
+                                  setPreviewDiv={handlePreviewOpen}
+                                />
+                              )
                             ))}
                           </div>
                         )}
@@ -663,10 +1155,12 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                     {openSections['landingPages'] === true && (
                       <div className="cluster-detail-card-container">
                         {pages.landingPages.map((page: any) => (
-                          <ClusterDetailCard 
-                            landingPage={page} 
-                            setPreviewDiv={handlePreviewOpen}
-                          />
+                          shouldShowByStatus(page.status?.toLowerCase() || "published") && (
+                            <ClusterDetailCard 
+                              landingPage={page} 
+                              setPreviewDiv={handlePreviewOpen}
+                            />
+                          )
                         ))}
                       </div>
                     )}
@@ -681,40 +1175,56 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
             return (
               <div className="cluster-tab-data">
                       {/* Content Source Filter */}
-        <div className="cluster-details-filter">
-          <div className="filter-dropdown">
-            <button
-              className="filter-dropdown-button"
-              onClick={() => setShowContentSourceDropdown(!showContentSourceDropdown)}
-            >
-              <span className="filter-dropdown-button-text">{getSelectedOptionLabel()}</span>
-              <img 
-                src={arrowUp} 
-                alt="dropdown" 
-                style={{
-                  width: 16,
-                  height: 16,
-                  transform: showContentSourceDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
-                  transition: 'transform 0.2s',
-                }}
-              />
-            </button>
-            {showContentSourceDropdown && (
-              <div className="filter-dropdown-menu">
-                {contentSourceOptions.map((option) => (
-                  <div
-                    key={option.value}
-                    className={`filter-dropdown-item ${contentSourceFilter === option.value ? 'active' : ''}`}
-                    onClick={() => handleContentSourceFilterChange(option.value)}
-                  >
-                    {option.icon && <img src={option.icon} alt={option.label} style={{ width: 16, height: 16, marginRight: 8 }} />}
-                    <span className="filter-dropdown-item-text">{option.label}</span>
+                <div className="cluster-details-filter-container">
+                  <div className="cluster-details-filter-1">
+                    <button 
+                      className={`cluster-details-filter-status-btn ${statusFilter === "draft" ? "active" : ""}`} 
+                      onClick={() => handleStatusFilterChange("draft")}
+                    >
+                      Draft <span className="cluster-details-filter-status-btn-count">{tabSpecificCounts.totalDraftCount}</span>
+                    </button>
+                    <button 
+                      className={`cluster-details-filter-status-btn ${statusFilter === "published" ? "active" : ""}`} 
+                      onClick={() => handleStatusFilterChange("published")}
+                    >
+                      Published <span className="cluster-details-filter-status-btn-count">{tabSpecificCounts.totalPublishedCount}</span>
+                    </button>
                   </div>
-                ))}
+              <div className="cluster-details-filter">
+                <div className="filter-dropdown">
+                  <button
+                    className="filter-dropdown-button"
+                    onClick={() => setShowContentSourceDropdown(!showContentSourceDropdown)}
+                  >
+                    <span className="filter-dropdown-button-text">{getSelectedOptionLabel()}</span>
+                    <img 
+                      src={arrowUp} 
+                      alt="dropdown" 
+                      style={{
+                        width: 16,
+                        height: 16,
+                        transform: showContentSourceDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
+                        transition: 'transform 0.2s',
+                      }}
+                    />
+                  </button>
+                  {showContentSourceDropdown && (
+                    <div className="filter-dropdown-menu">
+                      {contentSourceOptions.map((option) => (
+                        <div
+                          key={option.value}
+                          className={`filter-dropdown-item ${contentSourceFilter === option.value ? 'active' : ''}`}
+                          onClick={() => handleContentSourceFilterChange(option.value)}
+                        >
+                          {option.icon && <img src={option.icon} alt={option.label} style={{ width: 16, height: 16, marginRight: 8 }} />}
+                          <span className="filter-dropdown-item-text">{option.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
-          </div>
-        </div>
+              </div>
                 {/* AI Generated Blogs Section */}
                 {hasAIBlogs() && (
                   <div className="cluster-tab-data-container ai-generated">
@@ -735,10 +1245,12 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                     </div>
                     {openSections['aiBlog'] !== false && (
                       <div className="cluster-detail-card-container">
-                        <ClusterDetailCard 
-                          aiBlog={aiBlog} 
-                          setPreviewDiv={handlePreviewOpen}
-                        />
+                        {aiBlog && shouldShowByStatus(aiBlog.status?.toLowerCase() || "published") && (
+                          <ClusterDetailCard 
+                            aiBlog={aiBlog} 
+                            setPreviewDiv={handlePreviewOpen}
+                          />
+                        )}
                       </div>
                     )}
                   </div>
@@ -765,10 +1277,12 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                     {openSections['blogs'] === true && (
                       <div className="cluster-detail-card-container">
                         {blogs.map((blog: any) => (
-                          <ClusterDetailCard 
-                            blog={blog} 
-                            setPreviewDiv={handlePreviewOpen}
-                          />
+                          shouldShowByStatus(blog.status?.toLowerCase() || "published") && (
+                            <ClusterDetailCard 
+                              blog={blog} 
+                              setPreviewDiv={handlePreviewOpen}
+                            />
+                          )
                         ))}
                       </div>
                     )}
@@ -784,40 +1298,56 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
             return (
               <div className="cluster-tab-data">
                       {/* Content Source Filter */}
-        <div className="cluster-details-filter">
-          <div className="filter-dropdown">
-            <button
-              className="filter-dropdown-button"
-              onClick={() => setShowContentSourceDropdown(!showContentSourceDropdown)}
-            >
-              <span className="filter-dropdown-button-text">{getSelectedOptionLabel()}</span>
-              <img 
-                src={arrowUp} 
-                alt="dropdown" 
-                style={{
-                  width: 16,
-                  height: 16,
-                  transform: showContentSourceDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
-                  transition: 'transform 0.2s',
-                }}
-              />
-            </button>
-            {showContentSourceDropdown && (
-              <div className="filter-dropdown-menu">
-                {contentSourceOptions.map((option) => (
-                  <div
-                    key={option.value}
-                    className={`filter-dropdown-item ${contentSourceFilter === option.value ? 'active' : ''}`}
-                    onClick={() => handleContentSourceFilterChange(option.value)}
-                  >
-                    {option.icon && <img src={option.icon} alt={option.label} style={{ width: 16, height: 16, marginRight: 8 }} />}
-                    <span className="filter-dropdown-item-text">{option.label}</span>
+                <div className="cluster-details-filter-container">
+                  <div className="cluster-details-filter-1">
+                    <button 
+                      className={`cluster-details-filter-status-btn ${statusFilter === "draft" ? "active" : ""}`} 
+                      onClick={() => handleStatusFilterChange("draft")}
+                    >
+                      Draft <span className="cluster-details-filter-status-btn-count">{tabSpecificCounts.totalDraftCount}</span>
+                    </button>
+                    <button 
+                      className={`cluster-details-filter-status-btn ${statusFilter === "published" ? "active" : ""}`} 
+                      onClick={() => handleStatusFilterChange("published")}
+                    >
+                      Published <span className="cluster-details-filter-status-btn-count">{tabSpecificCounts.totalPublishedCount}</span>
+                    </button>
                   </div>
-                ))}
+              <div className="cluster-details-filter">
+                <div className="filter-dropdown">
+                  <button
+                    className="filter-dropdown-button"
+                    onClick={() => setShowContentSourceDropdown(!showContentSourceDropdown)}
+                  >
+                    <span className="filter-dropdown-button-text">{getSelectedOptionLabel()}</span>
+                    <img 
+                      src={arrowUp} 
+                      alt="dropdown" 
+                      style={{
+                        width: 16,
+                        height: 16,
+                        transform: showContentSourceDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
+                        transition: 'transform 0.2s',
+                      }}
+                    />
+                  </button>
+                  {showContentSourceDropdown && (
+                    <div className="filter-dropdown-menu">
+                      {contentSourceOptions.map((option) => (
+                        <div
+                          key={option.value}
+                          className={`filter-dropdown-item ${contentSourceFilter === option.value ? 'active' : ''}`}
+                          onClick={() => handleContentSourceFilterChange(option.value)}
+                        >
+                          {option.icon && <img src={option.icon} alt={option.label} style={{ width: 16, height: 16, marginRight: 8 }} />}
+                          <span className="filter-dropdown-item-text">{option.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
-          </div>
-        </div>
+              </div>
                 {/* AI Generated Email Templates Section */}
                 {hasAIEmailTemplates() && (
                   <div className="cluster-tab-data-container ai-generated">
@@ -838,10 +1368,12 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                     </div>
                     {openSections['createdEmailTemplate'] !== false && (
                       <div className="cluster-detail-card-container">
-                        <ClusterDetailCard 
-                          createdEmailTemplate={createdEmailTemplate} 
-                          setPreviewDiv={handlePreviewOpen}
-                        />
+                        {createdEmailTemplate && shouldShowByStatus(createdEmailTemplate.status?.toLowerCase() || "published") && (
+                          <ClusterDetailCard 
+                            createdEmailTemplate={createdEmailTemplate} 
+                            setPreviewDiv={handlePreviewOpen}
+                          />
+                        )}
                       </div>
                     )}
                   </div>
@@ -868,10 +1400,12 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                     {openSections['emailTemplates'] === true && (
                       <div className="cluster-detail-card-container">
                         {emailTemplates.map((emailTemplate: any) => (
-                          <ClusterDetailCard 
-                            emailTemplate={emailTemplate} 
-                            setPreviewDiv={handlePreviewOpen}
-                          />
+                          shouldShowByStatus(emailTemplate.status?.toLowerCase() || "published") && (
+                            <ClusterDetailCard 
+                              emailTemplate={emailTemplate} 
+                              setPreviewDiv={handlePreviewOpen}
+                            />
+                          )
                         ))}
                       </div>
                     )}

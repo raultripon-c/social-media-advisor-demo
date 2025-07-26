@@ -40,6 +40,24 @@
   border: 1px solid var(--primary-myrtle-green-gp-400, #3c6d68);
   box-shadow: 0 0 0 2px rgba(60, 109, 104, 0.1);
 }
+
+.create-content-cluster-header-title-input-error{
+  border-radius: 10px;
+  border: 1px solid #dc3545;
+  padding: 8px 12px;
+  font-family: var(--family-title, Poppins);
+  font-size: var(--size-font-size-xl, 18px);
+  font-weight: 600;
+  color: var(--neutrals-nn-500, #353B46);
+  outline: none;
+  transition: border-color 0.2s ease;
+  height: 40px;
+}
+
+.create-content-cluster-header-title-input-error:focus{
+  border: 1px solid var(--primary-myrtle-green-gp-400, #3c6d68);
+  box-shadow: 0 0 0 2px rgba(60, 109, 104, 0.1);
+}
 .create-content-cluster-header-title{
     overflow: hidden;
     color: var(--neutrals-nn-500, #353B46);
@@ -165,6 +183,10 @@
   z-index: 1;
 }
 
+.create-content-cluster-header-title-input-error{
+  border: 1px solid #dc3545;
+  box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.1);
+}
 .prompt-area::before {
   content: "";
   position: absolute;
