@@ -42,11 +42,11 @@ const ClusterDetailCard: React.FC<ClusterDetailCardProps> = ({
 }) => {
 
   const getStatusColor = (status: string) => {
-    if(status === "1"){
+    if(status === "Published"){
       return "#28a745"; // Green for published
-    }else if(status === "3"){
+    }else if(status === "Draft"){
       return "#CCCCCC"; // Gray for draft
-    }else if(status === "2"){
+    }else if(status === "Unpublished"){
       return "#28a745"; // Red for unpublished
     }
     else{
