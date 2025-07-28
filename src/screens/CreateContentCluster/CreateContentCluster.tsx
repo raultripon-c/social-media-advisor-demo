@@ -22,51 +22,7 @@ import tickIcon from "../../assets/svg/tick-icon.svg";
 
 import "./CreateContentCluster.css";
 import AddedLinks from "./SupportingMaterial/AddedLinks/AddedLinks";
-
-const ClusterTitleDisplay: React.FC<{ title: string; hasError: boolean }> = ({ title, hasError }) => (
-  <span className={`create-content-cluster-header-title${hasError ? " error" : ""}`}>
-    {title}
-  </span>
-);
-
-const ClusterTitleInput = React.forwardRef<HTMLInputElement, {
-  value: string;
-  onChange: (value: string) => void;
-  onError: boolean;
-  onClearError: () => void;
-  onUpdateMode: () => void;
-  updateMode: boolean;
-  onDone: () => void;
-}>(({ value, onChange, onError, onClearError, onUpdateMode, updateMode, onDone }, ref) => (
-  <>
-    <input 
-      ref={ref}
-      id="cluster-title-input"
-      name="clusterTitle"
-      className={`create-content-cluster-header-title-input${onError ? " error" : ""}`}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter') {
-          onDone();
-        }
-      }}
-      type="text" 
-      value={value} 
-      onChange={(e) => {
-        onChange(e.target.value);
-        if (e.target.value.trim()) {
-          onClearError();
-        }
-      }}
-      placeholder="Please enter content cluster title"
-    />
-    {!updateMode && (
-      <img onClick={onUpdateMode} src={pencilIcon} alt="edit-cluster-title" />
-    )}
-    {updateMode && (
-      <button className="done-btn" onClick={onDone}>Done</button>
-    )}
-  </>
-));
+import { toast } from "react-toastify";
 
 interface CreateContentClusterProps { }
 
@@ -91,7 +47,6 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
   const [showLoader, setShowLoader] = useState<boolean>(false);
   const [promptInput, setPromptInput] = useState<string>("");
   const [clusterTitle, setClusterTitle] = useState<string>("Content Clusters");
-  const [clusterTitleError, setClusterTitleError] = useState<boolean>(false);
   const [sampleSelectionListItems, setSampleSelectionListItems] = useState<string[]>([]);
   const [showPromptSuggestions, setShowPromptSuggestions] = useState<boolean>(false);
   const [crmUserInfo, setCrmUserInfo] = useState<any>({});
@@ -118,7 +73,16 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
   const [listItems, setListItems] = useState<any[]>([]);
   const [suggestedLists, setSuggestedLists] = useState<any[]>([]);
   const [selectedListsData, setSelectedListsData] = useState<any[]>([]);
+  const [clusterTitleError, setClusterTitleError] = useState<boolean>(false);
   const clusterTitleInputRef = useRef<HTMLInputElement>(null);
+  
+  // Scroll to input when there's an error
+  useEffect(() => {
+    if (clusterTitleError && clusterTitleInputRef.current) {
+      clusterTitleInputRef.current.scrollIntoView({ behavior: 'smooth' });
+      clusterTitleInputRef.current.focus();
+    }
+  }, [clusterTitleError]);
   
   const saveContentCluster = (payload: any) => {
     APIService.createContentCluster(payload).then((clusterDetail) => {
@@ -436,6 +400,8 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
         setSelectedContentTypes(contentTypeNames);
       }
       
+      // Set cluster title based on the first content page or blog
+      let clusterTitleName = "Content Cluster";
       let suggestedTagsData = promptResponse.contentTypes || [];
       setSuggestedTags(suggestedTagsData);
       
@@ -456,7 +422,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       setSuggestedLists(suggestedListsResponse?.data?.result || []);
       
       setEditClusterTitle(true);
-      setClusterTitle("");
+      setClusterTitle(clusterTitleName);
       setShowLoader(false);
       setIsPromptSubmitted(true);
       setShowSaveOrDiscardModal(false);
@@ -477,6 +443,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
     
     if (isInEditMode && isTitleEmpty) {
       setClusterTitleError(true);
+      setUpdateClusterTitle(true); // Navigate to edit section
       // Focus on the cluster title input when validation fails
       if (clusterTitleInputRef.current) {
         clusterTitleInputRef.current.focus();
@@ -486,7 +453,41 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
     
     setShowLoader(true);
     setShowSaveOrDiscardModal(true);
+    setClusterTitleError(false);
+    
+    // Validate cluster name first
     try {
+      const validationPayload = {
+        refNum: selectedTenant.refNum,
+        clusterName: clusterTitle,
+        recruiterUserId: crmUserInfo?.userDetails?.id
+      };
+      
+      const validationResponse = await APIService.validateClusterFields(validationPayload);
+      
+      if (!validationResponse) {
+        setUpdateClusterTitle(true);
+        setClusterTitleError(true);
+        setShowLoader(false);
+        setShowSaveOrDiscardModal(false);
+        toast.error("Failed to validate cluster name. Please try again.");
+        return;
+      }
+      
+      if (validationResponse?.status === "success" && validationResponse?.data?.clusterNameUnique === false) {
+        // Cluster name already exists
+        setUpdateClusterTitle(true);
+        setClusterTitleError(true);
+        setShowLoader(false);
+        setShowSaveOrDiscardModal(false);
+        toast.error("Cluster name already exists");
+        return;
+      }
+      
+      // If validation passes, proceed with cluster creation
+      // setShowLoader(true);
+      // setShowSaveOrDiscardModal(true);
+      
       const res = await createCluster();
       console.log("res", res);
       
@@ -730,26 +731,37 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       ) : ( */}
       <div className="create-content-cluster-container">
         <div className="create-content-cluster-header">
-          {editClusterTitle ? (
-            <ClusterTitleInput 
+          {updateClusterTitle?(
+            <input 
               ref={clusterTitleInputRef}
-              value={clusterTitle}
-              onChange={setClusterTitle}
-              onError={clusterTitleError}
-              onClearError={() => setClusterTitleError(false)}
-              onUpdateMode={() => setUpdateClusterTitle(true)}
-              updateMode={updateClusterTitle}
-              onDone={() => {
-                setUpdateClusterTitle(false);
+              className={clusterTitleError ? "create-content-cluster-header-title-input-error" : "create-content-cluster-header-title-input"}  
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  setUpdateClusterTitle(false);
+                  setClusterTitleError(false);
+                }
+              }}
+              onClick={() => {
                 setClusterTitleError(false);
               }}
+              type="text" 
+              value={clusterTitle} 
+              onChange={(e) => {setClusterTitle(e.target.value); setClusterTitleError(false);}} 
             />
-          ) : (
-            <ClusterTitleDisplay 
-              title={clusterTitle}
-              hasError={clusterTitleError}
-            />
+          ):(
+            <span className="create-content-cluster-header-title">{clusterTitle}</span>
           )}
+          {/* <span className="create-content-cluster-header-title">{clusterTitle}</span> */}
+          {editClusterTitle && !updateClusterTitle && (
+            <img onClick={() => setUpdateClusterTitle(true)} src={pencilIcon} alt="edit-cluster-title" />
+          )}
+          {updateClusterTitle && (
+            <button className="done-btn" onClick={() => {
+              setUpdateClusterTitle(false);
+              setClusterTitleError(false);
+            }}>Done</button>
+          )}
+           
         </div>
       <div className="genai-container">
         <div className="prompt-container">

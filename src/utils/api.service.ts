@@ -742,6 +742,21 @@ export const APIService = {
       return null;
     }
   },
+  getPagePublishStates: async (payload: any) => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/cms/getPagePublishtStates`;
+      const response = await API.post(url, payload, { withCredentials: false });
+      console.log("Page Publish States API Response:", response.data);
+      if (response.data.status === "success") {
+        return response.data.data;
+      }
+      return [];
+    }
+    catch (error) {
+      console.error('Error fetching page publish states:', error);
+      return [];
+    }
+  },
 
   getAnalyticsTenants: async (refNum: string) => {
     try {
@@ -757,6 +772,18 @@ export const APIService = {
       return [];
     } catch (error) {
       console.error('Error fetching analytics tenants:', error);
+      return null;
+    }
+  },
+
+  validateClusterFields: async (payload: any) => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/content-cluster/validateClusterFields`;
+      const response = await API.post(url, payload, { withCredentials: false });
+      return response.data;
+    }
+    catch (error) {
+      console.error('Error validating cluster fields:', error);
       return null;
     }
   }
