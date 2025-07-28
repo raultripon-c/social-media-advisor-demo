@@ -8,6 +8,8 @@ interface UsePreviewReturn {
   handlePreviewOpen: (pageDataOrObject: any, pageType?: string) => Promise<void>;
   handlePreviewClose: () => void;
   setIsCheckingTaskProgress: (loading: boolean) => void;
+  setPreviewDiv: (previewDiv: boolean) => void;
+  setSelectedPageData: (selectedPageData: any) => void;
 }
 
 export const usePreview = (): UsePreviewReturn => {
@@ -29,8 +31,8 @@ export const usePreview = (): UsePreviewReturn => {
     if (
       finalPageType &&
       (
-        finalPageType.toLowerCase().includes('contentpage') ||
-        finalPageType.toLowerCase().includes('landingpage')
+        finalPageType === 'Content Page' ||
+        finalPageType === 'Landing Page'
       )
     ) {
       // Show loading state while checking task progress
@@ -71,5 +73,7 @@ export const usePreview = (): UsePreviewReturn => {
     handlePreviewOpen,
     handlePreviewClose,
     setIsCheckingTaskProgress,
+    setPreviewDiv,
+    setSelectedPageData,
   };
 }; 

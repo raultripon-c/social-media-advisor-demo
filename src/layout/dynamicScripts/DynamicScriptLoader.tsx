@@ -18,7 +18,13 @@ interface DynamicScriptLoaderProps {
   scriptName: string;
 }
 
-const DynamicScriptLoader: React.FunctionComponent<DynamicScriptLoaderProps> = ({ scriptName }) => {
+interface TxeContext {
+  refNum: string;
+  token: string;
+  blogId: string | null;
+}
+
+const DynamicScriptLoader: React.FunctionComponent<DynamicScriptLoaderProps> = ({ scriptName}) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const storeData = useSelector((state: AppStore) => state.customer);
 
@@ -29,10 +35,12 @@ const DynamicScriptLoader: React.FunctionComponent<DynamicScriptLoaderProps> = (
     findAppConfigByRoutes(fetchedApps, window.location.pathname)?.[0]?.appConfig ||
     JSON.parse(sessionStorage.getItem("selectedApp") || "null")?.appConfig;
 
-  const txeContextToSend = {
+  let txeContextToSend :TxeContext= {
     refNum: storeData.selectedTenant.refNum,
     token: window.keycloakInstance.token,
+    blogId: localStorage.getItem('blogId'),
   };
+  
 
   useEffect(() => {
     const tokenBkp = localStorage.getItem("token");
@@ -98,6 +106,7 @@ const DynamicScriptLoader: React.FunctionComponent<DynamicScriptLoaderProps> = (
 
   const cleanupCallback = () => {
     setIsLoading(false);
+    localStorage.removeItem("blogId");
     removeElementsById("crm-stylesheet");
     removeCrmStyles();
   };

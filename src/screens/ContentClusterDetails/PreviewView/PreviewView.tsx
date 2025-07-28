@@ -14,9 +14,11 @@ interface PreviewViewProps {
     pageData?: any;
     onBack: () => void;
     crmUserInfo: any;
+    contentType?: string;
+    isCheckingTaskProgress?: boolean;
 }
 
-const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo }) => {
+const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo, contentType, isCheckingTaskProgress}) => {
     const navigate = useNavigate();
     const [currentUrl, setCurrentUrl] = useState<string>("");
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -118,10 +120,16 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
     };
     
     const handleEditClick = () => {
-        if (pageData?.application === "crm" && pageData?._id && selectedTenant) {
+        if (pageData?.application === "crm" && pageData?._id && selectedTenant && contentType === "EmailTemplate") {
             const editPath = `/${selectedTenant.customerCode}/${selectedTenant.refNum}/dashboard/email-management/templates/${pageData._id}`;
             window.open(editPath, '_blank');
-        } else {
+        } else if(contentType === "Blog"){
+            if(pageData.articleId){
+                localStorage.setItem("blogId", pageData.articleId);
+              }
+            const url = `/${selectedTenant.customerCode}/${selectedTenant.refNum}/blogs`;
+            window.open(url, '_blank');
+        } else if(contentType?.toLowerCase().includes("page")){
             navigateToExperienceManager();
         }
     };
@@ -218,7 +226,7 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
 
             {/* Preview Content */}
             <div className="preview-content">
-                {isLoading && (
+                {(isLoading || isCheckingTaskProgress) && (
                     <div className="preview-loading">
                         <div className="loading-spinner"></div>
                         <p>Loading preview...</p>
