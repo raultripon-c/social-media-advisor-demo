@@ -744,7 +744,7 @@ export const APIService = {
   },
   getPagePublishStates: async (payload: any) => {
     try {
-      const url = `${(window as any)._env_.TOOLS_API_URL}api/cms/getPagePublishtStates`;
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/cms/getPagePublishStates`;
       const response = await API.post(url, payload, { withCredentials: false });
       console.log("Page Publish States API Response:", response.data);
       if (response.data.status === "success") {
