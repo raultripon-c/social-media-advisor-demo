@@ -11,6 +11,7 @@ import contentPageImage from "../../../assets/images/content-page-image.png";
 import landingPageImage from "../../../assets/images/landing-page-image.png";
 import blogImage from "../../../assets/images/blog-image.png";
 import emailTemplateImage from "../../../assets/images/email-template-image.png";
+import { CONTENT_TYPES } from "../../../utils/constants";
 
 import "./ClusterDetailCard.css";
 import { create } from "lodash";
@@ -24,8 +25,7 @@ interface ClusterDetailCardProps {
   emailTemplate?: any;
   createdEmailTemplate?: any;
   aiLandingPage?: any;
-  setPreviewDiv?: (pageDataOrObject: any) => Promise<void>;
-  pageType?: string;
+  setPreviewDiv?: (pageData: any, contentType: string) => void;
 }
 
 // This component is responsible for just showing details of the cluster
@@ -40,7 +40,6 @@ const ClusterDetailCard: React.FC<ClusterDetailCardProps> = ({
   createdEmailTemplate,
   aiLandingPage,
   setPreviewDiv,
-  pageType,
 }) => {
 
   const getStatusColor = (status: string) => {
@@ -56,70 +55,33 @@ const ClusterDetailCard: React.FC<ClusterDetailCardProps> = ({
     }
   }
 
-  // Function to determine the appropriate icon based on content type
-  const getContentIcon = () => {
-    // Check for AI-generated content first
-    if (aiContentPage) {
-      return contentPageIcon; // AI content page
-    }
-    if (aiLandingPage) {
-      return landingPageIcon; // AI landing page
-    }
-    if (aiBlog) {
-      return blogIcon; // AI blog
-    }
-    if (createdEmailTemplate) {
-      return emailTemplateIcon; // AI email template
-    }
-    
-    // Check for manual content
-    if (contentPage) {
-      return contentPageIcon; // Manual content page
-    }
-    if (landingPage) {
-      return landingPageIcon; // Manual landing page
-    }
-    if (blog) {
-      return blogIcon; // Manual blog
-    }
-    if (emailTemplate) {
-      return emailTemplateIcon; // Manual email template
+  // Helper function to get content data based on priority order
+  const getContentData = () => {
+    const contentTypes = [
+      { ai: aiContentPage, manual: contentPage, icon: contentPageIcon, image: contentPageImage, type: CONTENT_TYPES.CONTENT_PAGE },
+      { ai: aiLandingPage, manual: landingPage, icon: landingPageIcon, image: landingPageImage, type: CONTENT_TYPES.LANDING_PAGE },
+      { ai: aiBlog, manual: blog, icon: blogIcon, image: blogImage, type: CONTENT_TYPES.BLOG },
+      { ai: createdEmailTemplate, manual: emailTemplate, icon: emailTemplateIcon, image: emailTemplateImage, type: CONTENT_TYPES.EMAIL_TEMPLATE }
+    ];
+
+    for (const contentType of contentTypes) {
+      if (contentType.ai) {
+        return { ...contentType, data: contentType.ai, isAI: true };
+      }
+      if (contentType.manual) {
+        return { ...contentType, data: contentType.manual, isAI: false };
+      }
     }
     
-    // Default fallback
-    return pageIcon;
+    return { icon: pageIcon, image: null, type: 'Content', data: null, isAI: false };
   };
+
+  const getContentIcon = () => {
+    return getContentData().icon;
+  };
+
   const getContentImage = () => {
-    // Check for AI-generated content first
-    if (aiContentPage) {
-      return contentPageImage; // AI content page
-    }
-    if (aiLandingPage) {
-      return landingPageImage; // AI landing page
-    }
-    if (aiBlog) {
-      return blogImage; // AI blog
-    }
-    if (createdEmailTemplate) {
-      return emailTemplateImage; // AI email template
-    }
-    
-    // Check for manual content
-    if (contentPage) {
-      return contentPageImage; // Manual content page
-    }
-    if (landingPage) {
-      return landingPageImage; // Manual landing page
-    }
-    if (blog) {
-      return blogImage; // Manual blog
-    }
-    if (emailTemplate) {
-      return emailTemplateImage; // Manual email template
-    }
-    
-    // Default fallback
-    return null;
+    return getContentData().image;
   };
 
   const formatDate = (timestamp: number) => {
@@ -127,37 +89,25 @@ const ClusterDetailCard: React.FC<ClusterDetailCardProps> = ({
     const formattedDate = new Date(timestamp).toLocaleDateString("en-US", options);
     return formattedDate;
   };
-  
 
   const getContentCreatedDate = () => {
-    if(createdEmailTemplate){
-      return formatDate(createdEmailTemplate?.createdDate);
+    const contentData = getContentData();
+    if (!contentData.data?.createdDate) return null;
+    
+    // For AI blog, return raw date, for others format it
+    if (contentData.type === 'Blog' && contentData.isAI) {
+      return contentData.data.createdDate;
     }
-    if(aiLandingPage){
-      return formatDate(aiLandingPage?.createdDate);
-  }
-  if(aiBlog){
-    return aiBlog?.createdDate;
-  }
-  if(aiContentPage){
-    return aiContentPage?.createdDate;
-  }
-  if(contentPage){
-    return contentPage?.createdDate;
-  }
-  if(landingPage){
-    return landingPage?.createdDate;
-  }
-  if(blog){
-    return blog?.createdDate;
-  }
-  if(emailTemplate){
-    return emailTemplate?.createdDate;
-  }
-  return null;
-}
+    
+    return formatDate(contentData.data.createdDate);
+  };
+
+  // Function to get content type name for hover display
+  const getContentTypeName = () => {
+    return getContentData().type;
+  };
   return (
-    <div className="cluster-detail-card">
+    <div className="cluster-detail-card" title={getContentTypeName()}>
       <div className="cluster-detail-card-image">
         <img
           src={
@@ -220,9 +170,11 @@ const ClusterDetailCard: React.FC<ClusterDetailCardProps> = ({
             className="preview-link"
             onClick={async () => {
               const pageData = contentPage || landingPage || blog || aiBlog || aiContentPage || emailTemplate || createdEmailTemplate || aiLandingPage;
-              if (setPreviewDiv) {
-                await setPreviewDiv({ pageData, pageType: pageType || 'unknown' });
-              }
+              
+              // Determine content type based on which prop is present
+            
+              
+              setPreviewDiv && setPreviewDiv(pageData, getContentTypeName());
             }}
           >
             Preview

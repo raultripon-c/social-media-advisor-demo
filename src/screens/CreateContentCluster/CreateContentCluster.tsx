@@ -379,8 +379,8 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
     // Call both APIs in parallel
     Promise.all([
       getPromptBasedSuggestions(payload),
-      getSuggestedLists()
-    ]).then(([promptResponse, suggestedListsResponse]) => {
+      // getSuggestedLists()
+    ]).then(([promptResponse]) => {
       // Handle prompt based suggestions response
       if (promptResponse?.masterPrompt) {
         setPromptInput(promptResponse.masterPrompt);
@@ -418,8 +418,8 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       }
       
       // Handle suggested lists response
-      console.log("Suggested Lists Response:", suggestedListsResponse);
-      setSuggestedLists(suggestedListsResponse?.data?.result || []);
+      // console.log("Suggested Lists Response:", suggestedListsResponse);
+      // setSuggestedLists(suggestedListsResponse?.data?.result || []);
       
       setEditClusterTitle(true);
       setClusterTitle(clusterTitleName);
@@ -873,6 +873,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
         </div>
         {showPromptSuggestions && (
           <div>
+            {false && (
             <div className="prompt-enhancements">
               <div className="prompt-enhancements-heading">Add supporting materials (Optional)
                 <div className="cluster-info-icon-wrapper">
@@ -890,6 +891,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
                 <SupportingMaterial options={supportingMaterialsConfig} fetchedPages={fetchedPages} list={listItems} setAddedurls={setAddedurls} suggestedLists={suggestedLists} onListSearch={handleListSearch} selectedListsData={selectedListsData} setSelectedListsData={setSelectedListsData}/>
               </div>
             </div>
+            )}
             <div className="prompt-suggestions content-format-section">
               <div className="prompt-suggestions-heading">Recommended content formats</div>
               {/* Suggested Content Tags */}

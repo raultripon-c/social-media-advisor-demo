@@ -14,6 +14,7 @@
   justify-content: space-between;
   flex-shrink: 0;
   background-color: #404040;
+  margin-bottom: 16px;
 }
 
 .preview-header-left {
@@ -141,7 +142,7 @@
 
 /* Site URL Content - Full width for web pages */
 .preview-iframe-container {
-  width: 50%;
+  width: 100%;
   height: 100%;
   background: #ffffff;
   min-height: 600px;

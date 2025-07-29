@@ -9,14 +9,16 @@ import { AppSelectionOptions } from "../../../interfaces/AppSelectionOptions";
 import { appSelectionHandler } from "../../../utils/appUtils";
 import { APIService } from "../../../utils/api.service";
 import { setSiteMetaData } from "../../../store/customer/actions";
-
+import { CONTENT_TYPES } from "../../../utils/constants";
 interface PreviewViewProps {
     pageData?: any;
     onBack: () => void;
     crmUserInfo: any;
+    contentType?: string;
+    isCheckingTaskProgress?: boolean;
 }
 
-const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo }) => {
+const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo, contentType, isCheckingTaskProgress}) => {
     const navigate = useNavigate();
     const [currentUrl, setCurrentUrl] = useState<string>("");
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -34,7 +36,7 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
     useEffect(() => {
         if (pageData) {
             // Check if it's an email template with _id
-            if (pageData?.application=="crm" && pageData?._id) {
+            if (pageData?.application=="crm" && pageData?._id && contentType === CONTENT_TYPES.EMAIL_TEMPLATE) {
                 fetchEmailTemplatePreview();
             } else {
                 // Extract URL from page data
@@ -118,10 +120,16 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
     };
     
     const handleEditClick = () => {
-        if (pageData?.application === "crm" && pageData?._id && selectedTenant) {
+        if (pageData?.application === "crm" && pageData?._id && selectedTenant && contentType === CONTENT_TYPES.EMAIL_TEMPLATE) {
             const editPath = `/${selectedTenant.customerCode}/${selectedTenant.refNum}/dashboard/email-management/templates/${pageData._id}`;
             window.open(editPath, '_blank');
-        } else {
+        } else if(contentType === CONTENT_TYPES.BLOG){
+            if(pageData.articleId){
+                localStorage.setItem("blogId", pageData.articleId);
+              }
+            const url = `/${selectedTenant.customerCode}/${selectedTenant.refNum}/blogs`;
+            window.open(url, '_blank');
+        } else if(contentType?.toLowerCase().includes("page")){
             navigateToExperienceManager();
         }
     };
@@ -218,7 +226,7 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
 
             {/* Preview Content */}
             <div className="preview-content">
-                {isLoading && (
+                {(isLoading || isCheckingTaskProgress) && (
                     <div className="preview-loading">
                         <div className="loading-spinner"></div>
                         <p>Loading preview...</p>
