@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { previewTaskManager } from '../utils/previewUtils';
-
+import { CONTENT_TYPES } from '../utils/constants';
 interface UsePreviewReturn {
   previewDiv: boolean;
   selectedPageData: any;
@@ -31,8 +31,8 @@ export const usePreview = (): UsePreviewReturn => {
     if (
       finalPageType &&
       (
-        finalPageType === 'Content Page' ||
-        finalPageType === 'Landing Page'
+        finalPageType === CONTENT_TYPES.CONTENT_PAGE ||
+        finalPageType === CONTENT_TYPES.LANDING_PAGE
       )
     ) {
       // Show loading state while checking task progress

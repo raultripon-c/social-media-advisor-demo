@@ -124,3 +124,10 @@ export const loginSessionTimeIntervals = {
   SSO_SESSION_IDLE_LOWER_LIMIT: 1800,
   SSO_SESSION_IDLE_UPPER_LIMIT: 28800
 }
+
+export const CONTENT_TYPES = {
+  CONTENT_PAGE: "Content Page",
+  LANDING_PAGE: "Landing Page",
+  BLOG: "Blog",
+  EMAIL_TEMPLATE: "Email Template"
+}

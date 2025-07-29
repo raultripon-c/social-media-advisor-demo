@@ -578,11 +578,6 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
         pageIds.push(currentAiBlog.pageId);
       }
 
-      console.log("AI Content Page:", currentAiContentPage);
-      console.log("AI Landing Page:", currentAiLandingPage);
-      console.log("AI Blog:", currentAiBlog);
-      console.log("Page IDs to fetch:", pageIds);
-
       // Only make API call if we have page IDs
       if (pageIds.length > 0) {
         const payload = {

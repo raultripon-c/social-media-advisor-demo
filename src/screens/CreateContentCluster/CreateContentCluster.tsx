@@ -379,8 +379,8 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
     // Call both APIs in parallel
     Promise.all([
       getPromptBasedSuggestions(payload),
-      getSuggestedLists()
-    ]).then(([promptResponse, suggestedListsResponse]) => {
+      // getSuggestedLists()
+    ]).then(([promptResponse]) => {
       // Handle prompt based suggestions response
       if (promptResponse?.masterPrompt) {
         setPromptInput(promptResponse.masterPrompt);
@@ -418,8 +418,8 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       }
       
       // Handle suggested lists response
-      console.log("Suggested Lists Response:", suggestedListsResponse);
-      setSuggestedLists(suggestedListsResponse?.data?.result || []);
+      // console.log("Suggested Lists Response:", suggestedListsResponse);
+      // setSuggestedLists(suggestedListsResponse?.data?.result || []);
       
       setEditClusterTitle(true);
       setClusterTitle(clusterTitleName);

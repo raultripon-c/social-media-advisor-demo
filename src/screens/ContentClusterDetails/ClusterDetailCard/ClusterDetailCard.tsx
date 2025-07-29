@@ -11,6 +11,7 @@ import contentPageImage from "../../../assets/images/content-page-image.png";
 import landingPageImage from "../../../assets/images/landing-page-image.png";
 import blogImage from "../../../assets/images/blog-image.png";
 import emailTemplateImage from "../../../assets/images/email-template-image.png";
+import { CONTENT_TYPES } from "../../../utils/constants";
 
 import "./ClusterDetailCard.css";
 import { create } from "lodash";
@@ -57,10 +58,10 @@ const ClusterDetailCard: React.FC<ClusterDetailCardProps> = ({
   // Helper function to get content data based on priority order
   const getContentData = () => {
     const contentTypes = [
-      { ai: aiContentPage, manual: contentPage, icon: contentPageIcon, image: contentPageImage, type: 'Content Page' },
-      { ai: aiLandingPage, manual: landingPage, icon: landingPageIcon, image: landingPageImage, type: 'Landing Page' },
-      { ai: aiBlog, manual: blog, icon: blogIcon, image: blogImage, type: 'Blog' },
-      { ai: createdEmailTemplate, manual: emailTemplate, icon: emailTemplateIcon, image: emailTemplateImage, type: 'Email Template' }
+      { ai: aiContentPage, manual: contentPage, icon: contentPageIcon, image: contentPageImage, type: CONTENT_TYPES.CONTENT_PAGE },
+      { ai: aiLandingPage, manual: landingPage, icon: landingPageIcon, image: landingPageImage, type: CONTENT_TYPES.LANDING_PAGE },
+      { ai: aiBlog, manual: blog, icon: blogIcon, image: blogImage, type: CONTENT_TYPES.BLOG },
+      { ai: createdEmailTemplate, manual: emailTemplate, icon: emailTemplateIcon, image: emailTemplateImage, type: CONTENT_TYPES.EMAIL_TEMPLATE }
     ];
 
     for (const contentType of contentTypes) {
