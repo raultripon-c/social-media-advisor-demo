@@ -235,7 +235,7 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
 
                 {htmlContent ? (
                     renderHtmlContent()
-                ) : currentUrl ? (
+                ) : currentUrl && !isCheckingTaskProgress ? (
                     renderUrlContent()
                 ) : (
                     <div className="preview-no-url">

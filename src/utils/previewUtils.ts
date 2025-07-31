@@ -47,10 +47,6 @@ export class PreviewTaskManager {
         "AI page creation"
       );
       
-      // Add a small delay to ensure AI page creation is fully processed
-      console.log('Waiting 2 seconds for AI page creation to be fully processed...');
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
       // Then check publish page progress
       console.log('=== Starting Publish Page Progress Check ===');
       await this.checkTaskProgress(
