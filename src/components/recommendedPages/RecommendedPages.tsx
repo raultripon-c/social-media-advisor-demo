@@ -93,7 +93,8 @@ export const RecommendedPages = (props: any) => {
           customerCode: "",
           route: "dashboard-tier3",
           payload: '',
-          site: btoa(JSON.stringify(siteMetaData))
+          site: btoa(JSON.stringify(siteMetaData)),
+          scenario: "createRecommendedPage"
         },
       };
       const link = getLink(config, {

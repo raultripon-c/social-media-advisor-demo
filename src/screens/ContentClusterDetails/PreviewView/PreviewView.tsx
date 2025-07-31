@@ -6,10 +6,11 @@ import "./PreviewView.css";
 import crossIcon from "../../../assets/svg/white-cross.svg";
 import editIcon from "../../../assets/svg/white-editIcon.svg";
 import { AppSelectionOptions } from "../../../interfaces/AppSelectionOptions";
-import { appSelectionHandler } from "../../../utils/appUtils";
+import { appSelectionHandler, getLink } from "../../../utils/appUtils";
 import { APIService } from "../../../utils/api.service";
 import { setSiteMetaData } from "../../../store/customer/actions";
 import { CONTENT_TYPES } from "../../../utils/constants";
+import { isEmpty } from "lodash";
 interface PreviewViewProps {
     pageData?: any;
     onBack: () => void;
@@ -130,11 +131,34 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
             const url = `/${selectedTenant.customerCode}/${selectedTenant.refNum}/blogs`;
             window.open(url, '_blank');
         } else if(contentType?.toLowerCase().includes("page")){
-            navigateToExperienceManager();
+            if (pageData?.id) {
+                pageData.pageId = pageData.id;
+            }
+            pageData.scenario = "navigateToPage"
+            navigateOnClick(pageData);
         }
     };
     
-    
+    const navigateOnClick = (pageData: object) => {
+        const cmsUrl = "https://cmsqa1.phenompro.com:9000";
+        const config = {
+          appType: "external",
+          appConfig: { link: cmsUrl + "/tier3" },
+          requestParams: {
+            lsrc: "txe",
+            lsw: "_self",
+            refNum: selectedTenant?.refNum,
+            customerCode: selectedTenant?.customerCode,
+            route: "pages",
+            payload: btoa(JSON.stringify(pageData)),
+            site: btoa(JSON.stringify(siteMetaData)),
+            scenario: "navigateToPageId"
+          },
+        };
+        const link = getLink(config, {});
+        if (link && !isEmpty(link)) 
+            window.open(link, "_blank");
+      }
     // Function to check if URL is an image
     const isImageUrl = (url: string): boolean => {
         if (!url) return false;
