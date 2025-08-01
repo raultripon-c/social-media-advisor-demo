@@ -301,6 +301,10 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
     });
   };
 
+  const generateClusterName = (clusterPayload: any) => {
+    return APIService.generateClusterName(clusterPayload)
+  }
+
   const createCMSAiBlog = () => {
     return APIService.generateCMSAIBlog({
       companyName: selectedTenant.tenantName,
@@ -375,12 +379,17 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
             "urlList": [jobLink]
         }
     ];
+    const clusterPayload = {
+      refNum: selectedTenant.refNum,
+      prompt: promptInput,
+    }
     
     // Call both APIs in parallel
     Promise.all([
       getPromptBasedSuggestions(payload),
+      generateClusterName(clusterPayload)
       // getSuggestedLists()
-    ]).then(([promptResponse]) => {
+    ]).then(([promptResponse, clusterNameResponse]) => {
       // Handle prompt based suggestions response
       if (promptResponse?.masterPrompt) {
         setPromptInput(promptResponse.masterPrompt);
@@ -400,8 +409,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
         setSelectedContentTypes(contentTypeNames);
       }
       
-      // Set cluster title based on the first content page or blog
-      let clusterTitleName = "Content Cluster";
+      const clusterTitleName = clusterNameResponse?.clusterName ?? "";
       let suggestedTagsData = promptResponse.contentTypes || [];
       setSuggestedTags(suggestedTagsData);
       
@@ -423,6 +431,9 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       
       setEditClusterTitle(true);
       setClusterTitle(clusterTitleName);
+      if (!clusterTitleName.trim()) {
+        setUpdateClusterTitle(true);
+      }
       setShowLoader(false);
       setIsPromptSubmitted(true);
       setShowSaveOrDiscardModal(false);
@@ -747,9 +758,10 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
               type="text" 
               value={clusterTitle} 
               onChange={(e) => {setClusterTitle(e.target.value); setClusterTitleError(false);}} 
+              placeholder="Please enter content cluster title"
             />
           ):(
-            <span className="create-content-cluster-header-title">{clusterTitle}</span>
+            <span className={`create-content-cluster-header-title${clusterTitleError ? " error" : ""}`}>{clusterTitle || "Content Clusters"}</span>
           )}
           {/* <span className="create-content-cluster-header-title">{clusterTitle}</span> */}
           {editClusterTitle && !updateClusterTitle && (
@@ -757,6 +769,10 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
           )}
           {updateClusterTitle && (
             <button className="done-btn" onClick={() => {
+              if (!clusterTitle.trim()) {
+                setClusterTitleError(true);
+                return;
+              }
               setUpdateClusterTitle(false);
               setClusterTitleError(false);
             }}>Done</button>
