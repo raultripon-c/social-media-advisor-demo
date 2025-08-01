@@ -512,7 +512,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
         createdBlogDetail = allBlogs["all"]?.find((blog: any) => blog.articleId === successfulBlog.data?.articleId);
       }
       let createdEmailTemplateData = null;
-      if (successfulEmailTemplate) {
+      if (successfulEmailTemplate.data?.templateName) {
         const allEmailTemplates = await fetchAllEmailTemplates();
         createdEmailTemplateData = allEmailTemplates.find((template: any) => template.templateName === successfulEmailTemplate.data.templateName);
       }
@@ -524,9 +524,14 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
         contentPages: fetchedPages?.contentPages, 
         landingPages: fetchedPages?.landingPages,
         blogs: fetchedPages?.blogs,
-        aiCreatedLandingPage: aiLandingPage ? [aiLandingPage.data.data] : [],
+        aiCreatedLandingPage: aiLandingPage && Object.keys(aiLandingPage.data?.data || {}).length > 0
+        ? [aiLandingPage.data.data]
+        : [],
+      
         aiCreatedBlog: createdBlogDetail ? [createdBlogDetail] : [],
-        aiCreatedContentPage: successfulContentPage ? [successfulContentPage.data.data] : [],
+        aiCreatedContentPage: successfulContentPage && Object.keys(successfulContentPage.data?.data || {}).length > 0
+        ? [successfulContentPage.data.data]
+        : [],
         emailTemplates: [],
         createdEmailTemplate: createdEmailTemplateData ? [createdEmailTemplateData] : [],
         clusterTitle: promptInput,

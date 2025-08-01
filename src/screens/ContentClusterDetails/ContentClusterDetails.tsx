@@ -341,7 +341,6 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
   };
 
   const tabCounts = getTabCounts();
-  const totalCounts = getTotalCounts();
   const tabSpecificCounts = getTabSpecificCounts();
 
   const handleBackNavigation = () => {
@@ -529,6 +528,8 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
       const currentAiBlog = location.state?.aiBlog || aiBlog;
       const currentAiContentPage = location.state?.aiContentPage || aiContentPage;
       const currentAiLandingPage = location.state?.aiLandingPage || aiLandingPage;
+      const currentEmailTemplates = location.state?.emailTemplates || emailTemplates;
+      const currentCreatedEmailTemplate = location.state?.createdEmailTemplate || createdEmailTemplate;
 
       // Add content pages
       if (currentPages?.contentPages) {
@@ -578,6 +579,18 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
         pageIds.push(currentAiBlog.pageId);
       }
 
+      // Add email templates
+      if (currentEmailTemplates) {
+        currentEmailTemplates.forEach((emailTemplate: any) => {
+          if (emailTemplate._id) pageIds.push(emailTemplate._id);
+        });
+      }
+
+      // Add created email template
+      if (currentCreatedEmailTemplate?._id) {
+        pageIds.push(currentCreatedEmailTemplate._id);
+      }
+
       // Only make API call if we have page IDs
       if (pageIds.length > 0) {
         const payload = {
@@ -587,18 +600,42 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
         };
 
         const publishStates = await APIService.getPagePublishStates(payload);
-
-        console.log("Publish States from API:", publishStates);
+        const blogsPublishStates = await  APIService.getAllBlogsDetails({
+          refNum: selectedTenant.refNum,
+          locale,
+          siteVariant: "external",
+          applyFilters: false,
+        });
+        const emailTemplatesPublishStates = await APIService.getAllEmailTemplates({
+          recruiterUserId: window?.keycloakInstance?.tokenParsed?.userDetails.id,
+          refNum: selectedTenant.refNum,
+        });
+        publishStates.data.push(...blogsPublishStates.all);
+        publishStates.data.push(...emailTemplatesPublishStates);
         setPagePublishStates(publishStates.data || []);
 
         // Create a map of pageId to publish state for easy lookup
         const publishStateMap = new Map();
         if (publishStates.data && Array.isArray(publishStates.data)) {
           publishStates.data.forEach((state: any) => {
-            publishStateMap.set(state.pageId, {
-              status: getContentStatus(state.status),
-              createdDate: formatDate(state.timestamp)
-            });
+            if(state.pageId){
+              publishStateMap.set(state.pageId, {
+                status: getContentStatus(state.status),
+                createdDate: formatDate(state.timestamp)
+              });
+            }
+            else if (state.articleId){
+              publishStateMap.set(state.articleId, {
+                status: state.type.toLowerCase() === "draft" ? "Draft" : "Published",
+                createdDate: formatDate(state.updatedDate)
+              });
+            }
+            else if (state._id){
+              publishStateMap.set(state._id, {
+                status: state.isDraft ? "Draft" : "Published",
+                createdDate: formatDate(state.createdDate)
+              });
+            }
           });
         }
 
@@ -668,12 +705,26 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
           }
         }
 
-        // Update the local variables that are used in the component
+        // Update email templates with status and createdDate
+
+        // Update created email template with status and createdDate
+        if (currentCreatedEmailTemplate) {
+          const pageId = currentCreatedEmailTemplate._id;
+          if (pageId && publishStateMap.has(pageId)) {
+            const state = publishStateMap.get(pageId);
+            currentCreatedEmailTemplate.status = state.status;
+            currentCreatedEmailTemplate.createdDate = state.createdDate;
+          }
+        }
+
+          // Update the local variables that are used in the component
         pages = currentPages;
         blogs = currentBlogs;
         aiBlog = currentAiBlog;
         aiContentPage = currentAiContentPage;
         aiLandingPage = currentAiLandingPage;
+        emailTemplates = currentEmailTemplates;
+        createdEmailTemplate = currentCreatedEmailTemplate;
       }
     } catch (error) {
       console.error("Error fetching page publish states:", error);
