@@ -786,6 +786,18 @@ export const APIService = {
       console.error('Error validating cluster fields:', error);
       return null;
     }
+  },
+
+  generateClusterName: async (payload: any) => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/content-cluster/generateClusterName`;
+      const response = await API.post(url, payload, { withCredentials: false });
+      return response.data.data;
+    }
+    catch (error) {
+      console.error('Error generating cluster name:', error);
+      return null
+    }
   }
 
 };

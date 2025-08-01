@@ -25,7 +25,7 @@
   padding: 8px 12px;
   font-family: var(--family-title, Poppins);
   font-size: var(--size-font-size-xl, 18px);
-  font-weight: 600;
+  font-weight: 400;
   color: var(--neutrals-nn-500, #353B46);
   outline: none;
   transition: border-color 0.2s ease;
@@ -53,7 +53,7 @@
   padding: 8px 12px;
   font-family: var(--family-title, Poppins);
   font-size: var(--size-font-size-xl, 18px);
-  font-weight: 600;
+  font-weight: 400;
   color: var(--neutrals-nn-500, #353B46);
   outline: none;
   transition: border-color 0.2s ease;
@@ -78,6 +78,7 @@
     height: 40px;
     display: flex;
     align-items: center;
+    cursor: pointer;
     /* min-width: 200px;
     flex: 1; */
 }
