@@ -6,7 +6,7 @@ import "./PreviewView.css";
 import crossIcon from "../../../assets/svg/white-cross.svg";
 import editIcon from "../../../assets/svg/white-editIcon.svg";
 import { AppSelectionOptions } from "../../../interfaces/AppSelectionOptions";
-import { appSelectionHandler, getLink } from "../../../utils/appUtils";
+import { appSelectionHandler, getLink, getRefnumFromLink, handleDomainUrlForSite } from "../../../utils/appUtils";
 import { APIService } from "../../../utils/api.service";
 import { setSiteMetaData } from "../../../store/customer/actions";
 import { CONTENT_TYPES } from "../../../utils/constants";
@@ -94,30 +94,6 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
 
     const handleImageError = () => {
         setIsLoading(false);
-        // Handle error - maybe show a fallback content
-    };
-
-    const navigateToExperienceManager = () => {
-        const app = allApps.find((app: any) => app.name === "Experience Manager");
-    
-        if (!app || !selectedTenant || !navigate || !dispatch) {
-            console.error("Missing dependencies for navigating to Experience Manager.");
-            return;
-        }
-    
-        const appSelectionOptions: AppSelectionOptions = {
-            selectedApp: app,
-            navigate,
-            customerCode: selectedTenant.customerCode,
-            refNum: selectedTenant.refNum,
-            siteMetaData,
-            dispatch,
-            openInNewTab: false,
-            setSiteMetaData,
-            selectedTenant,
-        };
-    
-        appSelectionHandler(appSelectionOptions);
     };
     
     const handleEditClick = () => {
@@ -139,8 +115,23 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
         }
     };
     
-    const navigateOnClick = (pageData: object) => {
-        const cmsUrl = "https://cmsqa1.phenompro.com:9000";
+    const navigateOnClick = async (pageData: object) => {
+        const cmsUrl = (window as any)["_env_"].CMS_URL;
+        let metaData = siteMetaData;
+        
+        if(!siteMetaData || Object.keys(siteMetaData).length === 0) {
+            const tenantSupportedLangs = await APIService.getSupportedLangs(
+                getRefnumFromLink(window.location.href, selectedTenant)
+              );
+              metaData = await handleDomainUrlForSite(
+                tenantSupportedLangs,
+                selectedTenant,
+                dispatch,
+                setSiteMetaData,
+                siteMetaData
+              );
+        }
+        
         const config = {
           appType: "external",
           appConfig: { link: cmsUrl + "/tier3" },
@@ -151,7 +142,7 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
             customerCode: selectedTenant?.customerCode,
             route: "pages",
             payload: btoa(JSON.stringify(pageData)),
-            site: btoa(JSON.stringify(siteMetaData)),
+            site: btoa(JSON.stringify(metaData)),
             scenario: "navigateToPageId"
           },
         };
