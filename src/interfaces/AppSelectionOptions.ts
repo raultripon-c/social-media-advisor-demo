@@ -11,4 +11,5 @@ export interface AppSelectionOptions {
   isAnalyticsChildAvailable?: boolean;
   customeRoute?: any;
   setShowAnalyticsTenant?: (show: boolean) => void;
+  scenario?: string;
 }

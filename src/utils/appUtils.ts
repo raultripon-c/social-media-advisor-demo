@@ -24,7 +24,8 @@ export const appSelectionHandler = async (
     selectedTenant,
     customeRoute,
     isAnalyticsChildAvailable,
-    setShowAnalyticsTenant
+    setShowAnalyticsTenant,
+    scenario
   } = options;
 
   if (!selectedApp) {
@@ -69,7 +70,8 @@ export const appSelectionHandler = async (
         siteMetaData,
         selectedApp,
         customerCode,
-        navigate
+        navigate,
+        scenario
       );
       break;
     case "script":
@@ -151,7 +153,8 @@ const handleExternalApp = async (
   siteMetaData: any,
   selectedApp: any,
   customerCode: string,
-  navigate: (path: string) => void
+  navigate: (path: string) => void,
+  scenario: any
 ) => {
 
   const tenantSupportedLangs = await APIService.getSupportedLangs(refNum);
@@ -166,7 +169,8 @@ const handleExternalApp = async (
   const link = getLink(selectedApp, {
     refNum: refNum,
     customerCode: customerCode,
-    site: btoa(JSON.stringify(metaData))
+    site: btoa(JSON.stringify(metaData)),
+    scenario: scenario
   });
 
   if (link && !isEmpty(link)) {
