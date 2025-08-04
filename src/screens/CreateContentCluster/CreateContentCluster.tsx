@@ -138,6 +138,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       refNum: selectedTenant.refNum,
       locale: locale,
       siteVariant: "external",
+      isNeededAllDetails: false,
     };
     APIService.getAllContentClusters(payload)
       .then((clusters: any) => {
@@ -409,7 +410,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
         setSelectedContentTypes(contentTypeNames);
       }
       
-      const clusterTitleName = clusterNameResponse?.clusterName ?? "";
+      const clusterTitleName = (clusterNameResponse?.clusterName ?? "").replace(/"/g, "");
       let suggestedTagsData = promptResponse.contentTypes || [];
       setSuggestedTags(suggestedTagsData);
       
@@ -655,22 +656,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
   const handleClusterClick = (cluster: any) => {
     console.log("Clicked", cluster);
     const newPath = location.pathname.replace(/\/create$/, "");
-    const pagesObj = {
-      contentPages: cluster.contentPages,
-      landingPages: cluster.landingPages,
-    };
-    navigate(`${newPath}/${cluster.id}`, {
-      state: {
-        currentPage: "content-cluster/create",
-        pages: pagesObj,
-        blogs: cluster?.blogs,
-        aiBlog: cluster?.aiCreatedBlog[0],
-        aiContentPage: cluster?.aiCreatedContentPage[0],
-        emailTemplates: cluster?.emailTemplates,
-        createdEmailTemplate: cluster?.createdEmailTemplate[0],
-        clusterName: cluster.clusterName,
-      },
-    });
+      navigate(`${newPath}/${cluster.clusterId}`);
   };
 
   const filteredClusters = contentClustersList.filter((cluster) => {

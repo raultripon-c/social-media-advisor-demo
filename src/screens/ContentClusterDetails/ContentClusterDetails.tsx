@@ -24,7 +24,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
   const location = useLocation();
   const { clusterId } = useParams();
   const navigate = useNavigate();
-  let { pages, blogs, aiBlog, aiContentPage, emailTemplates, createdEmailTemplate, clusterName, aiLandingPage } = location.state || {};
+  let { pages, blogs, aiBlog, aiContentPage, emailTemplates, createdEmailTemplate, clusterName, clusterTitle, aiLandingPage } = location.state || {};
 
   const [activeTab, setActiveTab] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -458,13 +458,9 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
   useEffect(() => {
     if (!pages && !blogs && !aiBlog && !aiContentPage && !emailTemplates && !createdEmailTemplate) {
       setIsLoading(true);
-      const payload = {
-        refNum: selectedTenant.refNum,
-        locale: locale,
-        siteVariant: "external",
-      };
-      APIService.getAllContentClusters(payload).then((clusters: any) => {
-        const cluster = clusters.find((cluster: any) => cluster.id === clusterId);
+  
+      APIService.getClusterById(clusterId).then((cluster: any) => {
+        cluster = cluster[0];
         if (cluster) {
           pages = { contentPages: cluster?.contentPages, landingPages: cluster?.landingPages };
           blogs = cluster?.blogs;
@@ -473,15 +469,16 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
           emailTemplates = cluster?.emailTemplates;
           createdEmailTemplate = cluster?.createdEmailTemplate?.[0];
           aiLandingPage = cluster?.aiCreatedLandingPage?.[0];
+          clusterTitle = cluster?.clusterTitle;
+          clusterName = cluster?.clusterName;
         }
-        location.state = { pages, blogs, aiBlog, aiContentPage, emailTemplates, createdEmailTemplate, aiLandingPage };
+        location.state = { pages, blogs, aiBlog, clusterTitle, clusterName, aiContentPage, emailTemplates, createdEmailTemplate, aiLandingPage };
         fetchPagePublishStates().then(() => {
           setIsLoading(false);
         }).catch((error) => {
           console.error("Error fetching page publish states:", error);
           setIsLoading(false);
         });
-        setIsLoading(false);
       }).catch((error) => {
         console.error("Error fetching cluster data:", error);
         setIsLoading(false);
@@ -563,33 +560,33 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
         pageIds.push(currentAiLandingPage.articleId);
       }
 
-      // Add blogs
-      if (currentBlogs) {
-        currentBlogs.forEach((blog: any) => {
-          if (blog.articleId) pageIds.push(blog.articleId);
-        });
-      }
+      // // Add blogs
+      // if (currentBlogs) {
+      //   currentBlogs.forEach((blog: any) => {
+      //     if (blog.articleId) pageIds.push(blog.articleId);
+      //   });
+      // }
 
-      // Add AI blogs
-      if (currentAiBlog?.articleId) {
-        pageIds.push(currentAiBlog.articleId);
-      } else if (currentAiBlog?.id) {
-        pageIds.push(currentAiBlog.id);
-      } else if (currentAiBlog?.pageId) {
-        pageIds.push(currentAiBlog.pageId);
-      }
+      // // Add AI blogs
+      // if (currentAiBlog?.articleId) {
+      //   pageIds.push(currentAiBlog.articleId);
+      // } else if (currentAiBlog?.id) {
+      //   pageIds.push(currentAiBlog.id);
+      // } else if (currentAiBlog?.pageId) {
+      //   pageIds.push(currentAiBlog.pageId);
+      // }
 
       // Add email templates
-      if (currentEmailTemplates) {
-        currentEmailTemplates.forEach((emailTemplate: any) => {
-          if (emailTemplate._id) pageIds.push(emailTemplate._id);
-        });
-      }
+      // if (currentEmailTemplates) {
+      //   currentEmailTemplates.forEach((emailTemplate: any) => {
+      //     if (emailTemplate._id) pageIds.push(emailTemplate._id);
+      //   });
+      // }
 
-      // Add created email template
-      if (currentCreatedEmailTemplate?._id) {
-        pageIds.push(currentCreatedEmailTemplate._id);
-      }
+      // // Add created email template
+      // if (currentCreatedEmailTemplate?._id) {
+      //   pageIds.push(currentCreatedEmailTemplate._id);
+      // }
 
       // Only make API call if we have page IDs
       if (pageIds.length > 0) {
@@ -599,17 +596,21 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
           pageIds: pageIds
         };
 
-        const publishStates = await APIService.getPagePublishStates(payload);
-        const blogsPublishStates = await  APIService.getAllBlogsDetails({
-          refNum: selectedTenant.refNum,
-          locale,
-          siteVariant: "external",
-          applyFilters: false,
-        });
-        const emailTemplatesPublishStates = await APIService.getAllEmailTemplates({
-          recruiterUserId: window?.keycloakInstance?.tokenParsed?.userDetails.id,
-          refNum: selectedTenant.refNum,
-        });
+        // Call all APIs in parallel using Promise.all
+        const [publishStates, blogsPublishStates, emailTemplatesPublishStates] = await Promise.all([
+          APIService.getPagePublishStates(payload),
+          APIService.getAllBlogsDetails({
+            refNum: selectedTenant.refNum,
+            locale,
+            siteVariant: "external",
+            applyFilters: false,
+          }),
+          APIService.getAllEmailTemplates({
+            recruiterUserId: window?.keycloakInstance?.tokenParsed?.userDetails.id,
+            refNum: selectedTenant.refNum,
+          })
+        ]);
+
         publishStates.data.push(...blogsPublishStates.all);
         publishStates.data.push(...emailTemplatesPublishStates);
         setPagePublishStates(publishStates.data || []);
@@ -783,7 +784,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
             </div>
           </div>
           <div className="cluster-details-container">
-            <div className="cluster-details-title">{clusterName}</div>
+            <div className="cluster-details-title">{(clusterName || "").replace(/"/g, "") || (clusterTitle || "").replace(/"/g, "")}</div>
             <div className="cluster-details-tabs">
               {tabs.map((tab: string, index: number) => {
                 const count = index === 0 ? tabCounts.allCount :

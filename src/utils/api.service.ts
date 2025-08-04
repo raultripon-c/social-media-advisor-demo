@@ -742,6 +742,21 @@ export const APIService = {
       return null;
     }
   },
+
+  getClusterById: async (clusterId: string) => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/content-cluster/getClusterById/${clusterId}`;
+      const response = await API.get(url, { withCredentials: false });
+      if(response?.data?.data) {
+        return response.data.data;
+      } 
+      return [];
+    } catch (error) {
+      console.error('Error fetching cluster by id:', error);
+      return null;
+    }
+  },
+
   getPagePublishStates: async (payload: any) => {
     try {
       const url = `${(window as any)._env_.TOOLS_API_URL}api/cms/getPagePublishStates`;

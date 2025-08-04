@@ -31,6 +31,7 @@ const ContentClustersList: React.FC<ContentClustersListProps> = ({}) => {
       refNum: selectedTenant.refNum,
       locale: locale,
       siteVariant: "external",
+      isNeededAllDetails: false,
     };
     APIService.getAllContentClusters(payload)
       .then((clusters: any) => {
@@ -49,9 +50,7 @@ const ContentClustersList: React.FC<ContentClustersListProps> = ({}) => {
     const clusterKeys = Object.keys(cluster);
     Object.keys(contentTypesMap).forEach((contentType: string) => {
       const contentTypes = contentTypesMap[contentType];
-      if (contentTypes.every((key: string) => clusterKeys.includes(key))) {
         result.push(contentType);
-      }
     });
     return result;
   };
@@ -59,23 +58,7 @@ const ContentClustersList: React.FC<ContentClustersListProps> = ({}) => {
   const handleClusterClick = (cluster: any) => {
     console.log("Clicked", cluster);
     const newPath = location.pathname.replace(/\/content-clusters$/, "/content-cluster");
-    const pagesObj = {
-      contentPages: cluster.contentPages,
-      landingPages: cluster.landingPages,
-    };
-    navigate(`${newPath}/${cluster.id}`, {
-      state: {
-        currentPage: "content-clusters",
-        pages: pagesObj,
-        blogs: cluster?.blogs,
-        aiBlog: cluster?.aiCreatedBlog?.[0],
-        aiContentPage: cluster?.aiCreatedContentPage?.[0],
-        aiLandingPage: cluster?.aiCreatedLandingPage?.[0],
-        emailTemplates: cluster?.emailTemplates,
-        createdEmailTemplate: cluster?.createdEmailTemplate?.[0],
-        clusterName: cluster?.clusterName,
-      },
-    });
+    navigate(`${newPath}/${cluster.clusterId}`);
   };
 
   return (
