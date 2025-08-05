@@ -34,6 +34,7 @@ declare global {
 }
 interface AppSwitcherProps extends React.HTMLAttributes<HTMLElement> {
   env: string;
+  region: string;
   kcObject: string;
   themeName: string;
   icon: string;
@@ -155,6 +156,7 @@ function Header({
         <div className={`header-right`}>
           <app-switcher
             env={(window as any)._env_.APP_ENV}
+            region={(window as any)._env_.APP_DC}
             kcObject={JSON.stringify(window.keycloakInstance)}
             themeName="new"
             icon={`${(window as any)._env_.APP_API_URL.replace(/\/api$/, "")}/public/logos/app-switcher/appswitcher_new.svg`}
