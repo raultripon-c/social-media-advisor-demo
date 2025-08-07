@@ -71,7 +71,7 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, generateP
         selector: "body > main",
         upload: true,
         language: siteMetaData?.defaultLanguage?.toLowerCase()|| "en_us",
-        pageTypes: "content-page,landing-page,blog-page",
+        pageTypes: ["content-page","landing-page","blog-page"],
         aiVoiceTone: "friendly",
         aiMetaData: {
           context: promptInput
