@@ -220,6 +220,9 @@
   font-style: normal;
   font-weight: 600;
   line-height: var(--line-height-line-height-xl, 30px);
+  white-space: nowrap;
+  max-width: 500px;
+
 }
 
 .cluster-tab-data-subheading {

@@ -111,7 +111,9 @@ const ClusterDetailCard: React.FC<ClusterDetailCardProps> = ({
       <div className="cluster-detail-card-image">
         <img
           src={
+            aiContentPage?.avatarUrl ||
             aiLandingPage?.avatarUrl ||
+            aiBlog?.avatarUrl ||
             createdEmailTemplate?.previewUrl ||
             emailTemplate?.previewUrl ||
             getContentImage() ||

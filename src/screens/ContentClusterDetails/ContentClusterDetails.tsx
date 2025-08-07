@@ -741,7 +741,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
         if (userInfo?.userDetails?.id) {
           setCrmUserInfo(userInfo);
         } else {
-          setCrmUserInfo(window?.keycloakInstance?.tokenParsed?.userDetails);
+          setCrmUserInfo(window?.keycloakInstance?.tokenParsed);
         }
       })
       .catch((err) => console.error("Error getting CRM user info", err));
@@ -784,7 +784,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
             </div>
           </div>
           <div className="cluster-details-container">
-            <div className="cluster-details-title">{(clusterName || "").replace(/"/g, "") || (clusterTitle || "").replace(/"/g, "")}</div>
+            <div className="cluster-details-title" title={(clusterName || "").replace(/"/g, "") || (clusterTitle || "").replace(/"/g, "")}>{(clusterName || "").replace(/"/g, "") || (clusterTitle || "").replace(/"/g, "")}</div>
             <div className="cluster-details-tabs">
               {tabs.map((tab: string, index: number) => {
                 const count = index === 0 ? tabCounts.allCount :

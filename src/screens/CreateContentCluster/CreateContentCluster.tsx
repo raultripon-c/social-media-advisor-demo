@@ -23,6 +23,7 @@ import tickIcon from "../../assets/svg/tick-icon.svg";
 import "./CreateContentCluster.css";
 import AddedLinks from "./SupportingMaterial/AddedLinks/AddedLinks";
 import { toast } from "react-toastify";
+import PreviewPages from "./PreviewPages/PreviewPages";
 
 interface CreateContentClusterProps { }
 
@@ -44,6 +45,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
   const selectedTenant = JSON.parse(localStorage.getItem("selectedTenant") || "[]");
   const locale = JSON.parse(sessionStorage.getItem("locale") || '"en_us"') || "en_us";
 
+  const [generatePages, setGeneratePages] = useState<any>(0);
   const [showLoader, setShowLoader] = useState<boolean>(false);
   const [promptInput, setPromptInput] = useState<string>("");
   const [clusterTitle, setClusterTitle] = useState<string>("Content Clusters");
@@ -75,6 +77,9 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
   const [selectedListsData, setSelectedListsData] = useState<any[]>([]);
   const [clusterTitleError, setClusterTitleError] = useState<boolean>(false);
   const clusterTitleInputRef = useRef<HTMLInputElement>(null);
+  const [pagesBasedKeywords, setPagesBasedKeywords] = useState<any>([]);
+  const [masterPrompt, setMasterPrompt] = useState<any>("");
+
   
   // Scroll to input when there's an error
   useEffect(() => {
@@ -293,7 +298,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
 
   const getPromptBasedSuggestions = (supportingMaterial: any) => {
     return APIService.getPromptBasedSuggestions({
-      isEnhancePrompt: jobLink ? true : false,
+      isEnhancePrompt: jobLink ? true : true,
       prompt: promptInput,
       deviceType: "desktop",
       language: locale,
@@ -364,6 +369,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
   };
 
   const handlePromptSubmit = () => {
+    setGeneratePages(generatePages+1);
     if (promptInput) {
       setShowSaveOrDiscardModal(true);
       setFetchedPages(null);
@@ -392,10 +398,11 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       // getSuggestedLists()
     ]).then(([promptResponse, clusterNameResponse]) => {
       // Handle prompt based suggestions response
-      if (promptResponse?.masterPrompt) {
+      if (promptResponse?.masterPrompt && jobLink) {
         setPromptInput(promptResponse.masterPrompt);
       }
-      
+      setMasterPrompt(promptResponse?.masterPrompt);
+      setPagesBasedKeywords(promptResponse?.pageTitleAndDescription || []);
       // Set fetched pages with content from response
       const fetchedPagesData = {
         contentPages: promptResponse?.contentPages || [],
@@ -899,6 +906,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
               </div>
             </div>
             )}
+            <PreviewPages generatePages={generatePages} pagesBasedKeywords={pagesBasedKeywords} promptInput={masterPrompt} showSaveOrDiscardModal={showSaveOrDiscardModal}/>
             <div className="prompt-suggestions content-format-section">
               <div className="prompt-suggestions-heading">Recommended content formats</div>
               {/* Suggested Content Tags */}

@@ -813,6 +813,42 @@ export const APIService = {
       console.error('Error generating cluster name:', error);
       return null
     }
+  },
+
+  // generateHtmlStructure: async (payload: any) => {
+  //   try {
+  //     const url = 'http://localhost:9100/canvas/generateHtmlStructure';
+  //     const response = await fetch(url, {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify(payload)
+  //     });
+
+  //     if (response.status !== 200) {
+  //       throw new Error(`HTTP error! status: ${response.status}`);
+  //     }
+  //     const result = await response.json();
+  //     return result;
+  //   }
+  //   catch (error) {
+  //     console.error('Error generating HTML structure:', error);
+  //     throw error;
+  //   }
+  // }
+
+  generateHtmlStructure: async (payload: any) => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/content-cluster/generateAIPagePreview`;
+      const response = await API.post(url, payload, { withCredentials: false });
+      // const response = await API.get("http://localhost:8082/PageListData.json");
+      return response.data;
+    }
+    catch (error) {
+      console.error('Error generating cluster name:', error);
+      return null
+    }
   }
 
 };

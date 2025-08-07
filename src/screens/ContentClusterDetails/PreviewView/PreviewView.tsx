@@ -17,9 +17,10 @@ interface PreviewViewProps {
     crmUserInfo: any;
     contentType?: string;
     isCheckingTaskProgress?: boolean;
+    className?: string;
 }
 
-const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo, contentType, isCheckingTaskProgress}) => {
+const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo, contentType, isCheckingTaskProgress, className}) => {
     const navigate = useNavigate();
     const [currentUrl, setCurrentUrl] = useState<string>("");
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -39,11 +40,13 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
             // Check if it's an email template with _id
             if (pageData?.application=="crm" && pageData?._id && contentType === CONTENT_TYPES.EMAIL_TEMPLATE) {
                 fetchEmailTemplatePreview();
-            } else {
+            } else if(contentType?.toLowerCase().includes("page")) {
                 // Extract URL from page data
                 const url = pageData?.previewUrl || pageData?.fullUrl || pageData?.url || "";
                 setCurrentUrl(url);
                 setIsLoading(true);
+            } else {
+                setHtmlContent(pageData?.htmlStructure);
             }
         }
     }, [pageData]);
@@ -208,7 +211,7 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
 
     const renderHtmlContent = () => {
         return (
-            <div className="preview-html-container">
+            <div className={`preview-html-container ${className}`}>
                 <iframe
                     srcDoc={htmlContent}
                     className="preview-iframe"
@@ -222,7 +225,7 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
     };
 
     return (
-        <div className="preview-view-container">
+        <div className={`preview-view-container ${className}`}>
             <div className="preview-header">
                 <div className="preview-header-left">
                     <div className="preview-back-btn">
