@@ -67,11 +67,12 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, generateP
         refNum: selectedTenant.refNum,
         locale: "en_us",
         siteVariant: "external",
+        siteType: "external",
         url: "https://" + siteMetaDataResp?.domain + "/",
         selector: "body > main",
         upload: true,
         language: siteMetaData?.defaultLanguage?.toLowerCase()|| "en_us",
-        pageTypes: ["content-page","landing-page","blog-page"],
+        pageTypes: ["content-page","landing-page","blog"],
         aiVoiceTone: "friendly",
         aiMetaData: {
           context: promptInput
@@ -79,10 +80,11 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, generateP
       };
 
       // Call the canvas API using APIService
-      const result = await APIService.generateHtmlStructure(payload);
+      let result = await APIService.generateHtmlStructure(payload);
       
-      if (true || result?.status === "success" && result?.data) {
+      if (result?.data) {
         // Handle content-page data
+        result = result.data;
         if (result?.["content-page"] && Array.isArray(result["content-page"])) {
           const contentData: PreviewData[] = result["content-page"].map((item: any, index: number) => ({
             id: `content-${index + 1}`,
@@ -100,8 +102,8 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, generateP
         }
 
         // Handle landing-page data
-        if (result["landing-page"] && Array.isArray(result["landing-page"])) {
-          const landingData: PreviewData[] = result["landing-page"].map((item: any, index: number) => ({
+        if (result?.["landing-page"] && Array.isArray(result?.["landing-page"])) {
+          const landingData: PreviewData[] = result?.["landing-page"].map((item: any, index: number) => ({
             id: `landing-${index + 1}`,
             url: "",
             selector: "body > main",
@@ -117,8 +119,8 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, generateP
         }
 
         // Handle blog-page data
-        if (result["blog-page"] && Array.isArray(result["blog-page"])) {
-          const blogData: PreviewData[] = result["blog-page"].map((item: any, index: number) => ({
+        if (result?.["blog"] && Array.isArray(result?.["blog"])) {
+          const blogData: PreviewData[] = result?.["blog"].map((item: any, index: number) => ({
             id: `blog-${index + 1}`,
             url: "",
             selector: "body > main",
@@ -128,7 +130,7 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, generateP
             createdBy: "System",
             htmlStructure: item.updatedHtmlStructure,
             imageUrl: item.filePath || pageImage,
-            type: "blog-page"
+            type: "blog"
           }));
           setAiGeneratedPages(prev => [...prev, ...blogData]);
         }
@@ -230,7 +232,7 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, generateP
                   />
                 );
               }
-              else if(data.type === "blog-page"){
+              else if(data.type === "blog"){
                 blogPage = {
                   id: data.id,
                   title: "Blog Page",
