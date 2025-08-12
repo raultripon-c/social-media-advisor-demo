@@ -54,10 +54,39 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, generateP
   );
 
   useEffect(() => {
-    // Initialize with API call to generate HTML structure
-    generateHtmlStructure();
-    generateEmailTemplate();
+    const run = async () => {
+      generateHtmlStructure();
+      generatePromptBasedEmailTemplatesInParallel(3);
+    };
+    run();
   }, [generatePages]);
+
+  const generatePromptBasedEmailTemplatesInParallel = async (times: number) => {
+    try {
+      setIsCrmEmailTemplateLoading(true);
+      const locale: string = siteMetaData?.defaultLanguage?.toLowerCase() || "en_us";
+
+      const tasks = Array.from({ length: times }).map(async () => {
+        try {
+          const enhanced = await APIService.enhancePrompt({
+            isEnhancePrompt: true,
+            prompt: promptInput,
+            deviceType: "desktop",
+            language: locale,
+            refNum: selectedTenant.refNum,
+          });
+          const enhancedPromptValue = enhanced?.enhancedPrompt || promptInput;
+          await generateEmailTemplate(enhancedPromptValue, false);
+        } catch (err) {
+          console.error('Parallel enhance/generate failed:', err);
+        }
+      });
+
+      await Promise.allSettled(tasks);
+    } finally {
+      setIsCrmEmailTemplateLoading(false);
+    }
+  };
 
   const generateHtmlStructure = async () => {
     try {
@@ -148,20 +177,24 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, generateP
     }
   };
 
-  const generateEmailTemplate = async () => {
+  const generateEmailTemplate = async (content?: string, manageLoading: boolean = true) => {
     try {
-      setIsCrmEmailTemplateLoading(true);
-      const payload = {
+      const locale: string = siteMetaData?.defaultLanguage?.toLowerCase() || "en_us";
+      const payload: any = {
         recruiterUserId: crmUserInfo?.userDetails?.id,
         displayName: crmUserInfo?.displayName,
         userEmail: crmUserInfo?.userName,
         import: false,
         refNum: selectedTenant.refNum,
       };
-
+      if (content) {
+        payload.content = content;
+        payload.locale = locale;
+        payload.siteVariant = "external";
+      }
 
       let result = await APIService.generateCRMEmailTemplate(payload);
-      const emailTemplateData: PreviewData[] = result?.["response"].map((item: any, index: number) => ({
+      const emailTemplateData: PreviewData[] = result?.["response"]?.map((item: any, index: number) => ({
         id: `email-template-${index + 1}`,
         url: "",
         selector: "",
@@ -172,12 +205,12 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, generateP
         htmlStructure: item.htmlStructure,
         imageUrl: item.filePath || pageImage,
         type: "email-template"
-      }));
-      setAiGeneratedPages(prev => [...prev, ...emailTemplateData]);
+      })) || [];
+      if (emailTemplateData.length > 0) {
+        setAiGeneratedPages(prev => [...prev, ...emailTemplateData]);
+      }
     } catch (error) {
       console.error('Error generating email template:', error);
-    } finally {
-      setIsCrmEmailTemplateLoading(false);
     }
   };
   const handlePreviewClick = (data: PreviewData) => {
@@ -221,15 +254,10 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, generateP
 
   return (
     <>
-    {!showSaveOrDiscardModal && isLoading && isCrmEmailTemplateLoading && (
-        <div className="preview-pages-loading">
-          <div className="loading-spinner"></div>
-          <p>Generating HTML structure...</p>
-        </div>
-      )}
+    
 
     {/* Content Pages Section */}
-    {aiGeneratedPages && aiGeneratedPages.length > 0 && (
+    { aiGeneratedPages && aiGeneratedPages.length > 0 ? (
       <div className="preview-pages-container">
         <div className="cluster-tab-data-container ai-generated">
           
@@ -355,6 +383,13 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, generateP
               })}
             </div>
           )}
+        </div>
+      </div>
+    ): !showSaveOrDiscardModal && (
+      <div className="preview-pages-container">
+        <div className="preview-pages-loading">
+          <div className="loading-spinner"></div>
+          <p>Generating content previews...</p>
         </div>
       </div>
     )}
