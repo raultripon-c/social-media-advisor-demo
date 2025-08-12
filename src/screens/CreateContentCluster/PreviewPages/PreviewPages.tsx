@@ -36,6 +36,7 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, generateP
   const [aiGeneratedPages, setAiGeneratedPages] = useState<PreviewData[]>([]);
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isCrmEmailTemplateLoading, setIsCrmEmailTemplateLoading] = useState(false);
   const [selectedPreview, setSelectedPreview] = useState<PreviewData | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [openSections, setOpenSections] = useState<{ [key: string]: boolean }>({
@@ -55,6 +56,7 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, generateP
   useEffect(() => {
     // Initialize with API call to generate HTML structure
     generateHtmlStructure();
+    generateEmailTemplate();
   }, [generatePages]);
 
   const generateHtmlStructure = async () => {
@@ -146,6 +148,38 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, generateP
     }
   };
 
+  const generateEmailTemplate = async () => {
+    try {
+      setIsCrmEmailTemplateLoading(true);
+      const payload = {
+        recruiterUserId: crmUserInfo?.userDetails?.id,
+        displayName: crmUserInfo?.displayName,
+        userEmail: crmUserInfo?.userName,
+        import: false,
+        refNum: selectedTenant.refNum,
+      };
+
+
+      let result = await APIService.generateCRMEmailTemplate(payload);
+      const emailTemplateData: PreviewData[] = result?.["response"].map((item: any, index: number) => ({
+        id: `email-template-${index + 1}`,
+        url: "",
+        selector: "",
+        upload: false,
+        title: `Email Template ${index + 1}`,
+        createdAt: new Date().toISOString().split('T')[0],
+        createdBy: "System",
+        htmlStructure: item.htmlStructure,
+        imageUrl: item.filePath || pageImage,
+        type: "email-template"
+      }));
+      setAiGeneratedPages(prev => [...prev, ...emailTemplateData]);
+    } catch (error) {
+      console.error('Error generating email template:', error);
+    } finally {
+      setIsCrmEmailTemplateLoading(false);
+    }
+  };
   const handlePreviewClick = (data: PreviewData) => {
     // Set the selected preview with HTML structure for PreviewView
     setSelectedPreview(data);
@@ -173,7 +207,8 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, generateP
         pageData={{
           ...selectedPreview,
           htmlStructure: selectedPreview.htmlStructure,
-          title: selectedPreview.title || "HTML Preview"
+          title: selectedPreview.title || "HTML Preview",
+          edit: false
         }}
         onBack={handleBackFromPreview}
         crmUserInfo={crmUserInfo}
@@ -186,7 +221,7 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, generateP
 
   return (
     <>
-    {!showSaveOrDiscardModal && isLoading && (
+    {!showSaveOrDiscardModal && isLoading && isCrmEmailTemplateLoading && (
         <div className="preview-pages-loading">
           <div className="loading-spinner"></div>
           <p>Generating HTML structure...</p>
@@ -197,6 +232,7 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, generateP
     {aiGeneratedPages && aiGeneratedPages.length > 0 && (
       <div className="preview-pages-container">
         <div className="cluster-tab-data-container ai-generated">
+          
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',width: '100%' }}>
             <p className="cluster-tab-data-subheading">AI Generated Pages</p>
             <img
@@ -212,10 +248,16 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, generateP
               onClick={() => toggleSection('contentPages')}
             />
           </div>
+          {!showSaveOrDiscardModal && isLoading && (
+          <div className="preview-pages-loading">
+            <div className="loading-spinner"></div>
+            <p>Generating content previews...</p>
+          </div>
+          )}
           {openSections['contentPages'] !== false && (
             <div className="cluster-detail-card-container" style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
               {aiGeneratedPages.map((data, index) => {
-                let contentPage = null, blogPage = null, landingPage = null;
+                let blogPage = null, landingPage = null;
                 if(data.type === "content-page"){
                 const contentPage = {
                   id: data.id,
@@ -260,6 +302,52 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, generateP
                   <ClusterDetailCard
                     key={data.id}
                     aiLandingPage={landingPage}
+                    setPreviewDiv={handlePreviewOpen}
+                  />
+                );
+              }
+              })}
+            </div>
+          )}
+        </div>
+        <div className="cluster-tab-data-container ai-generated">
+          {!showSaveOrDiscardModal && isCrmEmailTemplateLoading && (
+          <div className="preview-pages-loading">
+            <div className="loading-spinner"></div>
+            <p>Generating email templates...</p>
+          </div>
+          )}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',width: '100%' }}>
+            <p className="cluster-tab-data-subheading">AI Generated Email Templates</p>
+            <img
+              src={arrowUp}
+              alt="Toggle"
+              style={{
+                width: 24,
+                height: 24,
+                transform: openSections['emailTemplates'] === true ? 'rotate(0deg)' : 'rotate(180deg)',
+                cursor: 'pointer',
+                transition: 'transform 0.2s',
+              }}
+              onClick={() => toggleSection('emailTemplates')}
+            />
+          </div>
+          {openSections['emailTemplates'] !== false && (
+            <div className="cluster-detail-card-container" style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
+              {aiGeneratedPages.map((data, index) => {
+                if(data.type === "email-template") {
+                const emailTemplate = {
+                  id: data.id,
+                  templateName: "Email Template",
+                  createdDate: data.createdAt,
+                  avatarUrl: data.imageUrl,
+                  htmlStructure: data.htmlStructure,
+                  title: "Email Template"
+                };
+                return (
+                  <ClusterDetailCard
+                    key={data.id}
+                    emailTemplate={emailTemplate}
                     setPreviewDiv={handlePreviewOpen}
                   />
                 );

@@ -18,9 +18,10 @@ interface PreviewViewProps {
     contentType?: string;
     isCheckingTaskProgress?: boolean;
     className?: string;
+    edit?: boolean;
 }
 
-const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo, contentType, isCheckingTaskProgress, className}) => {
+const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo, contentType, isCheckingTaskProgress, className, edit}) => {
     const navigate = useNavigate();
     const [currentUrl, setCurrentUrl] = useState<string>("");
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -235,10 +236,12 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
                 </div>
                 <div className="preview-header-right">
 
-                    <button className="preview-btn preview-btn-edit" onClick={handleEditClick}>
-                        <img src={editIcon} alt="Edit" />
-                        <span>Edit</span>
-                    </button>
+                    {edit && (
+                        <button className="preview-btn preview-btn-edit" onClick={handleEditClick}>
+                            <img src={editIcon} alt="Edit" />
+                            <span>Edit</span>
+                        </button>
+                    )}
                 </div>
             </div>
 
