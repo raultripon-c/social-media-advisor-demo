@@ -368,17 +368,17 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
     getListItems(searchTerm);
   };
 
-  const handlePromptSubmit = () => {
-    setGeneratePages(generatePages+1);
+  const handlePromptSubmit = async () => {
     if (promptInput) {
       setShowSaveOrDiscardModal(true);
       setFetchedPages(null);
       // handleClusterCreation();
-      handlePromptBasedSuggestions();
+      await handlePromptBasedSuggestions();
+      setGeneratePages(generatePages+1);
     }
   };
 
-  const handlePromptBasedSuggestions = () => {
+  const handlePromptBasedSuggestions = async () => {
     setShowLoader(true);
     const payload =  [
         {
@@ -391,12 +391,14 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       prompt: promptInput,
     }
     
-    // Call both APIs in parallel
-    Promise.all([
-      getPromptBasedSuggestions(payload),
-      generateClusterName(clusterPayload)
-      // getSuggestedLists()
-    ]).then(([promptResponse, clusterNameResponse]) => {
+    try {
+      // Call both APIs in parallel
+      const [promptResponse, clusterNameResponse] = await Promise.all([
+        getPromptBasedSuggestions(payload),
+        generateClusterName(clusterPayload)
+        // getSuggestedLists()
+      ]);
+      
       // Handle prompt based suggestions response
       if (promptResponse?.masterPrompt && jobLink) {
         setPromptInput(promptResponse.masterPrompt);
@@ -449,11 +451,11 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       setShowPromptSuggestions(true);
         
       console.log("Prompt Based Suggestions", promptResponse);
-    }).catch((err) => {
+    } catch (err) {
       console.error("Error fetching data:", err);
       setShowSaveOrDiscardModal(false);
       setShowLoader(false);
-    });
+    }
   }
   const handleClusterCreate = async () => {
     // Simple validation: check if title is empty when in edit mode

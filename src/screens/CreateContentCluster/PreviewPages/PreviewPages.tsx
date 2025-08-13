@@ -59,6 +59,9 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, generateP
       generatePromptBasedEmailTemplatesInParallel(3);
     };
     run();
+    return () => {
+      setAiGeneratedPages([]);
+    };
   }, [generatePages]);
 
   const generatePromptBasedEmailTemplatesInParallel = async (times: number) => {
