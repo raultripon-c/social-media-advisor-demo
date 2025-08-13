@@ -52,6 +52,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
   const [sampleSelectionListItems, setSampleSelectionListItems] = useState<string[]>([]);
   const [showPromptSuggestions, setShowPromptSuggestions] = useState<boolean>(false);
   const [crmUserInfo, setCrmUserInfo] = useState<any>({});
+  const [selectedCards, setSelectedCards] = useState<string[]>([]);
   const [selectedContentTypes, setSelectedContentTypes] = useState<string[]>([]);
   const [addedurls, setAddedurls] = useState<string[]>([]);
   const [selectedContentId, setSelectedContentId] = useState<any[]>([]);
@@ -79,8 +80,8 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
   const clusterTitleInputRef = useRef<HTMLInputElement>(null);
   const [pagesBasedKeywords, setPagesBasedKeywords] = useState<any>([]);
   const [masterPrompt, setMasterPrompt] = useState<any>("");
-
-  
+  const [newCluster, setNewCluster] = useState<any>(null);
+  const [isClusterCreated, setIsClusterCreated] = useState<boolean>(false);
   // Scroll to input when there's an error
   useEffect(() => {
     if (clusterTitleError && clusterTitleInputRef.current) {
@@ -89,13 +90,15 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
     }
   }, [clusterTitleError]);
   
-  const saveContentCluster = (payload: any) => {
-    APIService.createContentCluster(payload).then((clusterDetail) => {
+  const saveContentCluster = async (payload: any, isNavigate: boolean = true) => {
+    await APIService.createContentCluster(payload).then((clusterDetail) => {
       console.log("Content Cluster created:", clusterDetail);
       setShowLoader(false);
       setShowSaveOrDiscardModal(false);
-
-      navigateToClusterDetails(clusterDetail);
+      setNewCluster(clusterDetail);
+      if(isNavigate){
+        navigateToClusterDetails(clusterDetail);
+      }
     }).catch((error) => {
       console.error("Error creating content cluster:", error);
       setShowLoader(false);
@@ -444,6 +447,9 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       if (!clusterTitleName.trim()) {
         setUpdateClusterTitle(true);
       }
+      if(!isClusterCreated){
+        await clusterCreation(clusterTitleName);
+      }
       setShowLoader(false);
       setIsPromptSubmitted(true);
       setShowSaveOrDiscardModal(false);
@@ -508,7 +514,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       // If validation passes, proceed with cluster creation
       // setShowLoader(true);
       // setShowSaveOrDiscardModal(true);
-      
+      console.log("selectedCards", selectedCards);
       const res = await createCluster();
       console.log("res", res);
       
@@ -566,6 +572,50 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       console.error("Error creating cluster:", error);
       setShowLoader(false);
       setShowSaveOrDiscardModal(false);
+    }
+  }
+
+  const clusterCreation = async (clusterTitleName: string) => {
+    // Simple validation: check if title is empty when in edit mode
+    const isTitleEmpty = !clusterTitle.trim();
+    const isInEditMode = editClusterTitle;
+    
+    if (isInEditMode && isTitleEmpty) {
+      setClusterTitleError(true);
+      setUpdateClusterTitle(true); // Navigate to edit section
+      // Focus on the cluster title input when validation fails
+      if (clusterTitleInputRef.current) {
+        clusterTitleInputRef.current.focus();
+      }
+      return;
+    }
+    
+    setShowLoader(true);
+    setShowSaveOrDiscardModal(true);
+    setClusterTitleError(false);
+    
+    // Validate cluster name first
+    try {
+      const clusterData = {
+        refNum: selectedTenant.refNum,
+        locale,
+        siteVariant: "external",
+        contentPages: fetchedPages?.contentPages, 
+        landingPages: fetchedPages?.landingPages,
+        blogs: fetchedPages?.blogs,
+        clusterTitle: promptInput,
+        clusterName: clusterTitleName,
+        selectedLists: selectedListsData,
+      };
+      
+      // Save the cluster
+      await saveContentCluster(clusterData, false);
+      setIsClusterCreated(true);
+    } catch (error) {
+      console.error("Error creating cluster:", error);
+      setShowLoader(false);
+      setShowSaveOrDiscardModal(false);
+      setIsClusterCreated(false);
     }
   }
   const handleClusterCreation = () => {
@@ -750,6 +800,9 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
                 if (e.key === 'Enter') {
                   setUpdateClusterTitle(false);
                   setClusterTitleError(false);
+                  if(!isClusterCreated){
+                    clusterCreation(clusterTitle);
+                  }
                 }
               }}
               onClick={() => {
@@ -775,6 +828,9 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
               }
               setUpdateClusterTitle(false);
               setClusterTitleError(false);
+              if(!isClusterCreated){
+                clusterCreation(clusterTitle);
+              }
             }}>Done</button>
           )}
            
@@ -908,10 +964,11 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
               </div>
             </div>
             )}
+            <PreviewPages selectedCards={selectedCards} setSelectedCards={setSelectedCards} key={generatePages} pagesBasedKeywords={pagesBasedKeywords} promptInput={masterPrompt} showSaveOrDiscardModal={showSaveOrDiscardModal} newCluster={newCluster}/>
+              {/* <div className="prompt-suggestions content-format-section">
             <PreviewPages key={generatePages} pagesBasedKeywords={pagesBasedKeywords} promptInput={masterPrompt} showSaveOrDiscardModal={showSaveOrDiscardModal}/>
             <div className="prompt-suggestions content-format-section">
               <div className="prompt-suggestions-heading">Recommended content formats</div>
-              {/* Suggested Content Tags */}
               <div className="content-tag-wrapper">
               <div className="suggested-tags-section">
                 <div className="suggested-tags-heading">Suggested Content Tags</div>
@@ -929,58 +986,6 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
                   ))}
                 </div>
               </div>
-              {/* Search Content Tags */}
-              {/* <div className="search-tags-section">
-                <div className="search-tags-heading">Search Content Tags</div>
-                <div className="search-tags-container">
-                  <input
-                    type="text"
-                    className="tag-search-input"
-                    placeholder="Search Content Tags"
-                    value={searchTagTerm}
-                    onChange={handleSearchInputChange}
-                    onFocus={() => setShowTagDropdown(true)}
-                    onBlur={handleSearchInputBlur}
-                  />
-                  {searchTagTerm && (
-                    <button
-                      type="button"
-                      className="tag-search-clear"
-                      onClick={() => setSearchTagTerm("")}
-                    >
-                      ×
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    className="tag-add-btn"
-                    onClick={() => {
-                      if (searchTagTerm && !selectedTags.includes(searchTagTerm)) {
-                        setSelectedTags([...selectedTags, searchTagTerm]);
-                        setSearchTagTerm("");
-                      }
-                    }}
-                  >
-                    + Add
-                  </button>
-                </div>
-                {/* Dropdown for search suggestions */}
-                {/* 
-                {showTagDropdown && filteredTagSuggestions.length > 0 && (
-                  <div className="content-tag-autocomplete-dropdown">
-                    {filteredTagSuggestions.map((tag) => (
-                      <div
-                        key={tag}
-                        className="content-tag-autocomplete-item"
-                        onMouseDown={() => handleSearchTagSelect(tag)}
-                      >
-                        {tag}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div> */}
-              {/* Added Tags */}
               {selectedTags.length > 0 && (
               <div className="added-tags-section">
                 <div className="added-tags-heading">Added Tags</div>
@@ -1001,7 +1006,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
               </div>
               )}
             </div>
-            </div>
+            </div> */}
             <div style={{ display: "flex", justifyContent: "flex-end" }}>
               <button 
                 className={`generate-cluster-btn${selectedContentId.length === 0 ? " disabled" : ""}`} 

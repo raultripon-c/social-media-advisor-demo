@@ -26,6 +26,12 @@ interface ClusterDetailCardProps {
   createdEmailTemplate?: any;
   aiLandingPage?: any;
   setPreviewDiv?: (pageData: any, contentType: string) => void;
+  cardTag?: boolean;
+  showStatus?: boolean;
+  showDate?: boolean;
+  isSelected?: boolean;
+  onSelect?: (isSelected: boolean) => void;
+  selectable?: boolean;
 }
 
 // This component is responsible for just showing details of the cluster
@@ -40,6 +46,12 @@ const ClusterDetailCard: React.FC<ClusterDetailCardProps> = ({
   createdEmailTemplate,
   aiLandingPage,
   setPreviewDiv,
+  cardTag = true,
+  showStatus = true,
+  showDate = true,
+  isSelected = false,
+  onSelect,
+  selectable = false
 }) => {
 
   const getStatusColor = (status: string) => {
@@ -107,8 +119,25 @@ const ClusterDetailCard: React.FC<ClusterDetailCardProps> = ({
     return getContentData().type;
   };
   return (
-    <div className="cluster-detail-card" title={getContentTypeName()}>
+    <div className={`cluster-detail-card ${isSelected ? 'selected' : ''}`} title={getContentTypeName()}>
       <div className="cluster-detail-card-image">
+        {/* Selection Checkbox - positioned over the image */}
+        {selectable && (
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={(e) => onSelect && onSelect(e.target.checked)}
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              cursor: 'pointer',
+              position: 'absolute',
+              top: '10px',
+              left: '10px',
+              zIndex: 20,
+              transform: 'scale(1.2)'
+            }}
+          />
+        )}
         <img
           src={
             aiContentPage?.avatarUrl ||
@@ -126,6 +155,7 @@ const ClusterDetailCard: React.FC<ClusterDetailCardProps> = ({
           height={"200px"}
           width={"200px"}
         />
+        {cardTag && (
           <span className={aiBlog || aiContentPage || aiLandingPage || createdEmailTemplate ? "cluster-detail-card-label-ai" : "cluster-detail-card-label"}>
           {aiBlog || aiContentPage || aiLandingPage || createdEmailTemplate ? (
             <img src={aiTag} alt="AI Tag" style={{ height: 24 }} />
@@ -133,7 +163,7 @@ const ClusterDetailCard: React.FC<ClusterDetailCardProps> = ({
           "Manual"
           )}
         </span>
-
+        )}
       </div>
       <div className="cluster-detail-card-content">
         <div className="cluster-detail-card-title-row" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -157,12 +187,22 @@ const ClusterDetailCard: React.FC<ClusterDetailCardProps> = ({
         </div>
         {/* Status and Date Row */}
         <div className="cluster-detail-card-status-row" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '8px 0 16px 0' }}>
-          <span style={{ width: 10, height: 10, background: getStatusColor(contentPage?.status || landingPage?.status || aiLandingPage?.status || emailTemplate?.status || createdEmailTemplate?.status || aiBlog?.status || aiContentPage?.status || blog?.status || "1"), borderRadius: '50%', display: 'inline-block' }}></span>
-          <span className="cluster-detail-card-status-text">{contentPage?.status || landingPage?.status || aiLandingPage?.status || emailTemplate?.status || createdEmailTemplate?.status || aiBlog?.status || aiContentPage?.status || blog?.status || "Published"}</span>
-          <span style={{ color: '#aaa', fontSize: '0.95rem' }}>|</span>
-          <span className="cluster-detail-card-status-text">
-            Created {getContentCreatedDate() ? getContentCreatedDate() : ""}
-          </span>
+          {showStatus && (
+            <>
+              <span style={{ width: 10, height: 10, background: getStatusColor(contentPage?.status || landingPage?.status || aiLandingPage?.status || emailTemplate?.status || createdEmailTemplate?.status || aiBlog?.status || aiContentPage?.status || blog?.status || "1"), borderRadius: '50%', display: 'inline-block' }}></span>
+              <span className="cluster-detail-card-status-text">{contentPage?.status || landingPage?.status || aiLandingPage?.status || emailTemplate?.status || createdEmailTemplate?.status || aiBlog?.status || aiContentPage?.status || blog?.status || "Published"}</span>
+              </>
+          )}
+          {showStatus && showDate && (
+            
+              <span style={{ color: '#aaa', fontSize: '0.95rem' }}>|</span>
+          )}
+           
+          {showDate && (
+            <span className="cluster-detail-card-status-text">
+              Created {getContentCreatedDate() ? getContentCreatedDate() : ""}
+            </span>
+          )}
         </div>
         <div className="cluster-detail-card-footer">
           {/* <span className="cluster-detail-card-score-badge">

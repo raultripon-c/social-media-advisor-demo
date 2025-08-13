@@ -190,7 +190,7 @@
   width: 60%;
   height: 100%;
   background: #ffffff;
-  min-height: 600px;
+  /* min-height: 600px; */
   max-height: calc(100vh - 120px);
   overflow: hidden;
   border-radius: 8px;

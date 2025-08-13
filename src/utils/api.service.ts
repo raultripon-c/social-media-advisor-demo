@@ -705,6 +705,18 @@ export const APIService = {
       return null;
     }
   },
+
+  updateCluster: async (payload: any) => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/content-cluster/update/${payload.clusterId}`;
+      const response = await API.put(url, payload, { withCredentials: false });
+      return response.data.data;
+    }
+    catch (error) {
+      console.error('Error creating content cluster:', error);
+      return null;
+    }
+  },
   
 
   createAIPages: async (payload: any) => {
@@ -814,29 +826,6 @@ export const APIService = {
       return null
     }
   },
-
-  // generateHtmlStructure: async (payload: any) => {
-  //   try {
-  //     const url = 'http://localhost:9100/canvas/generateHtmlStructure';
-  //     const response = await fetch(url, {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify(payload)
-  //     });
-
-  //     if (response.status !== 200) {
-  //       throw new Error(`HTTP error! status: ${response.status}`);
-  //     }
-  //     const result = await response.json();
-  //     return result;
-  //   }
-  //   catch (error) {
-  //     console.error('Error generating HTML structure:', error);
-  //     throw error;
-  //   }
-  // }
 
   generateHtmlStructure: async (payload: any) => {
     try {

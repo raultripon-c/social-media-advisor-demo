@@ -12,6 +12,7 @@ import "../../ContentClusterDetails/ClusterDetailCard/ClusterDetailCard.css";
 import "../../ContentClusterDetails/ContentClusterDetails.css";
 import { getRefnumFromLink } from "../../../utils/appUtils";
 import { toast } from "react-toastify";
+import { update } from "lodash";
 import { CMS_PAGE_TYPES, CMSPageType, CMS_PAGE_TYPE_META } from "../../../utils/constants";
 
 interface PreviewData {
@@ -26,19 +27,24 @@ interface PreviewData {
   createdAt?: string;
   createdBy?: string;
   type?: string;
+
 }
 
 interface PreviewPagesProps {
   pagesBasedKeywords: any;
   promptInput: any;
   showSaveOrDiscardModal: any;
+  selectedCards: any;
+  setSelectedCards: any;
+  newCluster: any;
 }
 
-export default function PreviewPages({pagesBasedKeywords, promptInput, showSaveOrDiscardModal}: PreviewPagesProps) {
+export default function PreviewPages({ pagesBasedKeywords, promptInput, showSaveOrDiscardModal, selectedCards, setSelectedCards, newCluster }: PreviewPagesProps) {
   const [aiGeneratedPages, setAiGeneratedPages] = useState<PreviewData[]>([]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [isCrmEmailTemplateLoading, setIsCrmEmailTemplateLoading] = useState(false);
+  const [emailTemplateResults, setEmailTemplateResults] = useState<any[]>([]);
   const [cmsHtmlByType, setCmsHtmlByType] = useState<Partial<Record<CMSPageType, string>>>({});
   const [selectedPreview, setSelectedPreview] = useState<PreviewData | null>(null);
   const [showPreview, setShowPreview] = useState(false);
@@ -48,7 +54,6 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, showSaveO
     landingPages: true,
     blogPages: true
   });
-
   const selectedTenant = JSON.parse(localStorage.getItem("selectedTenant") || "[]");
   const crmUserInfo = useSelector((state: AppStore) => state.customer.crmUserInfo);
 
@@ -56,9 +61,10 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, showSaveO
     (state: AppStore) => state.customer.siteMetaData
   );
 
+
   useEffect(() => {
     const run = async (generateCmsAiPages: boolean) => {
-      if ( generateCmsAiPages ) {
+      if (generateCmsAiPages) {
         generateCmsAiPreviewPagesAllTypesInParallel();
       } else {
         generateHtmlStructure();
@@ -72,6 +78,7 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, showSaveO
     try {
       setIsCrmEmailTemplateLoading(true);
       const locale: string = siteMetaData?.defaultLanguage?.toLowerCase() || "en_us";
+      const emailTemplateResults: any[] = [];
 
       const tasks = Array.from({ length: times }).map(async () => {
         try {
@@ -83,16 +90,45 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, showSaveO
             refNum: selectedTenant.refNum,
           });
           const enhancedPromptValue = enhanced?.enhancedPrompt || promptInput;
-          await generateEmailTemplate(enhancedPromptValue, false);
+          let id = `${Math.random().toString(36).slice(2, 9)}`;
+
+          const result = await generateEmailTemplate(enhancedPromptValue, false, id);
+          if (result) {
+            setEmailTemplateResults(prev => [...prev, { id: id, emailTemplatePreview: JSON.stringify(result) }]);
+            emailTemplateResults.push({ id: id, emailTemplatePreview: JSON.stringify(result) });
+          }
         } catch (err) {
           console.error('Parallel enhance/generate failed:', err);
         }
       });
 
       await Promise.allSettled(tasks);
+      updateClusterWithEmailTemplates(emailTemplateResults);
+
+      // Call updateCluster after all tasks are completed
     } finally {
       setIsCrmEmailTemplateLoading(false);
     }
+  };
+
+  const updateCluster = async (payload: any) => {
+    try {
+      await APIService.updateCluster(payload);
+    } catch (error) {
+      console.error('Error updating cluster:', error);
+      toast.error("Error updating cluster");
+    }
+  };
+
+  const updateClusterWithEmailTemplates = async (emailTemplateResults: any[], isCreatedTemplate: boolean = false) => {
+    const payload = {
+      clusterId: newCluster.clusterId,
+      ...(isCreatedTemplate
+        ? { createdEmailTemplate: emailTemplateResults, flag: true }
+        : { emailTemplatePreview: emailTemplateResults, flag: true }
+      )
+    };
+    await updateCluster(payload);
   };
 
   const generateHtmlStructure = async () => {
@@ -109,7 +145,7 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, showSaveO
         url: "https://" + siteMetaDataResp?.domain + "/",
         selector: "body > main",
         upload: true,
-        language: siteMetaData?.defaultLanguage?.toLowerCase()|| "en_us",
+        language: siteMetaData?.defaultLanguage?.toLowerCase() || "en_us",
         pageTypes: Object.values(CMS_PAGE_TYPES),
         aiVoiceTone: "friendly",
         aiMetaData: {
@@ -119,13 +155,13 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, showSaveO
 
       // Call the canvas API using APIService
       let result = await APIService.generateHtmlStructure(payload);
-      
+
       if (result?.data) {
         // Handle content-page data
         result = result.data;
         if (result?.[CMS_PAGE_TYPES.CONTENT_PAGE] && Array.isArray(result[CMS_PAGE_TYPES.CONTENT_PAGE])) {
           const contentData: PreviewData[] = result[CMS_PAGE_TYPES.CONTENT_PAGE].map((item: any, index: number) => ({
-            id: `${CMS_PAGE_TYPES.CONTENT_PAGE}-${Date.now()}-${Math.random().toString(36).slice(2,8)}`,
+            id: `${CMS_PAGE_TYPES.CONTENT_PAGE}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
             url: "",
             selector: "body > main",
             upload: false,
@@ -142,7 +178,7 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, showSaveO
         // Handle landing-page data
         if (result?.[CMS_PAGE_TYPES.LANDING_PAGE] && Array.isArray(result?.[CMS_PAGE_TYPES.LANDING_PAGE])) {
           const landingData: PreviewData[] = result?.[CMS_PAGE_TYPES.LANDING_PAGE].map((item: any, index: number) => ({
-            id: `${CMS_PAGE_TYPES.LANDING_PAGE}-${Date.now()}-${Math.random().toString(36).slice(2,8)}`,
+            id: `${CMS_PAGE_TYPES.LANDING_PAGE}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
             url: "",
             selector: "body > main",
             upload: false,
@@ -159,7 +195,7 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, showSaveO
         // Handle blog-page data
         if (result?.[CMS_PAGE_TYPES.BLOG] && Array.isArray(result?.[CMS_PAGE_TYPES.BLOG])) {
           const blogData: PreviewData[] = result?.[CMS_PAGE_TYPES.BLOG].map((item: any, index: number) => ({
-            id: `${CMS_PAGE_TYPES.BLOG}-${Date.now()}-${Math.random().toString(36).slice(2,8)}`,
+            id: `${CMS_PAGE_TYPES.BLOG}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
             url: "",
             selector: "body > main",
             upload: false,
@@ -202,7 +238,7 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, showSaveO
       const htmlString = await ensureHtmlForType(pageType);
       const { displayName, idPrefix } = CMS_PAGE_TYPE_META[pageType];
       const item: PreviewData = {
-        id: `${idPrefix}-${Date.now()}-${Math.random().toString(36).slice(2,8)}`,
+        id: `${idPrefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         url: htmlString ? "" : url,
         selector: "body > main",
         upload: false,
@@ -237,7 +273,7 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, showSaveO
     }
   };
 
-  const generateEmailTemplate = async (content?: string, manageLoading: boolean = true) => {
+  const generateEmailTemplate = async (content?: string, manageLoading: boolean = true, id: string = "") => {
     try {
       const locale: string = siteMetaData?.defaultLanguage?.toLowerCase() || "en_us";
       const payload: any = {
@@ -255,11 +291,11 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, showSaveO
 
       let result = await APIService.generateCRMEmailTemplate(payload);
       const emailTemplateData: PreviewData[] = result?.["response"]?.map((item: any, index: number) => ({
-        id: `email-template-${Date.now()}-${Math.random().toString(36).slice(2,8)}`,
+        id: id,
         url: "",
         selector: "",
         upload: false,
-        title: `Email Template ${index + 1}`,
+        title: `Email Template`,
         createdAt: new Date().toISOString().split('T')[0],
         createdBy: "System",
         htmlStructure: item.htmlStructure,
@@ -269,8 +305,10 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, showSaveO
       if (emailTemplateData.length > 0) {
         setAiGeneratedPages(prev => [...prev, ...emailTemplateData]);
       }
+      return result.response[0];
     } catch (error) {
       console.error('Error generating email template:', error);
+      return null;
     }
   };
   const handlePreviewClick = (data: PreviewData) => {
@@ -283,7 +321,26 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, showSaveO
     setShowPreview(false);
     setSelectedPreview(null);
   };
-
+  const handleSelect = (isSelected: boolean, cardId: string) => {
+    setSelectedCards((prev: any) => {
+      if (isSelected) {
+        // Find the card being selected to get its type
+        const selectedCard = aiGeneratedPages.find(card => card.id === cardId);
+        if (selectedCard) {
+          // Remove any existing card of the same type
+          const filteredCards = prev.filter((id: any) => {
+            const existingCard = aiGeneratedPages.find(card => card.id === id);
+            return existingCard?.type !== selectedCard.type;
+          });
+          // Add the new selection
+          return [...filteredCards, cardId];
+        }
+        return [...prev, cardId];
+      } else {
+        return prev.filter((id: any) => id !== cardId);
+      }
+    });
+  };
   const handlePreviewOpen = (pageData: any, contentType: string = "") => {
     setSelectedPreview(pageData);
     setShowPreview(true);
@@ -307,158 +364,183 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, showSaveO
         crmUserInfo={crmUserInfo}
         contentType={selectedPreview.contentType}
         isCheckingTaskProgress={false}
-        className="preview-pages-container-preview"
+        className={` ${selectedPreview.type == "email-template" ? "" : "preview-pages-container-preview"}`}
       />
     );
   }
 
   return (
     <>
-    
 
-    {/* Content Pages Section */}
-    { aiGeneratedPages && aiGeneratedPages.length > 0 ? (
-      <div className="preview-pages-container">
-        <div className="cluster-tab-data-container ai-generated">
-          
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',width: '100%' }}>
-            <p className="cluster-tab-data-subheading">AI Generated Pages</p>
-            <img
-              src={arrowUp}
-              alt="Toggle"
-              style={{
-                width: 24,
-                height: 24,
-                transform: openSections['contentPages'] === true ? 'rotate(0deg)' : 'rotate(180deg)',
-                cursor: 'pointer',
-                transition: 'transform 0.2s',
-              }}
-              onClick={() => toggleSection('contentPages')}
-            />
+
+      {/* Content Pages Section */}
+      {aiGeneratedPages && aiGeneratedPages.length > 0 ? (
+        <div className="preview-pages-container">
+          <div className="cluster-tab-data-container ai-generated">
+
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+              <p className="cluster-tab-data-subheading">AI Generated Pages</p>
+              <img
+                src={arrowUp}
+                alt="Toggle"
+                style={{
+                  width: 24,
+                  height: 24,
+                  transform: openSections['contentPages'] === true ? 'rotate(0deg)' : 'rotate(180deg)',
+                  cursor: 'pointer',
+                  transition: 'transform 0.2s',
+                }}
+                onClick={() => toggleSection('contentPages')}
+              />
+            </div>
+            {!showSaveOrDiscardModal && isLoading && (
+              <div className="preview-pages-loading">
+                <div className="loading-spinner"></div>
+                <p>Generating content previews...</p>
+              </div>
+            )}
+            {openSections['contentPages'] !== false && (
+              <div className="cluster-detail-card-container" style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
+                {aiGeneratedPages.map((data, index) => {
+                  const pageType = data.type;
+                  if (data.type === CMS_PAGE_TYPES.CONTENT_PAGE) {
+                    const contentPage = {
+                      id: data.id,
+                      name: CMS_PAGE_TYPE_META[pageType as CMSPageType].displayName,
+                      createdDate: data.createdAt,
+                      avatarUrl: data.imageUrl,
+                      htmlStructure: data.htmlStructure,
+                      url: data.url,
+                      contentType: data.url ? CMS_PAGE_TYPES.CONTENT_PAGE : "HtmlPreview"
+                    };
+                    return (
+                      <ClusterDetailCard
+                        key={data.id}
+                        aiContentPage={contentPage}
+                        setPreviewDiv={handlePreviewOpen}
+                        cardTag={false}
+                        showStatus={false}
+                        showDate={false}
+                        selectable={true}
+                        isSelected={selectedCards.includes(data.id)}
+                        onSelect={(isSelected: boolean) => handleSelect(isSelected, data.id)}
+                      />
+                    );
+                  }
+                  else if (data.type === CMS_PAGE_TYPES.BLOG) {
+                    const blogPage = {
+                      id: data.id,
+                      title: CMS_PAGE_TYPE_META[pageType as CMSPageType].displayName,
+                      createdDate: data.createdAt,
+                      avatarUrl: data.imageUrl,
+                      htmlStructure: data.htmlStructure,
+                      url: data.url,
+                      contentType: CMS_PAGE_TYPES.BLOG
+                    };
+                    return (
+                      <ClusterDetailCard
+                        key={data.id}
+                        aiBlog={blogPage}
+                        setPreviewDiv={handlePreviewOpen}
+                        cardTag={false}
+                        showStatus={false}
+                        showDate={false}
+                        selectable={true}
+                        isSelected={selectedCards.includes(data.id)}
+                        onSelect={(isSelected: boolean) => handleSelect(isSelected, data.id)}
+                      />
+                    );
+                  }
+                  else if (data.type === CMS_PAGE_TYPES.LANDING_PAGE) {
+                    const landingPage = {
+                      id: data.id,
+                      name: CMS_PAGE_TYPE_META[pageType as CMSPageType].displayName,
+                      createdDate: data.createdAt,
+                      avatarUrl: data.imageUrl,
+                      htmlStructure: data.htmlStructure,
+                      url: data.url,
+                      contentType: data.url ? CMS_PAGE_TYPES.LANDING_PAGE : "HtmlPreview"
+                    };
+                    return (
+                      <ClusterDetailCard
+                        key={data.id}
+                        aiLandingPage={landingPage}
+                        setPreviewDiv={handlePreviewOpen}
+                        cardTag={false}
+                        showStatus={false}
+                        showDate={false}
+                        selectable={true}
+                        onSelect={(isSelected: boolean) => handleSelect(isSelected, data.id)}
+                        isSelected={selectedCards.includes(data.id)}
+                      />
+                    );
+                  }
+                })}
+              </div>
+            )}
           </div>
-          {!showSaveOrDiscardModal && isLoading && (
+          <div className="cluster-tab-data-container ai-generated">
+            {!showSaveOrDiscardModal && isCrmEmailTemplateLoading && (
+              <div className="preview-pages-loading">
+                <div className="loading-spinner"></div>
+                <p>Generating email templates...</p>
+              </div>
+            )}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+              <p className="cluster-tab-data-subheading">AI Generated Email Templates</p>
+              <img
+                src={arrowUp}
+                alt="Toggle"
+                style={{
+                  width: 24,
+                  height: 24,
+                  transform: openSections['emailTemplates'] === true ? 'rotate(0deg)' : 'rotate(180deg)',
+                  cursor: 'pointer',
+                  transition: 'transform 0.2s',
+                }}
+                onClick={() => toggleSection('emailTemplates')}
+              />
+            </div>
+            {openSections['emailTemplates'] !== false && (
+              <div className="cluster-detail-card-container" style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
+                {aiGeneratedPages.map((data, index) => {
+                  if (data.type === "email-template") {
+                    const emailTemplate = {
+                      id: data.id,
+                      templateName: "Email Template",
+                      createdDate: data.createdAt,
+                      avatarUrl: data.imageUrl,
+                      htmlStructure: data.htmlStructure,
+                      title: "Email Template",
+                      type: "email-template"
+                    };
+                    return (
+                      <ClusterDetailCard
+                        key={data.id}
+                        createdEmailTemplate={emailTemplate}
+                        setPreviewDiv={handlePreviewOpen}
+                        cardTag={false}
+                        showStatus={false}
+                        showDate={false}
+                        selectable={true}
+                        onSelect={(isSelected: boolean) => handleSelect(isSelected, data.id)}
+                        isSelected={selectedCards.includes(data.id)}
+                      />
+                    );
+                  }
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      ) : !showSaveOrDiscardModal && (
+        <div className="preview-pages-container">
           <div className="preview-pages-loading">
             <div className="loading-spinner"></div>
             <p>Generating content previews...</p>
           </div>
-          )}
-          {openSections['contentPages'] !== false && (
-            <div className="cluster-detail-card-container" style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
-              {aiGeneratedPages.map((data, index) => {
-                const pageType = data.type;
-                if(data.type === CMS_PAGE_TYPES.CONTENT_PAGE){
-                const contentPage = {
-                  id: data.id,
-                  name: CMS_PAGE_TYPE_META[pageType as CMSPageType].displayName,
-                  createdDate: data.createdAt,
-                  avatarUrl: data.imageUrl,
-                  htmlStructure: data.htmlStructure,
-                  url: data.url,
-                  contentType: data.url ? CMS_PAGE_TYPES.CONTENT_PAGE : "HtmlPreview"
-                };
-                return (
-                  <ClusterDetailCard
-                    key={data.id}
-                    aiContentPage={contentPage}
-                    setPreviewDiv={handlePreviewOpen}
-                  />
-                );
-              }
-              else if(data.type === CMS_PAGE_TYPES.BLOG){
-                const blogPage = {
-                  id: data.id,
-                  title: CMS_PAGE_TYPE_META[pageType as CMSPageType].displayName,
-                  createdDate: data.createdAt,
-                  avatarUrl: data.imageUrl,
-                  htmlStructure: data.htmlStructure,
-                  url: data.url,
-                  contentType: CMS_PAGE_TYPES.BLOG
-                };
-                return (
-                  <ClusterDetailCard
-                    key={data.id}
-                    aiBlog={blogPage}
-                    setPreviewDiv={handlePreviewOpen}
-                  />
-                );
-              }
-              else if(data.type === CMS_PAGE_TYPES.LANDING_PAGE){
-                const landingPage = {
-                  id: data.id,
-                  name: CMS_PAGE_TYPE_META[pageType as CMSPageType].displayName,
-                  createdDate: data.createdAt,
-                  avatarUrl: data.imageUrl,
-                  htmlStructure: data.htmlStructure,
-                  url: data.url,
-                  contentType: data.url ? CMS_PAGE_TYPES.LANDING_PAGE : "HtmlPreview"
-                };
-                return (
-                  <ClusterDetailCard
-                    key={data.id}
-                    aiLandingPage={landingPage}
-                    setPreviewDiv={handlePreviewOpen}
-                  />
-                );
-              }
-              })}
-            </div>
-          )}
         </div>
-        <div className="cluster-tab-data-container ai-generated">
-          {!showSaveOrDiscardModal && isCrmEmailTemplateLoading && (
-          <div className="preview-pages-loading">
-            <div className="loading-spinner"></div>
-            <p>Generating email templates...</p>
-          </div>
-          )}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',width: '100%' }}>
-            <p className="cluster-tab-data-subheading">AI Generated Email Templates</p>
-            <img
-              src={arrowUp}
-              alt="Toggle"
-              style={{
-                width: 24,
-                height: 24,
-                transform: openSections['emailTemplates'] === true ? 'rotate(0deg)' : 'rotate(180deg)',
-                cursor: 'pointer',
-                transition: 'transform 0.2s',
-              }}
-              onClick={() => toggleSection('emailTemplates')}
-            />
-          </div>
-          {openSections['emailTemplates'] !== false && (
-            <div className="cluster-detail-card-container" style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
-              {aiGeneratedPages.map((data, index) => {
-                if(data.type === "email-template") {
-                const emailTemplate = {
-                  id: data.id,
-                  templateName: "Email Template",
-                  createdDate: data.createdAt,
-                  avatarUrl: data.imageUrl,
-                  htmlStructure: data.htmlStructure,
-                  title: "Email Template"
-                };
-                return (
-                  <ClusterDetailCard
-                    key={data.id}
-                    emailTemplate={emailTemplate}
-                    setPreviewDiv={handlePreviewOpen}
-                  />
-                );
-              }
-              })}
-            </div>
-          )}
-        </div>
-      </div>
-    ): !showSaveOrDiscardModal && (
-      <div className="preview-pages-container">
-        <div className="preview-pages-loading">
-          <div className="loading-spinner"></div>
-          <p>Generating content previews...</p>
-        </div>
-      </div>
-    )}
+      )}
     </>
   );
 }
