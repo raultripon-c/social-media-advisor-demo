@@ -908,7 +908,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
               </div>
             </div>
             )}
-            <PreviewPages generatePages={generatePages} pagesBasedKeywords={pagesBasedKeywords} promptInput={masterPrompt} showSaveOrDiscardModal={showSaveOrDiscardModal}/>
+            <PreviewPages key={generatePages} pagesBasedKeywords={pagesBasedKeywords} promptInput={masterPrompt} showSaveOrDiscardModal={showSaveOrDiscardModal}/>
             <div className="prompt-suggestions content-format-section">
               <div className="prompt-suggestions-heading">Recommended content formats</div>
               {/* Suggested Content Tags */}

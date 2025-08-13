@@ -4,6 +4,7 @@ import { AppStore } from "store";
 import PreviewView from "../../ContentClusterDetails/PreviewView/PreviewView";
 import ClusterDetailCard from "../../ContentClusterDetails/ClusterDetailCard/ClusterDetailCard";
 import { APIService } from "../../../utils/api.service";
+import { API } from "../../../utils/api";
 import pageImage from "../../../assets/images/page-image.png";
 import arrowUp from '../../../assets/svg/arrow-head.svg';
 import "./PreviewPages.css";
@@ -11,12 +12,14 @@ import "../../ContentClusterDetails/ClusterDetailCard/ClusterDetailCard.css";
 import "../../ContentClusterDetails/ContentClusterDetails.css";
 import { getRefnumFromLink } from "../../../utils/appUtils";
 import { toast } from "react-toastify";
+import { CMS_PAGE_TYPES, CMSPageType, CMS_PAGE_TYPE_META } from "../../../utils/constants";
 
 interface PreviewData {
   id: string;
   url: string;
   selector: string;
   upload: boolean;
+  contentType?: string;
   htmlStructure?: string;
   imageUrl?: string;
   title?: string;
@@ -28,15 +31,15 @@ interface PreviewData {
 interface PreviewPagesProps {
   pagesBasedKeywords: any;
   promptInput: any;
-  generatePages: any;
   showSaveOrDiscardModal: any;
 }
 
-export default function PreviewPages({pagesBasedKeywords, promptInput, generatePages, showSaveOrDiscardModal}: PreviewPagesProps) {
+export default function PreviewPages({pagesBasedKeywords, promptInput, showSaveOrDiscardModal}: PreviewPagesProps) {
   const [aiGeneratedPages, setAiGeneratedPages] = useState<PreviewData[]>([]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [isCrmEmailTemplateLoading, setIsCrmEmailTemplateLoading] = useState(false);
+  const [cmsHtmlByType, setCmsHtmlByType] = useState<Partial<Record<CMSPageType, string>>>({});
   const [selectedPreview, setSelectedPreview] = useState<PreviewData | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [openSections, setOpenSections] = useState<{ [key: string]: boolean }>({
@@ -54,15 +57,16 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, generateP
   );
 
   useEffect(() => {
-    const run = async () => {
-      generateHtmlStructure();
+    const run = async (generateCmsAiPages: boolean) => {
+      if ( generateCmsAiPages ) {
+        generateCmsAiPreviewPagesAllTypesInParallel();
+      } else {
+        generateHtmlStructure();
+      }
       generatePromptBasedEmailTemplatesInParallel(3);
     };
-    run();
-    return () => {
-      setAiGeneratedPages([]);
-    };
-  }, [generatePages]);
+    run(true);
+  }, []);
 
   const generatePromptBasedEmailTemplatesInParallel = async (times: number) => {
     try {
@@ -106,7 +110,7 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, generateP
         selector: "body > main",
         upload: true,
         language: siteMetaData?.defaultLanguage?.toLowerCase()|| "en_us",
-        pageTypes: ["content-page","landing-page","blog"],
+        pageTypes: Object.values(CMS_PAGE_TYPES),
         aiVoiceTone: "friendly",
         aiMetaData: {
           context: promptInput
@@ -119,9 +123,9 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, generateP
       if (result?.data) {
         // Handle content-page data
         result = result.data;
-        if (result?.["content-page"] && Array.isArray(result["content-page"])) {
-          const contentData: PreviewData[] = result["content-page"].map((item: any, index: number) => ({
-            id: `content-${index + 1}`,
+        if (result?.[CMS_PAGE_TYPES.CONTENT_PAGE] && Array.isArray(result[CMS_PAGE_TYPES.CONTENT_PAGE])) {
+          const contentData: PreviewData[] = result[CMS_PAGE_TYPES.CONTENT_PAGE].map((item: any, index: number) => ({
+            id: `${CMS_PAGE_TYPES.CONTENT_PAGE}-${Date.now()}-${Math.random().toString(36).slice(2,8)}`,
             url: "",
             selector: "body > main",
             upload: false,
@@ -130,15 +134,15 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, generateP
             createdBy: "System",
             htmlStructure: item.updatedHtmlStructure,
             imageUrl: item.filePath || pageImage,
-            type: "content-page"
+            type: CMS_PAGE_TYPES.CONTENT_PAGE
           }));
           setAiGeneratedPages(prev => [...prev, ...contentData]);
         }
 
         // Handle landing-page data
-        if (result?.["landing-page"] && Array.isArray(result?.["landing-page"])) {
-          const landingData: PreviewData[] = result?.["landing-page"].map((item: any, index: number) => ({
-            id: `landing-${index + 1}`,
+        if (result?.[CMS_PAGE_TYPES.LANDING_PAGE] && Array.isArray(result?.[CMS_PAGE_TYPES.LANDING_PAGE])) {
+          const landingData: PreviewData[] = result?.[CMS_PAGE_TYPES.LANDING_PAGE].map((item: any, index: number) => ({
+            id: `${CMS_PAGE_TYPES.LANDING_PAGE}-${Date.now()}-${Math.random().toString(36).slice(2,8)}`,
             url: "",
             selector: "body > main",
             upload: false,
@@ -147,15 +151,15 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, generateP
             createdBy: "System",
             htmlStructure: item.updatedHtmlStructure,
             imageUrl: item.filePath || pageImage,
-            type: "landing-page"
+            type: CMS_PAGE_TYPES.LANDING_PAGE
           }));
           setAiGeneratedPages(prev => [...prev, ...landingData]);
         }
 
         // Handle blog-page data
-        if (result?.["blog"] && Array.isArray(result?.["blog"])) {
-          const blogData: PreviewData[] = result?.["blog"].map((item: any, index: number) => ({
-            id: `blog-${index + 1}`,
+        if (result?.[CMS_PAGE_TYPES.BLOG] && Array.isArray(result?.[CMS_PAGE_TYPES.BLOG])) {
+          const blogData: PreviewData[] = result?.[CMS_PAGE_TYPES.BLOG].map((item: any, index: number) => ({
+            id: `${CMS_PAGE_TYPES.BLOG}-${Date.now()}-${Math.random().toString(36).slice(2,8)}`,
             url: "",
             selector: "body > main",
             upload: false,
@@ -164,7 +168,7 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, generateP
             createdBy: "System",
             htmlStructure: item.updatedHtmlStructure,
             imageUrl: item.filePath || pageImage,
-            type: "blog"
+            type: CMS_PAGE_TYPES.BLOG
           }));
           setAiGeneratedPages(prev => [...prev, ...blogData]);
         }
@@ -175,6 +179,59 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, generateP
     } catch (error) {
       toast.error("Error in generating HTML structure");
       console.error('Error generating HTML structure:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const ensureHtmlForType = async (pageType: CMSPageType): Promise<string> => {
+    const cached = cmsHtmlByType[pageType];
+    if (cached) return cached;
+    const base = `${(window as any)._env_.CMS_URL}`;
+    const url = `${base}/api/html/aiPagePreview?refNum=${selectedTenant?.refNum}&context=${encodeURIComponent(promptInput)}&companyName=${selectedTenant?.tenantName}&pageType=${pageType}`;
+    const response = await API.get(url, { withCredentials: false });
+    const html = String(response?.data || "");
+    setCmsHtmlByType(prev => ({ ...prev, [pageType]: html }));
+    return html;
+  };
+
+  const generateCmsAiPreviewPage = async (pageType: CMSPageType) => {
+    try {
+      const base = `${(window as any)._env_.CMS_URL}`;
+      const url = `${base}/api/html/aiPagePreview?refNum=${selectedTenant?.refNum}&context=${encodeURIComponent(promptInput)}&companyName=${selectedTenant?.tenantName}&pageType=${pageType}`;
+      const htmlString = await ensureHtmlForType(pageType);
+      const { displayName, idPrefix } = CMS_PAGE_TYPE_META[pageType];
+      const item: PreviewData = {
+        id: `${idPrefix}-${Date.now()}-${Math.random().toString(36).slice(2,8)}`,
+        url: htmlString ? "" : url,
+        selector: "body > main",
+        upload: false,
+        title: displayName,
+        createdAt: new Date().toISOString().split('T')[0],
+        createdBy: "System",
+        htmlStructure: htmlString || "",
+        imageUrl: pageImage,
+        type: pageType,
+      };
+      setAiGeneratedPages(prev => [...prev, item]);
+    } catch (error) {
+      console.error('Error generating CMS AI preview page:', error);
+    }
+  };
+
+  const generateCmsAiPreviewPagesAllTypesInParallel = async () => {
+    try {
+      setIsLoading(true);
+      const types = Object.values(CMS_PAGE_TYPES);
+      const tasks = types.map(async (type) => {
+        try {
+          await generateCmsAiPreviewPage(type as CMSPageType);
+        } catch (err) {
+          console.error(`Parallel CMS AI preview generation failed for ${type}:`, err);
+        }
+      });
+      await Promise.allSettled(tasks);
+      setIsLoading(false);
     } finally {
       setIsLoading(false);
     }
@@ -198,7 +255,7 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, generateP
 
       let result = await APIService.generateCRMEmailTemplate(payload);
       const emailTemplateData: PreviewData[] = result?.["response"]?.map((item: any, index: number) => ({
-        id: `email-template-${index + 1}`,
+        id: `email-template-${Date.now()}-${Math.random().toString(36).slice(2,8)}`,
         url: "",
         selector: "",
         upload: false,
@@ -248,7 +305,7 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, generateP
         }}
         onBack={handleBackFromPreview}
         crmUserInfo={crmUserInfo}
-        contentType="HtmlPreview"
+        contentType={selectedPreview.contentType}
         isCheckingTaskProgress={false}
         className="preview-pages-container-preview"
       />
@@ -288,14 +345,16 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, generateP
           {openSections['contentPages'] !== false && (
             <div className="cluster-detail-card-container" style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
               {aiGeneratedPages.map((data, index) => {
-                let blogPage = null, landingPage = null;
-                if(data.type === "content-page"){
+                const pageType = data.type;
+                if(data.type === CMS_PAGE_TYPES.CONTENT_PAGE){
                 const contentPage = {
                   id: data.id,
-                  name: "Content Page",
+                  name: CMS_PAGE_TYPE_META[pageType as CMSPageType].displayName,
                   createdDate: data.createdAt,
                   avatarUrl: data.imageUrl,
-                  htmlStructure: data.htmlStructure
+                  htmlStructure: data.htmlStructure,
+                  url: data.url,
+                  contentType: data.url ? CMS_PAGE_TYPES.CONTENT_PAGE : "HtmlPreview"
                 };
                 return (
                   <ClusterDetailCard
@@ -305,13 +364,15 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, generateP
                   />
                 );
               }
-              else if(data.type === "blog"){
-                blogPage = {
+              else if(data.type === CMS_PAGE_TYPES.BLOG){
+                const blogPage = {
                   id: data.id,
-                  title: "Blog Page",
+                  title: CMS_PAGE_TYPE_META[pageType as CMSPageType].displayName,
                   createdDate: data.createdAt,
                   avatarUrl: data.imageUrl,
-                  htmlStructure: data.htmlStructure
+                  htmlStructure: data.htmlStructure,
+                  url: data.url,
+                  contentType: CMS_PAGE_TYPES.BLOG
                 };
                 return (
                   <ClusterDetailCard
@@ -321,13 +382,15 @@ export default function PreviewPages({pagesBasedKeywords, promptInput, generateP
                   />
                 );
               }
-              else if(data.type === "landing-page"){
-                landingPage = {
+              else if(data.type === CMS_PAGE_TYPES.LANDING_PAGE){
+                const landingPage = {
                   id: data.id,
-                  name: "Landing Page",
+                  name: CMS_PAGE_TYPE_META[pageType as CMSPageType].displayName,
                   createdDate: data.createdAt,
                   avatarUrl: data.imageUrl,
-                  htmlStructure: data.htmlStructure
+                  htmlStructure: data.htmlStructure,
+                  url: data.url,
+                  contentType: data.url ? CMS_PAGE_TYPES.LANDING_PAGE : "HtmlPreview"
                 };
                 return (
                   <ClusterDetailCard

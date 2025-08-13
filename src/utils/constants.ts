@@ -102,11 +102,11 @@ export const ATTRIBUTE_DETAILS:any={
   name:"Name",
   key:"Key",
   type:"Type",
-options:"Options",
-allowMultiSelect:"Allow Multiselect",
-isMandatory:"Is Mandatory",
-isFranchisee:"Is Franchisee",
-source:"Source"
+  options:"Options",
+  allowMultiSelect:"Allow Multiselect",
+  isMandatory:"Is Mandatory",
+  isFranchisee:"Is Franchisee",
+  source:"Source"
 }
 
 export const EDIT_TENANT_SUBDOMAIN: string = 'editTenantSubdomain';
@@ -131,3 +131,17 @@ export const CONTENT_TYPES = {
   BLOG: "Blog",
   EMAIL_TEMPLATE: "Email Template"
 }
+
+export const CMS_PAGE_TYPES = {
+  CONTENT_PAGE: "content-page",
+  LANDING_PAGE: "landing-page",
+  BLOG: "blog",
+} as const;
+
+export type CMSPageType = typeof CMS_PAGE_TYPES[keyof typeof CMS_PAGE_TYPES];
+
+export const CMS_PAGE_TYPE_META: Record<CMSPageType, { displayName: string; idPrefix: string }> = {
+  [CMS_PAGE_TYPES.CONTENT_PAGE]: { displayName: "Content Page", idPrefix: "content" },
+  [CMS_PAGE_TYPES.LANDING_PAGE]: { displayName: "Landing Page", idPrefix: "landing" },
+  [CMS_PAGE_TYPES.BLOG]: { displayName: "Blog Page", idPrefix: "blog" },
+} as const;
