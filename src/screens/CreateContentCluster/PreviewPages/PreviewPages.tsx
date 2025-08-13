@@ -220,13 +220,18 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
     }
   };
 
-  const ensureHtmlForType = async (pageType: CMSPageType): Promise<string> => {
-    const cached = cmsHtmlByType[pageType];
-    if (cached) return cached;
+  const generatePagePreview = async (pageType: CMSPageType) => {
     const base = `${(window as any)._env_.CMS_URL}`;
     const url = `${base}/api/html/aiPagePreview?refNum=${selectedTenant?.refNum}&context=${encodeURIComponent(promptInput)}&companyName=${selectedTenant?.tenantName}&pageType=${pageType}`;
     const response = await API.get(url, { withCredentials: false });
     const html = String(response?.data || "");
+    return html;
+  }
+
+  const ensureHtmlForType = async (pageType: CMSPageType): Promise<string> => {
+    const cached = cmsHtmlByType[pageType];
+    if (cached) return cached;
+    const html = await generatePagePreview(pageType);
     setCmsHtmlByType(prev => ({ ...prev, [pageType]: html }));
     return html;
   };
@@ -321,6 +326,16 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
     setShowPreview(false);
     setSelectedPreview(null);
   };
+
+  const handleRegenerate = async (data: PreviewData) => {
+    if(data.type !== "email-template") {
+      const html = await generatePagePreview(data.type as CMSPageType);
+      setSelectedPreview({ ...data, htmlStructure: html });
+      return !!html;
+    }
+    return true;
+  }
+
   const handleSelect = (isSelected: boolean, cardId: string) => {
     setSelectedCards((prev: any) => {
       if (isSelected) {
@@ -360,11 +375,12 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
           title: selectedPreview.title || "HTML Preview",
         }}
         onBack={handleBackFromPreview}
+        onRegenerate={handleRegenerate}
         crmUserInfo={crmUserInfo}
         contentType={selectedPreview.contentType}
         isCheckingTaskProgress={false}
         className={` ${selectedPreview.type == "email-template" ? "" : "preview-pages-container-preview"}`}
-        edit={false}
+        preview={true}
       />
     );
   }
@@ -480,12 +496,6 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
             )}
           </div>
           <div className="cluster-tab-data-container ai-generated">
-            {!showSaveOrDiscardModal && isCrmEmailTemplateLoading && (
-              <div className="preview-pages-loading">
-                <div className="loading-spinner"></div>
-                <p>Generating email templates...</p>
-              </div>
-            )}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
               <p className="cluster-tab-data-subheading">AI Generated Email Templates</p>
               <img
@@ -501,6 +511,12 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
                 onClick={() => toggleSection('emailTemplates')}
               />
             </div>
+            {!showSaveOrDiscardModal && isCrmEmailTemplateLoading && (
+              <div className="preview-pages-loading">
+                <div className="loading-spinner"></div>
+                <p>Generating email templates...</p>
+              </div>
+            )}
             {openSections['emailTemplates'] !== false && (
               <div className="cluster-detail-card-container" style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
                 {aiGeneratedPages.map((data, index) => {

@@ -226,7 +226,6 @@
 .preview-btn {
   width: 100%;
   padding: 8px 16px;
-  border: none;
   border-radius: 6px;
   font-size: 14px;
   font-weight: 500;
@@ -236,12 +235,7 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  background-color: #10b981;
   color: white;
-}
-
-.preview-btn:hover:not(:disabled) {
-  background-color: #059669;
 }
 
 .preview-btn:disabled {
@@ -426,7 +420,6 @@
 .edit-btn:focus,
 .menu-button:focus,
 .pagination-btn:focus {
-  outline: 2px solid #3b82f6;
   outline-offset: 2px;
 }
 

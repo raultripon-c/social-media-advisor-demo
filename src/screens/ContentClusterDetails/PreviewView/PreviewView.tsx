@@ -18,10 +18,11 @@ interface PreviewViewProps {
     contentType?: string;
     isCheckingTaskProgress?: boolean;
     className?: string;
-    edit?: boolean;
+    preview?: boolean;
+    onRegenerate?: (data: any) => Promise<boolean>;
 }
 
-const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo, contentType, isCheckingTaskProgress, className, edit=true}) => {
+const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo, contentType, isCheckingTaskProgress, className, preview=false, onRegenerate}) => {
     const navigate = useNavigate();
     const [currentUrl, setCurrentUrl] = useState<string>("");
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -119,6 +120,12 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
         }
     };
     
+    const handleRegenerateClick = async () => {
+        setIsLoading(true);
+        const loaded = (await onRegenerate?.(pageData)) ?? false;
+        setIsLoading(!loaded);
+    };
+
     const navigateOnClick = async (pageData: object) => {
         const cmsUrl = (window as any)["_env_"].CMS_URL;
         let metaData = siteMetaData;
@@ -236,7 +243,12 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
                 </div>
                 <div className="preview-header-right">
 
-                    {edit && (
+                    {preview ? (
+                        <button className="preview-btn preview-btn-edit" onClick={handleRegenerateClick}>
+                            <img src={editIcon} alt="Regenerate" />
+                            <span>Regenerate</span>
+                        </button>
+                    ) : (
                         <button className="preview-btn preview-btn-edit" onClick={handleEditClick}>
                             <img src={editIcon} alt="Edit" />
                             <span>Edit</span>
