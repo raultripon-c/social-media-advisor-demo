@@ -21,7 +21,7 @@ interface PreviewViewProps {
     edit?: boolean;
 }
 
-const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo, contentType, isCheckingTaskProgress, className, edit}) => {
+const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo, contentType, isCheckingTaskProgress, className, edit=true}) => {
     const navigate = useNavigate();
     const [currentUrl, setCurrentUrl] = useState<string>("");
     const [isLoading, setIsLoading] = useState<boolean>(true);

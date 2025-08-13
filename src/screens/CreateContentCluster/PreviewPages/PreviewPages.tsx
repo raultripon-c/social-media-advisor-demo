@@ -358,13 +358,13 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
           ...selectedPreview,
           htmlStructure: selectedPreview.htmlStructure,
           title: selectedPreview.title || "HTML Preview",
-          edit: false
         }}
         onBack={handleBackFromPreview}
         crmUserInfo={crmUserInfo}
         contentType={selectedPreview.contentType}
         isCheckingTaskProgress={false}
         className={` ${selectedPreview.type == "email-template" ? "" : "preview-pages-container-preview"}`}
+        edit={false}
       />
     );
   }
