@@ -647,7 +647,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
         landingPages: fetchedPages?.landingPages,
         blogs: fetchedPages?.blogs,
         clusterTitle: promptInput,
-        clusterName: clusterTitleName,
+        clusterName: "Create Content Cluster",
         selectedLists: selectedListsData,
       };
       
