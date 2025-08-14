@@ -24,6 +24,7 @@ import "./CreateContentCluster.css";
 import AddedLinks from "./SupportingMaterial/AddedLinks/AddedLinks";
 import { toast } from "react-toastify";
 import PreviewPages from "./PreviewPages/PreviewPages";
+import { SUPPORTED_CONTENT_TYPES, CMSPageType } from "../../utils/constants";
 
 interface CreateContentClusterProps { }
 
@@ -52,7 +53,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
   const [sampleSelectionListItems, setSampleSelectionListItems] = useState<string[]>([]);
   const [showPromptSuggestions, setShowPromptSuggestions] = useState<boolean>(false);
   const [crmUserInfo, setCrmUserInfo] = useState<any>({});
-  const [selectedCards, setSelectedCards] = useState<string[]>([]);
+  const [selectedCards, setSelectedCards] = useState<Map<string, string[]>>(new Map());
   const [selectedContentTypes, setSelectedContentTypes] = useState<string[]>([]);
   const [addedurls, setAddedurls] = useState<string[]>([]);
   const [selectedContentId, setSelectedContentId] = useState<any[]>([]);
@@ -341,6 +342,24 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
     });
   };
 
+  const createClusterV2 = (contentTypes: CMSPageType[], emailTemplateId?: string | null) => {
+    return APIService.createAIPagesV2({
+      clusterId: newCluster?.clusterId,
+      companyName: selectedTenant.tenantName,
+      refNum: selectedTenant.refNum,
+      locale,
+      siteVariant: "external",
+      content: promptInput,
+      isCanvasSite: Boolean(JSON.parse(sessionStorage.getItem("isCanvasSite") || "false")) || false,
+      urlList: addedurls,
+      clusterName: clusterTitle,
+      recruiterUserId: crmUserInfo?.userDetails?.id,
+      displayName: crmUserInfo?.displayName,
+      userEmail: crmUserInfo?.userName,
+      contentTypes: contentTypes,
+      ...(emailTemplateId ? { [SUPPORTED_CONTENT_TYPES.EMAIL_TEMPLATE]: emailTemplateId } : {}),
+    });
+  };
   const enhancePrompt = () => {
     if (!promptInput) return;
     setShowSaveOrDiscardModal(true);
@@ -515,12 +534,34 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       // setShowLoader(true);
       // setShowSaveOrDiscardModal(true);
       console.log("selectedCards", selectedCards);
-      const res = await createCluster();
+      // Extract content types from selectedCards Map
+      const contentTypes: CMSPageType[] = [];
+      let emailTemplateId: string | null = null;
+      
+      selectedCards.forEach((ids: string[], type: string) => {
+        if (type === SUPPORTED_CONTENT_TYPES.EMAIL_TEMPLATE) {
+          // For email templates, store the template ID separately
+          emailTemplateId = ids[0]; // Take the first ID since radio selection allows only one
+        } else {
+          // For other content types, add to contentTypes array
+          contentTypes.push(type as CMSPageType);
+        }
+      });
+      const res = await createClusterV2(contentTypes, emailTemplateId);
       console.log("res", res);
       
+      // Handle case where res might not have the expected structure
+      let responseData = res;
+      if (res && typeof res === 'object' && res.data && Array.isArray(res.data)) {
+        responseData = res.data;
+      } else if (!Array.isArray(res)) {
+        console.warn("Unexpected response format:", res);
+        responseData = [];
+      }
+      
       // Process the response to extract successful content
-      const successfulContent = res.filter((item: any) => item.success);
-      const failedContent = res.filter((item: any) => !item.success);
+      const successfulContent = responseData.filter((item: any) => item.success);
+      const failedContent = responseData.filter((item: any) => !item.success);
       
       // Log any failed content for debugging
       if (failedContent.length > 0) {
@@ -528,18 +569,20 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       }
       
       // Extract successful content by type
-      const successfulBlog = successfulContent.find((item: any) => item.contentType === "blog-article");
+      const successfulBlog = successfulContent.find((item: any) => item.contentType === "blog");
       const successfulContentPage = successfulContent.find((item: any) => item.contentType === "content-page");
       const successfulEmailTemplate = successfulContent.find((item: any) => item.contentType === "email-template");
       const aiLandingPage = successfulContent.find((item: any) => item.contentType === "landing-page");
+      
       // Prepare cluster data for saving
       let createdBlogDetail = null;
       if (successfulBlog) {
         const allBlogs = await fetchAllBlogsDetails();
         createdBlogDetail = allBlogs["all"]?.find((blog: any) => blog.articleId === successfulBlog.data?.articleId);
       }
+      
       let createdEmailTemplateData = null;
-      if (successfulEmailTemplate.data?.templateName) {
+      if (successfulEmailTemplate?.data?.templateName) {
         const allEmailTemplates = await fetchAllEmailTemplates();
         createdEmailTemplateData = allEmailTemplates.find((template: any) => template.templateName === successfulEmailTemplate.data.templateName);
       }

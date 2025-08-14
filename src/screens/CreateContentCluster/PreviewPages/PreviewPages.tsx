@@ -94,7 +94,6 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
 
           const result = await generateEmailTemplate(enhancedPromptValue, id);
           if (result?.length) {
-            setAiGeneratedPages(prev => [...prev, ...result]);
             setEmailTemplateResults(prev => [...prev, { id: id, emailTemplatePreview: JSON.stringify(result) }]);
             emailTemplateResults.push({ id: id, emailTemplatePreview: JSON.stringify(result) });
           }
@@ -223,7 +222,7 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
 
   const generatePagePreview = async (pageType: CMSPageType) => {
     const base = `${(window as any)._env_.CMS_URL}`;
-    const url = `${base}/api/html/aiPagePreview?refNum=${selectedTenant?.refNum}&context=${encodeURIComponent(promptInput)}&companyName=${selectedTenant?.tenantName}&pageType=${pageType}`;
+    const url = `${base}/api/html/aiPagePreview?refNum=${selectedTenant?.refNum}&context=${encodeURIComponent(promptInput)}&companyName=${selectedTenant?.tenantName}&pageType=${pageType}&clusterId=${newCluster.clusterId}`;
     const response = await API.get(url, { withCredentials: false });
     const html = String(response?.data || "");
     setCmsHtmlByType(prev => ({ ...prev, [pageType]: html }));
@@ -308,7 +307,17 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
         imageUrl: item.filePath || pageImage,
         type: "email-template"
       })) || [];
-      return emailTemplateData;
+      if(emailTemplateData.length > 0) {
+        setAiGeneratedPages(prev => {
+          const idToSync = emailTemplateData[0].id;
+          const exists = prev.some(p => p.id === idToSync);
+          if (exists) {
+            return prev.map(p => p.id === idToSync ? { ...p, ...emailTemplateData[0] } : p);
+          }
+          return [...prev, ...emailTemplateData];
+        });
+      }
+      return result?.response;
     } catch (error) {
       console.error('Error generating email template:', error);
       return [];
@@ -348,24 +357,25 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
     return true;
   }
 
-  const handleSelect = (isSelected: boolean, cardId: string) => {
-    setSelectedCards((prev: any) => {
+  const handleSelect = (isSelected: boolean, currentCard: PreviewData) => {
+    setSelectedCards((prev: Map<string, string[]>) => {
+      const next = new Map(prev);
+      const cardType = currentCard.type || "";
+      const existingIds = next.get(cardType) || [];
+
       if (isSelected) {
-        // Find the card being selected to get its type
-        const selectedCard = aiGeneratedPages.find(card => card.id === cardId);
-        if (selectedCard) {
-          // Remove any existing card of the same type
-          const filteredCards = prev.filter((id: any) => {
-            const existingCard = aiGeneratedPages.find(card => card.id === id);
-            return existingCard?.type !== selectedCard.type;
-          });
-          // Add the new selection
-          return [...filteredCards, cardId];
-        }
-        return [...prev, cardId];
+        // Ensure only one selection per type: replace any existing selection of this type
+        next.set(cardType, [currentCard.id]);
       } else {
-        return prev.filter((id: any) => id !== cardId);
+        // Deselect: remove this id from its type; clean up empty arrays
+        const filtered = existingIds.filter((id) => id !== currentCard.id);
+        if (filtered.length > 0) {
+          next.set(cardType, filtered);
+        } else {
+          next.delete(cardType);
+        }
       }
+      return next;
     });
   };
   const handlePreviewOpen = (pageData: any, contentType: string = "") => {
@@ -451,8 +461,8 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
                         showStatus={false}
                         showDate={false}
                         selectable={true}
-                        isSelected={selectedCards.includes(data.id)}
-                        onSelect={(isSelected: boolean) => handleSelect(isSelected, data.id)}
+                        isSelected={selectedCards.get(data.type)?.includes(data.id)}
+                        onSelect={(isSelected: boolean) => handleSelect(isSelected, data)}
                       />
                     );
                   }
@@ -475,8 +485,8 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
                         showStatus={false}
                         showDate={false}
                         selectable={true}
-                        isSelected={selectedCards.includes(data.id)}
-                        onSelect={(isSelected: boolean) => handleSelect(isSelected, data.id)}
+                        isSelected={selectedCards.get(data.type)?.includes(data.id)}
+                        onSelect={(isSelected: boolean) => handleSelect(isSelected, data)}
                       />
                     );
                   }
@@ -499,8 +509,8 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
                         showStatus={false}
                         showDate={false}
                         selectable={true}
-                        onSelect={(isSelected: boolean) => handleSelect(isSelected, data.id)}
-                        isSelected={selectedCards.includes(data.id)}
+                        onSelect={(isSelected: boolean) => handleSelect(isSelected, data)}
+                        isSelected={selectedCards.get(data.type)?.includes(data.id)}
                       />
                     );
                   }
@@ -552,8 +562,8 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
                         showStatus={false}
                         showDate={false}
                         selectable={true}
-                        onSelect={(isSelected: boolean) => handleSelect(isSelected, data.id)}
-                        isSelected={selectedCards.includes(data.id)}
+                        onSelect={(isSelected: boolean) => handleSelect(isSelected, data)}
+                        isSelected={selectedCards.get(data.type)?.includes(data.id)}
                         inputType="radio"
                       />
                     );
