@@ -32,6 +32,7 @@ interface ClusterDetailCardProps {
   isSelected?: boolean;
   onSelect?: (isSelected: boolean) => void;
   selectable?: boolean;
+  inputType?: string;
 }
 
 // This component is responsible for just showing details of the cluster
@@ -51,7 +52,8 @@ const ClusterDetailCard: React.FC<ClusterDetailCardProps> = ({
   showDate = true,
   isSelected = false,
   onSelect,
-  selectable = false
+  selectable = false,
+  inputType = "checkbox"
 }) => {
 
   const getStatusColor = (status: string) => {
@@ -124,7 +126,7 @@ const ClusterDetailCard: React.FC<ClusterDetailCardProps> = ({
         {/* Selection Checkbox - positioned over the image */}
         {selectable && (
           <input
-            type="checkbox"
+            type={inputType}
             checked={isSelected}
             onChange={(e) => onSelect && onSelect(e.target.checked)}
             onClick={(e) => e.stopPropagation()}

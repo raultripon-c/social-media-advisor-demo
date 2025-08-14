@@ -554,6 +554,7 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
                         selectable={true}
                         onSelect={(isSelected: boolean) => handleSelect(isSelected, data.id)}
                         isSelected={selectedCards.includes(data.id)}
+                        inputType="radio"
                       />
                     );
                   }
