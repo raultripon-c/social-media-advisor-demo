@@ -13,14 +13,14 @@ import "../../ContentClusterDetails/ContentClusterDetails.css";
 import { getRefnumFromLink } from "../../../utils/appUtils";
 import { toast } from "react-toastify";
 import { update } from "lodash";
-import { CMS_PAGE_TYPES, CMSPageType, CMS_PAGE_TYPE_META } from "../../../utils/constants";
+import { CMS_PAGE_TYPES, CMSPageType, CMS_PAGE_TYPE_META, SupportedContentType, SUPPORTED_CONTENT_TYPES } from "../../../utils/constants";
 
 interface PreviewData {
   id: string;
   url: string;
   selector: string;
   upload: boolean;
-  contentType?: string;
+  contentType?: SupportedContentType;
   htmlStructure?: string;
   imageUrl?: string;
   title?: string;
@@ -74,7 +74,7 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
     run(true);
   }, []);
 
-  const generatePromptBasedEmailTemplatesInParallel = async (times: number) => {
+  const generatePromptBasedEmailTemplatesInParallel = async (times: number = 1) => {
     try {
       setIsCrmEmailTemplateLoading(true);
       const locale: string = siteMetaData?.defaultLanguage?.toLowerCase() || "en_us";
@@ -92,8 +92,9 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
           const enhancedPromptValue = enhanced?.enhancedPrompt || promptInput;
           let id = `${Math.random().toString(36).slice(2, 9)}`;
 
-          const result = await generateEmailTemplate(enhancedPromptValue, false, id);
-          if (result) {
+          const result = await generateEmailTemplate(enhancedPromptValue, id);
+          if (result?.length) {
+            setAiGeneratedPages(prev => [...prev, ...result]);
             setEmailTemplateResults(prev => [...prev, { id: id, emailTemplatePreview: JSON.stringify(result) }]);
             emailTemplateResults.push({ id: id, emailTemplatePreview: JSON.stringify(result) });
           }
@@ -225,6 +226,7 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
     const url = `${base}/api/html/aiPagePreview?refNum=${selectedTenant?.refNum}&context=${encodeURIComponent(promptInput)}&companyName=${selectedTenant?.tenantName}&pageType=${pageType}`;
     const response = await API.get(url, { withCredentials: false });
     const html = String(response?.data || "");
+    setCmsHtmlByType(prev => ({ ...prev, [pageType]: html }));
     return html;
   }
 
@@ -232,7 +234,6 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
     const cached = cmsHtmlByType[pageType];
     if (cached) return cached;
     const html = await generatePagePreview(pageType);
-    setCmsHtmlByType(prev => ({ ...prev, [pageType]: html }));
     return html;
   };
 
@@ -278,7 +279,7 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
     }
   };
 
-  const generateEmailTemplate = async (content?: string, manageLoading: boolean = true, id: string = "") => {
+  const generateEmailTemplate = async (content?: string, id: string = "") => {
     try {
       const locale: string = siteMetaData?.defaultLanguage?.toLowerCase() || "en_us";
       const payload: any = {
@@ -307,13 +308,10 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
         imageUrl: item.filePath || pageImage,
         type: "email-template"
       })) || [];
-      if (emailTemplateData.length > 0) {
-        setAiGeneratedPages(prev => [...prev, ...emailTemplateData]);
-      }
-      return result.response[0];
+      return emailTemplateData;
     } catch (error) {
       console.error('Error generating email template:', error);
-      return null;
+      return [];
     }
   };
   const handlePreviewClick = (data: PreviewData) => {
@@ -327,10 +325,24 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
     setSelectedPreview(null);
   };
 
-  const handleRegenerate = async (data: PreviewData) => {
-    if(data.type !== "email-template") {
-      const html = await generatePagePreview(data.type as CMSPageType);
-      setSelectedPreview({ ...data, htmlStructure: html });
+  const handleRegenerate = async (pageData: PreviewData, contentType: SupportedContentType) => {
+    if(contentType === SUPPORTED_CONTENT_TYPES.EMAIL_TEMPLATE) {
+      const enhanced = await APIService.enhancePrompt({
+        isEnhancePrompt: true,
+        prompt: promptInput,
+        refNum: selectedTenant.refNum,
+      });
+      const enhancedPromptValue = enhanced?.enhancedPrompt || promptInput;
+      const result = await generateEmailTemplate(enhancedPromptValue, pageData.id);
+      if (result?.length) {
+        setAiGeneratedPages(prev => prev.map(p => p.id === pageData.id ? { ...p, htmlStructure: result[0].htmlStructure } : p));
+        setSelectedPreview({ ...pageData, htmlStructure: result[0].htmlStructure });
+        return !!result[0].htmlStructure;
+      }
+    } else {
+      const html = await generatePagePreview(contentType as CMSPageType);
+      setSelectedPreview({ ...pageData, htmlStructure: html });
+      setAiGeneratedPages(prev => prev.map(p => p.id === pageData.id ? { ...p, htmlStructure: html } : p));
       return !!html;
     }
     return true;
@@ -373,6 +385,7 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
           ...selectedPreview,
           htmlStructure: selectedPreview.htmlStructure,
           title: selectedPreview.title || "HTML Preview",
+          type: selectedPreview.contentType || selectedPreview.type
         }}
         onBack={handleBackFromPreview}
         onRegenerate={handleRegenerate}
@@ -427,7 +440,7 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
                       avatarUrl: data.imageUrl,
                       htmlStructure: data.htmlStructure,
                       url: data.url,
-                      contentType: data.url ? CMS_PAGE_TYPES.CONTENT_PAGE : "HtmlPreview"
+                      contentType: CMS_PAGE_TYPES.CONTENT_PAGE
                     };
                     return (
                       <ClusterDetailCard
@@ -475,7 +488,7 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
                       avatarUrl: data.imageUrl,
                       htmlStructure: data.htmlStructure,
                       url: data.url,
-                      contentType: data.url ? CMS_PAGE_TYPES.LANDING_PAGE : "HtmlPreview"
+                      contentType: CMS_PAGE_TYPES.LANDING_PAGE
                     };
                     return (
                       <ClusterDetailCard

@@ -9,7 +9,7 @@ import { AppSelectionOptions } from "../../../interfaces/AppSelectionOptions";
 import { appSelectionHandler, getLink, getRefnumFromLink, handleDomainUrlForSite } from "../../../utils/appUtils";
 import { APIService } from "../../../utils/api.service";
 import { setSiteMetaData } from "../../../store/customer/actions";
-import { CONTENT_TYPES } from "../../../utils/constants";
+import { CMSPageType, CONTENT_TYPES, SupportedContentType } from "../../../utils/constants";
 import { isEmpty } from "lodash";
 interface PreviewViewProps {
     pageData?: any;
@@ -19,7 +19,7 @@ interface PreviewViewProps {
     isCheckingTaskProgress?: boolean;
     className?: string;
     preview?: boolean;
-    onRegenerate?: (data: any) => Promise<boolean>;
+    onRegenerate?: (pageData: any, contentType: SupportedContentType) => Promise<boolean>;
 }
 
 const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo, contentType, isCheckingTaskProgress, className, preview=false, onRegenerate}) => {
@@ -39,12 +39,12 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
       const dispatch = useDispatch();
     useEffect(() => {
         if (pageData) {
+            const htmlStructure = pageData?.htmlStructure;
+            const url = pageData?.previewUrl || pageData?.fullUrl || pageData?.url || "";
             // Check if it's an email template with _id
             if (pageData?.application=="crm" && pageData?._id && contentType === CONTENT_TYPES.EMAIL_TEMPLATE) {
                 fetchEmailTemplatePreview();
-            } else if(contentType?.toLowerCase().includes("page")) {
-                // Extract URL from page data
-                const url = pageData?.previewUrl || pageData?.fullUrl || pageData?.url || "";
+            } else if(!htmlStructure && url) {
                 setCurrentUrl(url);
                 setIsLoading(true);
             } else {
@@ -122,7 +122,8 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
     
     const handleRegenerateClick = async () => {
         setIsLoading(true);
-        const loaded = (await onRegenerate?.(pageData)) ?? false;
+        const contentType: SupportedContentType = pageData?.type;
+        const loaded = (await onRegenerate?.(pageData, contentType)) ?? false;
         setIsLoading(!loaded);
     };
 

@@ -138,7 +138,13 @@ export const CMS_PAGE_TYPES = {
   BLOG: "blog",
 } as const;
 
+export const SUPPORTED_CONTENT_TYPES = {
+  ...CMS_PAGE_TYPES,
+  EMAIL_TEMPLATE: "email-template"
+} as const;
+
 export type CMSPageType = typeof CMS_PAGE_TYPES[keyof typeof CMS_PAGE_TYPES];
+export type SupportedContentType = typeof SUPPORTED_CONTENT_TYPES[keyof typeof SUPPORTED_CONTENT_TYPES];
 
 export const CMS_PAGE_TYPE_META: Record<CMSPageType, { displayName: string; idPrefix: string }> = {
   [CMS_PAGE_TYPES.CONTENT_PAGE]: { displayName: "Content Page", idPrefix: "content" },
