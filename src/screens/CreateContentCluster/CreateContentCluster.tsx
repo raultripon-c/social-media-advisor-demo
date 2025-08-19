@@ -445,6 +445,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       setFetchedPages(null);
       // handleClusterCreation();
       await handlePromptBasedSuggestions();
+      setSelectedCards(new Map());
       setGeneratePages(generatePages+1);
     }
   };
@@ -641,9 +642,9 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
         refNum: selectedTenant.refNum,
         locale,
         siteVariant: "external",
-        contentPages: fetchedPages?.contentPages, 
-        landingPages: fetchedPages?.landingPages,
-        blogs: fetchedPages?.blogs,
+        contentPages: selectedCards.get(SUPPORTED_CONTENT_TYPES.CONTENT_PAGE) ? fetchedPages?.contentPages : [], 
+        landingPages: selectedCards.get(SUPPORTED_CONTENT_TYPES.LANDING_PAGE) ? fetchedPages?.landingPages : [],
+        blogs: selectedCards.get(SUPPORTED_CONTENT_TYPES.BLOG) ? fetchedPages?.blogs : [],
         aiCreatedLandingPage: aiLandingPage && Object.keys(aiLandingPage.data?.data || {}).length > 0
         ? [aiLandingPage.data.data]
         : [],
@@ -1104,9 +1105,9 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
             </div> */}
             <div style={{ display: "flex", justifyContent: "flex-end" }}>
               <button 
-                className={`generate-cluster-btn${selectedContentId.length === 0 ? " disabled" : ""}`} 
+                className={`generate-cluster-btn${selectedCards.size === 0 ? " disabled" : ""}`} 
                 onClick={handleClusterCreate}
-                disabled={selectedContentId.length === 0}
+                disabled={selectedCards.size === 0}
               >
                 Generate Cluster
               </button>
