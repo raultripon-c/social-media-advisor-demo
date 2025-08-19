@@ -107,13 +107,29 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
     });
   };
 
+  const updateCluster = async (payload: any, isNavigate: boolean = true) => {
+    await APIService.updateCluster(payload).then((clusterDetail) => {
+      console.log("Content Cluster updated:", clusterDetail);
+      setShowLoader(false);
+      setShowSaveOrDiscardModal(false);
+      setNewCluster(clusterDetail);
+      if(isNavigate){
+        navigateToClusterDetails(clusterDetail);
+      }
+    }).catch((error) => {
+      console.error("Error updating content cluster:", error);
+      setShowLoader(false);
+      setShowSaveOrDiscardModal(false);
+    });
+  }
+
   const navigateToClusterDetails = (clusterDetails: any) => {
     const newPath = location.pathname.replace(/\/create$/, "");
     const pagesObj = {
       contentPages: clusterDetails.contentPages,
       landingPages: clusterDetails.landingPages,
     };
-    navigate(`${newPath}/${clusterDetails.id}`, {
+    navigate(`${newPath}/${clusterDetails.clusterId}`, {
       state: {
         pages: pagesObj,
         blogs: clusterDetails?.blogs,
@@ -137,7 +153,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
           setCrmUserInfo(window?.keycloakInstance?.tokenParsed?.userDetails);
         }
       })
-      .catch((err) => console.error("Error getting CRM user info", err));
+    .catch((err) => console.error("Error getting CRM user info", err));
   }, []);
 
   useEffect(() => {
@@ -161,6 +177,39 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       });
   }, []);
 
+  useEffect(() => {
+    if (!newCluster?.clusterId) return;
+
+    const deleteCurrentCluster = async () => {
+      console.log("Checking if draft cluster needs deletion");
+      try {
+        const draft: boolean = await APIService.getDraftStatus(newCluster.clusterId);
+        if (draft) {
+          console.log("Deleting draft cluster:", newCluster.clusterId);
+          await APIService.deleteCluster({
+            clusterIds: [newCluster.clusterId],
+            refNum: selectedTenant.refNum,
+          });
+        }
+      } catch (error) {
+        console.error('Error deleting draft cluster:', error);
+      }
+    };
+
+    const handleBeforeUnload = () => {
+      APIService.deleteCluster({
+        clusterIds: [newCluster.clusterId],
+        refNum: selectedTenant.refNum,
+      }).catch(console.error);
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      deleteCurrentCluster();
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [newCluster?.clusterId, selectedTenant.refNum]);
 
   const getListItems = (searchTerm: string) => {
     // Check if crmUserInfo and userDetails exist before making the API call
@@ -588,6 +637,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       }
 
       const clusterData = {
+        clusterId: newCluster?.clusterId,
         refNum: selectedTenant.refNum,
         locale,
         siteVariant: "external",
@@ -607,10 +657,11 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
         clusterTitle: promptInput,
         clusterName: clusterTitle,
         selectedLists: selectedListsData,
+        draft: false
       };
       
-      // Save the cluster
-      saveContentCluster(clusterData);
+      // update the cluster
+      updateCluster(clusterData);
     } catch (error) {
       console.error("Error creating cluster:", error);
       setShowLoader(false);
@@ -649,7 +700,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
         clusterTitle: promptInput,
         clusterName: "Create Content Cluster",
         selectedLists: selectedListsData,
-        flag: true
+        draft: true
       };
       
       // Save the cluster

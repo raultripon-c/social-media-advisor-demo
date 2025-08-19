@@ -862,6 +862,33 @@ export const APIService = {
       console.error('Error generating cluster name:', error);
       return null
     }
+  },
+
+  deleteCluster: async (payload: any) => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/content-cluster/delete`;
+      const response = await API.delete(url, { 
+        data: payload,
+        withCredentials: false 
+      });
+      return response.data.data;
+    }
+    catch (error) {
+      console.error('Error deleting cluster:', error);
+      return null;
+    }
+  },
+
+  getDraftStatus: async (clusterId: string) => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/content-cluster/getDraftStatus/${clusterId}`;
+      const response = await API.get(url, { withCredentials: false });
+      return response.data.data;
+    }
+    catch (error) {
+      console.error('Error fetching draft status:', error);
+      return null;
+    }
   }
 
 };
