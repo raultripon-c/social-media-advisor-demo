@@ -649,6 +649,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
         clusterTitle: promptInput,
         clusterName: "Create Content Cluster",
         selectedLists: selectedListsData,
+        flag: true
       };
       
       // Save the cluster

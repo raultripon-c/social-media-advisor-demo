@@ -706,6 +706,18 @@ export const APIService = {
     }
   },
 
+  captureScreenshot: async (payload: any) => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/content-cluster/captureScreenshot`;
+      const response = await API.post(url, payload, { withCredentials: false });
+      return response.data.data;
+    }
+    catch (error) {
+      console.error('Error creating content cluster:', error);
+      return null;
+    }
+  },
+
   updateCluster: async (payload: any) => {
     try {
       const url = `${(window as any)._env_.TOOLS_API_URL}api/content-cluster/update/${payload.clusterId}`;
