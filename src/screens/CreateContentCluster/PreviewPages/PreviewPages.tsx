@@ -140,9 +140,10 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
   const updateClusterWithEmailTemplates = async (emailTemplateResults: any[], isCreatedTemplate: boolean = false) => {
     const payload = {
       clusterId: newCluster.clusterId,
+      draft: true,
       ...(isCreatedTemplate
-        ? { createdEmailTemplate: emailTemplateResults, flag: true }
-        : { emailTemplatePreview: emailTemplateResults, flag: true }
+        ? { createdEmailTemplate: emailTemplateResults }
+        : { emailTemplatePreview: emailTemplateResults }
       )
     };
     await updateCluster(payload);
