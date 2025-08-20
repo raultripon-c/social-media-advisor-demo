@@ -92,7 +92,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
   const [selectedSort, setSelectedSort] = useState("newest");
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(15);
+  const [itemsPerPage] = useState(10);
   const sortDropdownRef = useRef<HTMLDivElement>(null);
   // Scroll to input when there's an error
   useEffect(() => {
@@ -278,7 +278,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
   };
 
   // Pagination logic
-  const { totalPages, currentPageClusters, filteredClusters } = useMemo(() => {
+  const { totalPages, currentPageClusters, filteredClusters, startIndex, endIndex } = useMemo(() => {
     // Filter clusters based on search term
     const filtered = sortedClustersList.filter((cluster) => {
       if (!clusterSearchTerm.trim()) return true;
@@ -294,16 +294,59 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
     });
     
     const total = Math.ceil(filtered.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    const pageData = filtered.slice(startIndex, endIndex);
+    const startIdx = (currentPage - 1) * itemsPerPage;
+    const endIdx = Math.min(startIdx + itemsPerPage, filtered.length);
+    const pageData = filtered.slice(startIdx, endIdx);
     
     return {
       totalPages: total,
       currentPageClusters: pageData,
-      filteredClusters: filtered
+      filteredClusters: filtered,
+      startIndex: startIdx + 1, // 1-based for display
+      endIndex: endIdx
     };
   }, [sortedClustersList, currentPage, itemsPerPage, clusterSearchTerm]);
+
+  // Generate page numbers with ellipsis
+  const generatePageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+    
+    if (totalPages <= maxVisiblePages) {
+      // Show all pages if total is small
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Show first page
+      pages.push(1);
+      
+      if (currentPage <= 3) {
+        // Show 1, 2, 3, 4, ..., last
+        for (let i = 2; i <= 4; i++) {
+          pages.push(i);
+        }
+        pages.push('ellipsis');
+        pages.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        // Show 1, ..., last-3, last-2, last-1, last
+        pages.push('ellipsis');
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        // Show 1, ..., current-1, current, current+1, ..., last
+        pages.push('ellipsis');
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pages.push(i);
+        }
+        pages.push('ellipsis');
+        pages.push(totalPages);
+      }
+    }
+    
+    return pages;
+  };
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -1350,34 +1393,52 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
           </div>
           
           {totalPages > 1 && (
-            <div className="pagination-container">
-              <button 
-                className="pagination-btn pagination-prev" 
-                onClick={handlePrevPage}
-                disabled={currentPage === 1}
-              >
-                Previous
-              </button>
-              
-              <div className="pagination-pages">
-                {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
-                  <button
-                    key={page}
-                    className={`pagination-page ${currentPage === page ? 'active' : ''}`}
-                    onClick={() => handlePageChange(page)}
-                  >
-                    {page}
-                  </button>
-                ))}
+            <div className="pagination-wrapper">
+              <div className="pagination-info">
+                Showing {startIndex} - {endIndex} of {filteredClusters.length}
               </div>
               
-              <button 
-                className="pagination-btn pagination-next" 
-                onClick={handleNextPage}
-                disabled={currentPage === totalPages}
-              >
-                Next
-              </button>
+              <div className="pagination-container">
+                <button 
+                  className="pagination-btn pagination-arrow" 
+                  onClick={handlePrevPage}
+                  disabled={currentPage === 1}
+                  aria-label="Previous page"
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+                
+                <div className="pagination-pages">
+                  {generatePageNumbers().map((page, index) => (
+                    page === 'ellipsis' ? (
+                      <span key={`ellipsis-${index}`} className="pagination-ellipsis">
+                        ...
+                      </span>
+                    ) : (
+                      <button
+                        key={page}
+                        className={`pagination-page ${currentPage === page ? 'active' : ''}`}
+                        onClick={() => handlePageChange(page as number)}
+                      >
+                        {page}
+                      </button>
+                    )
+                  ))}
+                </div>
+                
+                <button 
+                  className="pagination-btn pagination-arrow" 
+                  onClick={handleNextPage}
+                  disabled={currentPage === totalPages}
+                  aria-label="Next page"
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+              </div>
             </div>
           )}
         </div>

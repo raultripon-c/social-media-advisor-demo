@@ -418,6 +418,7 @@
 .menu-button:focus,
 .pagination-btn:focus {
   outline-offset: 2px;
+  outline: 1px dotted;
 }
 
 /* Error state styling */
