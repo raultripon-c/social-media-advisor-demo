@@ -3,7 +3,6 @@ import React, { useEffect } from 'react';
 const CrmStylesRenderer = () => {
 
   const addStyles = () => {
-    // Create the first <style> element
     const crmStyles = document.createElement('style');
     crmStyles.id = 'crm-index-styles';
     crmStyles.textContent = `
@@ -40,44 +39,45 @@ const CrmStylesRenderer = () => {
         position: sticky !important;
       }
 
+      .main-header-bar {
+        display: none !important;
+      }
 
-      * {
+      html,
+      body {
         padding: 0;
         margin: 0;
         text-decoration: none;
         list-style: none;
         outline: none;
         box-sizing: border-box;
+
         -webkit-font-smoothing: antialiased;
         -webkit-tap-highlight-color: transparent;
       }
-      ::before, ::after {
-        box-sizing: inherit;
-        text-decoration: inherit;
-        vertical-align: inherit;
+      ul,
+      li {
+        padding: 0;
+        margin: 0;
+        list-style: none;
       }
-      hr { overflow: visible; }
-      article, aside, details, figcaption, figure, footer, header, main, menu, nav, section, summary {
-        display: block;
-      }
-      summary { display: list-item; }
-      button, input, select, textarea, fieldset {
+      button {
         color: inherit;
         background-color: transparent;
         border-style: none;
       }
-      progress { vertical-align: baseline; }
-      audio, canvas, progress, video {
-        display: inline-block;
+      [hidden] {
+        display: none !important;
       }
-      audio:not([controls]) { display: none; height: 0; }
-      [hidden] { display: none !important; }
-
+      /* Reset css styles end */
+    </style>
+    <style>
       .main-loader {
         width: 100%;
         height: 100%;
         text-align: center;
       }
+
       .main-loader img {
         height: 80px;
         position: fixed;
@@ -85,17 +85,20 @@ const CrmStylesRenderer = () => {
         left: 50%;
         transform: translate3d(-50%, -50%, 0);
       }
+
       .small-screen-error {
         display: none;
         width: 100%;
         height: 100%;
         text-align: center;
       }
+
       .small-screen-details {
         color: var(--N400);
         font-size: 20px;
         width: 100%;
       }
+
       .error-image {
         margin: 50px 0px;
         height: 300px;
@@ -105,6 +108,7 @@ const CrmStylesRenderer = () => {
         align-items: center;
         justify-content: center;
       }
+
       .promotion-content {
         padding: 0 30px;
         text-align: left;
@@ -116,10 +120,11 @@ const CrmStylesRenderer = () => {
         color: var(--N400);
         gap: 10px;
         margin-top: 30px;
+        .internal-link {
+          color: var(--B100);
+        }
       }
-      .promotion-content .internal-link {
-        color: var(--B100);
-      }
+
       .loading-screen-error-text {
         color: var(--N400);
         padding: 0 30px;
@@ -152,26 +157,20 @@ const CrmStylesRenderer = () => {
     document.head.appendChild(crmStyles);
   };
 
-  const crmExternalStyles = [
-    { id: 'codemirror-css', src: 'codemirror.css' },
-    { id: 'font-awesome-css', src: 'font-awesome.css' },
-    { id: 'jquery-timepicker-css', src: 'jquery.timepicker.css' },
-    { id: 'daterangepicker-css', src: 'daterangepicker.css' }
-  ];
 
   const removeStyles = () => {
-    const daterangepickerDivs = document.querySelectorAll('div.daterangepicker.dropdown-menu');
-    daterangepickerDivs.forEach(div => div.remove());
     const styles = document.getElementById('crm-index-styles');
     if (styles) document.head.removeChild(styles);
-    crmExternalStyles.forEach(style => {
-      const link = document.getElementById(style.id);
-      if (link) document.head.removeChild(link);
-    });
   };
+
 
   useEffect(() => {
     addStyles();
+    const disableTxeBootstrap = document.getElementById('bootstrap-styles') as HTMLLinkElement;
+    if (disableTxeBootstrap) {
+      disableTxeBootstrap.disabled = true;
+    }
+
     const code = window?.orgInfo?.code;
     const type = window?.orgInfo?.type;
     localStorage.setItem("CP_USER_LOGIN_TYPE", JSON.stringify("CP_LOGIN_TYPE_KEY_CLOAK"));
@@ -179,28 +178,12 @@ const CrmStylesRenderer = () => {
     type && localStorage.setItem("CP_KEY_CLOAK_ORG_TYPE", JSON.stringify(type));
     
     
-    const loadStyles = () => {
-      const crmHost = (window as any)._env_?.CRM_URL;
-      if (crmHost) {
-        crmExternalStyles.forEach(style => {
-          if (!document.getElementById(style.id)) {
-            const link = document.createElement('link');
-            link.id = style.id;
-            link.rel = 'stylesheet';
-            link.href = `${crmHost}/${style.src}`;
-            document.head.appendChild(link);
-          }
-        });
-      } else {
-        console.warn('CRM_URL is not defined in window._env_');
-      }
-    };
-    
-    loadStyles();
-    
-
     return () => {
       removeStyles();
+      const disableTxeBootstrap = document.getElementById('bootstrap-styles') as HTMLLinkElement;
+      if (disableTxeBootstrap) {
+        disableTxeBootstrap.disabled = false;
+      }
     };
   }, []);
 

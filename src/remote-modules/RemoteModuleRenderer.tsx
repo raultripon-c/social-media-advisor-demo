@@ -217,7 +217,7 @@ export const RemoteModuleRenderer = () => {
   };
 
   return (
-    <div>
+    <>
       {selectedModuleAppObject.framework === "REACT" && (
         <Fragment>
           <Routes>
@@ -255,6 +255,6 @@ export const RemoteModuleRenderer = () => {
           />
         </Fragment>
       )}
-    </div>
+    </>
   );
 };
