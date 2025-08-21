@@ -79,12 +79,10 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
     run(true);
   }, []);
 
-  const captureScreenshot = async (htmlStructure: string, id: string) => {
+  const captureScreenshot = async (htmlStructure: any) => {
     const payload = {
       refNum: selectedTenant.refNum,
-      htmlStructure: {
-        [id]: htmlStructure
-      }
+      htmlStructure
     };
     const res = await APIService.captureScreenshot(payload);
     return res;
@@ -93,35 +91,9 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
   const generatePromptBasedEmailTemplatesInParallel = async (times: number = 1): Promise<any[]> => {
     try {
       setIsCrmEmailTemplateLoading(true);
-      const locale: string = siteMetaData?.defaultLanguage?.toLowerCase() || "en_us";
-      const emailTemplateResults: any[] = [];
-
-      const tasks = Array.from({ length: times }).map(async () => {
-        try {
-          const enhanced = await APIService.enhancePrompt({
-            isEnhancePrompt: true,
-            prompt: promptInput,
-            deviceType: "desktop",
-            language: locale,
-            refNum: selectedTenant.refNum,
-          });
-          const enhancedPromptValue = enhanced?.enhancedPrompt || promptInput;
-          let id = `${Math.random().toString(36).slice(2, 9)}`;
-
-          const result = await generateEmailTemplate(enhancedPromptValue, id);
-          if (result?.length) {
-            setEmailTemplateResults(prev => [...prev, { id: id, emailTemplatePreview: JSON.stringify(result) }]);
-            emailTemplateResults.push({ id: id, emailTemplatePreview: JSON.stringify(result) });
-          }
-        } catch (err) {
-          console.error('Parallel enhance/generate failed:', err);
-        }
-      });
-
-      await Promise.allSettled(tasks);
-      updateClusterWithEmailTemplates(emailTemplateResults);
-
-      // Call updateCluster after all tasks are completed
+      const result = await generateEmailTemplate(promptInput, times);
+      setEmailTemplateResults(result);
+      updateClusterWithEmailTemplates(result);
       return emailTemplateResults;
     } finally {
       setIsCrmEmailTemplateLoading(false);
@@ -267,7 +239,7 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
       const htmlString = await ensureHtmlForType(pageType);
       const { displayName, idPrefix } = CMS_PAGE_TYPE_META[pageType];
       const id = `${idPrefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-      const res = await captureScreenshot(htmlString, id);
+      const res = await captureScreenshot({[id]: htmlString});
       const imageUrl = res?.screenshots?.[id]?.filePath ? res?.screenshots?.[id]?.filePath : pageType === CMS_PAGE_TYPES.CONTENT_PAGE ? contentPageImage : pageType === CMS_PAGE_TYPES.LANDING_PAGE ? landingPageImage : pageType === CMS_PAGE_TYPES.BLOG ? blogImage : "";
       const item: PreviewData = {
         id: id,
@@ -313,8 +285,9 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
     }
   };
 
-  const generateEmailTemplate = async (content?: string, id: string = "") => {
+  const generateEmailTemplate = async (content?: string, variations: number = 1, pageData?: any) => {
     try {
+      const emailTemplateResults: any[] = [];
       const locale: string = siteMetaData?.defaultLanguage?.toLowerCase() || "en_us";
       const payload: any = {
         recruiterUserId: crmUserInfo?.userDetails?.id,
@@ -322,6 +295,7 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
         userEmail: crmUserInfo?.userName,
         import: false,
         refNum: selectedTenant.refNum,
+        variations: variations
       };
       if (content) {
         payload.content = content;
@@ -330,20 +304,47 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
       }
 
       let result = await APIService.generateCRMEmailTemplate(payload);
-      const res = await captureScreenshot(result?.["response"]?.[0]?.htmlStructure, id);
-      const imageUrl = res?.screenshots?.[id]?.filePath ? res?.screenshots?.[id]?.filePath : emailTemplateImage;
-      const emailTemplateData: PreviewData[] = result?.["response"]?.map((item: any, index: number) => ({
-        id: id,
+      let templatesWithIds;
+      
+      // Step 1: build templates with IDs
+      if(pageData) {
+        templatesWithIds = (result?.["response"] || []).map((item: any) => {
+          const id = pageData.id;
+          emailTemplateResults.push({ id: id, emailTemplatePreview: JSON.stringify([item]) });
+          return { id, htmlStructure: item.htmlStructure };
+        });
+      }
+      else {
+          templatesWithIds = (result?.["response"] || []).map((item: any) => {
+          const id = `${Math.random().toString(36).slice(2, 9)}`;
+          emailTemplateResults.push({ id: id, emailTemplatePreview: JSON.stringify([item]) });
+          return { id, htmlStructure: item.htmlStructure };
+        });
+      }
+
+      // Step 2: call captureScreenshot with merged object { id: htmlStructure }
+      const res = await captureScreenshot(
+        templatesWithIds.reduce((acc: any, t: any) => {
+          acc[t.id] = t.htmlStructure;
+          return acc;
+        }, {})
+      );
+
+      // Step 3: build PreviewData[]
+      const emailTemplateData: PreviewData[] = templatesWithIds.map((t: any) => ({
+        id: t.id,
         url: "",
         selector: "",
         upload: false,
-        title: `Email Template`,
-        createdAt: new Date().toISOString().split('T')[0],
+        title: "Email Template",
+        createdAt: new Date().toISOString().split("T")[0],
         createdBy: "System",
-        htmlStructure: item.htmlStructure,
-        imageUrl: imageUrl,
+        htmlStructure: t.htmlStructure,
+        imageUrl: res?.screenshots?.[t.id]?.filePath || emailTemplateImage,
         type: "email-template"
-      })) || [];
+      }));
+
+      
       if(emailTemplateData.length > 0) {
         setAiGeneratedPages(prev => {
           const idToSync = emailTemplateData[0].id;
@@ -354,7 +355,8 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
           return [...prev, ...emailTemplateData];
         });
       }
-      return result?.response;
+
+      return emailTemplateResults;
     } catch (error) {
       console.error('Error generating email template:', error);
       return [];
@@ -373,21 +375,18 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
 
   const handleRegenerate = async (pageData: PreviewData, contentType: SupportedContentType) => {
     if(contentType === SUPPORTED_CONTENT_TYPES.EMAIL_TEMPLATE) {
-      const enhanced = await APIService.enhancePrompt({
-        isEnhancePrompt: true,
-        prompt: promptInput,
-        refNum: selectedTenant.refNum,
-      });
-      const enhancedPromptValue = enhanced?.enhancedPrompt || promptInput;
-      const result = await generateEmailTemplate(enhancedPromptValue, pageData.id);
+      let updateEmailTemplateResults: any[] = emailTemplateResults;
+      const result = await generateEmailTemplate(promptInput, 1, pageData);
       if (result?.length) {
-        setAiGeneratedPages(prev => prev.map(p => p.id === pageData.id ? { ...p, htmlStructure: result[0].htmlStructure } : p));
-        setSelectedPreview({ ...pageData, htmlStructure: result[0].htmlStructure });
+        setEmailTemplateResults(prev => prev.map(p => p.id === pageData.id ? { ...p, ...result[0] } : p));
+        setSelectedPreview({ ...pageData, htmlStructure: JSON.parse(result[0].emailTemplatePreview)[0].htmlStructure });
+        updateEmailTemplateResults = emailTemplateResults.map(p => p.id === pageData.id ? { ...p, ...result[0] } : p);
+        updateClusterWithEmailTemplates(updateEmailTemplateResults);
         return !!result[0].htmlStructure;
       }
     } else {
       const html = await generatePagePreview(contentType as CMSPageType);
-      const res = await captureScreenshot(html, pageData.id);
+      const res = await captureScreenshot({[pageData.id]: html});
       const imageUrl = res?.screenshots?.[pageData.id]?.filePath ? res?.screenshots?.[pageData.id]?.filePath : pageData.imageUrl;
       setSelectedPreview({ ...pageData, htmlStructure: html, imageUrl: imageUrl });
       setAiGeneratedPages(prev => prev.map(p => p.id === pageData.id ? { ...p, htmlStructure: html, imageUrl: imageUrl } : p));
@@ -397,26 +396,28 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
   }
 
   const handleSelect = (isSelected: boolean, currentCard: PreviewData) => {
-    setSelectedCards((prev: Map<string, string[]>) => {
+    setSelectedCards((prev: Map<string, { id: string; imageUrl: string }[]>) => {
       const next = new Map(prev);
       const cardType = currentCard.type || "";
-      const existingIds = next.get(cardType) || [];
-
+      const existing = next.get(cardType) || [];
+  
       if (isSelected) {
-        // Ensure only one selection per type: replace any existing selection of this type
-        next.set(cardType, [currentCard.id]);
+        // Only one selection per type → replace with new object
+        next.set(cardType, [{ id: currentCard.id, imageUrl: currentCard.imageUrl || "" }]);
       } else {
-        // Deselect: remove this id from its type; clean up empty arrays
-        const filtered = existingIds.filter((id) => id !== currentCard.id);
+        // Deselect: remove this id from its type
+        const filtered = existing.filter((item) => item.id !== currentCard.id);
         if (filtered.length > 0) {
           next.set(cardType, filtered);
         } else {
           next.delete(cardType);
         }
       }
+  
       return next;
     });
   };
+  
   const handlePreviewOpen = (pageData: any, contentType: string = "") => {
     setSelectedPreview(pageData);
     setShowPreview(true);
@@ -500,7 +501,7 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
                         showStatus={false}
                         showDate={false}
                         selectable={true}
-                        isSelected={selectedCards.get(data.type)?.includes(data.id)}
+                        isSelected={selectedCards.get(data.type)?.some((card: { id: string; imageUrl: string }) => card.id === data.id)}
                         onSelect={(isSelected: boolean) => handleSelect(isSelected, data)}
                       />
                     );
@@ -524,7 +525,7 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
                         showStatus={false}
                         showDate={false}
                         selectable={true}
-                        isSelected={selectedCards.get(data.type)?.includes(data.id)}
+                        isSelected={selectedCards.get(data.type)?.some((card: { id: string; imageUrl: string }) => card.id === data.id)}
                         onSelect={(isSelected: boolean) => handleSelect(isSelected, data)}
                       />
                     );
@@ -549,7 +550,7 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
                         showDate={false}
                         selectable={true}
                         onSelect={(isSelected: boolean) => handleSelect(isSelected, data)}
-                        isSelected={selectedCards.get(data.type)?.includes(data.id)}
+                        isSelected={selectedCards.get(data.type)?.some((card: { id: string; imageUrl: string }) => card.id === data.id)}
                       />
                     );
                   }
@@ -602,7 +603,7 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
                         showDate={false}
                         selectable={true}
                         onSelect={(isSelected: boolean) => handleSelect(isSelected, data)}
-                        isSelected={selectedCards.get(data.type)?.includes(data.id)}
+                        isSelected={selectedCards.get(data.type)?.some((card: { id: string; imageUrl: string }) => card.id === data.id)}
                         inputType="radio"
                       />
                     );

@@ -53,7 +53,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
   const [sampleSelectionListItems, setSampleSelectionListItems] = useState<string[]>([]);
   const [showPromptSuggestions, setShowPromptSuggestions] = useState<boolean>(false);
   const [crmUserInfo, setCrmUserInfo] = useState<any>({});
-  const [selectedCards, setSelectedCards] = useState<Map<string, string[]>>(new Map());
+  const [selectedCards, setSelectedCards] = useState<Map<string, { id: string; imageUrl: string }[]>>(new Map());
   const [selectedContentTypes, setSelectedContentTypes] = useState<string[]>([]);
   const [addedurls, setAddedurls] = useState<string[]>([]);
   const [selectedContentId, setSelectedContentId] = useState<any[]>([]);
@@ -351,7 +351,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
 
   const getPromptBasedSuggestions = (supportingMaterial: any) => {
     return APIService.getPromptBasedSuggestions({
-      isEnhancePrompt: jobLink ? true : true,
+      isEnhancePrompt: jobLink ? true : false,
       prompt: promptInput,
       deviceType: "desktop",
       language: locale,
@@ -586,12 +586,12 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       console.log("selectedCards", selectedCards);
       // Extract content types from selectedCards Map
       const contentTypes: CMSPageType[] = [];
-      let emailTemplateId: string | null = null;
+      let emailTemplateId: string | null = "";
       
-      selectedCards.forEach((ids: string[], type: string) => {
+      selectedCards.forEach((ids: { id: string; imageUrl: string }[], type: string) => {
         if (type === SUPPORTED_CONTENT_TYPES.EMAIL_TEMPLATE) {
           // For email templates, store the template ID separately
-          emailTemplateId = ids[0]; // Take the first ID since radio selection allows only one
+          emailTemplateId = ids[0]?.id || ""; // Extract the id from the object
         } else {
           // For other content types, add to contentTypes array
           contentTypes.push(type as CMSPageType);
@@ -620,9 +620,9 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       
       // Extract successful content by type
       const successfulBlog = successfulContent.find((item: any) => item.contentType === "blog");
-      const successfulContentPage = successfulContent.find((item: any) => item.contentType === "content-page");
+      let successfulContentPage = successfulContent.find((item: any) => item.contentType === "content-page");
       const successfulEmailTemplate = successfulContent.find((item: any) => item.contentType === "email-template");
-      const aiLandingPage = successfulContent.find((item: any) => item.contentType === "landing-page");
+      let aiLandingPage = successfulContent.find((item: any) => item.contentType === "landing-page");
       
       // Prepare cluster data for saving
       let createdBlogDetail = null;
@@ -636,7 +636,26 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
         const allEmailTemplates = await fetchAllEmailTemplates();
         createdEmailTemplateData = allEmailTemplates.find((template: any) => template.templateName === successfulEmailTemplate.data.templateName);
       }
+      successfulContentPage = successfulContentPage && Object.keys(successfulContentPage.data?.data || {}).length > 0
+      ? [successfulContentPage.data.data]
+      : [];
+      aiLandingPage = aiLandingPage && Object.keys(aiLandingPage.data?.data || {}).length > 0
+      ? [aiLandingPage.data.data]
+      : [];
+        // Set avatarUrl for content types that have selected cards
+        selectedCards.forEach((ids: { id: string; imageUrl: string }[], type: string) => {
+          if (type === SUPPORTED_CONTENT_TYPES.LANDING_PAGE && aiLandingPage && aiLandingPage.length > 0) {
+            aiLandingPage[0]["avatarUrl"] = ids[0]?.imageUrl || "";
+          }
+          if (type === SUPPORTED_CONTENT_TYPES.CONTENT_PAGE && successfulContentPage && successfulContentPage.length > 0) {
+            successfulContentPage[0]["avatarUrl"] = ids[0]?.imageUrl || "";
+          }
+          if (type === SUPPORTED_CONTENT_TYPES.BLOG && createdBlogDetail) {
+            createdBlogDetail["avatarUrl"] = ids[0]?.imageUrl || "";
+          }
+        });
 
+    
       const clusterData = {
         clusterId: newCluster?.clusterId,
         refNum: selectedTenant.refNum,
@@ -645,13 +664,13 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
         contentPages: selectedCards.get(SUPPORTED_CONTENT_TYPES.CONTENT_PAGE) ? fetchedPages?.contentPages : [], 
         landingPages: selectedCards.get(SUPPORTED_CONTENT_TYPES.LANDING_PAGE) ? fetchedPages?.landingPages : [],
         blogs: selectedCards.get(SUPPORTED_CONTENT_TYPES.BLOG) ? fetchedPages?.blogs : [],
-        aiCreatedLandingPage: aiLandingPage && Object.keys(aiLandingPage.data?.data || {}).length > 0
-        ? [aiLandingPage.data.data]
+        aiCreatedLandingPage: aiLandingPage && Object.keys(aiLandingPage || {}).length > 0
+        ? aiLandingPage
         : [],
       
         aiCreatedBlog: createdBlogDetail ? [createdBlogDetail] : [],
-        aiCreatedContentPage: successfulContentPage && Object.keys(successfulContentPage.data?.data || {}).length > 0
-        ? [successfulContentPage.data.data]
+        aiCreatedContentPage: successfulContentPage && Object.keys(successfulContentPage || {}).length > 0
+        ? successfulContentPage
         : [],
         emailTemplates: [],
         createdEmailTemplate: createdEmailTemplateData ? [createdEmailTemplateData] : [],
