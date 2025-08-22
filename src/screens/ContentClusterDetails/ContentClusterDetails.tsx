@@ -344,14 +344,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
   const tabSpecificCounts = getTabSpecificCounts();
 
   const handleBackNavigation = () => {
-    if (currentPage === "content-clusters") {
-      navigate("/content-clusters");
-    } else if (currentPage === "content-cluster/create") {
-      navigate("/content-cluster/create");
-    }
-    else {
-      navigate("/content-clusters");
-    }
+    navigate("/content-cluster/create");
   };
 
   const handlePreviewOpen = (pageData: any, contentType: string = "") => {

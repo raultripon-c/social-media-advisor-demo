@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import SupportingMaterial from "./SupportingMaterial/SupportingMaterial";
 import { Loader } from "@phenom/react-ui-components";
@@ -39,6 +39,11 @@ const contentTypesMap: any = {
   Blogs: ["aiCreatedBlog", "blogs"],
   "Email Templates": ["createdEmailTemplate", "emailTemplates"],
 };
+
+const sortOptions = [
+  { label: "Newest First", value: "newest" },
+  { label: "Oldest First", value: "oldest" },
+];
 
 const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
   const navigate = useNavigate();
@@ -83,6 +88,12 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
   const [masterPrompt, setMasterPrompt] = useState<any>("");
   const [newCluster, setNewCluster] = useState<any>(null);
   const [isClusterCreated, setIsClusterCreated] = useState<boolean>(false);
+  // Pagination and sorting states
+  const [selectedSort, setSelectedSort] = useState("newest");
+  const [showSortDropdown, setShowSortDropdown] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+  const sortDropdownRef = useRef<HTMLDivElement>(null);
   // Scroll to input when there's an error
   useEffect(() => {
     if (clusterTitleError && clusterTitleInputRef.current) {
@@ -210,6 +221,164 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [newCluster?.clusterId, selectedTenant.refNum]);
+
+  // Sort clusters based on selected sort option
+  const sortedClustersList = useMemo(() => {
+    return [...contentClustersList].sort((a: any, b: any) => {
+      const dateA = new Date(a.createdAt || 0);
+      const dateB = new Date(b.createdAt || 0);
+
+      if (selectedSort === "newest") {
+        return dateB.getTime() - dateA.getTime(); // Newest first
+      } else {
+        return dateA.getTime() - dateB.getTime(); // Oldest first
+      }
+    });
+  }, [contentClustersList, selectedSort]);
+
+  // Handle click outside dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (sortDropdownRef.current && !sortDropdownRef.current.contains(event.target as Node)) {
+        setShowSortDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  // Utility function to scroll to clusters section
+  const scrollToClusters = () => {
+    setTimeout(() => {
+      const clustersSection = document.querySelector('.clusters-section');
+      if (clustersSection) {
+        clustersSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        // Fallback to top of page
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      }
+    }, 100);
+  };
+
+  const contentTypesForCluster = (cluster: any): string[] => {
+    const result: string[] = [];
+    const clusterKeys = Object.keys(cluster);
+    Object.keys(contentTypesMap).forEach((contentType: string) => {
+      const contentTypes = contentTypesMap[contentType];
+      if (contentTypes.some((key: string) => clusterKeys.includes(key) && cluster[key] && cluster[key].length > 0)) {
+        result.push(contentType);
+      }
+    });
+    return result;
+  };
+
+  // Pagination logic
+  const { totalPages, currentPageClusters, filteredClusters, startIndex, endIndex } = useMemo(() => {
+    // Filter clusters based on search term
+    const filtered = sortedClustersList.filter((cluster) => {
+      if (!clusterSearchTerm.trim()) return true;
+      
+      const searchTerm = clusterSearchTerm.toLowerCase();
+      const clusterTitle = (cluster.clusterTitle || '').toLowerCase();
+      const clusterName = (cluster.clusterName || '').toLowerCase();
+      const contentTypes = contentTypesForCluster(cluster).join(' ').toLowerCase();
+      
+      return clusterTitle.includes(searchTerm) || 
+             clusterName.includes(searchTerm) || 
+             contentTypes.includes(searchTerm);
+    });
+    
+    const total = Math.ceil(filtered.length / itemsPerPage);
+    const startIdx = (currentPage - 1) * itemsPerPage;
+    const endIdx = Math.min(startIdx + itemsPerPage, filtered.length);
+    const pageData = filtered.slice(startIdx, endIdx);
+    
+    return {
+      totalPages: total,
+      currentPageClusters: pageData,
+      filteredClusters: filtered,
+      startIndex: startIdx + 1, // 1-based for display
+      endIndex: endIdx
+    };
+  }, [sortedClustersList, currentPage, itemsPerPage, clusterSearchTerm]);
+
+  // Generate page numbers with ellipsis
+  const generatePageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+    
+    if (totalPages <= maxVisiblePages) {
+      // Show all pages if total is small
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Show first page
+      pages.push(1);
+      
+      if (currentPage <= 3) {
+        // Show 1, 2, 3, 4, ..., last
+        for (let i = 2; i <= 4; i++) {
+          pages.push(i);
+        }
+        pages.push('ellipsis');
+        pages.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        // Show 1, ..., last-3, last-2, last-1, last
+        pages.push('ellipsis');
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        // Show 1, ..., current-1, current, current+1, ..., last
+        pages.push('ellipsis');
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pages.push(i);
+        }
+        pages.push('ellipsis');
+        pages.push(totalPages);
+      }
+    }
+    
+    return pages;
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // Scroll to clusters section when changing pages
+    scrollToClusters();
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+      // Scroll to clusters section when going to previous page
+      scrollToClusters();
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+      // Scroll to clusters section when going to next page
+      scrollToClusters();
+    }
+  };
+
+  const handleSortSelect = (sortValue: string) => {
+    setSelectedSort(sortValue);
+    setShowSortDropdown(false);
+    setCurrentPage(1); // Reset to first page when sorting changes
+  };
+
+  const getSelectedSortLabel = () => {
+    return sortOptions.find(option => option.value === selectedSort)?.label || "Newest First";
+  };
 
   const getListItems = (searchTerm: string) => {
     // Check if crmUserInfo and userDetails exist before making the API call
@@ -814,34 +983,13 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       });
   };
 
-  const contentTypesForCluster = (cluster: any): string[] => {
-    const result: string[] = [];
-    const clusterKeys = Object.keys(cluster);
-    Object.keys(contentTypesMap).forEach((contentType: string) => {
-      const contentTypes = contentTypesMap[contentType];
-      if (contentTypes.some((key: string) => clusterKeys.includes(key) && cluster[key] && cluster[key].length > 0)) {
-        result.push(contentType);
-      }
-    });
-    return result;
-  };
-  
-
   const handleClusterClick = (cluster: any) => {
     console.log("Clicked", cluster);
     const newPath = location.pathname.replace(/\/create$/, "");
       navigate(`${newPath}/${cluster.clusterId}`);
   };
 
-  const filteredClusters = contentClustersList.filter((cluster) => {
-    if (!clusterSearchTerm.trim()) return true;
-    
-    const searchTerm = clusterSearchTerm.toLowerCase();
-    const clusterTitle = (cluster.clusterTitle || '').toLowerCase();
-    const contentTypes = contentTypesForCluster(cluster).join(' ').toLowerCase();
-    
-    return clusterTitle.includes(searchTerm) || contentTypes.includes(searchTerm);
-  });
+
 
   // Suggested Content Tags (static, as per image)
   // const allSuggestedTags = [
@@ -1147,12 +1295,54 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
                   className="cluster-search" 
                   placeholder="Search cluster" 
                   value={clusterSearchTerm}
-                  onChange={(e) => setClusterSearchTerm(e.target.value)}
+                  onChange={(e) => {
+                    setClusterSearchTerm(e.target.value);
+                    setCurrentPage(1); // Reset to first page when searching
+                  }}
                 />
               </div>
-              {/* <select className="cluster-sort">
-                <option>Sort: Most recently updated</option>
-              </select> */}
+              <div className="sort-dropdown" ref={sortDropdownRef}>
+                <button 
+                  className="sort-dropdown-button"
+                  onClick={() => setShowSortDropdown(!showSortDropdown)}
+                >
+                  <span className="sort-dropdown-button-text">
+                    Sort: {getSelectedSortLabel()}
+                  </span>
+                  <svg 
+                    width="16" 
+                    height="16" 
+                    viewBox="0 0 16 16" 
+                    fill="none" 
+                    xmlns="http://www.w3.org/2000/svg"
+                    style={{
+                      transform: showSortDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
+                      transition: 'transform 0.2s ease'
+                    }}
+                  >
+                    <path 
+                      d="M4 6L8 10L12 6" 
+                      stroke="#637085" 
+                      strokeWidth="1.5" 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
+                {showSortDropdown && (
+                  <div className="sort-dropdown-menu">
+                    {sortOptions.map((option) => (
+                      <div
+                        key={option.value}
+                        className={`sort-dropdown-item ${selectedSort === option.value ? 'active' : ''}`}
+                        onClick={() => handleSortSelect(option.value)}
+                      >
+                        <span className="sort-dropdown-item-text">{option.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           <div className="clusters-list">
@@ -1161,7 +1351,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
                 <Loader title="Loading clusters..." />
               </div>
             ) : contentClustersList.length > 0 ? (
-              filteredClusters.map((cluster: any, idx: number) => {
+              currentPageClusters.map((cluster: any, idx: number) => {
                 const contentTypes = contentTypesForCluster(cluster);
                 const createdDate = cluster.createdAt ? new Date(cluster.createdAt).toLocaleDateString('en-US', {
                   year: 'numeric',
@@ -1179,12 +1369,6 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
                         <div>
                           <div 
                             className="cluster-title" 
-                            style={{ 
-                              whiteSpace: 'nowrap', 
-                              overflow: 'hidden', 
-                              textOverflow: 'ellipsis',
-                              maxWidth: '200px'
-                            }}
                             title={cluster.clusterName || cluster.clusterTitle || 'Untitled Cluster'}
                           >
                             {cluster.clusterName || cluster.clusterTitle || 'Untitled Cluster'}
@@ -1227,6 +1411,56 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
               </div>
             )}
           </div>
+          
+          {totalPages > 1 && (
+            <div className="pagination-wrapper">
+              <div className="pagination-info">
+                Showing {startIndex} - {endIndex} of {filteredClusters.length}
+              </div>
+              
+              <div className="pagination-container">
+                <button 
+                  className="pagination-btn pagination-arrow" 
+                  onClick={handlePrevPage}
+                  disabled={currentPage === 1}
+                  aria-label="Previous page"
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+                
+                <div className="pagination-pages">
+                  {generatePageNumbers().map((page, index) => (
+                    page === 'ellipsis' ? (
+                      <span key={`ellipsis-${index}`} className="pagination-ellipsis">
+                        ...
+                      </span>
+                    ) : (
+                      <button
+                        key={page}
+                        className={`pagination-page ${currentPage === page ? 'active' : ''}`}
+                        onClick={() => handlePageChange(page as number)}
+                      >
+                        {page}
+                      </button>
+                    )
+                  ))}
+                </div>
+                
+                <button 
+                  className="pagination-btn pagination-arrow" 
+                  onClick={handleNextPage}
+                  disabled={currentPage === totalPages}
+                  aria-label="Next page"
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
       <Modal
