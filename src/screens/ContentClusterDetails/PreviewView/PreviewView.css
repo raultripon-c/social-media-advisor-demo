@@ -145,7 +145,6 @@
   width: 100%;
   height: 100%;
   background: #ffffff;
-  min-height: 600px;
   max-height: calc(100vh - 120px); /* Account for header and padding */
   overflow: hidden;
   border-radius: 8px;
