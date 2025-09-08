@@ -821,6 +821,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
           }
           if (type === SUPPORTED_CONTENT_TYPES.BLOG && createdBlogDetail) {
             createdBlogDetail["avatarUrl"] = ids[0]?.imageUrl || "";
+            createdBlogDetail["previewUrl"] = successfulBlog.data?.previewUrl;
           }
         });
 

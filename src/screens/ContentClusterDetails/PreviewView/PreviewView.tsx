@@ -40,11 +40,14 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
     useEffect(() => {
         if (pageData) {
             const htmlStructure = pageData?.htmlStructure;
-            const url = pageData?.fullUrl || pageData?.url || "";
+            let url = pageData?.fullUrl || pageData?.url || "";
             // Check if it's an email template with _id
             if (pageData?.application=="crm" && pageData?._id && contentType === CONTENT_TYPES.EMAIL_TEMPLATE) {
                 fetchEmailTemplatePreview();
             } else if(!htmlStructure && url) {
+                if(contentType === CONTENT_TYPES.BLOG){
+                    url = pageData?.previewUrl || url;
+                }
                 setCurrentUrl(url);
                 setIsLoading(true);
             } else {
