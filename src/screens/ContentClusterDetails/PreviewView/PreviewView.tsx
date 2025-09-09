@@ -221,7 +221,7 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
         setIsLoading(true);
         const contentType: SupportedContentType = pageData?.type;
         const loaded = (await onRegenerate?.(pageData, contentType)) ?? false;
-        setIsLoading(!loaded);
+        setIsLoading(false);
     };
 
     const navigateOnClick = async (pageData: object) => {

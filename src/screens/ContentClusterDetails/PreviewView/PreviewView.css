@@ -124,6 +124,7 @@
   align-items: center;
   gap: 16px;
   color: #6b7280;
+  z-index: 1000;
 }
 
 .loading-spinner {
