@@ -159,6 +159,27 @@
   border-radius: 8px;
 }
 
+/* Disabled iframe styles to prevent clicks but allow scrolling */
+.preview-iframe-click-disabled {
+  /* Allow scrolling but disable clicks */
+  pointer-events: auto;
+}
+
+.preview-iframe-container,
+.preview-html-container {
+  /* Enable scrolling on the container */
+  overflow: auto;
+  pointer-events: auto;
+  position: relative;
+}
+
+/* Ensure iframe content can still be scrolled */
+.preview-iframe {
+  /* Allow scrolling but disable clicks */
+  pointer-events: auto;
+}
+
+
 /* Image Content - Responsive sizing for images */
 .preview-image-container {
   width: 50%;

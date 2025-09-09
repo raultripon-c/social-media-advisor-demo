@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { AppStore } from "store";
@@ -27,6 +27,7 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
     const [currentUrl, setCurrentUrl] = useState<string>("");
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [htmlContent, setHtmlContent] = useState<string>("");
+    const observerRef = useRef<MutationObserver | null>(null);
    
     const { selectedApp, allApps } = useSelector((state: any) => state.app);
 
@@ -55,6 +56,16 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
             }
         }
     }, [pageData]);
+
+    // Cleanup observer on component unmount
+    useEffect(() => {
+        return () => {
+            if (observerRef.current) {
+                observerRef.current.disconnect();
+                observerRef.current = null;
+            }
+        };
+    }, []);
 
 
 
@@ -87,13 +98,96 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
         }
     };
 
-    const handleIframeLoad = () => {
-        setIsLoading(false);
-    };
 
     const handleIframeError = () => {
         setIsLoading(false);
         // Handle error - maybe show a fallback content
+    };
+    
+
+    const handleIframeLoad = () => {
+        setIsLoading(false);
+        
+        // Clean up any existing observer
+        if (observerRef.current) {
+            observerRef.current.disconnect();
+            observerRef.current = null;
+        }
+        
+        // Add event listeners to disable only hyperlinks in iframe content
+        const iframe = document.querySelector('.preview-iframe-click-disabled') as HTMLIFrameElement;
+        if (iframe && iframe.contentDocument) {
+            try {
+                const iframeDoc = iframe.contentDocument;
+                
+                // Function to disable all links
+                const disableAllLinks = () => {
+                    const links = iframeDoc.querySelectorAll('a');
+                    links.forEach(link => {
+                        // Remove existing event listeners to avoid duplicates
+                        link.removeEventListener('click', preventLinkClick, true);
+                        // Add click prevention
+                        link.addEventListener('click', preventLinkClick, true);
+                    });
+                };
+                
+                // Function to prevent link clicks
+                const preventLinkClick = (e: Event) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    return false;
+                };
+                
+                // Disable existing links
+                disableAllLinks();
+                
+                // Set up observer to catch dynamically added links
+                const observer = new MutationObserver((mutations) => {
+                    let shouldDisableLinks = false;
+                    mutations.forEach((mutation) => {
+                        if (mutation.type === 'childList') {
+                            mutation.addedNodes.forEach((node) => {
+                                if (node.nodeType === Node.ELEMENT_NODE) {
+                                    const element = node as Element;
+                                    if (element.tagName === 'A' || element.querySelector('a')) {
+                                        shouldDisableLinks = true;
+                                    }
+                                }
+                            });
+                        }
+                    });
+                    
+                    if (shouldDisableLinks) {
+                        disableAllLinks();
+                    }
+                });
+                
+                // Store observer reference for cleanup
+                observerRef.current = observer;
+                
+                // Start observing for changes
+                observer.observe(iframeDoc.body, {
+                    childList: true,
+                    subtree: true
+                });
+                
+                // Also add a global click listener on the document
+                iframeDoc.addEventListener('click', (e) => {
+                    const target = e.target as Element;
+                    if (target && target.tagName === 'A') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        e.stopImmediatePropagation();
+                        return false;
+                    }
+                }, true);
+                
+            } catch (error) {
+                // Cross-origin iframe, can't access content
+                console.log('Cannot access iframe content due to cross-origin restrictions');
+            }
+        }
     };
 
     const handleImageLoad = () => {
@@ -210,7 +304,7 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
                 <div className="preview-iframe-container">
                     <iframe
                         src={currentUrl}
-                        className="preview-iframe"
+                        className="preview-iframe preview-iframe-click-disabled"
                         onLoad={handleIframeLoad}
                         onError={handleIframeError}
                         title="Page Preview"
@@ -226,7 +320,7 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
             <div className={`preview-html-container ${className}`}>
                 <iframe
                     srcDoc={htmlContent}
-                    className="preview-iframe"
+                    className="preview-iframe preview-iframe-click-disabled"
                     onLoad={handleIframeLoad}
                     onError={handleIframeError}
                     title="Email Template Preview"
