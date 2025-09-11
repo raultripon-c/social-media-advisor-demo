@@ -767,6 +767,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
           crmUserInfo={crmUserInfo}
           isCheckingTaskProgress={isCheckingTaskProgress}
           contentType={selectedContentType}
+          noUrlClassName={selectedContentType === "Email Template" ? "preview-email-template" : ""}
         />
       ) : (
         <div className="cluster-details-wrapper">

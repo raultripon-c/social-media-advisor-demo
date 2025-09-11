@@ -443,6 +443,7 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
         contentType={selectedPreview.contentType}
         isCheckingTaskProgress={false}
         className={` ${selectedPreview.type == "email-template" ? "" : "preview-pages-container-preview"}`}
+        noUrlClassName={selectedPreview.type == "email-template" ? "preview-email-template" : ""}
         preview={true}
       />
     );

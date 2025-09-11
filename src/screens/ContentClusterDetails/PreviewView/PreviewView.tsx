@@ -18,11 +18,12 @@ interface PreviewViewProps {
     contentType?: string;
     isCheckingTaskProgress?: boolean;
     className?: string;
+    noUrlClassName?: string;
     preview?: boolean;
     onRegenerate?: (pageData: any, contentType: SupportedContentType) => Promise<boolean>;
 }
 
-const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo, contentType, isCheckingTaskProgress, className, preview=false, onRegenerate}) => {
+const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo, contentType, isCheckingTaskProgress, className, preview=false, onRegenerate, noUrlClassName}) => {
     const navigate = useNavigate();
     const [currentUrl, setCurrentUrl] = useState<string>("");
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -369,7 +370,7 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
                 ) : currentUrl && !isCheckingTaskProgress ? (
                     renderUrlContent()
                 ) : (
-                    <div className="preview-no-url">
+                    <div className={`preview-no-url ${noUrlClassName}`}>
                         <div className="preview-loading">
                             <div className="loading-spinner"></div>
                             <p>Loading preview...</p>
