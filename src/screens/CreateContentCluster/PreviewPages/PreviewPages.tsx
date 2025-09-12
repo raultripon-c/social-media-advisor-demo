@@ -61,14 +61,20 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
   });
   const selectedTenant = JSON.parse(localStorage.getItem("selectedTenant") || "[]");
   const crmUserInfo = useSelector((state: AppStore) => state.customer.crmUserInfo);
-
-  const siteMetaData = useSelector(
-    (state: AppStore) => state.customer.siteMetaData
-  );
-
+  const [siteMetaData, setsiteMetaData] = useState<any>(useSelector(
+    (state: AppStore) => state.customer.siteMetaData));
+ 
 
   useEffect(() => {
     const run = async (generateCmsAiPages: boolean) => {
+      let data = siteMetaData;
+
+        if (!siteMetaData || Object.keys(siteMetaData).length === 0) {
+          const refnum = getRefnumFromLink(window.location.href, selectedTenant);
+          const response = await APIService.getSiteMetaData(refnum);
+          data = response?.data?.data;
+          setsiteMetaData(data)
+        }
       if (generateCmsAiPages) {
         generateCmsAiPreviewPagesAllTypesInParallel();
       } else {
@@ -295,7 +301,8 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
         userEmail: crmUserInfo?.userName,
         import: false,
         refNum: selectedTenant.refNum,
-        variations: variations
+        variations: variations,
+        url: "https://" + siteMetaData?.domain + "/", 
       };
       if (content) {
         payload.content = content;
