@@ -634,47 +634,47 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
     
     try {
       // Call both APIs in parallel
-      const [promptResponse, clusterNameResponse] = await Promise.all([
-        getPromptBasedSuggestions(payload),
+      const [clusterNameResponse] = await Promise.all([
+        // getPromptBasedSuggestions(payload),
         generateClusterName(clusterPayload)
         // getSuggestedLists()
       ]);
       
       // Handle prompt based suggestions response
-      if (promptResponse?.masterPrompt && jobLink) {
-        setPromptInput(promptResponse.masterPrompt);
-      }
-      setMasterPrompt(promptResponse?.masterPrompt);
-      setPagesBasedKeywords(promptResponse?.pageTitleAndDescription || []);
+      // if (promptResponse?.masterPrompt && jobLink) {
+      //   setPromptInput(promptResponse.masterPrompt);
+      // }
+      // setMasterPrompt(promptResponse?.masterPrompt);
+      // setPagesBasedKeywords(promptResponse?.pageTitleAndDescription || []);
       // Set fetched pages with content from response
-      const fetchedPagesData = {
-        contentPages: promptResponse?.contentPages || [],
-        landingPages: promptResponse?.landingPages || [],
-        blogs: promptResponse?.blogDetails || []
-      };
-      setFetchedPages(fetchedPagesData);
+      // const fetchedPagesData = {
+      //   contentPages: promptResponse?.contentPages || [],
+      //   landingPages: promptResponse?.landingPages || [],
+      //   blogs: promptResponse?.blogDetails || []
+      // };
+      // setFetchedPages(fetchedPagesData);
       
       // Update content types based on response
-      if (promptResponse.data?.contentTypes) {
-        const contentTypeNames = promptResponse.contentTypes.map((type: any) => type.displayName);
-        setSelectedContentTypes(contentTypeNames);
-      }
+      // if (promptResponse.data?.contentTypes) {
+      //   const contentTypeNames = promptResponse.contentTypes.map((type: any) => type.displayName);
+      //   setSelectedContentTypes(contentTypeNames);
+      // }
       
       const clusterTitleName = (clusterNameResponse?.clusterName ?? "").replace(/"/g, "");
-      let suggestedTagsData = promptResponse.contentTypes || [];
-      setSuggestedTags(suggestedTagsData);
+      // let suggestedTagsData = promptResponse.contentTypes || [];
+      // setSuggestedTags(suggestedTagsData);
       
       // Set default selectedTags and selectedContentId to first two content types
-      if (suggestedTagsData.length >= 2) {
-        const defaultTags = suggestedTagsData.slice(0, 2).map((type: any) => type.displayName);
-        const defaultContentIds = suggestedTagsData.slice(0, 2).map((type: any) => type.contentId);
-        setSelectedTags(defaultTags);
-        setSelectedContentId(defaultContentIds);
-      } else if (suggestedTagsData.length === 1) {
-        // If only one content type, select just that one
-        setSelectedTags([suggestedTagsData[0].displayName]);
-        setSelectedContentId([suggestedTagsData[0].contentId]);
-      }
+      // if (suggestedTagsData.length >= 2) {
+      //   const defaultTags = suggestedTagsData.slice(0, 2).map((type: any) => type.displayName);
+      //   const defaultContentIds = suggestedTagsData.slice(0, 2).map((type: any) => type.contentId);
+      //   setSelectedTags(defaultTags);
+      //   setSelectedContentId(defaultContentIds);
+      // } else if (suggestedTagsData.length === 1) {
+      //   // If only one content type, select just that one
+      //   setSelectedTags([suggestedTagsData[0].displayName]);
+      //   setSelectedContentId([suggestedTagsData[0].contentId]);
+      // }
       
       // Handle suggested lists response
       // console.log("Suggested Lists Response:", suggestedListsResponse);
@@ -694,7 +694,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       setShowClustersList(true);
       setShowPromptSuggestions(true);
         
-      console.log("Prompt Based Suggestions", promptResponse);
+      // console.log("Prompt Based Suggestions", promptResponse);
     } catch (err) {
       console.error("Error fetching data:", err);
       setShowSaveOrDiscardModal(false);
