@@ -1228,7 +1228,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
               </div>
             </div>
             )}
-            <PreviewPages selectedCards={selectedCards} setSelectedCards={setSelectedCards} key={generatePages} pagesBasedKeywords={pagesBasedKeywords} promptInput={masterPrompt} showSaveOrDiscardModal={showSaveOrDiscardModal} newCluster={newCluster}/>
+            <PreviewPages selectedCards={selectedCards} setSelectedCards={setSelectedCards} key={generatePages} pagesBasedKeywords={pagesBasedKeywords} promptInput={promptInput} showSaveOrDiscardModal={showSaveOrDiscardModal} newCluster={newCluster}/>
               {/* <div className="prompt-suggestions content-format-section">
             <PreviewPages key={generatePages} pagesBasedKeywords={pagesBasedKeywords} promptInput={masterPrompt} showSaveOrDiscardModal={showSaveOrDiscardModal}/>
             <div className="prompt-suggestions content-format-section">
@@ -1382,7 +1382,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
                         {/* <button className="cluster-menu-btn">⋮</button> */}
                       </div>
                     </div>
-                    <div className="cluster-divider" />
+                    {/* <div className="cluster-divider" />
                     <div className="cluster-actions">
                       <div className="cluster-content-types-label">Content types:</div>
                       <div className="cluster-content-types">
@@ -1399,7 +1399,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
                           <span>No content types</span>
                         )}
                       </div>
-                    </div>
+                    </div> */}
                   </div>
                 );
               })
