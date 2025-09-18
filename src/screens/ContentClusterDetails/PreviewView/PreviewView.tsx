@@ -21,9 +21,10 @@ interface PreviewViewProps {
     noUrlClassName?: string;
     preview?: boolean;
     onRegenerate?: (pageData: any, contentType: SupportedContentType) => Promise<boolean>;
+    clickDisabled?: boolean | true;
 }
 
-const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo, contentType, isCheckingTaskProgress, className, preview=false, onRegenerate, noUrlClassName}) => {
+const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo, contentType, isCheckingTaskProgress, className, preview=false, onRegenerate, noUrlClassName, clickDisabled=true}) => {
     const navigate = useNavigate();
     const [currentUrl, setCurrentUrl] = useState<string>("");
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -117,7 +118,7 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
         
         // Add event listeners to disable only hyperlinks in iframe content
         const iframe = document.querySelector('.preview-iframe-click-disabled') as HTMLIFrameElement;
-        if (iframe && iframe.contentDocument) {
+        if (iframe && iframe.contentDocument && clickDisabled) {
             try {
                 const iframeDoc = iframe.contentDocument;
                 
@@ -141,7 +142,9 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
                 };
                 
                 // Disable existing links
-                disableAllLinks();
+                if(clickDisabled) {
+                    disableAllLinks();
+                }
                 
                 // Set up observer to catch dynamically added links
                 const observer = new MutationObserver((mutations) => {
@@ -305,7 +308,7 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
                 <div className="preview-iframe-container">
                     <iframe
                         src={currentUrl}
-                        className="preview-iframe preview-iframe-click-disabled"
+                        className={`preview-iframe ${clickDisabled ? "preview-iframe-click-disabled" : ""}`}
                         onLoad={handleIframeLoad}
                         onError={handleIframeError}
                         title="Page Preview"
@@ -321,7 +324,7 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
             <div className={`preview-html-container ${className}`}>
                 <iframe
                     srcDoc={htmlContent}
-                    className="preview-iframe preview-iframe-click-disabled"
+                    className={`preview-iframe ${clickDisabled ? "preview-iframe-click-disabled" : ""}`}
                     onLoad={handleIframeLoad}
                     onError={handleIframeError}
                     title="Email Template Preview"

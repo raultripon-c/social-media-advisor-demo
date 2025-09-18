@@ -768,6 +768,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
           isCheckingTaskProgress={isCheckingTaskProgress}
           contentType={selectedContentType}
           noUrlClassName={selectedContentType === "Email Template" ? "preview-email-template" : ""}
+          clickDisabled={false}
         />
       ) : (
         <div className="cluster-details-wrapper">

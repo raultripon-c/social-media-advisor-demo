@@ -88,6 +88,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
   const [masterPrompt, setMasterPrompt] = useState<any>("");
   const [newCluster, setNewCluster] = useState<any>(null);
   const [isClusterCreated, setIsClusterCreated] = useState<boolean>(false);
+  const [siteMetaData, setSiteMetaData] = useState<any>(null);
   // Pagination and sorting states
   const [selectedSort, setSelectedSort] = useState("newest");
   const [showSortDropdown, setShowSortDropdown] = useState(false);
@@ -165,6 +166,13 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
         }
       })
     .catch((err) => console.error("Error getting CRM user info", err));
+
+    // Fetch site metadata
+    APIService.getSiteMetaData(selectedTenant.refNum)
+      .then((response) => {
+        setSiteMetaData(response?.data?.data);
+      })
+      .catch((err) => console.error("Error getting site metadata", err));
   }, []);
 
   useEffect(() => {
@@ -564,6 +572,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
     return APIService.createAIPagesV2({
       clusterId: newCluster?.clusterId,
       companyName: selectedTenant.tenantName,
+      defaultUrl: siteMetaData?.domain ? "https://" + siteMetaData.domain + "/" : "",
       refNum: selectedTenant.refNum,
       locale,
       siteVariant: "external",
