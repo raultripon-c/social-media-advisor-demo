@@ -1,5 +1,5 @@
 .content-clusters-list-container {
-  height: 100vh;
+  /* height: 100vh; */
   padding: 24px;
   background: var(--grays-grgr-25, #f8f9fb);
 }

@@ -24,7 +24,8 @@ export const appSelectionHandler = async (
     selectedTenant,
     customeRoute,
     isAnalyticsChildAvailable,
-    setShowAnalyticsTenant
+    setShowAnalyticsTenant,
+    scenario
   } = options;
 
   if (!selectedApp) {
@@ -69,7 +70,8 @@ export const appSelectionHandler = async (
         siteMetaData,
         selectedApp,
         customerCode,
-        navigate
+        navigate,
+        scenario
       );
       break;
     case "script":
@@ -151,7 +153,8 @@ const handleExternalApp = async (
   siteMetaData: any,
   selectedApp: any,
   customerCode: string,
-  navigate: (path: string) => void
+  navigate: (path: string) => void,
+  scenario: any
 ) => {
 
   const tenantSupportedLangs = await APIService.getSupportedLangs(refNum);
@@ -166,7 +169,8 @@ const handleExternalApp = async (
   const link = getLink(selectedApp, {
     refNum: refNum,
     customerCode: customerCode,
-    site: btoa(JSON.stringify(metaData))
+    site: btoa(JSON.stringify(metaData)),
+    scenario: scenario
   });
 
   if (link && !isEmpty(link)) {
@@ -352,7 +356,7 @@ export const transformAppData = (data: any) => {
 export const getMfRoutes = (data: any) => {
   const mfRoutes = data
     .filter(({ appType }: { appType: string }) => appType === "module-federation")
-    .flatMap(({ context, appConfig }: { context: string; appConfig: { route?: string, moduleRoute?: string } }) => {
+    .flatMap(({ context, appConfig, name }: { context: string; appConfig: { route?: string, moduleRoute?: string }; name: string }) => {
       if (!appConfig?.route) return [];
 
       const { route, moduleRoute } = appConfig;
@@ -374,6 +378,12 @@ export const getMfRoutes = (data: any) => {
       // Only add module path route if updatedModulePath is not null or empty
       if (updatedModulePath && updatedModulePath.trim() !== "") {
         routes.push({ path: `${updatedModulePath}/*`, component: RemoteModuleRenderer });
+      }
+
+      // Special handling for Email Manager to support base email-management route
+      if (name === "Email Manager" && route.includes("/dashboard/email-management/")) {
+        const baseEmailManagementRoute = `/:customerCode/:refNum/dashboard/email-management/templates/:templateId*`;
+        routes.push({ path: baseEmailManagementRoute, component: RemoteModuleRenderer });
       }
 
       return routes;
@@ -430,6 +440,17 @@ export function findAppConfigByRoutes(apps: any = [], value: string): any {
         if (!filterCondition) {
           filterCondition = element?.appConfig?.moduleRoute && value.toLowerCase().includes(element?.appConfig?.moduleRoute?.toLowerCase())
         }
+        
+        // Special handling for Email Manager to match both specific and base routes
+        if (!filterCondition && element?.name === "Email Manager") {
+          const emailManagementRoutes = [
+            "/dashboard/email-management/templates/"
+          ];
+          filterCondition = emailManagementRoutes.some(route => 
+            value.toLowerCase().includes(route.toLowerCase())
+          );
+        }
+        
         return filterCondition;
       } catch (error) {
         console.error("An error occurred while filtering: ", error);

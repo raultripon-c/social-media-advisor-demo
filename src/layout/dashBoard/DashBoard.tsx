@@ -208,6 +208,7 @@ const DashBoard = () => {
         openInNewTab: false,
         setSiteMetaData: setSiteMetaData,
         selectedTenant: selectedTenant,
+        scenario: "navigateToAddPage"
       };
       appSelectionHandler(appSelectionOptions);
     } else {
