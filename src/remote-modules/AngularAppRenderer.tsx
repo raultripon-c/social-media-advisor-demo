@@ -122,26 +122,6 @@ export function AngularAppRenderer(props: any) {
     });
   }, [props.scope]);
 
-  // Fetch and load the CRM script and its associated CSS
-  const fetchAndLoadScript = async () => {
-    try {
-      const response = await fetch(`${(window as any)._env_.CRM_URL}/en/assets-manifest.json`);
-      if (!response.ok) throw new Error('Failed to fetch assets manifest');
-
-      const data = await response.json();
-      const cssUrl = `${(window as any)._env_.CRM_URL}/${data["styles.css"]}`;
-
-      const link = document.createElement("link");
-      link.rel = "stylesheet";
-      link.id = 'crm-stylesheet';
-      link.href = cssUrl;
-      document.head.appendChild(link);
-
-    } catch (error) {
-      console.error('Error fetching data or loading script:', error);
-    }
-  };
-
   // Load the Angular component
   const loadComponent = () => {
     const parentDiv = document.querySelector("#child-module-renderer");

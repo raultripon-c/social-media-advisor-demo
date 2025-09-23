@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { removeElementsById } from '../utils/helper/utilizer';
 
 const CrmStylesRenderer = () => {
 
@@ -46,15 +47,31 @@ const CrmStylesRenderer = () => {
     document.head.appendChild(crmStyles);
   };
 
-
-  const removeStyles = () => {
-    const styles = document.getElementById('crm-index-styles');
-    if (styles) document.head.removeChild(styles);
-  };
-
+    // Fetch and load the CRM script and its associated CSS
+    const fetchAndLoadCRMStyles = async () => {
+      try {
+        const response = await fetch(`${(window as any)._env_.CRM_URL}/en/assets-manifest.json`);
+        if (!response.ok) throw new Error('Failed to fetch assets manifest');
+  
+        const data = await response.json();
+        const cssUrl = `${(window as any)._env_.CRM_URL}/${data["styles.css"]}`;
+  
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.id = 'crm-stylesheet';
+        link.href = cssUrl;
+        document.head.appendChild(link);
+  
+      } catch (error) {
+        console.error('Error fetching data or loading script:', error);
+      }
+    };
 
   useEffect(() => {
     addStyles();
+    (async () => {
+      await fetchAndLoadCRMStyles();
+    })();
     const disableTxeBootstrap = document.getElementById('bootstrap-styles') as HTMLLinkElement;
     if (disableTxeBootstrap) {
       disableTxeBootstrap.disabled = true;
@@ -68,7 +85,8 @@ const CrmStylesRenderer = () => {
     
     
     return () => {
-      removeStyles();
+      removeElementsById("crm-stylesheet");
+      removeElementsById("crm-index-styles");
       const disableTxeBootstrap = document.getElementById('bootstrap-styles') as HTMLLinkElement;
       if (disableTxeBootstrap) {
         disableTxeBootstrap.disabled = false;
