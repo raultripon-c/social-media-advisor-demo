@@ -591,12 +591,19 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
     if (!promptInput) return;
     setShowSaveOrDiscardModal(true);
     setShowLoader(true);
+    const supportingMaterial = [
+      {
+        type: "jobsPage",
+        urlList: jobLink ? [jobLink] : []
+      }
+    ];
     return APIService.enhancePrompt({
       isEnhancePrompt: true,
       prompt: promptInput,
       deviceType: "desktop",
       language: locale,
       refNum: selectedTenant.refNum,
+      supportingMaterial,
     }).then((response) => {
       // Update the prompt input with the enhanced version
       setShowSaveOrDiscardModal(false); 
@@ -645,7 +652,8 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       // Call both APIs in parallel
       const [clusterNameResponse] = await Promise.all([
         // getPromptBasedSuggestions(payload),
-        generateClusterName(clusterPayload)
+        generateClusterName(clusterPayload),
+        enhancePrompt()
         // getSuggestedLists()
       ]);
       
