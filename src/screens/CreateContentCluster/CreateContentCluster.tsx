@@ -644,17 +644,18 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
   };
 
   const handlePromptSubmit = async () => {
+    const isJobLinkValid = jobLink && isValidJobLink ? true : false;
     if (promptInput || (jobLink && isValidJobLink)) {
       setShowSaveOrDiscardModal(true);
       setFetchedPages(null);
       // handleClusterCreation();
-      await handlePromptBasedSuggestions();
+      await handlePromptBasedSuggestions(isJobLinkValid);
       setSelectedCards(new Map());
       setGeneratePages(generatePages+1);
     }
   };
 
-  const handlePromptBasedSuggestions = async () => {
+  const handlePromptBasedSuggestions = async (isJobLinkValid: boolean) => {
     setShowLoader(true);
     const payload =  [
         {
@@ -672,7 +673,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       const [clusterNameResponse] = await Promise.all([
         // getPromptBasedSuggestions(payload),
         generateClusterName(clusterPayload),
-        enhancePrompt()
+        isJobLinkValid ? enhancePrompt() : Promise.resolve(),
         // getSuggestedLists()
       ]);
       
