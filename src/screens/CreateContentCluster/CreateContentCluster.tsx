@@ -663,19 +663,24 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
             "urlList": [jobLink]
         }
     ];
-    const clusterPayload = {
-      refNum: selectedTenant.refNum,
-      prompt: promptInput,
-    }
     
     try {
-      // Call both APIs in parallel
-      const [clusterNameResponse] = await Promise.all([
-        // getPromptBasedSuggestions(payload),
-        generateClusterName(clusterPayload),
-        isJobLinkValid ? enhancePrompt() : Promise.resolve(),
-        // getSuggestedLists()
-      ]);
+      let clusterNameResponse;
+      
+      if (isJobLinkValid) {
+        const enhancedPromptResponse = await enhancePrompt();
+        const clusterPayload = {
+          refNum: selectedTenant.refNum,
+          prompt: enhancedPromptResponse.enhancedPrompt,
+        };
+        clusterNameResponse = await generateClusterName(clusterPayload);
+      } else {
+        const clusterPayload = {
+          refNum: selectedTenant.refNum,
+          prompt: promptInput,
+        };
+        clusterNameResponse = await generateClusterName(clusterPayload);
+      }
       
       // Handle prompt based suggestions response
       // if (promptResponse?.masterPrompt && jobLink) {
