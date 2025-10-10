@@ -78,6 +78,8 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
   const [searchTagTerm, setSearchTagTerm] = useState<string>("");
   const [showTagDropdown, setShowTagDropdown] = useState<boolean>(false);
   const [jobLink, setJobLink] = useState<string>("");
+  const [jobLinkError, setJobLinkError] = useState<boolean>(false);
+  const [jobLinkErrorMessage, setJobLinkErrorMessage] = useState<string>("");
   const [listInput, setListInput] = useState<string>("");
   const [listItems, setListItems] = useState<any[]>([]);
   const [suggestedLists, setSuggestedLists] = useState<any[]>([]);
@@ -588,7 +590,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
     });
   };
   const enhancePrompt = () => {
-    if (!promptInput) return;
+    if (!promptInput && !jobLink) return Promise.resolve();
     setShowSaveOrDiscardModal(true);
     setShowLoader(true);
     const supportingMaterial = [
@@ -605,18 +607,35 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       refNum: selectedTenant.refNum,
       supportingMaterial,
     }).then((response) => {
-      // Update the prompt input with the enhanced version
       setShowSaveOrDiscardModal(false); 
+      
+      // Check if the response starts with "NOT VALID"
+      if (response?.enhancedPrompt && response.enhancedPrompt.startsWith("NOT VALID")) {
+        // Extract error reason from {{}}
+        const errorMatch = response.enhancedPrompt.match(/\{\{(.+?)\}\}/);
+        const errorReason = errorMatch ? errorMatch[1] : "Invalid URL";
+        
+        setJobLinkError(true);
+        setJobLinkErrorMessage(errorReason);
+        setShowLoader(false);
+        console.error("URL validation failed:", errorReason);
+        return Promise.reject(new Error(errorReason));
+      }
+      
+      // Update the prompt input with the enhanced version
       if (response?.enhancedPrompt) {
         setPromptInput(response.enhancedPrompt);
+        setJobLinkError(false);
+        setJobLinkErrorMessage("");
       }
       setShowLoader(false);
       console.log("Enhanced prompt:", response);
+      return response;
     }).catch((error) => {
       setShowSaveOrDiscardModal(false);
       console.error("Error enhancing prompt:", error);
       setShowLoader(false);
-      // You could add a toast notification here for user feedback
+      throw error;
     });
   }
 
@@ -625,17 +644,18 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
   };
 
   const handlePromptSubmit = async () => {
-    if (promptInput) {
+    const isJobLinkValid = jobLink && isValidJobLink ? true : false;
+    if (promptInput || (jobLink && isValidJobLink)) {
       setShowSaveOrDiscardModal(true);
       setFetchedPages(null);
       // handleClusterCreation();
-      await handlePromptBasedSuggestions();
+      await handlePromptBasedSuggestions(isJobLinkValid);
       setSelectedCards(new Map());
       setGeneratePages(generatePages+1);
     }
   };
 
-  const handlePromptBasedSuggestions = async () => {
+  const handlePromptBasedSuggestions = async (isJobLinkValid: boolean) => {
     setShowLoader(true);
     const payload =  [
         {
@@ -653,7 +673,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       const [clusterNameResponse] = await Promise.all([
         // getPromptBasedSuggestions(payload),
         generateClusterName(clusterPayload),
-        enhancePrompt()
+        isJobLinkValid ? enhancePrompt() : Promise.resolve(),
         // getSuggestedLists()
       ]);
       
@@ -716,6 +736,9 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       console.error("Error fetching data:", err);
       setShowSaveOrDiscardModal(false);
       setShowLoader(false);
+      setShowPromptSuggestions(false);
+      setShowClustersList(false);
+      setIsPromptSubmitted(false);
     }
   }
   const handleClusterCreate = async () => {
@@ -1066,6 +1089,29 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
     setTimeout(() => setShowTagDropdown(false), 150); // Delay to allow click
   };
 
+  const isValidUrl = (urlString: string): boolean => {
+    if (!urlString.trim()) return true;
+    try {
+      const url = new URL(urlString);
+      return url.protocol === 'http:' || url.protocol === 'https:';
+    } catch {
+      return false;
+    }
+  };
+
+  const handleJobLinkChange = (value: string) => {
+    setJobLink(value);
+    if (value.trim() && !isValidUrl(value)) {
+      setJobLinkError(true);
+      setJobLinkErrorMessage("Please enter a valid URL (must start with http:// or https://)");
+    } else {
+      setJobLinkError(false);
+      setJobLinkErrorMessage("");
+    }
+  };
+
+  const isValidJobLink = jobLink.trim() === '' || isValidUrl(jobLink);
+
   return (
     <>
       {/* {showLoader ? (
@@ -1169,18 +1215,18 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
                   </>
                 ) : (
                   <>
-                    <button className={`prompt-enhance-btn${!promptInput ? " disabled" : ""}`} type="button" tabIndex={-1} disabled={!promptInput} onClick={enhancePrompt}>
-                      <img src={!promptInput ? disabledSparkleIcon : sparkleIcon} alt="Enhance prompt with AI." style={{ marginRight: 6 }} />
+                    <button className={`prompt-enhance-btn${(!promptInput && !jobLink) || !isValidJobLink ? " disabled" : ""}`} type="button" tabIndex={-1} disabled={(!promptInput && !jobLink) || !isValidJobLink} onClick={enhancePrompt}>
+                      <img src={(!promptInput && !jobLink) || !isValidJobLink ? disabledSparkleIcon : sparkleIcon} alt="Enhance prompt with AI." style={{ marginRight: 6 }} />
                       Enhance prompt
                     </button>
                     <button
-                      className={`prompt-arrow-btn${!promptInput ? " disabled" : ""}`}
+                      className={`prompt-arrow-btn${(!promptInput && !jobLink) || !isValidJobLink ? " disabled" : ""}`}
                       onClick={handlePromptSubmit}
-                      disabled={!promptInput}
+                      disabled={(!promptInput && !jobLink) || !isValidJobLink}
                       type="button"
                       aria-label="Submit prompt"
                     >
-                      <img src={!promptInput ? disabledArrowUpIcon : arrowUpIcon} alt="Submit" />
+                      <img src={(!promptInput && !jobLink) || !isValidJobLink ? disabledArrowUpIcon : arrowUpIcon} alt="Submit" />
                     </button>
                   </>
                 )}
@@ -1216,12 +1262,15 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
               <input
                 id="job-link-input"
                 type="text"
-                className="job-link-input"
+                className={`job-link-input${jobLinkError ? " error" : ""}`}
                 placeholder="Paste job link here"
                 value={jobLink}
-                onChange={(e) => setJobLink(e.target.value)}
+                onChange={(e) => handleJobLinkChange(e.target.value)}
               />
             </div>
+            {jobLinkError && jobLinkErrorMessage && (
+              <div className="job-link-error-message">{jobLinkErrorMessage}</div>
+            )}
           </div>)}
         </div>
         {showPromptSuggestions && (

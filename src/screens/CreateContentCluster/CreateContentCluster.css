@@ -1019,6 +1019,25 @@
   font-weight: 500;
   line-height: var(--line-height-line-height-md, 20px);
 }
+
+.job-link-input.error {
+  border-color: #DC2626;
+}
+
+.job-link-input.error:focus {
+  border-color: #DC2626;
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.1);
+}
+
+.job-link-error-message {
+  color: #DC2626;
+  font-family: var(--family-body, Poppins);
+  font-size: 12px;
+  font-weight: 400;
+  margin-top: 4px;
+  line-height: 16px;
+}
+
 .added-tag-remove {
   background: none;
   border: none;
