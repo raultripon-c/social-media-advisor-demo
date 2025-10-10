@@ -47,6 +47,7 @@ export const triggerRefreshToken = async () => {
     await waitForToken();
     const { code, type } = window.orgInfo ?? {};
     code && type && APIService.triggerTxeLogin();
+    code && type && APIService.registerToken(window.keycloakInstance.subject, code, type);
     const event = new CustomEvent("tokenRefreshed");
     window.dispatchEvent(event);
   } catch (error) {

@@ -13,8 +13,9 @@ export const ErrorBoundary: React.FC<Props> = (props: Props) => {
   const dispatch = useDispatch();
   const backNavigation = () => {
     props.navigate("/");
-    dispatch(setSelectedTenant({}));
-    dispatch(setCustomerTenants([]));
+    // Don't clear tenant information as it's needed for app selection
+    // dispatch(setSelectedTenant({}));
+    // dispatch(setCustomerTenants([]));
     sessionStorage.removeItem("selectedApp");
   };
   return (

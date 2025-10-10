@@ -1,0 +1,172 @@
+.addUrlModal{
+    right: 36%;
+    bottom: 27%;
+    width: 500px;
+}
+
+.txe-modal-title{
+    color: var(--components-modal-text-default, #464F5E);
+    font-feature-settings: 'liga' off, 'clig' off;
+    text-overflow: ellipsis;
+    font-family: var(--family-title, Poppins);
+    font-size: var(--size-font-size-2xl, 20px);
+    font-style: normal;
+    font-weight: 600;
+    line-height: var(--line-height-line-height-xl, 30px);
+}
+.txe-modal-label{
+    display: inline-block;
+    margin-bottom: 0;
+    color: var(--neutrals-nn-400, #464F5E);
+    font-feature-settings: 'liga' off, 'clig' off;
+    font-family: var(--family-body, Poppins);
+    font-size: var(--size-font-size-base, 14px);
+    font-style: normal;
+    font-weight: 500;
+    line-height: var(--line-height-line-height-md, 20px);
+}
+.txe-modal-select{
+    border-radius: var(--border-border-radius-xl, 10px);
+    border: 1px solid var(--neutrals-nn-200, #8C95A8);
+    background: var(--Core-White, #FFF);
+}
+.custom-dropdown-wrapper {
+    border: 1px solid var(--neutrals-nn-200, #8C95A8);
+    border-radius: 10px;
+    background: #fff;
+    padding: 8px;
+  }
+  
+  .page-search-input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+  }
+  
+  .page-options-list {
+    max-height: 150px; /* fixed height */
+    overflow-y: auto;
+    border-radius: 6px;
+  }
+  
+  .dropdown-option {
+    padding: 6px 8px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .dropdown-option:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .dropdown-option.selected {
+    background-color: #e0f7e9;
+    font-weight: bold;
+  }
+  
+  .dropdown-placeholder {
+    padding: 8px;
+    color: #888;
+    font-size: 14px;
+}
+
+.page-select-trigger {
+    /* padding: 8px 12px; */
+    /* border: 1px solid var(--neutrals-nn-200, #8C95A8); */
+    border-radius: var(--border-border-radius-xl, 10px);
+    cursor: pointer;
+    background-color: var(--Core-White, #FFF);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* min-height: 36px; */
+    transition: border-color 0.2s ease;
+}
+
+.page-select-trigger:hover {
+    border-color: var(--neutrals-nn-300, #6B7280);
+}
+
+.page-select-trigger .select-text {
+    color: var(--neutrals-nn-400, #464F5E);
+    font-family: var(--family-body, Poppins);
+    font-size: var(--size-font-size-base, 14px);
+    font-weight: 400;
+}
+
+.page-select-trigger .select-text.placeholder {
+    color: var(--neutrals-nn-300, #6B7280);
+}
+
+.page-select-trigger .dropdown-arrow {
+    font-size: 12px;
+    color: var(--neutrals-nn-300, #6B7280);
+    transition: transform 0.2s ease;
+}
+
+.page-select-trigger.open .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.page-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: var(--Core-White, #FFF);
+    border: 1px solid var(--neutrals-nn-200, #8C95A8);
+    border-radius: var(--border-border-radius-xl, 10px);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    margin-top: 4px;
+}
+
+.page-search-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--neutrals-nn-200, #8C95A8);
+    border-radius: var(--border-border-radius-lg, 8px);
+    font-size: var(--size-font-size-base, 14px);
+    font-family: var(--family-body, Poppins);
+    background-color: var(--Core-White, #FFF);
+    transition: border-color 0.2s ease;
+}
+
+.page-search-input:focus {
+    outline: none;
+    border-color: var(--primary-500, #40665A);
+}
+
+.page-dropdown-option {
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: var(--size-font-size-base, 14px);
+    font-family: var(--family-body, Poppins);
+    color: var(--neutrals-nn-400, #464F5E);
+    transition: background-color 0.2s ease;
+}
+
+.page-dropdown-option:hover {
+    background-color: var(--neutrals-nn-50, #F9FAFB);
+}
+
+.page-dropdown-option.selected {
+    background-color: var(--primary-50, #F0F7F5);
+    color: var(--primary-600, #2D4A3F);
+    font-weight: 500;
+}
+
+.page-dropdown-loading,
+.page-dropdown-empty {
+    padding: 8px 12px;
+    color: var(--neutrals-nn-300, #6B7280);
+    font-size: var(--size-font-size-base, 14px);
+    font-family: var(--family-body, Poppins);
+    font-style: italic;
+}
+  

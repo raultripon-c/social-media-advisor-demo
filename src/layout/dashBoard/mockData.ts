@@ -11,7 +11,7 @@ export const staticData = [
             appType: "external",
             appConfig: { link: CMS_URL + "/tier3" },
             context: "customer",
-            requestParams: { lsrc: "txe", lsw: "_self", refNum: "", customerCode: "", route: "pages", site: "" },
+            requestParams: { lsrc: "txe", lsw: "_self", refNum: "", customerCode: "", route: "pages", site: "", scenario: "" },
         },
     },
     {
@@ -23,7 +23,7 @@ export const staticData = [
             appType: "external",
             appConfig: { link: CMS_URL + "/tier3" },
             context: "customer",
-            requestParams: { lsrc: "txe", lsw: "_self", refNum: "", customerCode: "", route: "blogs-new", site: "" },
+            requestParams: { lsrc: "txe", lsw: "_self", refNum: "", customerCode: "", route: "blogs-new", site: "", scenario: "" },
         }
     },
     {
@@ -62,7 +62,7 @@ export const tenantData = [
             appType: "external",
             appConfig: { link: CMS_URL + "/tier3" },
             context: "customer",
-            requestParams: { lsrc: "txe", lsw: "_self", refNum: "", customerCode: "", site: "" },
+            requestParams: { lsrc: "txe", lsw: "_self", refNum: "", customerCode: "", site: "", scenario: "" },
         },
     },
 ];

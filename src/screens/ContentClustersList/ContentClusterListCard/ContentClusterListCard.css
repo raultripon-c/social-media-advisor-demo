@@ -10,19 +10,26 @@
   background: var(--Core-White, #fff);
   cursor: pointer;
 }
-
 .content-cluster-list-card-title {
-  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   color: var(--text-primary, #464f5e);
   font-feature-settings: "liga" off, "clig" off;
-  text-overflow: ellipsis;
 
-  /* Body 1/SemiBold */
   font-family: var(--family-body, Poppins);
   font-size: var(--size-font-size-lg, 16px);
   font-style: normal;
   font-weight: 600;
-  line-height: var(--line-height-line-height-lg, 24px); /* 150% */
+  line-height: var(--line-height-line-height-lg, 24px);
+}
+
+.title-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 180px; /* adjust as needed */
+  display: inline-block;
 }
 
 .content-cluster-list-card-content-types-heading {

@@ -226,6 +226,49 @@ export const APIService = {
       return null;
     }
   },
+
+  getListItems: async (props: any): Promise<any> => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/crm/getLists`;
+      const response = await API.post(url, props, {
+        headers: {
+          Authorization: `${window.keycloakInstance.token}`,
+          'Content-Type': 'application/json',
+          'Accept': '*/*'
+        },
+      });
+
+      if (response?.data) {
+        return response.data;
+      } else {
+        throw new Error("No list items found for the provided refNum.");
+      }
+    } catch (error) {
+      console.error("Error in getListItems: ", error);
+      return null;
+    }
+  },
+  getSuggestedLists: async (props: any): Promise<any> => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/crm/getSuggestedLists`;
+      const response = await API.post(url, props, {
+        headers: {
+          Authorization: `${window.keycloakInstance.token}`,
+          'Content-Type': 'application/json',
+          'Accept': '*/*'
+        },
+      });
+
+      if (response?.data) {
+        return response.data;
+      } else {
+        throw new Error("No list items found for the provided refNum.");
+      }
+    } catch (error) {
+      console.error("Error in getListItems: ", error);
+      return null;
+    }
+  },
   getRecruiterPermissions: async (props: any): Promise<any> => {
     try {
       const url = `${(window as any)._env_.CANDIDATES_USER_MANAGEMENT_URL}/loginPermissionsId`;
@@ -314,6 +357,17 @@ export const APIService = {
     }
   },
 
+  getTaskProgress: async (payload: { refNum: string; type: string; pageId: string }) => {
+    try {
+      const url = `${(window as any)._env_.CMS_URL}/api/getTaskProgress`;
+      const response = await API.post(url, payload, { withCredentials: true });
+      return response;
+    } catch (error) {
+      console.error('Error fetching task progress:', error);
+      throw error;
+    }
+  },
+
   triggerTxeLogin: async () => {
     try {
       const { code, type } = window.orgInfo ?? {};
@@ -366,6 +420,42 @@ export const APIService = {
       const resp = await API.post(
         `${(window as any)._env_.CMS_URL}/api/tenantLangs`,
         { refNum: refNum },
+        { withCredentials: true }
+      );
+      if (resp.data.status === "success") {
+        return resp.data.data;
+      }
+      return null;
+    }
+    catch (err) {
+      console.error('Error fetching supported langs:', err);
+      throw err;
+    }
+  },
+
+  getSiteVariants: async (refNum: string) => {
+    try {
+      const resp = await API.post(
+        `${(window as any)._env_.CMS_URL}/api/getSiteVariants`,
+        { refNum: refNum },
+        { withCredentials: true }
+      );
+      if (resp.data.status === "success") {
+        return resp.data.data;
+      }
+      return null;
+    }
+    catch (err) {
+      console.error('Error fetching supported langs:', err);
+      throw err;
+    }
+  },
+
+  getAllPages: async (payload: any) => {
+    try {
+      const resp = await API.post(
+        `${(window as any)._env_.CMS_URL}/api/getAllPages`,
+        payload,
         { withCredentials: true }
       );
       if (resp.data.status === "success") {
@@ -579,6 +669,19 @@ export const APIService = {
     }
   },
 
+  getPreview: async (payload: any) => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/crm/getPreview`;
+      const response = await API.post(url, payload, { withCredentials: false });
+      return response.data.data;
+    }
+    catch (error) {
+      console.error('Error fetching preview:', error);
+      return null;
+    }
+  },
+
+
   createContentCluster: async (payload: any) => {
     try {
       const url = `${(window as any)._env_.TOOLS_API_URL}api/content-cluster/save`;
@@ -587,6 +690,79 @@ export const APIService = {
     }
     catch (error) {
       console.error('Error creating content cluster:', error);
+      return null;
+    }
+  },
+  
+  enhancePrompt: async (payload: any) => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/content-cluster/enhancePrompt`;
+      const response = await API.post(url, payload, { withCredentials: false });
+      return response.data.data;
+    }
+    catch (error) {
+      console.error('Error creating content cluster:', error);
+      return null;
+    }
+  },
+
+  captureScreenshot: async (payload: any) => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/content-cluster/captureScreenshot`;
+      const response = await API.post(url, payload, { withCredentials: false });
+      return response.data.data;
+    }
+    catch (error) {
+      console.error('Error creating content cluster:', error);
+      return null;
+    }
+  },
+
+  updateCluster: async (payload: any) => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/content-cluster/update/${payload.clusterId}`;
+      const response = await API.put(url, payload, { withCredentials: false });
+      return response.data.data;
+    }
+    catch (error) {
+      console.error('Error creating content cluster:', error);
+      return null;
+    }
+  },
+  
+
+  createAIPages: async (payload: any) => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/content-cluster/create-all`;
+      const response = await API.post(url, payload, { withCredentials: false });
+      return response.data.data;
+    }
+    catch (error) {
+      console.error('Error creating content cluster:', error);
+      return null;
+    }
+  },
+
+  createAIPagesV2: async (payload: any) => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/content-cluster/create-allV2`;
+      const response = await API.post(url, payload, { withCredentials: false });
+      return response.data.data;
+    }
+    catch (error) {
+      console.error('Error creating content cluster:', error);
+      return null;
+    }
+  },
+
+  getPromptBasedSuggestions: async (payload: any) => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/content-cluster/getPromptBasedSuggestions`;
+      const response = await API.post(url, payload, { withCredentials: false });
+      return response.data.data;
+    }
+    catch (error) {
+      console.error('Error fetching all content clusters:', error);
       return null;
     }
   },
@@ -600,6 +776,36 @@ export const APIService = {
     catch (error) {
       console.error('Error fetching all content clusters:', error);
       return null;
+    }
+  },
+
+  getClusterById: async (clusterId: string) => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/content-cluster/getClusterById/${clusterId}`;
+      const response = await API.get(url, { withCredentials: false });
+      if(response?.data?.data) {
+        return response.data.data;
+      } 
+      return [];
+    } catch (error) {
+      console.error('Error fetching cluster by id:', error);
+      return null;
+    }
+  },
+
+  getPagePublishStates: async (payload: any) => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/cms/getPagePublishStates`;
+      const response = await API.post(url, payload, { withCredentials: false });
+      console.log("Page Publish States API Response:", response.data);
+      if (response.data.status === "success") {
+        return response.data.data;
+      }
+      return [];
+    }
+    catch (error) {
+      console.error('Error fetching page publish states:', error);
+      return [];
     }
   },
 
@@ -617,6 +823,70 @@ export const APIService = {
       return [];
     } catch (error) {
       console.error('Error fetching analytics tenants:', error);
+      return null;
+    }
+  },
+
+  validateClusterFields: async (payload: any) => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/content-cluster/validateClusterFields`;
+      const response = await API.post(url, payload, { withCredentials: false });
+      return response.data;
+    }
+    catch (error) {
+      console.error('Error validating cluster fields:', error);
+      return null;
+    }
+  },
+
+  generateClusterName: async (payload: any) => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/content-cluster/generateClusterName`;
+      const response = await API.post(url, payload, { withCredentials: false });
+      return response.data.data;
+    }
+    catch (error) {
+      console.error('Error generating cluster name:', error);
+      return null
+    }
+  },
+
+  generateHtmlStructure: async (payload: any) => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/content-cluster/generateAIPagePreview`;
+      const response = await API.post(url, payload, { withCredentials: false });
+      // const response = await API.get("http://localhost:8082/PageListData.json");
+      return response.data;
+    }
+    catch (error) {
+      console.error('Error generating cluster name:', error);
+      return null
+    }
+  },
+
+  deleteCluster: async (payload: any) => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/content-cluster/delete`;
+      const response = await API.delete(url, { 
+        data: payload,
+        withCredentials: false 
+      });
+      return response.data.data;
+    }
+    catch (error) {
+      console.error('Error deleting cluster:', error);
+      return null;
+    }
+  },
+
+  getDraftStatus: async (clusterId: string) => {
+    try {
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/content-cluster/getDraftStatus/${clusterId}`;
+      const response = await API.get(url, { withCredentials: false });
+      return response.data.data;
+    }
+    catch (error) {
+      console.error('Error fetching draft status:', error);
       return null;
     }
   }
