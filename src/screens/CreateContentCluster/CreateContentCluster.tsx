@@ -846,9 +846,9 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       }
       
       let createdEmailTemplateData = null;
-      if (successfulEmailTemplate?.data?.templateName) {
+      if (successfulEmailTemplate?.data?.response?.templateId) {
         const allEmailTemplates = await fetchAllEmailTemplates();
-        createdEmailTemplateData = allEmailTemplates.find((template: any) => template.templateName === successfulEmailTemplate.data.templateName);
+        createdEmailTemplateData = allEmailTemplates.find((template: any) => template._id === successfulEmailTemplate.data.response.templateId);
       }
       successfulContentPage = successfulContentPage && Object.keys(successfulContentPage.data?.data || {}).length > 0
       ? [successfulContentPage.data.data]
