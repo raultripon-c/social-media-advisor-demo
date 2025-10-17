@@ -302,6 +302,7 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
         import: false,
         refNum: selectedTenant.refNum,
         variations: variations,
+        companyName: selectedTenant.tenantName,
         url: "https://" + siteMetaData?.domain + "/", 
       };
       if (content) {
