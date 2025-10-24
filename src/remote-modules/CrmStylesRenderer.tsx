@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { removeElementsById } from '../utils/helper/utilizer';
 
 const CrmStylesRenderer = () => {
-
+  const analyticsLinkRef = useRef<HTMLLinkElement | null>(null);
   const addStyles = () => {
     const crmStyles = document.createElement('style');
     crmStyles.id = 'crm-index-styles';
@@ -67,10 +67,33 @@ const CrmStylesRenderer = () => {
       }
     };
 
+    // Fetch the Analytics style ID for cleanup
+    const fetchAnalyticsStyleId = async () => {
+      try {
+        const response = await fetch(`${(window as any)._env_.ANALYTICS_URL}/assets-manifest.json`);
+        if (!response.ok) throw new Error('Failed to fetch analytics manifest');
+  
+        const data = await response.json();
+        return data["styles.css"];
+  
+      } catch (error) {
+        console.error('Error fetching analytics manifest:', error);
+        return null;
+      }
+    };
+
   useEffect(() => {
     addStyles();
     (async () => {
       await fetchAndLoadCRMStyles();
+      const analyticsStyleId = await fetchAnalyticsStyleId();
+      if (analyticsStyleId) {
+        const analyticsLink = document.getElementById(analyticsStyleId) as HTMLLinkElement;
+        if (analyticsLink) {
+          analyticsLinkRef.current = analyticsLink;
+          analyticsLink.remove();
+        }
+      }
     })();
     const disableTxeBootstrap = document.getElementById('bootstrap-styles') as HTMLLinkElement;
     if (disableTxeBootstrap) {
@@ -83,13 +106,15 @@ const CrmStylesRenderer = () => {
     code && localStorage.setItem("CP_KEY_CLOAK_ORG_CODE", JSON.stringify(code));
     type && localStorage.setItem("CP_KEY_CLOAK_ORG_TYPE", JSON.stringify(type));
     
-    
     return () => {
       removeElementsById("crm-stylesheet");
       removeElementsById("crm-index-styles");
       const disableTxeBootstrap = document.getElementById('bootstrap-styles') as HTMLLinkElement;
       if (disableTxeBootstrap) {
         disableTxeBootstrap.disabled = false;
+      }
+      if (analyticsLinkRef.current) {
+        document.head.appendChild(analyticsLinkRef.current);
       }
     };
   }, []);
