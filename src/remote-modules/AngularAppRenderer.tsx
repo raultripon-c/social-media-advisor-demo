@@ -122,26 +122,6 @@ export function AngularAppRenderer(props: any) {
     });
   }, [props.scope]);
 
-  // Fetch and load the CRM script and its associated CSS
-  const fetchAndLoadScript = async () => {
-    try {
-      const response = await fetch(`${(window as any)._env_.CRM_URL}/en/assets-manifest.json`);
-      if (!response.ok) throw new Error('Failed to fetch assets manifest');
-
-      const data = await response.json();
-      const cssUrl = `${(window as any)._env_.CRM_URL}/${data["styles.css"]}`;
-
-      const link = document.createElement("link");
-      link.rel = "stylesheet";
-      link.id = 'crm-stylesheet';
-      link.href = cssUrl;
-      document.head.appendChild(link);
-
-    } catch (error) {
-      console.error('Error fetching data or loading script:', error);
-    }
-  };
-
   // Load the Angular component
   const loadComponent = () => {
     const parentDiv = document.querySelector("#child-module-renderer");
@@ -163,9 +143,6 @@ export function AngularAppRenderer(props: any) {
   useEffect(() => {
     if (isRemoteEntryFileReady) {
       setRemoteEntryFileReady(false);
-      if (!document.getElementById("crm-styles") && props.scope === "cpui") {
-        fetchAndLoadScript();
-      }
       let stylesToBeRemoved = [
         "https://github.com/h5bp/html5-boilerplate/blob/master/src/css/main.css",
         "assets-management-new-body",
@@ -201,7 +178,7 @@ export function AngularAppRenderer(props: any) {
           }, 10000);
 
           if (scope === "cpui") {
-            window.addEventListener("crmModuleAvailable", () => {
+            (window as any).document.getElementById('child-module-renderer').addEventListener("crmModuleAvailable", () => {
               console.log("crm module available");
               (window as any).__OPENREPLAY__?.event("CRM component loaded successfully", {
                 message: "Component loaded successfully!",
@@ -250,10 +227,10 @@ export function AngularAppRenderer(props: any) {
   }, [isRemoteEntryFileReady]);
 
   return (
-    <div>
+    <>
       <div
         id="child-module-renderer"
-        style={{ 
+        style={{
           display: isComponentLoaded ? "block" : "none"
         }}
       ></div>
@@ -265,6 +242,6 @@ export function AngularAppRenderer(props: any) {
           <Loader title={"loading"} />
         </div>
       )}
-    </div>
+    </>
   );
 }

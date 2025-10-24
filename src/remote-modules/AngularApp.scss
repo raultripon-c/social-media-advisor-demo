@@ -103,3 +103,15 @@ ul#spotlight-list {
 .main-header-bar {
   display: none !important;
 }
+
+@font-face {
+  font-family: "fontastic";
+  src:url('/assets/fonts/fontastic/fontastic.eot');
+  src:url('/assets/fonts/fontastic/fontastic.eot?#iefix') format("embedded-opentype"),
+  url('/assets/fonts/fontastic/fontastic.woff') format("woff"),
+  url('/assets/fonts/fontastic/fontastic.ttf') format("truetype"),
+  url('/assets/fonts/fontastic/fontastic.svg#fontastic') format("svg");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
