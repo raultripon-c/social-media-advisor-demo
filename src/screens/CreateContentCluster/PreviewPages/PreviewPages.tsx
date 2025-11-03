@@ -308,6 +308,8 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
       if (content) {
         payload.content = content;
         payload.locale = locale;
+        payload.language = locale;
+        payload.deviceType = "desktop";
         payload.siteVariant = "external";
       }
 
