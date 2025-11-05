@@ -635,7 +635,7 @@ export const APIService = {
 
   generateCRMEmailTemplate: async (payload: any) => {
     try {
-      const url = `${(window as any)._env_.TOOLS_API_URL}api/crm/generateCRMEmailTemplate`;
+      const url = `${(window as any)._env_.TOOLS_API_URL}api/content-cluster/generateEmailTemplates`;
       const response = await API.post(url, payload, { withCredentials: false });
       return response.data.data;
     }

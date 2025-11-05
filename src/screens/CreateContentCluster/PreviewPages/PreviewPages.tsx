@@ -302,11 +302,14 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
         import: false,
         refNum: selectedTenant.refNum,
         variations: variations,
+        companyName: selectedTenant.tenantName,
         url: "https://" + siteMetaData?.domain + "/", 
       };
       if (content) {
         payload.content = content;
         payload.locale = locale;
+        payload.language = locale;
+        payload.deviceType = "desktop";
         payload.siteVariant = "external";
       }
 
