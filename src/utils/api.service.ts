@@ -671,7 +671,7 @@ export const APIService = {
 
   getAllCmsEmailTemplates: async (payload: any) => {
     try {
-      const url = `${(window as any)._env_.CMS_URL}/api/email/getEmailTemplatesByRefNumLocale`;
+      const url = `${(window as any)._env_.CMS_URL}/api/email/getEmailTemplatesByRefNum`;
       const response = await API.post(url, payload, { withCredentials: true });
       return response.data.data;
     }

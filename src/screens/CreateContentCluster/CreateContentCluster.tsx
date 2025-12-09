@@ -512,8 +512,6 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
   const fetchAllCmsEmailTemplates = () => {
     return APIService.getAllCmsEmailTemplates({
       refNum: selectedTenant.refNum,
-      locale,
-      siteVariant: "external",
       type: "custom"
     });
   };
