@@ -508,6 +508,16 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
     });
   };
 
+
+  const fetchAllCmsEmailTemplates = () => {
+    return APIService.getAllCmsEmailTemplates({
+      refNum: selectedTenant.refNum,
+      locale,
+      siteVariant: "external",
+      type: "custom"
+    });
+  };
+
   const fetchBlogsForContent = (keywords: string[]) => {
     return APIService.getBlogsForContent({
       keywords,
@@ -846,9 +856,15 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       }
       
       let createdEmailTemplateData = null;
-      if (successfulEmailTemplate?.data?.response?.templateId) {
-        const allEmailTemplates = await fetchAllEmailTemplates();
-        createdEmailTemplateData = allEmailTemplates.find((template: any) => template._id === successfulEmailTemplate.data.response.templateId);
+      //successfulEmailTemplate?.data?.response?.templateId
+      if (successfulEmailTemplate?.data?.response?.data?.id) {
+        var allEmailTemplates;
+        if (true) {
+          allEmailTemplates = await fetchAllCmsEmailTemplates();
+        } else {
+          allEmailTemplates = await fetchAllEmailTemplates();
+        }
+        createdEmailTemplateData = allEmailTemplates.find((template: any) => template.templateId === successfulEmailTemplate.data.response.data.id);
       }
       successfulContentPage = successfulContentPage && Object.keys(successfulContentPage.data?.data || {}).length > 0
       ? [successfulContentPage.data.data]
@@ -892,7 +908,8 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
         clusterTitle: promptInput,
         clusterName: clusterTitle,
         selectedLists: selectedListsData,
-        draft: false
+        draft: false,
+        isCmsEmailTemplate: true ? true : false 
       };
       
       // update the cluster

@@ -669,6 +669,18 @@ export const APIService = {
     }
   },
 
+  getAllCmsEmailTemplates: async (payload: any) => {
+    try {
+      const url = `${(window as any)._env_.CMS_URL}/api/email/getEmailTemplatesByRefNumLocale`;
+      const response = await API.post(url, payload, { withCredentials: true });
+      return response.data.data;
+    }
+    catch (error) {
+      console.error('Error fetching all cms email templates:', error);
+      return null;
+    }
+  },
+
   getPreview: async (payload: any) => {
     try {
       const url = `${(window as any)._env_.TOOLS_API_URL}api/crm/getPreview`;

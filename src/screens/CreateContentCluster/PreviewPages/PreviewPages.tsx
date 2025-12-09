@@ -51,6 +51,7 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
   const [isCrmEmailTemplateLoading, setIsCrmEmailTemplateLoading] = useState(false);
   const [emailTemplateResults, setEmailTemplateResults] = useState<any[]>([]);
   const [cmsHtmlByType, setCmsHtmlByType] = useState<Partial<Record<CMSPageType, string>>>({});
+  const [cmsEmailByType, setCmsEmailByType] = useState<Partial<Record<string, string>>>({});
   const [selectedPreview, setSelectedPreview] = useState<PreviewData | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [openSections, setOpenSections] = useState<{ [key: string]: boolean }>({
@@ -80,7 +81,12 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
       } else {
         generateHtmlStructure();
       }
-      generatePromptBasedEmailTemplatesInParallel(3);
+      // TODO: Remove this after testing and fetching flag dynamically from the backend
+      if(true) {
+        generateCmsAiPreviewEmailsInParallel();
+      } else {
+        generatePromptBasedEmailTemplatesInParallel(3);
+      }
     };
     run(true);
   }, []);
@@ -231,11 +237,65 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
     return html;
   }
 
+  const generateEmailPreview = async (emailIdStr?: string) => {
+    const base = `${(window as any)._env_.CMS_URL}`;
+    const url = `${base}/api/email-editor/html/generateAIEmailPreview?refNum=${selectedTenant?.refNum}&context=${encodeURIComponent(promptInput)}&companyName=${selectedTenant?.tenantName}&clusterId=${newCluster.clusterId}${emailIdStr ? `&emailId=${emailIdStr}` : ""}`;
+    const response = await API.get(url, { withCredentials: false });
+    const html = String(response?.data || "");
+    const emailId = response.headers['previewid']
+    if (emailId) {
+      setCmsEmailByType(prev => ({ ...prev, [emailId]: html }));
+    } else {
+      setCmsEmailByType(prev => ({ ...prev, [Math.random().toString(36).slice(2, 9)]: html }));
+    }
+    const obj = {
+      "emailId": emailId,
+      "html": html
+    }
+    return obj;
+  }
+
   const ensureHtmlForType = async (pageType: CMSPageType): Promise<string> => {
     const cached = cmsHtmlByType[pageType];
     if (cached) return cached;
     const html = await generatePagePreview(pageType);
     return html;
+  };
+
+  const ensureEmail = async (emailId?: string): Promise<{ emailId: string, html: string }> => {
+    if (emailId) {
+      const cached = cmsEmailByType[emailId];
+      if (cached) return { emailId: emailId, html: cached };
+    }
+    const html = await generateEmailPreview(emailId);
+    return { emailId: html.emailId, html: html.html };
+  };
+
+  const generateCmsAiEmail = async (emailIdStr?: string): Promise<PreviewData | null> => {
+    try {
+      const base = `${(window as any)._env_.CMS_URL}`;
+      const url = `${base}/api/email-editor/html/generateAIEmailPreview?refNum=${selectedTenant?.refNum}&context=${encodeURIComponent(promptInput)}&companyName=${selectedTenant?.tenantName}`;
+      const { emailId, html } = await ensureEmail(emailIdStr);
+      const res = await captureScreenshot({[emailId]: html});
+      const imageUrl = res?.screenshots?.[emailId]?.filePath ? res?.screenshots?.[emailId]?.filePath : emailTemplateImage;
+      const item: PreviewData = {
+        id: emailId,
+        url: html ? "" : url,
+        selector: "",
+        upload: false,
+        title: "Email Template",
+        createdAt: new Date().toISOString().split('T')[0],
+        createdBy: "System",
+        htmlStructure: html || "",
+        imageUrl: imageUrl,
+        type: "email-template",
+      };
+      setAiGeneratedPages(prev => [...prev, item]);
+      return item;
+    } catch (error) {
+      console.error('Error generating CMS AI preview page:', error);
+      return null;
+    }
   };
 
   const generateCmsAiPreviewPage = async (pageType: CMSPageType): Promise<PreviewData | null> => {
@@ -288,6 +348,30 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
       return resultPages;
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const generateCmsAiPreviewEmailsInParallel = async (): Promise<PreviewData[]> => {
+    try {
+      setIsCrmEmailTemplateLoading(true);
+      const types = Object.values(CMS_PAGE_TYPES);
+      const resultPages: PreviewData[] = [];
+      
+      const tasks = types.map(async (type) => {
+        try {
+          const page = await generateCmsAiEmail();
+          if (page) {
+            resultPages.push(page);
+          }
+        } catch (err) {
+          console.error(`Parallel CMS AI preview emails generation failed for ${type}:`, err);
+        }
+      });
+      await Promise.allSettled(tasks);
+      setIsCrmEmailTemplateLoading(false);
+      return resultPages;
+    } finally {
+      setIsCrmEmailTemplateLoading(false);
     }
   };
 
@@ -385,14 +469,23 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
 
   const handleRegenerate = async (pageData: PreviewData, contentType: SupportedContentType) => {
     if(contentType === SUPPORTED_CONTENT_TYPES.EMAIL_TEMPLATE) {
-      let updateEmailTemplateResults: any[] = emailTemplateResults;
-      const result = await generateEmailTemplate(promptInput, 1, pageData);
-      if (result?.length) {
-        setEmailTemplateResults(prev => prev.map(p => p.id === pageData.id ? { ...p, ...result[0] } : p));
-        setSelectedPreview({ ...pageData, htmlStructure: JSON.parse(result[0].emailTemplatePreview)[0].htmlStructure });
-        updateEmailTemplateResults = emailTemplateResults.map(p => p.id === pageData.id ? { ...p, ...result[0] } : p);
-        updateClusterWithEmailTemplates(updateEmailTemplateResults);
-        return !!result[0].htmlStructure;
+      if(true) {
+        const html = await generateEmailPreview(pageData.id);
+        const res = await captureScreenshot({[pageData.id]: html.html});
+        const imageUrl = res?.screenshots?.[pageData.id]?.filePath ? res?.screenshots?.[pageData.id]?.filePath : pageData.imageUrl;
+        setSelectedPreview({ ...pageData, htmlStructure: html.html, imageUrl: imageUrl });
+        setAiGeneratedPages(prev => prev.map(p => p.id === pageData.id ? { ...p, htmlStructure: html.html, imageUrl: imageUrl } : p));
+        return !!html.html;
+      } else {
+        let updateEmailTemplateResults: any[] = emailTemplateResults;
+        const result = await generateEmailTemplate(promptInput, 1, pageData);
+        if (result?.length) {
+          setEmailTemplateResults(prev => prev.map(p => p.id === pageData.id ? { ...p, ...result[0] } : p));
+          setSelectedPreview({ ...pageData, htmlStructure: JSON.parse(result[0].emailTemplatePreview)[0].htmlStructure });
+          updateEmailTemplateResults = emailTemplateResults.map(p => p.id === pageData.id ? { ...p, ...result[0] } : p);
+          updateClusterWithEmailTemplates(updateEmailTemplateResults);
+          return !!result[0].htmlStructure;
+        }
       }
     } else {
       const html = await generatePagePreview(contentType as CMSPageType);
