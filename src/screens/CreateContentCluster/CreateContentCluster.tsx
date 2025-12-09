@@ -884,6 +884,10 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
             createdBlogDetail["avatarUrl"] = ids[0]?.imageUrl || "";
             createdBlogDetail["previewUrl"] = successfulBlog.data?.previewUrl;
           }
+          if (type === SUPPORTED_CONTENT_TYPES.EMAIL_TEMPLATE && createdEmailTemplateData) {
+            // For email templates, store the template ID separately
+            createdEmailTemplateData["previewUrl"] = ids[0]?.imageUrl || ""; // Extract the id from the object
+          }
         });
 
     
