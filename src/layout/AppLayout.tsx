@@ -209,7 +209,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
         dispatch(setSelectedTenant(selectedTenant));
         (window as any).txeTenant = selectedTenant;
       }
-      // APIService.checkCmsEmailEnabled(refNum);
+      APIService.checkCmsEmailEnabled(refNum);
     })();
 
     let response = JSON.parse(sessionStorage.getItem("allapps") || "[]");
