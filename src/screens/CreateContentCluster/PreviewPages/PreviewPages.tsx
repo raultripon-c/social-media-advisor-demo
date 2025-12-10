@@ -61,6 +61,7 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
     blogPages: true
   });
   const selectedTenant = JSON.parse(localStorage.getItem("selectedTenant") || "[]");
+  const isCmsEmailEnabled = localStorage.getItem("isCmsEmailEnabled") === "true" || false;
   const crmUserInfo = useSelector((state: AppStore) => state.customer.crmUserInfo);
   const [siteMetaData, setsiteMetaData] = useState<any>(useSelector(
     (state: AppStore) => state.customer.siteMetaData));
@@ -82,8 +83,9 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
         generateHtmlStructure();
       }
       // TODO: Remove this after testing and fetching flag dynamically from the backend
-      if(true) {
+      if (isCmsEmailEnabled) {
         generateCmsAiPreviewEmailsInParallel();
+
       } else {
         generatePromptBasedEmailTemplatesInParallel(3);
       }
@@ -469,7 +471,7 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
 
   const handleRegenerate = async (pageData: PreviewData, contentType: SupportedContentType) => {
     if(contentType === SUPPORTED_CONTENT_TYPES.EMAIL_TEMPLATE) {
-      if(true) {
+      if (isCmsEmailEnabled) {
         const html = await generateEmailPreview(pageData.id);
         const res = await captureScreenshot({[pageData.id]: html.html});
         const imageUrl = res?.screenshots?.[pageData.id]?.filePath ? res?.screenshots?.[pageData.id]?.filePath : pageData.imageUrl;

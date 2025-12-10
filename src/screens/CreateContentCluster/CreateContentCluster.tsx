@@ -49,6 +49,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const selectedTenant = JSON.parse(localStorage.getItem("selectedTenant") || "[]");
+  const isCmsEmailEnabled = localStorage.getItem("isCmsEmailEnabled") === "true" || false;
   const locale = JSON.parse(sessionStorage.getItem("locale") || '"en_us"') || "en_us";
 
   const [generatePages, setGeneratePages] = useState<any>(0);
@@ -595,6 +596,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       userEmail: crmUserInfo?.userName,
       contentTypes: contentTypes,
       ...(emailTemplateId ? { [SUPPORTED_CONTENT_TYPES.EMAIL_TEMPLATE]: emailTemplateId } : {}),
+      isCmsEmailEnabled
     });
   };
   const enhancePrompt = () => {
@@ -855,15 +857,30 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       
       let createdEmailTemplateData = null;
       //successfulEmailTemplate?.data?.response?.templateId
-      if (successfulEmailTemplate?.data?.response?.data?.id) {
-        var allEmailTemplates;
-        if (true) {
-          allEmailTemplates = await fetchAllCmsEmailTemplates();
-        } else {
-          allEmailTemplates = await fetchAllEmailTemplates();
+      if (isCmsEmailEnabled) {
+        if (successfulEmailTemplate?.data?.response?.data?.id) {
+          var allEmailTemplates = await fetchAllCmsEmailTemplates();
+          createdEmailTemplateData = allEmailTemplates.find((template: any) => template.templateId === successfulEmailTemplate.data.response.data.id);
+
         }
-        createdEmailTemplateData = allEmailTemplates.find((template: any) => template.templateId === successfulEmailTemplate.data.response.data.id);
+
+      } else {
+        if (successfulEmailTemplate?.data?.response?.templateId) {
+          var allEmailTemplates = await fetchAllEmailTemplates();
+          createdEmailTemplateData = allEmailTemplates.find((template: any) => template._id === successfulEmailTemplate.data.response.templateId);
+
+        }
+
       }
+      // if (successfulEmailTemplate?.data?.response?.data?.id) {
+      //   var allEmailTemplates;
+      //   if (isCmsEmailEnabled) {
+      //     allEmailTemplates = await fetchAllCmsEmailTemplates();
+      //   } else {
+      //     allEmailTemplates = await fetchAllEmailTemplates();
+      //   }
+      //   createdEmailTemplateData = allEmailTemplates.find((template: any) => template.templateId === successfulEmailTemplate.data.response.data.id);
+      // }
       successfulContentPage = successfulContentPage && Object.keys(successfulContentPage.data?.data || {}).length > 0
       ? [successfulContentPage.data.data]
       : [];
@@ -882,9 +899,9 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
             createdBlogDetail["avatarUrl"] = ids[0]?.imageUrl || "";
             createdBlogDetail["previewUrl"] = successfulBlog.data?.previewUrl;
           }
-          if (type === SUPPORTED_CONTENT_TYPES.EMAIL_TEMPLATE && createdEmailTemplateData) {
+          if (type === SUPPORTED_CONTENT_TYPES.EMAIL_TEMPLATE && createdEmailTemplateData && isCmsEmailEnabled) {
             // For email templates, store the template ID separately
-            createdEmailTemplateData["previewUrl"] = ids[0]?.imageUrl || ""; // Extract the id from the object
+            createdEmailTemplateData["previewUrl"] = ids[0]?.imageUrl || ""; 
           }
         });
 
@@ -910,8 +927,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
         clusterTitle: promptInput,
         clusterName: clusterTitle,
         selectedLists: selectedListsData,
-        draft: false,
-        isCmsEmailTemplate: true ? true : false 
+        draft: false
       };
       
       // update the cluster

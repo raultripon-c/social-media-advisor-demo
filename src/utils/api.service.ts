@@ -159,6 +159,28 @@ export const APIService = {
     }
   },
 
+  checkCmsEmailEnabled: async (refNum: string ) => {
+    try {
+      const url = `${(window as any)._env_.CMS_URL}/api/email/isEmailTemplatesEnabledV2`;
+      const payload = {
+        refNum
+      }
+      const response = await API.post(url, payload, { withCredentials: true });      
+      if (response.data.data) {
+        const bool = response.data.data;
+        // dispatch(setSelectedTenant(selectedTenant));
+        localStorage.setItem("isCmsEmailEnabled", bool);
+        return;
+      } else {
+        // dispatch(setSelectedTenant({}));
+        return;
+      }
+    } catch (error: any) {
+      console.log("Error in checkCmsEmailsEnabled : " + error);
+      return;
+    }
+  },
+
   getMetaDataByRefNum: async (refNum: string, options?: { signal?: AbortSignal }): Promise<any> => {
     try {
       const url = `${(window as any)._env_.ANALYTICS_SF_URL}/getMetaData?refNum=${refNum}`;
@@ -684,6 +706,18 @@ export const APIService = {
   getPreview: async (payload: any) => {
     try {
       const url = `${(window as any)._env_.TOOLS_API_URL}api/crm/getPreview`;
+      const response = await API.post(url, payload, { withCredentials: false });
+      return response.data.data;
+    }
+    catch (error) {
+      console.error('Error fetching preview:', error);
+      return null;
+    }
+  },
+
+  getCmsEmailPreview: async (payload: any) => {
+    try {
+      const url = `${(window as any)._env_.CMS_URL}api/email/getTemplateHtml`;
       const response = await API.post(url, payload, { withCredentials: false });
       return response.data.data;
     }

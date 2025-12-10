@@ -11,6 +11,7 @@ import { APIService } from "../../../utils/api.service";
 import { setSiteMetaData } from "../../../store/customer/actions";
 import { CMSPageType, CONTENT_TYPES, SupportedContentType } from "../../../utils/constants";
 import { isEmpty } from "lodash";
+import { API } from "../../../utils/api";
 interface PreviewViewProps {
     pageData?: any;
     onBack: () => void;
@@ -74,17 +75,35 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
     const fetchEmailTemplatePreview = async () => {
         try {
             setIsLoading(true);
-            const payload = {
-                "id": pageData?._id,
-                "source": "template",
-                "userPreferredLanguage": "en",
-                "recruiterUserId": crmUserInfo.userDetails.id,
-                "refNum": selectedTenant.refNum
+            var response;
+            if (pageData?.isCmsTemplate) {
+                // const payload = {
+                //     "refNum": selectedTenant.refNum,
+                //     "locale": pageData.locale,
+                //     "siteVariant": pageData.siteVariant,
+                //     "templateId": pageData.templateId,
+                //     "application": pageData.application
+                // }
+                const base = `${(window as any)._env_.CMS_URL}`;
+                const url = `${base}/api/email/getTemplateHtml?refNum=${selectedTenant?.refNum}&locale=${pageData.locale}&siteVariant=${pageData.siteVariant}&templateId=${pageData.templateId}&application=${pageData.application}`;
+                response = await API.get(url, { withCredentials: false });
+                // response = await APIService.getCmsEmailPreview(payload);
+
+            } else {
+                const payload = {
+                    "id": pageData?._id,
+                    "source": "template",
+                    "userPreferredLanguage": "en",
+                    "recruiterUserId": crmUserInfo.userDetails.id,
+                    "refNum": selectedTenant.refNum
+                }
+                response = await APIService.getPreview(payload);
+
             }
-            
-            const response = await APIService.getPreview(payload);
             if (response?.htmlStructure) {
                 setHtmlContent(response.htmlStructure);
+            } else if (response?.data) {
+                setHtmlContent(response.data)
             } else {
                 // Fallback to URL if no HTML structure
                 const url = pageData?.previewUrl || pageData?.fullUrl || pageData?.url || "";
