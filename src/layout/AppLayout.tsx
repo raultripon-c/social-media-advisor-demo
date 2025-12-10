@@ -302,6 +302,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
     const tenantSupportedLangs = await APIService.getSupportedLangs(
       selectedTenant?.refNum
     );
+    APIService.checkCmsEmailEnabled(selectedTenant?.refNum);
     return handleDomainUrlForSite(
       tenantSupportedLangs,
       selectedTenant,
