@@ -85,7 +85,7 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
                 //     "application": pageData.application
                 // }
                 const base = `${(window as any)._env_.CMS_URL}`;
-                const url = `${base}/api/email/getTemplateHtml?refNum=${selectedTenant?.refNum}&locale=${pageData.locale}&siteVariant=${pageData.siteVariant}&templateId=${pageData.templateId}&application=${pageData.application}`;
+                const url = `${base}/api/email-editor/html/email/getTemplateHtml?refNum=${selectedTenant?.refNum}&locale=${pageData.locale}&siteVariant=${pageData.siteVariant}&templateId=${pageData.templateId}&application=${pageData.application}`;
                 response = await API.get(url, { withCredentials: false });
                 // response = await APIService.getCmsEmailPreview(payload);
 
