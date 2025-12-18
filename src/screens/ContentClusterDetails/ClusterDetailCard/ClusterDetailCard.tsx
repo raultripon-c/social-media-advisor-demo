@@ -15,6 +15,7 @@ import { CONTENT_TYPES } from "../../../utils/constants";
 
 import "./ClusterDetailCard.css";
 import { create } from "lodash";
+import InlineLoader from "../../../components/loader/InlineLoader";
 
 interface ClusterDetailCardProps {
   contentPage?: any;
@@ -33,6 +34,8 @@ interface ClusterDetailCardProps {
   onSelect?: (isSelected: boolean) => void;
   selectable?: boolean;
   inputType?: string;
+  disabledPreview?: boolean;
+  cardLoader?: boolean;
 }
 
 // This component is responsible for just showing details of the cluster
@@ -53,7 +56,9 @@ const ClusterDetailCard: React.FC<ClusterDetailCardProps> = ({
   isSelected = false,
   onSelect,
   selectable = false,
-  inputType = "checkbox"
+  inputType = "checkbox",
+  disabledPreview = false,
+  cardLoader = false
 }) => {
 
   const getStatusColor = (status: string) => {
@@ -121,22 +126,29 @@ const ClusterDetailCard: React.FC<ClusterDetailCardProps> = ({
     return getContentData().type;
   };
   return (
-    <div className={`cluster-detail-card ${isSelected ? 'selected' : ''}`} title={getContentTypeName()}>
+    <div 
+      className={`cluster-detail-card ${isSelected ? 'selected' : ''} ${cardLoader ? 'loading' : ''}`} 
+      title={getContentTypeName()}
+      aria-busy={cardLoader}
+      aria-label={cardLoader ? 'Loading card content' : undefined}
+    >
       <div className="cluster-detail-card-image">
         {/* Selection Checkbox - positioned over the image */}
         {selectable && (
           <input
             type={inputType}
+            disabled={disabledPreview}
             checked={isSelected}
             onChange={(e) => onSelect && onSelect(e.target.checked)}
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => !disabledPreview && e.stopPropagation()}
             style={{
-              cursor: 'pointer',
+              cursor: disabledPreview ? 'not-allowed' : 'pointer',
               position: 'absolute',
               top: '10px',
               left: '10px',
               zIndex: 20,
-              transform: 'scale(1.2)'
+              transform: 'scale(1.2)',
+              opacity: disabledPreview ? 0.5 : 1
             }}
           />
         )}
@@ -221,10 +233,15 @@ const ClusterDetailCard: React.FC<ClusterDetailCardProps> = ({
               setPreviewDiv && setPreviewDiv(pageData, getContentTypeName());
             }}
           >
-            Preview
+            {disabledPreview ? 'Regenerate' : 'Preview'}
           </div>
         </div>
       </div>
+      {cardLoader && (
+        <div className="cluster-detail-card-loader-overlay">
+          <InlineLoader loadingMessage="Loading..." />
+        </div>
+      )}
     </div>
   );
 };
