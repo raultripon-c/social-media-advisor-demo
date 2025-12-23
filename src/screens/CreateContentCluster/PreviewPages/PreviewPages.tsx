@@ -63,6 +63,8 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
   const crmUserInfo = useSelector((state: AppStore) => state.customer.crmUserInfo);
   const [siteMetaData, setsiteMetaData] = useState<any>(useSelector(
     (state: AppStore) => state.customer.siteMetaData));
+  const [disabledPreviewCardIds, setDisabledPreviewCardIds] = useState<Set<string>>(new Set());
+  const [loadingCardIds, setLoadingCardIds] = useState<Set<string>>(new Set());
  
 
   useEffect(() => {
@@ -222,29 +224,44 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
     }
   };
 
-  const generatePagePreview = async (pageType: CMSPageType) => {
-    const base = `${(window as any)._env_.CMS_URL}`;
-    const url = `${base}/api/html/aiPagePreview?refNum=${selectedTenant?.refNum}&context=${encodeURIComponent(promptInput)}&companyName=${selectedTenant?.tenantName}&pageType=${pageType}&clusterId=${newCluster.clusterId}`;
-    const response = await API.get(url, { withCredentials: false });
-    const html = String(response?.data || "");
-    setCmsHtmlByType(prev => ({ ...prev, [pageType]: html }));
-    return html;
+  const generatePagePreview = async (pageType: CMSPageType, id: string) => {
+    try {
+      const base = `${(window as any)._env_.CMS_URL}`;
+      const url = `${base}/api/html/aiPagePreview?refNum=${selectedTenant?.refNum}&context=${encodeURIComponent(promptInput)}&companyName=${selectedTenant?.tenantName}&pageType=${pageType}&clusterId=${newCluster.clusterId}`;
+      const response = await API.get(url, { withCredentials: false });
+      const html = String(response?.data || "");
+      setCmsHtmlByType(prev => ({ ...prev, [pageType]: html }));
+      setDisabledPreviewCardIds(prev => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+      return html;
+    } catch (error) {
+      console.error(`Error generating page preview for ${pageType}:`, error);
+      toast.error(`Preview failed for ${pageType}. Please try regenerating.`);
+      setDisabledPreviewCardIds(prev => new Set(prev).add(id));
+      handleBackFromPreview();
+      const emptyHtml = "";
+      setCmsHtmlByType(prev => ({ ...prev, [pageType]: emptyHtml }));
+      return emptyHtml;
+    }
   }
 
-  const ensureHtmlForType = async (pageType: CMSPageType): Promise<string> => {
+  const ensureHtmlForType = async (pageType: CMSPageType, id: string): Promise<string> => {
     const cached = cmsHtmlByType[pageType];
     if (cached) return cached;
-    const html = await generatePagePreview(pageType);
+    const html = await generatePagePreview(pageType, id);
     return html;
   };
 
   const generateCmsAiPreviewPage = async (pageType: CMSPageType): Promise<PreviewData | null> => {
+    const { displayName, idPrefix } = CMS_PAGE_TYPE_META[pageType];
+    const id = `${idPrefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     try {
       const base = `${(window as any)._env_.CMS_URL}`;
       const url = `${base}/api/html/aiPagePreview?refNum=${selectedTenant?.refNum}&context=${encodeURIComponent(promptInput)}&companyName=${selectedTenant?.tenantName}&pageType=${pageType}`;
-      const htmlString = await ensureHtmlForType(pageType);
-      const { displayName, idPrefix } = CMS_PAGE_TYPE_META[pageType];
-      const id = `${idPrefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      const htmlString = await ensureHtmlForType(pageType, id);
       const res = await captureScreenshot({[id]: htmlString});
       const imageUrl = res?.screenshots?.[id]?.filePath ? res?.screenshots?.[id]?.filePath : pageType === CMS_PAGE_TYPES.CONTENT_PAGE ? contentPageImage : pageType === CMS_PAGE_TYPES.LANDING_PAGE ? landingPageImage : pageType === CMS_PAGE_TYPES.BLOG ? blogImage : "";
       const item: PreviewData = {
@@ -263,11 +280,13 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
       return item;
     } catch (error) {
       console.error('Error generating CMS AI preview page:', error);
+      toast.error(`Preview failed for ${pageType}. Please try regenerating.`);
+      setDisabledPreviewCardIds(prev => new Set(prev).add(id));
       return null;
     }
   };
 
-  const generateCmsAiPreviewPagesAllTypesInParallel = async (): Promise<PreviewData[]> => {
+  const generateCmsAiPreviewPagesAllTypesInParallel = async () => {
     try {
       setIsLoading(true);
       const types = Object.values(CMS_PAGE_TYPES);
@@ -284,8 +303,11 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
         }
       });
       await Promise.allSettled(tasks);
-      setIsLoading(false);
-      return resultPages;
+      // setIsLoading(false);
+      // return resultPages;
+    } catch (error) {
+      console.error('Error generating CMS AI preview pages:', error);
+      toast.error("Error in generating CMS AI preview pages");
     } finally {
       setIsLoading(false);
     }
@@ -384,25 +406,35 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
   };
 
   const handleRegenerate = async (pageData: PreviewData, contentType: SupportedContentType) => {
-    if(contentType === SUPPORTED_CONTENT_TYPES.EMAIL_TEMPLATE) {
-      let updateEmailTemplateResults: any[] = emailTemplateResults;
-      const result = await generateEmailTemplate(promptInput, 1, pageData);
-      if (result?.length) {
-        setEmailTemplateResults(prev => prev.map(p => p.id === pageData.id ? { ...p, ...result[0] } : p));
-        setSelectedPreview({ ...pageData, htmlStructure: JSON.parse(result[0].emailTemplatePreview)[0].htmlStructure });
-        updateEmailTemplateResults = emailTemplateResults.map(p => p.id === pageData.id ? { ...p, ...result[0] } : p);
-        updateClusterWithEmailTemplates(updateEmailTemplateResults);
-        return !!result[0].htmlStructure;
+    setLoadingCardIds(prev => new Set(prev).add(pageData.id));
+    
+    try {
+      if(contentType === SUPPORTED_CONTENT_TYPES.EMAIL_TEMPLATE) {
+        let updateEmailTemplateResults: any[] = emailTemplateResults;
+        const result = await generateEmailTemplate(promptInput, 1, pageData);
+        if (result?.length) {
+          setEmailTemplateResults(prev => prev.map(p => p.id === pageData.id ? { ...p, ...result[0] } : p));
+          setSelectedPreview({ ...pageData, htmlStructure: JSON.parse(result[0].emailTemplatePreview)[0].htmlStructure });
+          updateEmailTemplateResults = emailTemplateResults.map(p => p.id === pageData.id ? { ...p, ...result[0] } : p);
+          updateClusterWithEmailTemplates(updateEmailTemplateResults);
+          return !!result[0].htmlStructure;
+        }
+      } else {
+        const html = await generatePagePreview(contentType as CMSPageType, pageData.id);
+        const res = await captureScreenshot({[pageData.id]: html});
+        const imageUrl = res?.screenshots?.[pageData.id]?.filePath ? res?.screenshots?.[pageData.id]?.filePath : pageData.imageUrl;
+        setSelectedPreview({ ...pageData, htmlStructure: html, imageUrl: imageUrl });
+        setAiGeneratedPages(prev => prev.map(p => p.id === pageData.id ? { ...p, htmlStructure: html, imageUrl: imageUrl } : p));
+        return !!html;
       }
-    } else {
-      const html = await generatePagePreview(contentType as CMSPageType);
-      const res = await captureScreenshot({[pageData.id]: html});
-      const imageUrl = res?.screenshots?.[pageData.id]?.filePath ? res?.screenshots?.[pageData.id]?.filePath : pageData.imageUrl;
-      setSelectedPreview({ ...pageData, htmlStructure: html, imageUrl: imageUrl });
-      setAiGeneratedPages(prev => prev.map(p => p.id === pageData.id ? { ...p, htmlStructure: html, imageUrl: imageUrl } : p));
-      return !!html;
+      return true;
+    } finally {
+      setLoadingCardIds(prev => {
+        const next = new Set(prev);
+        next.delete(pageData.id);
+        return next;
+      });
     }
-    return true;
   }
 
   const handleSelect = (isSelected: boolean, currentCard: PreviewData) => {
@@ -507,13 +539,15 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
                       <ClusterDetailCard
                         key={data.id}
                         aiContentPage={contentPage}
-                        setPreviewDiv={handlePreviewOpen}
+                        setPreviewDiv={disabledPreviewCardIds.has(data.id) ? () => handleRegenerate(data, CMS_PAGE_TYPES.CONTENT_PAGE) : handlePreviewOpen}
                         cardTag={false}
                         showStatus={false}
                         showDate={false}
                         selectable={true}
                         isSelected={selectedCards.get(data.type)?.some((card: { id: string; imageUrl: string }) => card.id === data.id)}
                         onSelect={(isSelected: boolean) => handleSelect(isSelected, data)}
+                        disabledPreview={disabledPreviewCardIds.has(data.id)}
+                        cardLoader={loadingCardIds.has(data.id)}
                       />
                     );
                   }
@@ -531,13 +565,15 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
                       <ClusterDetailCard
                         key={data.id}
                         aiBlog={blogPage}
-                        setPreviewDiv={handlePreviewOpen}
+                        setPreviewDiv={disabledPreviewCardIds.has(data.id) ? () => handleRegenerate(data, CMS_PAGE_TYPES.BLOG) : handlePreviewOpen}
                         cardTag={false}
                         showStatus={false}
                         showDate={false}
                         selectable={true}
                         isSelected={selectedCards.get(data.type)?.some((card: { id: string; imageUrl: string }) => card.id === data.id)}
                         onSelect={(isSelected: boolean) => handleSelect(isSelected, data)}
+                        disabledPreview={disabledPreviewCardIds.has(data.id)}
+                        cardLoader={loadingCardIds.has(data.id)}
                       />
                     );
                   }
@@ -555,13 +591,15 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
                       <ClusterDetailCard
                         key={data.id}
                         aiLandingPage={landingPage}
-                        setPreviewDiv={handlePreviewOpen}
+                        setPreviewDiv={disabledPreviewCardIds.has(data.id) ? () => handleRegenerate(data, CMS_PAGE_TYPES.LANDING_PAGE) : handlePreviewOpen}
                         cardTag={false}
                         showStatus={false}
                         showDate={false}
                         selectable={true}
                         onSelect={(isSelected: boolean) => handleSelect(isSelected, data)}
                         isSelected={selectedCards.get(data.type)?.some((card: { id: string; imageUrl: string }) => card.id === data.id)}
+                        disabledPreview={disabledPreviewCardIds.has(data.id)}
+                        cardLoader={loadingCardIds.has(data.id)}
                       />
                     );
                   }
