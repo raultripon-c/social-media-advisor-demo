@@ -5,6 +5,7 @@ import { removeStyles, removeStylesBasedOnContents, restoreStyles } from "../uti
 import CrmStylesRenderer from "./CrmStylesRenderer";
 import "./AngularApp.scss";
 import { CommonConstants } from "../utils/common-constants";
+import { removeElements, SelectorType } from "../layout/dashBoard/utils";
 
 // Extend the Window interface to include __ckeditor__
 declare global {
@@ -141,6 +142,7 @@ export function AngularAppRenderer(props: any) {
 
   // Handle module mounting after script loading
   useEffect(() => {
+    removeElements("link", true, new Map([[SelectorType.ID, "segment-manager-bootstrap-styles"]]));
     if (isRemoteEntryFileReady) {
       setRemoteEntryFileReady(false);
       let stylesToBeRemoved = [
@@ -196,9 +198,9 @@ export function AngularAppRenderer(props: any) {
               if (mfeRoot) {
                 const observer = new MutationObserver(() => {
                   mfeRoot.querySelectorAll("img").forEach((img) => {
-                    if (img.src.includes("/assets/images")) {
+                    if (img.src.includes("assets/images")) {
                       img.src = img.src.replace(
-                        /^(.*?)\/assets\/images/,
+                        /^(.*?)(\.\/|(\.\.\/)+|\/)?assets\/images/,
                         `${(window as any)._env_.ANALYTICS_URL}/assets/images`
                       );
                     }
