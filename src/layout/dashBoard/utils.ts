@@ -40,3 +40,34 @@ export const getGreetingMessage = () => {
     return "Good evening";
   }
 };
+
+export enum SelectorType {
+  ID = 'id',
+  CLASS = 'class'
+}
+
+export const removeElements = (
+  tagType: 'style' | 'link',
+  isSingle: boolean,
+  selectorMap: Map<SelectorType, string>
+) => {
+  selectorMap.forEach((value, selectorType) => {
+    if (isSingle) {
+      if (selectorType === SelectorType.ID) {
+        const element = document.getElementById(value);
+        element?.remove();
+      } else {
+        const selector = `${tagType}.${value}`;
+        const element = document.querySelector(selector);
+        element?.remove();
+      }
+    } else {
+      const selector = selectorType === SelectorType.ID 
+        ? `${tagType}#${value}` 
+        : `${tagType}.${value}`;
+      const elements = document.querySelectorAll(selector);
+      elements.forEach(element => element.remove());
+    }
+  });
+};
+

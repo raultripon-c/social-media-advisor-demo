@@ -18,6 +18,7 @@ import {
   handleDomainUrlForSite,
   refnumContainInCrmTenants,
 } from "../utils/appUtils";
+import { applySmsCampaignDomAdapter } from "../utils/moduleDomAdapter";
 
 import {
   setAppDetails,
@@ -148,6 +149,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
     const matchedKey = Object.keys(appRouteDictionary).find((key) =>
       url.includes(key)
     );
+    if (matchedKey === "sms-campaign") {
+      applySmsCampaignDomAdapter();
+    }
     if (
       matchedKey &&
       decodeURIComponent(url).indexOf(";") === -1 &&
