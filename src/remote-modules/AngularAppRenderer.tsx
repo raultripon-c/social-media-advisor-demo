@@ -5,7 +5,6 @@ import { removeStyles, removeStylesBasedOnContents, restoreStyles } from "../uti
 import CrmStylesRenderer from "./CrmStylesRenderer";
 import "./AngularApp.scss";
 import { CommonConstants } from "../utils/common-constants";
-import { removeElements, SelectorType } from "../layout/dashBoard/utils";
 
 // Extend the Window interface to include __ckeditor__
 declare global {
@@ -142,7 +141,6 @@ export function AngularAppRenderer(props: any) {
 
   // Handle module mounting after script loading
   useEffect(() => {
-    removeElements("link", true, new Map([[SelectorType.ID, "segment-manager-bootstrap-styles"]]));
     if (isRemoteEntryFileReady) {
       setRemoteEntryFileReady(false);
       let stylesToBeRemoved = [
@@ -225,6 +223,9 @@ export function AngularAppRenderer(props: any) {
       removedStyles && restoreStyles(removedStyles);
       setReady(false);
       setIsInteractionBlocked(true);
+      removeStylesBasedOnContents([
+        "phenomcrm",
+      ]);
     };
   }, [isRemoteEntryFileReady]);
 
