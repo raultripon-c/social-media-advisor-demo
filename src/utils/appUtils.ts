@@ -538,6 +538,14 @@ export const removeStylesBasedOnContents = (contents: string[]) => {
   });
 };
 
+export const removeStylesBasedOnLinkContent = (linkContent: string[] = []) => {
+  linkContent.forEach((content: string) => {
+    const linkTag = document.querySelector(`link[href*="${content}"]`);
+    if (linkTag) {
+      linkTag.remove();
+    }
+  });
+};
 export const handleDomainUrlForSite = async (supportedLangs: Array<any>, selectedTenant: any, dispatch: any, setSiteMetaData: any, siteMetaData: any) => {
   try {
     let domainUrl;
