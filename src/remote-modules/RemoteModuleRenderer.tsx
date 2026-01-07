@@ -32,12 +32,12 @@ export const RemoteModuleRenderer = () => {
     fetchedAppsFromStorage &&
     fetchedAppsFromStorage.length &&
     findAppConfigByRoutes(fetchedAppsFromStorage, `/${window.location.pathname.split('/').slice(3).join('/')}`)[0];
-  var selectedApp = detailsApp?.appConfig;
   const selectedModuleAppObject = useSelector((state: any) => {
     const selectedAppFromSession = JSON.parse(sessionStorage.getItem("selectedApp") || "null");
-
+    
     return detailsApp ?? (selectedAppFromSession || state.app?.selectedApp);
   });
+  var selectedApp = selectedModuleAppObject?.appConfig;
   var selectedAppTitle = selectedModuleAppObject?.hoverText || null;
   const dispatch = useDispatch();
   const navigate = useNavigate();

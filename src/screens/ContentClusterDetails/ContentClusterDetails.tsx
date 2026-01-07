@@ -1223,7 +1223,7 @@ const ClusterDetails: React.FC<ClusterDetailsProps> = ({ data }) => {
                         )}
                       </div>
                     )}
-                    {(!hasContentPages() && !hasLandingPages()) && (
+                    {(!hasContentPages() && !hasLandingPages() && !hasAIPages()) && (
                       <div className="no-data-container">No Pages Data</div>
                     )}
                   </div>

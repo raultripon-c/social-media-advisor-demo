@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Loader } from "@phenom/react-ui-components";
 import { MessageService } from "../MessageService";
-import { removeStyles, removeStylesBasedOnContents, restoreStyles } from "../utils/appUtils";
+import { removeStyles, removeStylesBasedOnContents, removeStylesBasedOnLinkContent, restoreStyles } from "../utils/appUtils";
 import CrmStylesRenderer from "./CrmStylesRenderer";
 import "./AngularApp.scss";
 import { CommonConstants } from "../utils/common-constants";
@@ -196,9 +196,9 @@ export function AngularAppRenderer(props: any) {
               if (mfeRoot) {
                 const observer = new MutationObserver(() => {
                   mfeRoot.querySelectorAll("img").forEach((img) => {
-                    if (img.src.includes("/assets/images")) {
+                    if (img.src.includes("assets/images")) {
                       img.src = img.src.replace(
-                        /^(.*?)\/assets\/images/,
+                        /^(.*?)(\.\/|(\.\.\/)+|\/)?assets\/images/,
                         `${(window as any)._env_.ANALYTICS_URL}/assets/images`
                       );
                     }
@@ -223,6 +223,10 @@ export function AngularAppRenderer(props: any) {
       removedStyles && restoreStyles(removedStyles);
       setReady(false);
       setIsInteractionBlocked(true);
+      removeStylesBasedOnLinkContent(["phenom-chatbot"]);
+      removeStylesBasedOnContents([
+        "phenomcrm",
+      ]);
     };
   }, [isRemoteEntryFileReady]);
 

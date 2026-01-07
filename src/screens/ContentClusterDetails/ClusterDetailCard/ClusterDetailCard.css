@@ -170,3 +170,34 @@
   display: flex;
   align-items: center;
 }
+
+/* Loader Overlay */
+.cluster-detail-card-loader-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  border-radius: 8px;
+}
+
+.cluster-detail-card.loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.cluster-detail-card.loading .preview-link {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.cluster-detail-card.loading input[type="checkbox"],
+.cluster-detail-card.loading input[type="radio"] {
+  pointer-events: none;
+  opacity: 0.6;
+}
