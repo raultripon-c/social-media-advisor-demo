@@ -230,18 +230,18 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
     }
   };
 
-  const generatePagePreview = async (pageType: CMSPageType) => {
+  const generatePagePreview = async (pageType: CMSPageType, regenerate?: boolean) => {
     const base = `${(window as any)._env_.CMS_URL}`;
-    const url = `${base}/api/html/aiPagePreview?refNum=${selectedTenant?.refNum}&context=${encodeURIComponent(promptInput)}&companyName=${selectedTenant?.tenantName}&pageType=${pageType}&clusterId=${newCluster.clusterId}`;
+    const url = `${base}/api/html/aiPagePreview?refNum=${selectedTenant?.refNum}&context=${encodeURIComponent(promptInput)}&companyName=${selectedTenant?.tenantName}&pageType=${pageType}&clusterId=${newCluster.clusterId}${regenerate ? `&regenerate=${true}` : ""}`;
     const response = await API.get(url, { withCredentials: false });
     const html = String(response?.data || "");
     setCmsHtmlByType(prev => ({ ...prev, [pageType]: html }));
     return html;
   }
 
-  const generateEmailPreview = async (emailIdStr?: string) => {
+  const generateEmailPreview = async (emailIdStr?: string, regenerate?: boolean) => {
     const base = `${(window as any)._env_.CMS_URL}`;
-    const url = `${base}/api/email-editor/html/generateAIEmailPreview?refNum=${selectedTenant?.refNum}&context=${encodeURIComponent(promptInput)}&companyName=${selectedTenant?.tenantName}&clusterId=${newCluster.clusterId}${emailIdStr ? `&emailId=${emailIdStr}` : ""}`;
+    const url = `${base}/api/email-editor/html/generateAIEmailPreview?refNum=${selectedTenant?.refNum}&context=${encodeURIComponent(promptInput)}&companyName=${selectedTenant?.tenantName}&clusterId=${newCluster.clusterId}${emailIdStr ? `&emailId=${emailIdStr}` : ""}${regenerate ? `&regenerate=${true}` : ""}`;
     const response = await API.get(url, { withCredentials: false });
     const html = String(response?.data || "");
     const emailId = response.headers['previewid']
@@ -472,7 +472,7 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
   const handleRegenerate = async (pageData: PreviewData, contentType: SupportedContentType) => {
     if(contentType === SUPPORTED_CONTENT_TYPES.EMAIL_TEMPLATE) {
       if (isCmsEmailEnabled) {
-        const html = await generateEmailPreview(pageData.id);
+        const html = await generateEmailPreview(pageData.id, true);
         const res = await captureScreenshot({[pageData.id]: html.html});
         const imageUrl = res?.screenshots?.[pageData.id]?.filePath ? res?.screenshots?.[pageData.id]?.filePath : pageData.imageUrl;
         setSelectedPreview({ ...pageData, htmlStructure: html.html, imageUrl: imageUrl });
@@ -490,7 +490,7 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
         }
       }
     } else {
-      const html = await generatePagePreview(contentType as CMSPageType);
+      const html = await generatePagePreview(contentType as CMSPageType, true);
       const res = await captureScreenshot({[pageData.id]: html});
       const imageUrl = res?.screenshots?.[pageData.id]?.filePath ? res?.screenshots?.[pageData.id]?.filePath : pageData.imageUrl;
       setSelectedPreview({ ...pageData, htmlStructure: html, imageUrl: imageUrl });
