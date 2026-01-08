@@ -514,13 +514,14 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
           }
         }
       } else {
-        const html = await generatePagePreview(contentType as CMSPageType, true);
+        const html = await generatePagePreview(contentType as CMSPageType, pageData.id, true);
         const res = await captureScreenshot({[pageData.id]: html});
         const imageUrl = res?.screenshots?.[pageData.id]?.filePath ? res?.screenshots?.[pageData.id]?.filePath : pageData.imageUrl;
         setSelectedPreview({ ...pageData, htmlStructure: html, imageUrl: imageUrl });
         setAiGeneratedPages(prev => prev.map(p => p.id === pageData.id ? { ...p, htmlStructure: html, imageUrl: imageUrl } : p));
         return !!html;
       }
+      return true;
     } finally {
       setLoadingCardIds(prev => {
         const next = new Set(prev);
