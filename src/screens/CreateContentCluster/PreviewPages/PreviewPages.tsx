@@ -399,7 +399,7 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
     }
   };
 
-  const generateEmailTemplate = async (content?: string, variations: number = 1, pageData?: any) => {
+  const generateEmailTemplate = async (content?: string, variations: number = 1, pageData?: any, regenerate?: boolean) => {
     try {
       const emailTemplateResults: any[] = [];
       const locale: string = siteMetaData?.defaultLanguage?.toLowerCase() || "en_us";
@@ -412,6 +412,7 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
         variations: variations,
         companyName: selectedTenant.tenantName,
         url: "https://" + siteMetaData?.domain + "/", 
+        regenerate: regenerate,
       };
       if (content) {
         payload.content = content;
@@ -504,7 +505,7 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
           return !!html.html;
         } else {
           let updateEmailTemplateResults: any[] = emailTemplateResults;
-          const result = await generateEmailTemplate(promptInput, 1, pageData);
+          const result = await generateEmailTemplate(promptInput, 1, pageData, true);
           if (result?.length) {
             setEmailTemplateResults(prev => prev.map(p => p.id === pageData.id ? { ...p, ...result[0] } : p));
             setSelectedPreview({ ...pageData, htmlStructure: JSON.parse(result[0].emailTemplatePreview)[0].htmlStructure });
