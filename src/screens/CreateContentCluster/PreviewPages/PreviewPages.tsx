@@ -224,10 +224,10 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
     }
   };
 
-  const generatePagePreview = async (pageType: CMSPageType, id: string) => {
+  const generatePagePreview = async (pageType: CMSPageType, id: string, regenerate?: boolean) => {
     try {
       const base = `${(window as any)._env_.CMS_URL}`;
-      const url = `${base}/api/html/aiPagePreview?refNum=${selectedTenant?.refNum}&context=${encodeURIComponent(promptInput)}&companyName=${selectedTenant?.tenantName}&pageType=${pageType}&clusterId=${newCluster.clusterId}`;
+      const url = `${base}/api/html/aiPagePreview?refNum=${selectedTenant?.refNum}&context=${encodeURIComponent(promptInput)}&companyName=${selectedTenant?.tenantName}&pageType=${pageType}&clusterId=${newCluster.clusterId}${regenerate ? `&regenerate=${true}` : ""}`;
       const response = await API.get(url, { withCredentials: false });
       const html = String(response?.data || "");
       setCmsHtmlByType(prev => ({ ...prev, [pageType]: html }));
@@ -313,7 +313,7 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
     }
   };
 
-  const generateEmailTemplate = async (content?: string, variations: number = 1, pageData?: any) => {
+  const generateEmailTemplate = async (content?: string, variations: number = 1, pageData?: any, regenerate?: boolean) => {
     try {
       const emailTemplateResults: any[] = [];
       const locale: string = siteMetaData?.defaultLanguage?.toLowerCase() || "en_us";
@@ -326,6 +326,7 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
         variations: variations,
         companyName: selectedTenant.tenantName,
         url: "https://" + siteMetaData?.domain + "/", 
+        regenerate: regenerate,
       };
       if (content) {
         payload.content = content;
@@ -411,7 +412,7 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
     try {
       if(contentType === SUPPORTED_CONTENT_TYPES.EMAIL_TEMPLATE) {
         let updateEmailTemplateResults: any[] = emailTemplateResults;
-        const result = await generateEmailTemplate(promptInput, 1, pageData);
+        const result = await generateEmailTemplate(promptInput, 1, pageData, true);
         if (result?.length) {
           setEmailTemplateResults(prev => prev.map(p => p.id === pageData.id ? { ...p, ...result[0] } : p));
           setSelectedPreview({ ...pageData, htmlStructure: JSON.parse(result[0].emailTemplatePreview)[0].htmlStructure });
@@ -420,7 +421,7 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
           return !!result[0].htmlStructure;
         }
       } else {
-        const html = await generatePagePreview(contentType as CMSPageType, pageData.id);
+        const html = await generatePagePreview(contentType as CMSPageType, pageData.id, true);
         const res = await captureScreenshot({[pageData.id]: html});
         const imageUrl = res?.screenshots?.[pageData.id]?.filePath ? res?.screenshots?.[pageData.id]?.filePath : pageData.imageUrl;
         setSelectedPreview({ ...pageData, htmlStructure: html, imageUrl: imageUrl });
