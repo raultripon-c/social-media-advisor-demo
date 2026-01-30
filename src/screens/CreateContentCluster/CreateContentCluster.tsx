@@ -643,19 +643,19 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
     getListItems(searchTerm);
   };
 
-  const handlePromptSubmit = async () => {
+  const handlePromptSubmit = async (isRegenerate?: boolean) => {
     const isJobLinkValid = jobLink && isValidJobLink ? true : false;
     if (promptInput || (jobLink && isValidJobLink)) {
       setShowSaveOrDiscardModal(true);
       setFetchedPages(null);
       // handleClusterCreation();
-      await handlePromptBasedSuggestions(isJobLinkValid);
+      await handlePromptBasedSuggestions(isJobLinkValid, isRegenerate || false);
       setSelectedCards(new Map());
       setGeneratePages(generatePages+1);
     }
   };
 
-  const handlePromptBasedSuggestions = async (isJobLinkValid: boolean) => {
+  const handlePromptBasedSuggestions = async (isJobLinkValid: boolean, isRegenerate?: boolean) => {
     setShowLoader(true);
     const payload =  [
         {
@@ -672,12 +672,18 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
         const clusterPayload = {
           refNum: selectedTenant.refNum,
           prompt: enhancedPromptResponse.enhancedPrompt,
+          deviceType: "desktop",
+          language: locale,
+          isRegenerate: isRegenerate || false,
         };
         clusterNameResponse = await generateClusterName(clusterPayload);
       } else {
         const clusterPayload = {
           refNum: selectedTenant.refNum,
           prompt: promptInput,
+          deviceType: "desktop",
+          language: locale,
+          isRegenerate: isRegenerate || false,
         };
         clusterNameResponse = await generateClusterName(clusterPayload);
       }
@@ -1206,7 +1212,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
                       if (promptInput) {
                         setIsPromptSubmitted(true);
                         setIsEditingPrompt(false);
-                        handlePromptSubmit();
+                        handlePromptSubmit(true);
                       } else {
                         setShowClustersList(false);
                         setShowPromptSuggestions(false);
@@ -1226,7 +1232,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
                     </button>
                     <button
                       className={`prompt-arrow-btn${(!promptInput && !jobLink) || !isValidJobLink ? " disabled" : ""}`}
-                      onClick={handlePromptSubmit}
+                      onClick={() => handlePromptSubmit()}
                       disabled={(!promptInput && !jobLink) || !isValidJobLink}
                       type="button"
                       aria-label="Submit prompt"
