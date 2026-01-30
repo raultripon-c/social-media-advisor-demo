@@ -413,6 +413,7 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
         companyName: selectedTenant.tenantName,
         url: "https://" + siteMetaData?.domain + "/", 
         regenerate: regenerate,
+        clusterId: newCluster.clusterId
       };
       if (content) {
         payload.content = content;

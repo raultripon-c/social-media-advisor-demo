@@ -719,6 +719,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       // }
       
       const clusterTitleName = (clusterNameResponse?.clusterName ?? "").replace(/"/g, "");
+      const intentAnalysisJson = (clusterNameResponse?.intentAnalysisJson ?? "");
       // let suggestedTagsData = promptResponse.contentTypes || [];
       // setSuggestedTags(suggestedTagsData);
       
@@ -744,7 +745,9 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
         setUpdateClusterTitle(true);
       }
       if(!isClusterCreated){
-        await clusterCreation(clusterTitleName);
+        await clusterCreation(clusterTitleName, intentAnalysisJson);
+      } else {
+        updateClusterWithIntentAnalysisJson(intentAnalysisJson);
       }
       setShowLoader(false);
       setIsPromptSubmitted(true);
@@ -945,7 +948,16 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
     }
   }
 
-  const clusterCreation = async (clusterTitleName: string) => {
+  const updateClusterWithIntentAnalysisJson = async (intentAnalysisJson: string) => {
+    const payload = {
+      clusterId: newCluster.clusterId,
+      draft: true,
+      intentAnalysisJson: intentAnalysisJson
+    };
+    await updateCluster(payload);
+  };
+
+  const clusterCreation = async (clusterTitleName: string, intentAnalysisJson: string) => {
     // Simple validation: check if title is empty when in edit mode
     const isTitleEmpty = !clusterTitle.trim();
     const isInEditMode = editClusterTitle;
@@ -976,7 +988,8 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
         clusterTitle: promptInput,
         clusterName: "Create Content Cluster",
         selectedLists: selectedListsData,
-        draft: true
+        draft: true,
+        intentAnalysisJson: intentAnalysisJson
       };
       
       // Save the cluster
