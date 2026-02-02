@@ -98,6 +98,8 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const sortDropdownRef = useRef<HTMLDivElement>(null);
+  const [intentAnalysisJson, setIntentAnalysisJson] = useState<string>("");
+
   // Scroll to input when there's an error
   useEffect(() => {
     if (clusterTitleError && clusterTitleInputRef.current) {
@@ -719,7 +721,8 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       // }
       
       const clusterTitleName = (clusterNameResponse?.clusterName ?? "").replace(/"/g, "");
-      const intentAnalysisJson = (clusterNameResponse?.intentAnalysisJson ?? "");
+      const intentAnalysisJson = clusterNameResponse?.intentAnalysisJson ?? "";
+      setIntentAnalysisJson(intentAnalysisJson);
       // let suggestedTagsData = promptResponse.contentTypes || [];
       // setSuggestedTags(suggestedTagsData);
       
@@ -747,7 +750,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       if(!isClusterCreated){
         await clusterCreation(clusterTitleName, intentAnalysisJson);
       } else {
-        updateClusterWithIntentAnalysisJson(intentAnalysisJson);
+        await updateClusterWithIntentAnalysisJson(intentAnalysisJson);
       }
       setShowLoader(false);
       setIsPromptSubmitted(true);
@@ -952,9 +955,10 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
     const payload = {
       clusterId: newCluster.clusterId,
       draft: true,
-      intentAnalysisJson: intentAnalysisJson
+      intentAnalysisJson: intentAnalysisJson,
+      clusterTitle: promptInput,
     };
-    await updateCluster(payload);
+    await updateCluster(payload, false);
   };
 
   const clusterCreation = async (clusterTitleName: string, intentAnalysisJson: string) => {
@@ -1187,7 +1191,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
                   setUpdateClusterTitle(false);
                   setClusterTitleError(false);
                   if(!isClusterCreated){
-                    clusterCreation(clusterTitle);
+                    clusterCreation(clusterTitle, intentAnalysisJson);
                   }
                 }
               }}
@@ -1215,7 +1219,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
               setUpdateClusterTitle(false);
               setClusterTitleError(false);
               if(!isClusterCreated){
-                clusterCreation(clusterTitle);
+                clusterCreation(clusterTitle, intentAnalysisJson);
               }
             }}>Done</button>
           )}
