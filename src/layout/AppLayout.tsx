@@ -306,7 +306,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
     const tenantSupportedLangs = await APIService.getSupportedLangs(
       selectedTenant?.refNum
     );
-    APIService.checkCmsEmailEnabled(selectedTenant?.refNum);
     return handleDomainUrlForSite(
       tenantSupportedLangs,
       selectedTenant,
@@ -332,9 +331,11 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
     await APIService.triggerTxeLogin();
     if (document.cookie.includes("token")) {
       checkCanvasSite(refNum);
+      APIService.checkCmsEmailEnabled(refNum);
     } else {
       await APIService.triggerTxeLogin();
       checkCanvasSite(refNum);
+      APIService.checkCmsEmailEnabled(refNum);
     }
   };
 
