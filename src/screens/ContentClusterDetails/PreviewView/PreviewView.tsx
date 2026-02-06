@@ -81,7 +81,7 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
                 "recruiterUserId": crmUserInfo.userDetails.id,
                 "refNum": selectedTenant.refNum
             }
-
+            
             const response = await APIService.getPreview(payload);
             if (response?.htmlStructure) {
                 setHtmlContent(response.htmlStructure);
