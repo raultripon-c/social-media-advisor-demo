@@ -51,6 +51,7 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
   const [isCrmEmailTemplateLoading, setIsCrmEmailTemplateLoading] = useState(false);
   const [emailTemplateResults, setEmailTemplateResults] = useState<any[]>([]);
   const [cmsHtmlByType, setCmsHtmlByType] = useState<Partial<Record<CMSPageType, string>>>({});
+  const [cmsEmailByType, setCmsEmailByType] = useState<Partial<Record<string, string>>>({});
   const [selectedPreview, setSelectedPreview] = useState<PreviewData | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [openSections, setOpenSections] = useState<{ [key: string]: boolean }>({
@@ -327,6 +328,7 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
         companyName: selectedTenant.tenantName,
         url: "https://" + siteMetaData?.domain + "/", 
         regenerate: regenerate,
+        clusterId: newCluster.clusterId
       };
       if (content) {
         payload.content = content;
@@ -408,7 +410,6 @@ export default function PreviewPages({ pagesBasedKeywords, promptInput, showSave
 
   const handleRegenerate = async (pageData: PreviewData, contentType: SupportedContentType) => {
     setLoadingCardIds(prev => new Set(prev).add(pageData.id));
-    
     try {
       if(contentType === SUPPORTED_CONTENT_TYPES.EMAIL_TEMPLATE) {
         let updateEmailTemplateResults: any[] = emailTemplateResults;
