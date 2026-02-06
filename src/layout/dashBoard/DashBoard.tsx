@@ -149,7 +149,6 @@ const DashBoard = () => {
         x[0].domain = liveUrl;
       }
       metaData && setCurrentTenantData(x);
-      APIService.checkCmsEmailEnabled(selectedTenant.refNum)
     });
 
     // Cleanup actions when component unmounts

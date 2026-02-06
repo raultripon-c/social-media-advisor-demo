@@ -213,7 +213,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
         dispatch(setSelectedTenant(selectedTenant));
         (window as any).txeTenant = selectedTenant;
       }
-      APIService.checkCmsEmailEnabled(refNum);
     })();
 
     let response = JSON.parse(sessionStorage.getItem("allapps") || "[]");
@@ -331,11 +330,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
     await APIService.triggerTxeLogin();
     if (document.cookie.includes("token")) {
       checkCanvasSite(refNum);
-      APIService.checkCmsEmailEnabled(refNum);
     } else {
       await APIService.triggerTxeLogin();
       checkCanvasSite(refNum);
-      APIService.checkCmsEmailEnabled(refNum);
     }
   };
 

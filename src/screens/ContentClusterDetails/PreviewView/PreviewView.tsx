@@ -11,7 +11,6 @@ import { APIService } from "../../../utils/api.service";
 import { setSiteMetaData } from "../../../store/customer/actions";
 import { CMSPageType, CONTENT_TYPES, SupportedContentType } from "../../../utils/constants";
 import { isEmpty } from "lodash";
-import { API } from "../../../utils/api";
 interface PreviewViewProps {
     pageData?: any;
     onBack: () => void;
@@ -46,7 +45,7 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
             const htmlStructure = pageData?.htmlStructure;
             let url = pageData?.fullUrl || pageData?.url || "";
             // Check if it's an email template with _id
-            if ((pageData?.application=="crm" || pageData?.application=="cms") && pageData?._id && contentType === CONTENT_TYPES.EMAIL_TEMPLATE) {
+            if (pageData?.application=="crm" && pageData?._id && contentType === CONTENT_TYPES.EMAIL_TEMPLATE) {
                 fetchEmailTemplatePreview();
             } else if(!htmlStructure && url) {
                 if(contentType === CONTENT_TYPES.BLOG){
@@ -75,35 +74,17 @@ const PreviewView: React.FC<PreviewViewProps> = ({ pageData, onBack, crmUserInfo
     const fetchEmailTemplatePreview = async () => {
         try {
             setIsLoading(true);
-            var response;
-            if (pageData?.isCmsTemplate) {
-                // const payload = {
-                //     "refNum": selectedTenant.refNum,
-                //     "locale": pageData.locale,
-                //     "siteVariant": pageData.siteVariant,
-                //     "templateId": pageData.templateId,
-                //     "application": pageData.application
-                // }
-                const base = `${(window as any)._env_.CMS_URL}`;
-                const url = `${base}/api/email-editor/html/email/getTemplateHtml?refNum=${selectedTenant?.refNum}&locale=${pageData.locale}&siteVariant=${pageData.siteVariant}&templateId=${pageData.templateId}&application=${pageData.application}`;
-                response = await API.get(url, { withCredentials: false });
-                // response = await APIService.getCmsEmailPreview(payload);
-
-            } else {
-                const payload = {
-                    "id": pageData?._id,
-                    "source": "template",
-                    "userPreferredLanguage": "en",
-                    "recruiterUserId": crmUserInfo.userDetails.id,
-                    "refNum": selectedTenant.refNum
-                }
-                response = await APIService.getPreview(payload);
-
+            const payload = {
+                "id": pageData?._id,
+                "source": "template",
+                "userPreferredLanguage": "en",
+                "recruiterUserId": crmUserInfo.userDetails.id,
+                "refNum": selectedTenant.refNum
             }
+
+            const response = await APIService.getPreview(payload);
             if (response?.htmlStructure) {
                 setHtmlContent(response.htmlStructure);
-            } else if (response?.data) {
-                setHtmlContent(response.data)
             } else {
                 // Fallback to URL if no HTML structure
                 const url = pageData?.previewUrl || pageData?.fullUrl || pageData?.url || "";

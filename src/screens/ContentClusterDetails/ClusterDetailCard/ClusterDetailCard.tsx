@@ -194,9 +194,9 @@ const ClusterDetailCard: React.FC<ClusterDetailCardProps> = ({
               whiteSpace: 'nowrap',
               maxWidth: '100%'
             }}
-            title={contentPage?.displayName || landingPage?.displayName || aiLandingPage?.name || emailTemplate?.templateName || createdEmailTemplate?.templateName || createdEmailTemplate?.displayName || aiBlog?.title || aiContentPage?.name || blog?.title || "Sample Name"}
+            title={contentPage?.displayName || landingPage?.displayName || aiLandingPage?.name || emailTemplate?.templateName || createdEmailTemplate?.templateName || aiBlog?.title || aiContentPage?.name || blog?.title || "Sample Name"}
           >
-            {contentPage?.displayName || landingPage?.displayName || aiLandingPage?.name || emailTemplate?.templateName || createdEmailTemplate?.templateName || createdEmailTemplate?.displayName || aiBlog?.title || aiContentPage?.name || blog?.title || "Sample Name"}
+            {contentPage?.displayName || landingPage?.displayName || aiLandingPage?.name || emailTemplate?.templateName || createdEmailTemplate?.templateName || aiBlog?.title || aiContentPage?.name || blog?.title || "Sample Name"}
           </h3>
         </div>
         {/* Status and Date Row */}
