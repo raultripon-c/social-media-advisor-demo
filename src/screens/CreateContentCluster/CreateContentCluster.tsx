@@ -510,8 +510,6 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
     });
   };
 
-
-
   const fetchBlogsForContent = (keywords: string[]) => {
     return APIService.getBlogsForContent({
       keywords,
