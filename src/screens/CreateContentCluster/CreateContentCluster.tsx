@@ -97,6 +97,8 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const sortDropdownRef = useRef<HTMLDivElement>(null);
+  const [intentAnalysisJson, setIntentAnalysisJson] = useState<string>("");
+
   // Scroll to input when there's an error
   useEffect(() => {
     if (clusterTitleError && clusterTitleInputRef.current) {
@@ -709,6 +711,8 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       // }
       
       const clusterTitleName = (clusterNameResponse?.clusterName ?? "").replace(/"/g, "");
+      const intentAnalysisJson = clusterNameResponse?.intentAnalysisJson ?? "";
+      setIntentAnalysisJson(intentAnalysisJson);
       // let suggestedTagsData = promptResponse.contentTypes || [];
       // setSuggestedTags(suggestedTagsData);
       
@@ -734,7 +738,9 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
         setUpdateClusterTitle(true);
       }
       if(!isClusterCreated){
-        await clusterCreation(clusterTitleName);
+        await clusterCreation(clusterTitleName, intentAnalysisJson);
+      } else {
+        await updateClusterWithIntentAnalysisJson(intentAnalysisJson);
       }
       setShowLoader(false);
       setIsPromptSubmitted(true);
@@ -910,7 +916,17 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
     }
   }
 
-  const clusterCreation = async (clusterTitleName: string) => {
+  const updateClusterWithIntentAnalysisJson = async (intentAnalysisJson: string) => {
+    const payload = {
+      clusterId: newCluster.clusterId,
+      draft: true,
+      intentAnalysisJson: intentAnalysisJson,
+      clusterTitle: promptInput,
+    };
+    await updateCluster(payload, false);
+  };
+
+  const clusterCreation = async (clusterTitleName: string, intentAnalysisJson: string) => {
     // Simple validation: check if title is empty when in edit mode
     const isTitleEmpty = !clusterTitle.trim();
     const isInEditMode = editClusterTitle;
@@ -941,7 +957,8 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
         clusterTitle: promptInput,
         clusterName: "Create Content Cluster",
         selectedLists: selectedListsData,
-        draft: true
+        draft: true,
+        intentAnalysisJson: intentAnalysisJson
       };
       
       // Save the cluster
@@ -1139,7 +1156,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
                   setUpdateClusterTitle(false);
                   setClusterTitleError(false);
                   if(!isClusterCreated){
-                    clusterCreation(clusterTitle);
+                    clusterCreation(clusterTitle, intentAnalysisJson);
                   }
                 }
               }}
@@ -1167,7 +1184,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
               setUpdateClusterTitle(false);
               setClusterTitleError(false);
               if(!isClusterCreated){
-                clusterCreation(clusterTitle);
+                clusterCreation(clusterTitle, intentAnalysisJson);
               }
             }}>Done</button>
           )}
