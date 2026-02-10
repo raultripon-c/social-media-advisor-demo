@@ -44,15 +44,15 @@ module.exports = {
       },
       {
         test: /\.(gif|svg|jpg|png)$/,
-        use: [
-          {
-            loader: "url-loader",
-            options: {
-              limit: 81920000, // inline files smaller than 80KB
-              name: "[name].[hash].[ext]",
-            },
-          },
-        ],
+        type: 'asset',
+        parser: {
+          dataUrlCondition: {
+            maxSize: 81920000 // inline files smaller than 80KB
+          }
+        },
+        generator: {
+          filename: '[name].[hash][ext]'
+        }
       },
       {
         test: /\.(scss|css|sass)$/,
@@ -71,17 +71,10 @@ module.exports = {
       },
       {
         test: /\.(woff|woff2|eot|ttf|otf)$/i,
-        use: [
-          {
-            loader: "url-loader",
-            options: {
-              limit: 8192,
-              name: "[name].[ext]",
-              outputPath: "fonts/",
-              publicPath: "fonts/",
-            },
-          },
-        ],
+        type: 'asset/resource',
+        generator: {
+          filename: 'fonts/[name].[ext]'
+        }
       },
       {
         test: /\.tsx?$/,
