@@ -97,6 +97,11 @@ function ToolsSideBar(props: any) {
         selectedTenant: selectedTenant,
       }
       appSelectionHandler(appSelectionOptions);
+    } else if (app?.name === "Candidate Journeys") {
+      dispatch(setDashboardSelected(false));
+      dispatch(setAppDetails(app));
+      sessionStorage.setItem("selectedApp", JSON.stringify(app));
+      navigate(`/${selectedTenant.customerCode}/${selectedTenant.refNum}/candidate-journeys`);
     } else if (app?.name === "Banners") {
       const bannersPath = `/${selectedTenant.customerCode}/${selectedTenant.refNum}/banners`;
       window.location.assign(`${window.location.origin}${bannersPath}`);

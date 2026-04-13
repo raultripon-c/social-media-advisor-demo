@@ -4,6 +4,7 @@ import UnmatchedRoutePage from "../components/UnmatchedRoutePage/UnmatchedRouteP
 import CreateContentCluster from "../screens/CreateContentCluster/CreateContentCluster";
 import ClusterDetails from "../screens/ContentClusterDetails/ContentClusterDetails";
 import ContentClustersList from "../screens/ContentClustersList/ContentClustersList";
+import CandidateJourneys from "../screens/CandidateJourneys/CandidateJourneys";
 import { withDynamicScript } from "../layout/dynamicScripts/WithDynamicScript";
 
 export interface IRoute {
@@ -52,6 +53,10 @@ const clusterList = {
   component: ContentClustersList
 }
 
+const candidateJourneys = {
+  path: "/:customerCode/:refnum/candidate-journeys",
+  component: CandidateJourneys,
+}
 
 const unmatchedRoutePage = {
   path: "*",
@@ -67,5 +72,6 @@ export const appRoutes = [
   clusterCreate,
   clusterDetail,
   clusterList,
+  candidateJourneys,
   unmatchedRoutePage
 ];

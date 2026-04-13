@@ -7,6 +7,7 @@ import { useKeycloak } from "phenom-auth-react-adapter";
 import { AppStore } from "store";
 import Toast from "../components/Toast/Toast";
 import { IRoute, appRoutes } from "../routes/AppRoutes";
+import PathSvg from "../assets/svg/path-svgrepo-com.svg";
 import { setUserRoles, setSiteMetaData, setSelectedTenant } from "../store/customer/actions";
 import RBAJson from "../utils/RBA.json";
 import {
@@ -322,7 +323,30 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
 
     const filteredApps: any = transformAppData(response); // filters customerTenantApps and platformApps
     setTransformedAppData(filteredApps);
-    setCustomerTenantApps(filteredApps?.customerTenantApps); // customerTenantApps
+
+    // Inject standalone "Candidate Journeys" tab into the sidebar categories
+    const candidateJourneysApp = {
+      id: "candidate-journeys",
+      name: "Candidate Journeys",
+      icon: PathSvg,
+      order: 999,
+      isParent: false,
+      parentName: null,
+      context: "tenant",
+      appType: "internal",
+      hoverText: "Candidate Journeys",
+      appConfig: {
+        route: "/candidate-journeys",
+        showSideNav: "false",
+      },
+    };
+
+    const categoriesWithJourneys = [
+      ...(filteredApps?.customerTenantApps || []),
+      candidateJourneysApp,
+    ];
+
+    setCustomerTenantApps(categoriesWithJourneys as any); // customerTenantApps
   };
 
   const cmsFilterApps = async (refNum: string) => {
