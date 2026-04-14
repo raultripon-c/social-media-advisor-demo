@@ -1358,7 +1358,7 @@ const CandidateJourneys: React.FC = () => {
     setLoading(true); setError(null);
     try {
       const planEngineBaseUrl = (window as any)._env_?.TXE_PLAN_ENGINE_URL || 'http://txe-plan-engine.intqa.phenom.local';
-      const response = await API.post(`${planEngineBaseUrl}/recommend/journeys/${refNum}`, '', {
+      const response = await API.post(`${planEngineBaseUrl}/recommend/journeys/${refNum}/latest-output`, '', {
         headers: { 'Content-Type': 'application/json' },
         timeout: 900000,
       });
