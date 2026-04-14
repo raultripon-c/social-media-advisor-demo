@@ -1357,11 +1357,8 @@ const CandidateJourneys: React.FC = () => {
     if (!refNum) { setError('No tenant selected. Please select a tenant first.'); return; }
     setLoading(true); setError(null);
     try {
-      const planEngineBaseUrl = (window as any)._env_?.TXE_PLAN_ENGINE_URL || 'http://txe-plan-engine.intqa.phenom.local';
-      const response = await API.get(`${planEngineBaseUrl}/recommend/journeys/${refNum}/latest-output`, {
-        headers: { 'Content-Type': 'application/json' },
-        timeout: 900000,
-      });
+      const planEngineBaseUrl = (window as any)._env_?.TOOLS_API_URL;
+      const response = await API.get(`${planEngineBaseUrl}txe-plan-engine/getLatestCandidateJourneys/${refNum}`);
       const data = response.data;
       if (data && data.recommendations) addDataset(data);
       else setError('API returned unexpected response format.');
