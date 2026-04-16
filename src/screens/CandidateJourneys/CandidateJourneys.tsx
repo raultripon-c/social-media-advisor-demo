@@ -1358,7 +1358,7 @@ const CandidateJourneys: React.FC = () => {
     setLoading(true); setError(null);
     try {
       const planEngineBaseUrl = (window as any)._env_?.TOOLS_API_URL;
-      const response = await API.get(`${planEngineBaseUrl}txe-plan-engine/getLatestCandidateJourneys/${refNum}`);
+      const response = await API.get(`${planEngineBaseUrl}api/txe-plan-engine/getLatestCandidateJourneys/${refNum}`);
       const data = response.data;
       if (data && data.recommendations) addDataset(data);
       else setError('API returned unexpected response format.');
