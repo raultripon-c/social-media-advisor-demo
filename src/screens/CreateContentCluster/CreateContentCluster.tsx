@@ -98,6 +98,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
   const [itemsPerPage] = useState(10);
   const sortDropdownRef = useRef<HTMLDivElement>(null);
   const [intentAnalysisJson, setIntentAnalysisJson] = useState<string>("");
+  const [jobDetailsJson, setJobDetailsJson] = useState<string>("");
 
   // Scroll to input when there's an error
   useEffect(() => {
@@ -671,12 +672,19 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       
       if (isJobLinkValid) {
         const enhancedPromptResponse = await enhancePrompt();
+        const supportingMaterial = [
+          {
+            type: "jobsPage",
+            urlList: jobLink ? [jobLink] : []
+          }
+        ];
         const clusterPayload = {
           refNum: selectedTenant.refNum,
           prompt: enhancedPromptResponse.enhancedPrompt,
           deviceType: "desktop",
           language: locale,
           isRegenerate: isRegenerate || false,
+          supportingMaterial
         };
         clusterNameResponse = await generateClusterName(clusterPayload);
       } else {
@@ -711,8 +719,10 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       // }
       
       const clusterTitleName = (clusterNameResponse?.clusterName ?? "").replace(/"/g, "");
-      const intentAnalysisJson = clusterNameResponse?.intentAnalysisJson ?? "";
-      setIntentAnalysisJson(intentAnalysisJson);
+      const intentJson = clusterNameResponse?.intentAnalysisJson ?? "";
+      const jdJson = clusterNameResponse?.jobDetailsJson ?? "";
+      setIntentAnalysisJson(intentJson);
+      setJobDetailsJson(jdJson);
       // let suggestedTagsData = promptResponse.contentTypes || [];
       // setSuggestedTags(suggestedTagsData);
       
@@ -922,6 +932,7 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
       draft: true,
       intentAnalysisJson: intentAnalysisJson,
       clusterTitle: promptInput,
+      jobDetailsJson
     };
     await updateCluster(payload, false);
   };
@@ -958,7 +969,8 @@ const CreateContentCluster: React.FC<CreateContentClusterProps> = () => {
         clusterName: "Create Content Cluster",
         selectedLists: selectedListsData,
         draft: true,
-        intentAnalysisJson: intentAnalysisJson
+        intentAnalysisJson: intentAnalysisJson,
+        jobDetailsJson
       };
       
       // Save the cluster
