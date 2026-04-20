@@ -11,6 +11,7 @@ import { toast } from "react-toastify";
 import { Loader } from "@phenom/react-ui-components";
 import Tracker from '@openreplay/tracker';
 import { fetchCrmTenants } from "../utils/api.service";
+import PhollySdkRoot from "../components/PhollySdkRoot";
 
 const Layout = () => {
   
@@ -131,6 +132,7 @@ const Layout = () => {
     <>
       {keycloakAvailable && initialized && (
         <div className="servicehub-tools">
+          <PhollySdkRoot />
           <div className="service-tools-app-header">
             <Header
               allApps={allApps}

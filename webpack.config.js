@@ -1,17 +1,29 @@
+const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ModuleFederationPlugin = require("webpack/lib/container/ModuleFederationPlugin");
 const webpack = require("webpack");
 const CopyPlugin = require("copy-webpack-plugin");
 
 const deps = require("./package.json").dependencies;
+const isProd =
+  process.argv.includes("--mode=production") ||
+  process.env.NODE_ENV === "production";
+
 module.exports = {
   entry: {
     app: "./src/index.ts",
   },
   output: {
+    path: path.resolve(__dirname, "dist"),
     publicPath: "auto",
+    clean: isProd,
   },
-  mode: "development",
+  mode: isProd ? "production" : "development",
+  devtool: isProd
+    ? process.env.GENERATE_SOURCEMAP === "true"
+      ? "source-map"
+      : false
+    : "eval-cheap-module-source-map",
   devServer: {
     headers: {
       'Access-Control-Allow-Origin': '*',  // Allow cross-origin access

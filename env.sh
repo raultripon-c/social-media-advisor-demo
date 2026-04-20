@@ -1,28 +1,35 @@
 #!/bin/bash
 
+trim() {
+  local s="$1"
+  s="${s#"${s%%[![:space:]]*}"}"
+  s="${s%"${s##*[![:space:]]}"}"
+  printf '%s' "$s"
+}
+
 # Recreate config file
 rm -rf ./env-config.js
 touch ./env-config.js
 
-# Add assignment 
+# Add assignment
 echo "window._env_ = {" >> ./env-config.js
 
 # Read each line in .env file
-# Each line represents key=value pairs
-while read -r line || [[ -n "$line" ]];
-do
-  # Split env variables by character `=`
-  if printf '%s\n' "$line" | grep -q -e '='; then
-    varname=$(printf '%s\n' "$line" | sed -e 's/=.*//')
-    varvalue=$(printf '%s\n' "$line" | sed -e 's/^[^=]*=//')
-  fi
+while IFS= read -r line || [[ -n "$line" ]]; do
+  line="$(trim "$line")"
+  [[ -z "$line" ]] && continue
+  [[ "$line" =~ ^# ]] && continue
+  [[ "$line" != *"="* ]] && continue
 
-  # Read value of current variable if exists as Environment variable
-  value=$(printf '%s\n' "${!varname}")
-  # Otherwise use value from .env file
-  [[ -z $value ]] && value=${varvalue}
-  
-  # Append configuration property to JS file
+  varname="${line%%=*}"
+  varvalue="${line#*=}"
+  varname="$(trim "$varname")"
+  varvalue="$(trim "$varvalue")"
+
+  # Prefer Kubernetes / shell env over file
+  value="${!varname}"
+  [[ -z "$value" ]] && value="${varvalue}"
+
   echo "  $varname: \"$value\"," >> ./env-config.js
 done < .env
 

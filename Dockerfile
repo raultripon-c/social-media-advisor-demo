@@ -10,8 +10,20 @@ RUN npm install --legacy-peer-deps
 
 COPY . ./
 
-# build the apllication in prod mode
+# Production source maps for Pholly upload (optional); set GENERATE_SOURCEMAP=false to disable
+ENV GENERATE_SOURCEMAP=true
+
+# build the application in prod mode
 RUN npm run build
+
+ARG UPLOAD_SOURCEMAPS=true
+ARG API_BASE_URL=https://apm-pholly.phenom.com/api
+RUN if [ "$UPLOAD_SOURCEMAPS" = "true" ]; then \
+      echo "Uploading sourcemaps..."; \
+      API_BASE_URL=${API_BASE_URL} node scripts/upload-sourcemaps.js || echo "Sourcemap upload failed, continuing build..."; \
+    else \
+      echo "Skipping sourcemap upload"; \
+    fi
 # RUN npm run test 
 
 FROM nginx:stable-alpine
