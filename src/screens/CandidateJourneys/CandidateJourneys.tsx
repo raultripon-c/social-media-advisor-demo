@@ -1323,10 +1323,10 @@ function DirectGenerateLoader({ tenantLabel }: { tenantLabel: string }) {
         }}
       />
       <div style={{ textAlign: 'center' }}>
-        <div style={{ fontSize: 16, fontWeight: 600, color: T.text, marginBottom: 6 }}>Generating candidate journeys…</div>
-        <div style={{ fontSize: 13, color: T.textMuted, maxWidth: 360, lineHeight: 1.5 }}>
+        <div style={{ fontSize: 16, fontWeight: 600, color: T.text, marginBottom: 6 }}>Loading…</div>
+        {/* <div style={{ fontSize: 13, color: T.textMuted, maxWidth: 360, lineHeight: 1.5 }}>
           {tenantLabel ? `Loading recommendations for ${tenantLabel}.` : 'Loading recommendations.'}
-        </div>
+        </div> */}
       </div>
     </div>
   );
