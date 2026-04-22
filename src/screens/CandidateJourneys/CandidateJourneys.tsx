@@ -13,6 +13,8 @@ import ReactFlow, {
 } from "reactflow";
 import "reactflow/dist/style.css";
 import { API } from "../../utils/api";
+import { useLocation, useNavigate } from "react-router-dom";
+import type { CandidateJourneysNavState } from "../../context/FeatureFlagsContext";
 
 // ─── Theme ────────────────────────────────────────────────────────────────────
 const T = {
@@ -1145,12 +1147,12 @@ function SignalPanel({ snapshot }: any) {
 }
 
 // ─── Journey Sidebar ──────────────────────────────────────────────────────────
-function JourneySidebar({ ds, selectedSeg, selectedCohort, onSelect }: any) {
+function JourneySidebar({ ds, clientLabel, selectedSeg, selectedCohort, onSelect }: any) {
   return (
     <div style={{ width: 256, background: T.surface, borderRight: `1px solid ${T.border}`, overflowY: 'auto', flexShrink: 0, fontFamily: T.font }}>
       <div style={{ padding: '12px 14px', background: T.surface2, borderBottom: `1px solid ${T.border}` }}>
         <div style={{ fontSize: 10, color: T.textMuted, fontWeight: 600, letterSpacing: .4 }}>CLIENT</div>
-        <div style={{ fontSize: 13, fontWeight: 600, color: T.text, marginTop: 2 }}>{ds.enterprise_context?.customer}</div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: T.text, marginTop: 2 }}>{clientLabel}</div>
         {ds.enterprise_context?.job_category && <div style={{ fontSize: 11, color: T.textSub, marginTop: 1 }}>{ds.enterprise_context.job_category}</div>}
         <div style={{ display: 'flex', gap: 14, marginTop: 6 }}>
           {[['Jobs', ds.enterprise_context?.total_jobs?.toLocaleString()], ['Candidates', (ds.enterprise_context?.total_candidates / 1000).toFixed(1) + 'k']].map(([l, v]: any) => (
@@ -1217,7 +1219,7 @@ function JourneySidebar({ ds, selectedSeg, selectedCohort, onSelect }: any) {
 }
 
 // ─── Journey View ─────────────────────────────────────────────────────────────
-function JourneyView({ ds }: any) {
+function JourneyView({ ds, clientLabel }: any) {
   const [seg, setSeg] = useState(0);
   const [ci, setCi] = useState(0);
   const [selected, setSelected] = useState<any>(null);
@@ -1245,7 +1247,7 @@ function JourneyView({ ds }: any) {
 
   return (
     <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-      <JourneySidebar ds={ds} selectedSeg={seg} selectedCohort={ci} onSelect={handleSelect} />
+      <JourneySidebar ds={ds} clientLabel={clientLabel} selectedSeg={seg} selectedCohort={ci} onSelect={handleSelect} />
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Cohort header */}
@@ -1293,9 +1295,46 @@ function JourneyView({ ds }: any) {
   );
 }
 
+// ─── Direct (sidebar) full-area loader ────────────────────────────────────────
+function DirectGenerateLoader({ tenantLabel }: { tenantLabel: string }) {
+  return (
+    <div
+      style={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 20,
+        background: 'rgba(245, 247, 250, 0.96)',
+        padding: 40,
+        fontFamily: T.font,
+      }}
+    >
+      <span
+        style={{
+          display: 'inline-block',
+          width: 40,
+          height: 40,
+          border: `3px solid ${T.border}`,
+          borderTop: `3px solid rgb(60, 109, 104)`,
+          borderRadius: '50%',
+          animation: 'cj-spin 0.7s linear infinite',
+        }}
+      />
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ fontSize: 16, fontWeight: 600, color: T.text, marginBottom: 6 }}>Generating candidate journeys…</div>
+        <div style={{ fontSize: 13, color: T.textMuted, maxWidth: 360, lineHeight: 1.5 }}>
+          {tenantLabel ? `Loading recommendations for ${tenantLabel}.` : 'Loading recommendations.'}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Empty / Landing State ────────────────────────────────────────────────────
-function EmptyState({ onUpload, onGenerate, loading, refNum }: {
-  onUpload: (files: FileList) => void; onGenerate: () => void; loading: boolean; refNum: string;
+function EmptyState({ onUpload, onGenerate, loading, tenantLabel }: {
+  onUpload: (files: FileList) => void; onGenerate: () => void; loading: boolean; tenantLabel: string;
 }) {
   const ref = useRef<HTMLInputElement>(null);
   return (
@@ -1317,7 +1356,7 @@ function EmptyState({ onUpload, onGenerate, loading, refNum }: {
           📂 Upload Journey
         </button>
       </div>
-      {refNum && <div style={{ fontSize: 11, color: T.textMuted, marginTop: 4 }}>Tenant: <strong style={{ color: T.text }}>{refNum}</strong></div>}
+      {tenantLabel && <div style={{ fontSize: 11, color: T.textMuted, marginTop: 4 }}>Tenant: <strong style={{ color: T.text }}>{tenantLabel}</strong></div>}
     </div>
   );
 }
@@ -1327,11 +1366,15 @@ const CandidateJourneys: React.FC = () => {
   const [datasets, setDatasets] = useState<any[]>([]);
   const [activeDsIdx, setActiveDsIdx] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [directGenerateLoading, setDirectGenerateLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const selectedTenant = JSON.parse(localStorage.getItem("selectedTenant") || "{}");
   const refNum = selectedTenant?.refNum || "";
+  const tenantDisplayName = (selectedTenant?.tenantName as string) || refNum || "";
 
   const addDataset = useCallback((data: any) => {
     setDatasets(prev => {
@@ -1353,20 +1396,65 @@ const CandidateJourneys: React.FC = () => {
     });
   }, [addDataset]);
 
+  const fetchLatestJourneys = useCallback(async () => {
+    const planEngineBaseUrl = (window as any)._env_?.TOOLS_API_URL;
+    const response = await API.get(`${planEngineBaseUrl}api/txe-plan-engine/getLatestCandidateJourneys/${refNum}`);
+    const data = response.data;
+    if (data && data.recommendations) addDataset(data);
+    else setError('API returned unexpected response format.');
+  }, [refNum, addDataset]);
+
   const handleGenerate = useCallback(async () => {
     if (!refNum) { setError('No tenant selected. Please select a tenant first.'); return; }
-    setLoading(true); setError(null);
+    setLoading(true);
+    setError(null);
     try {
-      const planEngineBaseUrl = (window as any)._env_?.TOOLS_API_URL;
-      const response = await API.get(`${planEngineBaseUrl}api/txe-plan-engine/getLatestCandidateJourneys/${refNum}`);
-      const data = response.data;
-      if (data && data.recommendations) addDataset(data);
-      else setError('API returned unexpected response format.');
+      await fetchLatestJourneys();
     } catch (err: any) {
       console.error('Error generating journeys:', err);
       setError(err?.response?.data?.message || err?.message || 'Failed to generate journeys.');
-    } finally { setLoading(false); }
-  }, [refNum, addDataset]);
+    } finally {
+      setLoading(false);
+    }
+  }, [refNum, fetchLatestJourneys]);
+
+  useEffect(() => {
+    const state = location.state as CandidateJourneysNavState | null;
+    if (!state?.autoGenerateCandidateJourneys) return;
+    navigate(
+      { pathname: location.pathname, search: location.search },
+      { replace: true, state: {} }
+    );
+    let cancelled = false;
+    (async () => {
+      if (!refNum) {
+        setError('No tenant selected. Please select a tenant first.');
+        return;
+      }
+      setDirectGenerateLoading(true);
+      setError(null);
+      try {
+        await fetchLatestJourneys();
+      } catch (err: any) {
+        if (!cancelled) {
+          console.error('Error generating journeys:', err);
+          setError(err?.response?.data?.message || err?.message || 'Failed to generate journeys.');
+        }
+      } finally {
+        if (!cancelled) setDirectGenerateLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [location.state, location.pathname, location.search, navigate, fetchLatestJourneys, refNum]);
+
+  const activeDs = datasets.length > 0 ? datasets[activeDsIdx] : null;
+  const journeyClientLabel = activeDs
+    ? activeDs.ref_num === refNum
+      ? tenantDisplayName
+      : activeDs.enterprise_context?.customer ?? activeDs.ref_num
+    : "";
 
   return (
     <div style={{ height: '100%', background: T.bg, color: T.text, fontFamily: T.font, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -1386,7 +1474,7 @@ const CandidateJourneys: React.FC = () => {
               <div key={i} style={{ display: 'flex', alignItems: 'center' }}>
                 <button onClick={() => setActiveDsIdx(i)}
                   style={{ fontSize: 12, padding: '8px 12px', cursor: 'pointer', color: i === activeDsIdx ? T.accent : T.textSub, background: 'none', border: 'none', borderBottom: `2px solid ${i === activeDsIdx ? T.accent : 'transparent'}`, fontWeight: i === activeDsIdx ? 600 : 400, fontFamily: T.font }}>
-                  {d.ref_num}
+                  {d.ref_num === refNum ? tenantDisplayName : d.ref_num}
                   <span style={{ marginLeft: 5, fontSize: 10, color: T.textMuted }}>{d.recommendations?.length} seg</span>
                 </button>
                 <button onClick={() => setDatasets(p => { const n = p.filter((_: any, j: number) => j !== i); setActiveDsIdx(Math.min(activeDsIdx, n.length - 1)); return n; })}
@@ -1419,9 +1507,11 @@ const CandidateJourneys: React.FC = () => {
 
       {/* Body */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        {datasets.length === 0
-          ? <EmptyState onUpload={handleUpload} onGenerate={handleGenerate} loading={loading} refNum={refNum} />
-          : <JourneyView key={activeDsIdx} ds={datasets[activeDsIdx]} />
+        {datasets.length === 0 && directGenerateLoading
+          ? <DirectGenerateLoader tenantLabel={tenantDisplayName} />
+          : datasets.length === 0
+            ? <EmptyState onUpload={handleUpload} onGenerate={handleGenerate} loading={loading} tenantLabel={tenantDisplayName} />
+            : <JourneyView key={activeDsIdx} ds={datasets[activeDsIdx]} clientLabel={journeyClientLabel} />
         }
       </div>
     </div>
