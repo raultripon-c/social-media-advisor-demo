@@ -13,6 +13,7 @@ import "./SideBar.scss";
 import { AppSelectionOptions } from "../../interfaces/AppSelectionOptions";
 import { appSelectionHandler, findAppConfigByRoutes } from "../../utils/appUtils";
 import { MessageService } from "../../MessageService";
+import { useFeatureFlags } from "../../context/FeatureFlagsContext";
 
 function ToolsSideBar(props: any) {
   const { categories, setCategories } = props;
@@ -40,6 +41,7 @@ function ToolsSideBar(props: any) {
   });
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { autoGenerateCandidateJourneysOnSidebarNav } = useFeatureFlags();
   const summaryOnClick = () => {
     dispatch(setDashboardSelected(true));
     setDisableAutoClose(false);
@@ -101,7 +103,12 @@ function ToolsSideBar(props: any) {
       dispatch(setDashboardSelected(false));
       dispatch(setAppDetails(app));
       sessionStorage.setItem("selectedApp", JSON.stringify(app));
-      navigate(`/${selectedTenant.customerCode}/${selectedTenant.refNum}/candidate-journeys`);
+      const path = `/${selectedTenant.customerCode}/${selectedTenant.refNum}/candidate-journeys`;
+      if (autoGenerateCandidateJourneysOnSidebarNav) {
+        navigate(path, { state: { autoGenerateCandidateJourneys: true } });
+      } else {
+        navigate(path);
+      }
     } else if (app?.name === "Banners") {
       const bannersPath = `/${selectedTenant.customerCode}/${selectedTenant.refNum}/banners`;
       window.location.assign(`${window.location.origin}${bannersPath}`);

@@ -4,8 +4,12 @@ import "react-toastify/dist/ReactToastify.css";
 import "../index.scss";
 import Layout from "./layout/Layout";
 import { InitialLoader } from "./layout/Loader";
+import { FeatureFlagsProvider } from "./context/FeatureFlagsContext";
 import { APIService } from './utils/api.service';
 import { triggerRefreshToken, waitForToken } from "./utils/api";
+
+/** When true, opening Candidate Journeys from the sidebar runs the same flow as Generate Journeys */
+const autoGenerateCandidateJourneysOnSidebarNav = true;
 
 const App = (): JSX.Element => {
   const keyCloakConfig = {
@@ -55,7 +59,11 @@ const App = (): JSX.Element => {
         onEvent={eventLogger}
         onTokens={tokenLogger}
       >
-        <Layout  />
+        <FeatureFlagsProvider
+          value={{ autoGenerateCandidateJourneysOnSidebarNav }}
+        >
+          <Layout />
+        </FeatureFlagsProvider>
         <div className="notify-toaster" style={{ display: "none" }}>
           {/* <Notify /> */}
         </div>
