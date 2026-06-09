@@ -237,7 +237,7 @@ export const createCampaignFromBrief = (
 const demoCampaigns = (): Campaign[] => [
   createCampaignFromBrief(
     "Create a campaign for Registered Nurse, PICU in Durham, NC. Target experienced nurses with a warm and professional tone.",
-    ["LinkedIn", "Facebook", "Instagram", "X"],
+    ["LinkedIn", "Facebook", "Instagram"],
     "Registered Nurse, PICU Campaign",
     toneOptions[0],
     new Date(Date.now() + 86400000).toISOString().slice(0, 10)
@@ -254,12 +254,16 @@ const demoCampaigns = (): Campaign[] => [
   id: `demo-campaign-${index + 1}`,
   status: index === 0 ? "active" : "completed",
   metrics: index === 0
-    ? { clicks: 3611, applicationStarts: 932, applications: 280 }
+    ? { clicks: 3611, applicationStarts: 1940, applications: 1128 }
     : { clicks: 3852, applicationStarts: 994, applications: 298 },
   platforms: campaign.platforms.map((platform) => ({
     ...platform,
     metrics: index === 0
-      ? { clicks: platform.platform === "LinkedIn" ? 1156 : 818, applicationStarts: platform.platform === "LinkedIn" ? 298 : 211, applications: platform.platform === "LinkedIn" ? 90 : 63 }
+      ? platform.platform === "LinkedIn"
+        ? { clicks: 2528, applicationStarts: 1264, applications: 1011 }
+        : platform.platform === "Facebook"
+          ? { clicks: 902, applicationStarts: 631, applications: 126 }
+          : { clicks: 181, applicationStarts: 45, applications: 2 }
       : { clicks: platform.platform === "LinkedIn" ? 1233 : 873, applicationStarts: platform.platform === "LinkedIn" ? 318 : 225, applications: platform.platform === "LinkedIn" ? 95 : 68 },
   })),
 }));

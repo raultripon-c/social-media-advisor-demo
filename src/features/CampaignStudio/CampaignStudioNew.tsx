@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -91,6 +91,8 @@ const channelLogoMap: Record<CampaignPlatformName, string> = {
   X: xLogo,
 };
 
+const getChannelSelectionLabel = (channel: CampaignPlatformName) => (channel === "X" ? "X (Formerly Twitter)" : channel);
+
 const campaignTableChannelOrder: CampaignPlatformName[] = ["LinkedIn", "Facebook", "X", "Instagram"];
 const getOrderedCampaignPlatforms = (platforms: CampaignPlatformOutput[]) =>
   [...platforms].sort(
@@ -167,6 +169,265 @@ const imageOptions = [
 
 const formatDate = (date: string) =>
   new Intl.DateTimeFormat("en", { month: "short", day: "numeric", year: "numeric" }).format(new Date(date));
+
+const scrollPageToTop = () => {
+  const resetScroll = () => {
+    window.scrollTo({ top: 0, left: 0 });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    document
+      .querySelectorAll<HTMLElement>(".tools-body-container, .app-layout__content, .app-content, .root-main-page, main")
+      .forEach((element) => {
+        element.scrollTop = 0;
+        element.scrollTo?.({ top: 0, left: 0 });
+      });
+  };
+
+  resetScroll();
+  window.requestAnimationFrame(resetScroll);
+  window.setTimeout(resetScroll, 0);
+  window.setTimeout(resetScroll, 50);
+};
+
+const sanitizeFileName = (value: string) =>
+  value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "campaign";
+
+const crc32Table = Array.from({ length: 256 }, (_, index) => {
+  let crc = index;
+  for (let bit = 0; bit < 8; bit += 1) {
+    crc = crc & 1 ? 0xedb88320 ^ (crc >>> 1) : crc >>> 1;
+  }
+  return crc >>> 0;
+});
+
+const getCrc32 = (data: Uint8Array) => {
+  let crc = 0xffffffff;
+  data.forEach((byte) => {
+    crc = crc32Table[(crc ^ byte) & 0xff] ^ (crc >>> 8);
+  });
+  return (crc ^ 0xffffffff) >>> 0;
+};
+
+const pushUint16 = (target: number[], value: number) => {
+  target.push(value & 0xff, (value >>> 8) & 0xff);
+};
+
+const pushUint32 = (target: number[], value: number) => {
+  target.push(value & 0xff, (value >>> 8) & 0xff, (value >>> 16) & 0xff, (value >>> 24) & 0xff);
+};
+
+const createStoredZipBlob = (files: Array<{ name: string; content: string | Uint8Array }>) => {
+  const encoder = new TextEncoder();
+  const chunks: Uint8Array[] = [];
+  const centralDirectory: Uint8Array[] = [];
+  let offset = 0;
+
+  files.forEach((file) => {
+    const name = encoder.encode(file.name);
+    const data = typeof file.content === "string" ? encoder.encode(file.content) : file.content;
+    const crc = getCrc32(data);
+    const localHeader: number[] = [];
+
+    pushUint32(localHeader, 0x04034b50);
+    pushUint16(localHeader, 20);
+    pushUint16(localHeader, 0);
+    pushUint16(localHeader, 0);
+    pushUint16(localHeader, 0);
+    pushUint16(localHeader, 0);
+    pushUint32(localHeader, crc);
+    pushUint32(localHeader, data.length);
+    pushUint32(localHeader, data.length);
+    pushUint16(localHeader, name.length);
+    pushUint16(localHeader, 0);
+
+    chunks.push(new Uint8Array(localHeader), name, data);
+
+    const centralHeader: number[] = [];
+    pushUint32(centralHeader, 0x02014b50);
+    pushUint16(centralHeader, 20);
+    pushUint16(centralHeader, 20);
+    pushUint16(centralHeader, 0);
+    pushUint16(centralHeader, 0);
+    pushUint16(centralHeader, 0);
+    pushUint16(centralHeader, 0);
+    pushUint32(centralHeader, crc);
+    pushUint32(centralHeader, data.length);
+    pushUint32(centralHeader, data.length);
+    pushUint16(centralHeader, name.length);
+    pushUint16(centralHeader, 0);
+    pushUint16(centralHeader, 0);
+    pushUint16(centralHeader, 0);
+    pushUint16(centralHeader, 0);
+    pushUint32(centralHeader, 0);
+    pushUint32(centralHeader, offset);
+
+    centralDirectory.push(new Uint8Array(centralHeader), name);
+    offset += localHeader.length + name.length + data.length;
+  });
+
+  const centralDirectorySize = centralDirectory.reduce((sum, chunk) => sum + chunk.length, 0);
+  const endRecord: number[] = [];
+  pushUint32(endRecord, 0x06054b50);
+  pushUint16(endRecord, 0);
+  pushUint16(endRecord, 0);
+  pushUint16(endRecord, files.length);
+  pushUint16(endRecord, files.length);
+  pushUint32(endRecord, centralDirectorySize);
+  pushUint32(endRecord, offset);
+  pushUint16(endRecord, 0);
+
+  return new Blob([...chunks, ...centralDirectory, new Uint8Array(endRecord)], { type: "application/zip" });
+};
+
+const escapePdfText = (value: string) => value.replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
+
+const wrapPdfLine = (value: string, maxLength = 88) => {
+  const words = value.split(/\s+/);
+  const lines: string[] = [];
+  let currentLine = "";
+
+  words.forEach((word) => {
+    const nextLine = currentLine ? `${currentLine} ${word}` : word;
+    if (nextLine.length > maxLength && currentLine) {
+      lines.push(currentLine);
+      currentLine = word;
+    } else {
+      currentLine = nextLine;
+    }
+  });
+
+  if (currentLine) lines.push(currentLine);
+  return lines;
+};
+
+const createCampaignContentPdf = (campaign: Campaign) => {
+  const encoder = new TextEncoder();
+  const pageWidth = 612;
+  const pageHeight = 792;
+  const pageMargin = 54;
+  const lineHeight = 16;
+  const lines: string[] = [
+    campaign.name,
+    `Publish date: ${formatDisplayDate(campaign.postDate) || campaign.postDate}`,
+    "",
+  ];
+
+  campaign.platforms.forEach((platform, index) => {
+    lines.push(`${index + 1}. ${platform.platform}`);
+    lines.push(`CTA link: ${platform.utmLink || platform.ctaDestination}`);
+    lines.push("Post text:");
+    stripGeneratedLinksFromCopy(platform.copy)
+      .split(/\n+/)
+      .flatMap((line) => wrapPdfLine(line.trim()))
+      .forEach((line) => lines.push(line));
+    lines.push("");
+  });
+
+  const pages: string[][] = [[]];
+  let currentY = pageHeight - pageMargin;
+  lines.forEach((line) => {
+    const wrappedLines = line ? wrapPdfLine(line) : [""];
+    wrappedLines.forEach((wrappedLine) => {
+      if (currentY < pageMargin) {
+        pages.push([]);
+        currentY = pageHeight - pageMargin;
+      }
+      pages[pages.length - 1].push(wrappedLine);
+      currentY -= lineHeight;
+    });
+  });
+
+  const objects: string[] = [];
+  const addObject = (content: string) => {
+    objects.push(content);
+    return objects.length;
+  };
+  const catalogId = addObject("<< /Type /Catalog /Pages 2 0 R >>");
+  const pagesId = addObject("");
+  const fontId = addObject("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>");
+  const pageIds: number[] = [];
+
+  pages.forEach((pageLines) => {
+    const textCommands = pageLines
+      .map((line, index) => `1 0 0 1 ${pageMargin} ${pageHeight - pageMargin - index * lineHeight} Tm (${escapePdfText(line)}) Tj`)
+      .join("\n");
+    const stream = `BT\n/F1 10 Tf\n${textCommands}\nET`;
+    const contentId = addObject(`<< /Length ${encoder.encode(stream).length} >>\nstream\n${stream}\nendstream`);
+    const pageId = addObject(`<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 ${pageWidth} ${pageHeight}] /Resources << /Font << /F1 ${fontId} 0 R >> >> /Contents ${contentId} 0 R >>`);
+    pageIds.push(pageId);
+  });
+
+  objects[pagesId - 1] = `<< /Type /Pages /Kids [${pageIds.map((id) => `${id} 0 R`).join(" ")}] /Count ${pageIds.length} >>`;
+
+  const pdfParts = ["%PDF-1.4\n"];
+  const offsets: number[] = [0];
+  objects.forEach((object, index) => {
+    offsets.push(encoder.encode(pdfParts.join("")).length);
+    pdfParts.push(`${index + 1} 0 obj\n${object}\nendobj\n`);
+  });
+  const xrefOffset = encoder.encode(pdfParts.join("")).length;
+  pdfParts.push(`xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`);
+  offsets.slice(1).forEach((offsetValue) => {
+    pdfParts.push(`${String(offsetValue).padStart(10, "0")} 00000 n \n`);
+  });
+  pdfParts.push(`trailer\n<< /Size ${objects.length + 1} /Root ${catalogId} 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`);
+
+  return encoder.encode(pdfParts.join(""));
+};
+
+const getImageExtension = (imageUrl: string) => {
+  const cleanUrl = imageUrl.split("?")[0];
+  const extension = cleanUrl.match(/\.(png|jpe?g|webp|gif)$/i)?.[1]?.toLowerCase();
+  if (!extension) return "png";
+  return extension === "jpeg" ? "jpg" : extension;
+};
+
+const downloadCampaignContentZip = async (campaign: Campaign) => {
+  const files: Array<{ name: string; content: string | Uint8Array }> = [
+    {
+      name: `${sanitizeFileName(campaign.name)}-channel-content.pdf`,
+      content: createCampaignContentPdf(campaign),
+    },
+  ];
+
+  const imageFiles = await Promise.all(
+    campaign.platforms.map(async (platform, index) => {
+      const fileBaseName = `image-assets/${String(index + 1).padStart(2, "0")}-${sanitizeFileName(platform.platform)}-image`;
+      try {
+        const response = await fetch(platform.image);
+        if (!response.ok) {
+          return {
+            name: `${fileBaseName}-download-link.txt`,
+            content: platform.image,
+          };
+        }
+        const imageData = new Uint8Array(await response.arrayBuffer());
+        return {
+          name: `${fileBaseName}.${getImageExtension(platform.image)}`,
+          content: imageData,
+        };
+      } catch {
+        return {
+          name: `${fileBaseName}-download-link.txt`,
+          content: platform.image,
+        };
+      }
+    })
+  );
+
+  files.push(...imageFiles);
+  const zipBlob = createStoredZipBlob(files);
+  const url = URL.createObjectURL(zipBlob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = `${sanitizeFileName(campaign.name)}-content.zip`;
+  anchor.click();
+  window.setTimeout(() => URL.revokeObjectURL(url), 0);
+};
 
 const getCampaignTableStatus = (campaign: Campaign) => {
   const postDate = new Date(campaign.postDate);
@@ -255,6 +516,8 @@ const MetricInfoPopover = ({
 
 const CampaignSankeyDiagram = ({ campaign }: { campaign: Campaign }) => {
   const [activeChannel, setActiveChannel] = useState<CampaignPlatformName | null>(null);
+  const sankeyRef = useRef<HTMLDivElement | null>(null);
+  const [sankeyWidth, setSankeyWidth] = useState(1280);
   const sankeyAccentMap: Record<CampaignPlatformName, string> = {
     LinkedIn: "#12355f",
     Facebook: "#1877f2",
@@ -266,29 +529,59 @@ const CampaignSankeyDiagram = ({ campaign }: { campaign: Campaign }) => {
     { key: "applicationStarts", label: "Click to apply" },
     { key: "applications", label: "Applied" },
   ];
-  const vbWidth = 1200;
-  const headerHeight = 62;
+  useEffect(() => {
+    const node = sankeyRef.current;
+    if (!node) return undefined;
+
+    const updateWidth = () => {
+      setSankeyWidth(Math.max(560, Math.round(node.getBoundingClientRect().width)));
+    };
+
+    updateWidth();
+    const resizeObserver = new ResizeObserver(updateWidth);
+    resizeObserver.observe(node);
+    return () => resizeObserver.disconnect();
+  }, []);
+
+  const vbWidth = sankeyWidth;
+  const headerHeight = 86;
   const nodeWidth = 34;
-  const fixedGap = 16;
+  const fixedGap = 1;
   const channelCount = campaign.platforms.length;
-  const colX = [190, 500, 800, 1100];
-  const totalsByStage = stages.map((stage) => campaign.platforms.reduce((sum, platform) => sum + platform.metrics[stage.key], 0));
-  const maxSourceClicks = Math.max(...campaign.platforms.map((platform) => platform.metrics.clicks), 1);
+  const chartSidePadding = vbWidth < 760 ? 32 : 48;
+  const stageHeaderWidth = 190;
+  const sideLabelReserve = Math.max(nodeWidth, stageHeaderWidth);
+  const firstColumnX = chartSidePadding + sideLabelReserve / 2;
+  const lastColumnX = Math.max(firstColumnX + 320, vbWidth - chartSidePadding - sideLabelReserve / 2 - nodeWidth);
+  const colX = [firstColumnX, firstColumnX + (lastColumnX - firstColumnX) / 2, lastColumnX];
+  const stageValue = (platform: CampaignPlatformOutput, stageIndex: number) => {
+    if (stageIndex === 0) return platform.metrics.clicks;
+    if (stageIndex === 1) return Math.min(platform.metrics.applicationStarts, platform.metrics.clicks);
+    return Math.min(platform.metrics.applications, platform.metrics.applicationStarts, platform.metrics.clicks);
+  };
+  const totalsByStage = stages.map((_, stageIndex) => campaign.platforms.reduce((sum, platform) => sum + stageValue(platform, stageIndex), 0));
+  const totalClicks = Math.max(totalsByStage[0], 1);
   const toK = (value: number) => (value >= 1000 ? `${(value / 1000).toFixed(1)}k` : value.toLocaleString());
   const pct = (value: number, total: number) => (total ? `${((value / total) * 100).toFixed(1)}%` : "0%");
   const stagePct = (platform: CampaignPlatformOutput, stageIndex: number) => {
-    if (stageIndex === 0) return pct(platform.metrics.clicks, totalsByStage[0]);
-    if (stageIndex === 1) return pct(platform.metrics.applicationStarts, platform.metrics.clicks);
-    return pct(platform.metrics.applications, platform.metrics.applicationStarts);
+    if (stageIndex === 0) return pct(stageValue(platform, 0), totalsByStage[0]);
+    return pct(stageValue(platform, stageIndex), stageValue(platform, stageIndex - 1));
   };
   const nodeOpacity = (platform: CampaignPlatformName) => (!activeChannel || activeChannel === platform ? 1 : 0.18);
-  const flowOpacity = (platform: CampaignPlatformName) => (!activeChannel ? 0.34 : activeChannel === platform ? 0.72 : 0.05);
-  const sourceHeights = campaign.platforms.map((platform) => Math.max(14, Math.min(126, (platform.metrics.clicks / maxSourceClicks) * 108)));
+  const flowOpacity = (platform: CampaignPlatformName) => (!activeChannel ? 0.7 : activeChannel === platform ? 0.82 : 0.08);
+  const clickedTotalHeight = 210;
+  const minFlowHeight = 32;
+  const clickedHeights = campaign.platforms.map((platform) => Math.max(minFlowHeight, (stageValue(platform, 0) / totalClicks) * clickedTotalHeight));
   const stageHeights = stages.map((stage, stageIndex) =>
-    campaign.platforms.map((platform) => Math.max(12, Math.min(126, (platform.metrics[stage.key] / Math.max(totalsByStage[stageIndex], 1)) * 112)))
+    campaign.platforms.map((platform, platformIndex) => {
+      if (stageIndex === 0) return clickedHeights[platformIndex];
+
+      const stepRatio = stageValue(platform, stageIndex) / Math.max(stageValue(platform, 0), 1);
+      return Math.max(minFlowHeight, clickedHeights[platformIndex] * stepRatio);
+    })
   );
   const blockHeight = (heights: number[]) => heights.reduce((sum, height) => sum + height, 0) + fixedGap * Math.max(channelCount - 1, 0);
-  const maxBlockHeight = Math.max(blockHeight(sourceHeights), ...stageHeights.map(blockHeight));
+  const maxBlockHeight = Math.max(...stageHeights.map(blockHeight));
   const height = headerHeight + maxBlockHeight + 24;
   const distributeY = (heights: number[]) => {
     const total = blockHeight(heights);
@@ -299,11 +592,9 @@ const CampaignSankeyDiagram = ({ campaign }: { campaign: Campaign }) => {
       return currentY;
     });
   };
-  const sourceYs = distributeY(sourceHeights);
-  const sourceNodes = campaign.platforms.map((platform, index) => ({ x: colX[0], y: sourceYs[index], h: sourceHeights[index], platform }));
   const stageNodes = stages.map((_, stageIndex) => {
     const ys = distributeY(stageHeights[stageIndex]);
-    return campaign.platforms.map((platform, index) => ({ x: colX[stageIndex + 1], y: ys[index], h: stageHeights[stageIndex][index], platform }));
+    return campaign.platforms.map((platform, index) => ({ x: colX[stageIndex], y: ys[index], h: stageHeights[stageIndex][index], platform }));
   });
   const bandPath = (fromX: number, fromY: number, fromH: number, toX: number, toY: number, toH: number) => {
     const mx = (fromX + toX) / 2;
@@ -317,63 +608,82 @@ const CampaignSankeyDiagram = ({ campaign }: { campaign: Campaign }) => {
           <h2>Channel performance flow</h2>
         </div>
       </div>
-      <div className="cs-sankey">
+      <div className="cs-sankey" ref={sankeyRef}>
         <svg viewBox={`0 0 ${vbWidth} ${height}`} role="img" aria-label="Campaign channel performance Sankey diagram">
-          <text x={colX[0]} y="16" className="cs-sankey__stage-label">Source</text>
+          {colX.map((x, index) => (
+            <line
+              key={`step-guide-${stages[index].key}`}
+              x1={x}
+              y1={headerHeight - 12}
+              x2={x}
+              y2={height - 16}
+              className="cs-sankey__step-guide"
+            />
+          ))}
           {stages.map((stage, index) => (
             <g key={stage.key}>
-              <text x={colX[index + 1]} y="14" className="cs-sankey__stage-label">{stage.label}</text>
-              <line x1={colX[index + 1]} y1="23" x2={colX[index + 1] + 154} y2="23" className="cs-sankey__stage-rule" />
-              <text x={colX[index + 1]} y="38" className="cs-sankey__stage-total">{pct(totalsByStage[index], totalsByStage[0])}</text>
-              <text x={colX[index + 1]} y="52" className="cs-sankey__stage-count">{toK(totalsByStage[index])}</text>
+              <text x={colX[index]} y="14" className="cs-sankey__stage-label">{`${stage.label} (${toK(totalsByStage[index])})`}</text>
+              <text x={colX[index]} y="42" className="cs-sankey__stage-total">{pct(totalsByStage[index], totalsByStage[0])}</text>
             </g>
           ))}
           {campaign.platforms.flatMap((platform, platformIndex) =>
-            stages.map((stage, stageIndex) => {
-              const from = stageIndex === 0 ? sourceNodes[platformIndex] : stageNodes[stageIndex - 1][platformIndex];
-              const to = stageNodes[stageIndex][platformIndex];
-              const value = platform.metrics[stage.key];
+            stages.slice(1).map((stage, stageIndex) => {
+              const from = stageNodes[stageIndex][platformIndex];
+              const to = stageNodes[stageIndex + 1][platformIndex];
+              const value = stageValue(platform, stageIndex + 1);
+              const labelX = (from.x + nodeWidth + to.x) / 2;
+              const labelY = (from.y + from.h / 2 + to.y + to.h / 2) / 2;
               return (
-                <path
+                <g
                   key={`${platform.platform}-${stage.key}`}
-                  d={bandPath(from.x + nodeWidth, from.y, from.h, to.x, to.y, to.h)}
-                  fill={sankeyAccentMap[platform.platform]}
                   opacity={flowOpacity(platform.platform)}
-                  className="cs-sankey__band"
-                  onClick={() => setActiveChannel(activeChannel === platform.platform ? null : platform.platform)}
+                  onMouseEnter={() => setActiveChannel(platform.platform)}
+                  onMouseLeave={() => setActiveChannel(null)}
                 >
-                  <title>{`${platform.platform} ${stage.label}: ${value.toLocaleString()}`}</title>
-                </path>
+                  <path
+                    d={bandPath(from.x + nodeWidth, from.y, from.h, to.x, to.y, to.h)}
+                    fill={sankeyAccentMap[platform.platform]}
+                    className="cs-sankey__band"
+                  >
+                    <title>{`${platform.platform} ${stage.label}: ${value.toLocaleString()}`}</title>
+                  </path>
+                  <text x={labelX} y={labelY + 3} className="cs-sankey__transition-pct">{stagePct(platform, stageIndex + 1)}</text>
+                </g>
               );
             })
           )}
-          {campaign.platforms.map((platform, index) => {
-            const node = sourceNodes[index];
-            return (
-              <g key={platform.platform} opacity={nodeOpacity(platform.platform)} className="cs-sankey__node" onClick={() => setActiveChannel(activeChannel === platform.platform ? null : platform.platform)}>
-                <rect x={24} y={node.y + node.h / 2 - 16} width={132} height={32} rx="16" fill="#ffffff" stroke="#d1d5dc" />
-                <circle cx={44} cy={node.y + node.h / 2} r="11" fill="#ffffff" stroke="#e5e7eb" />
-                <image href={channelLogoMap[platform.platform]} x={36} y={node.y + node.h / 2 - 8} width="16" height="16" />
-                <text x={58} y={node.y + node.h / 2 + 4} className="cs-sankey__channel-label">{platform.platform}</text>
-                <rect x={node.x} y={node.y} width={nodeWidth} height={node.h} rx="4" fill={sankeyAccentMap[platform.platform]} />
-              </g>
-            );
-          })}
           {campaign.platforms.flatMap((platform, platformIndex) =>
             stages.map((stage, stageIndex) => {
               const node = stageNodes[stageIndex][platformIndex];
-              const value = platform.metrics[stage.key];
-              const isActiveMetric = activeChannel === platform.platform && stageIndex < stages.length - 1;
+              const value = stageValue(platform, stageIndex);
               return (
-                <g key={`${platform.platform}-${stage.key}-node`} opacity={nodeOpacity(platform.platform)} className="cs-sankey__node" onClick={() => setActiveChannel(activeChannel === platform.platform ? null : platform.platform)}>
-                  <rect x={node.x} y={node.y} width={nodeWidth} height={node.h} rx="4" fill={sankeyAccentMap[platform.platform]} />
-                  <text x={node.x + nodeWidth + 6} y={node.y + node.h / 2 - 5} className={`cs-sankey__metric ${isActiveMetric ? "cs-sankey__metric--active" : ""}`}>{stagePct(platform, stageIndex)}</text>
-                  <text x={node.x + nodeWidth + 6} y={node.y + node.h / 2 + 9} className={`cs-sankey__metric cs-sankey__metric--muted ${isActiveMetric ? "cs-sankey__metric--active" : ""}`}>{toK(value)}</text>
+                <g
+                  key={`${platform.platform}-${stage.key}-node`}
+                  opacity={nodeOpacity(platform.platform)}
+                  className="cs-sankey__node"
+                  onMouseEnter={() => setActiveChannel(platform.platform)}
+                  onMouseLeave={() => setActiveChannel(null)}
+                >
+                  <rect x={node.x} y={node.y} width={nodeWidth} height={node.h} fill={sankeyAccentMap[platform.platform]} />
+                  <text x={node.x + nodeWidth / 2} y={node.y + node.h / 2 + 3} className="cs-sankey__metric-inside">{toK(value)}</text>
                 </g>
               );
             })
           )}
         </svg>
+        <div className="cs-sankey__history" aria-label="Channel history">
+          {campaign.platforms.map((platform) => (
+            <div
+              key={platform.platform}
+              className={activeChannel === platform.platform ? "is-active" : ""}
+              onMouseEnter={() => setActiveChannel(platform.platform)}
+              onMouseLeave={() => setActiveChannel(null)}
+            >
+              <span style={{ backgroundColor: sankeyAccentMap[platform.platform] }} aria-hidden="true" />
+              {platform.platform}
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -449,11 +759,11 @@ const getCalendarDays = (monthDate: Date) => {
   });
 };
 
-const shortenPostCopy = (copy: string) => {
-  const cleanCopy = copy.replace(/\s+/g, " ").trim();
-  if (cleanCopy.length <= 150) return cleanCopy;
-  return `${cleanCopy.slice(0, 147).trim()}...`;
-};
+const stripGeneratedLinksFromCopy = (copy: string) =>
+  copy
+    .replace(/\s*(?:Learn more:\s*)?https?:\/\/\S+/gi, "")
+    .replace(/[ \t]+\n/g, "\n")
+    .trim();
 
 const OverlayPortal = ({ children }: { children: React.ReactNode }) => {
   if (typeof document === "undefined") return <>{children}</>;
@@ -512,6 +822,12 @@ const BackEditLink = ({ onClick }: { onClick?: () => void }) => (
   </button>
 );
 
+const BackToCampaignStudioLink = ({ onClick }: { onClick?: () => void }) => (
+  <button className="cs-back-edit" onClick={onClick}>
+    <span aria-hidden="true">‹</span> Back to Campaigns Studio
+  </button>
+);
+
 const TemplateIcon = ({ type }: { type: string }) => {
   if (type === "user") {
     return (
@@ -561,6 +877,14 @@ const roleOptions = [
   "Patient Care Technicians",
   "Software Engineers",
 ];
+const jobCategoryOptions = [
+  "Nursing",
+  "Allied Health",
+  "Clinical Support",
+  "Administrative",
+  "Technology",
+  "Operations",
+];
 const eventOptions = [
   "Duke Health Nursing Hiring Event",
   "Clinical Careers Open House",
@@ -568,6 +892,10 @@ const eventOptions = [
   "Healthcare Career Fair",
   "Patient Care Networking Event",
 ];
+const ctaEventOptions = eventOptions.map((eventName) => ({
+  label: eventName,
+  value: `https://careers.dukehealth.org/events/${eventName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`,
+}));
 
 type DropdownOption = { value: string; label: string };
 type GooglePlacePrediction = {
@@ -669,11 +997,9 @@ const SingleSelectDropdown = ({
   );
 };
 
-const isEventCampaignBrief = (brief: string) =>
-  /\b(event|events|rsvp|attendance|career fair|hiring fair|open house|webinar|meet.?and.?greet)\b/i.test(brief);
-
 const buildStructuredBrief = ({
   brief,
+  jobCategory,
   role,
   location,
   eventName,
@@ -681,6 +1007,7 @@ const buildStructuredBrief = ({
   eventFormat,
 }: {
   brief: string;
+  jobCategory: string;
   role: string;
   location: string;
   eventName: string;
@@ -689,6 +1016,7 @@ const buildStructuredBrief = ({
 }) => {
   const details: string[] = [];
 
+  if (jobCategory.trim()) details.push(`Job category: ${jobCategory.trim()}.`);
   if (role.trim()) details.push(`Target role or roles: ${role.trim()}.`);
   if (location.trim()) details.push(`Location or work model: ${location.trim()}.`);
   if (eventName.trim()) details.push(`Event: ${eventName.trim()}.`);
@@ -751,7 +1079,7 @@ const DatePickerField = ({ value, onChange }: { value: string; onChange: (date: 
 
   return (
     <div className="cs-date-picker" ref={datePickerRef}>
-      <button type="button" className={`cs-date-input ${isOpen ? "is-open" : ""}`} onClick={() => setIsOpen((current) => !current)}>
+      <button type="button" className={`cs-date-input ${isOpen ? "is-open" : ""} ${!value ? "is-placeholder" : ""}`} onClick={() => setIsOpen((current) => !current)}>
         <span>{value ? formatDisplayDate(value) : "Select date"}</span>
         <img src={calendarIcon} alt="" />
       </button>
@@ -837,37 +1165,37 @@ const GenerateCampaignModal = ({
   const [campaignName, setCampaignName] = useState(initialCampaignName || makeCampaignName(prompt));
   const [selectedChannels, setSelectedChannels] = useState<CampaignPlatformName[]>(initialChannels || ["Facebook", "Instagram", "X", "LinkedIn"]);
   const [dueDate, setDueDate] = useState(initialDueDate || "");
+  const [jobCategory, setJobCategory] = useState(jobCategoryOptions[0]);
   const [roleDetails, setRoleDetails] = useState(initialDetails.role === "priority roles" ? "" : initialDetails.role);
   const [locationDetails, setLocationDetails] = useState(initialDetails.location === "target markets" ? "" : initialDetails.location);
-  const [eventType, setEventType] = useState("");
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
   const [isLocationDropdownOpen, setIsLocationDropdownOpen] = useState(false);
-  const [isEventDropdownOpen, setIsEventDropdownOpen] = useState(false);
   const [roleSearch, setRoleSearch] = useState("");
   const [locationSearch, setLocationSearch] = useState("");
   const [googleLocationOptions, setGoogleLocationOptions] = useState<GooglePlacePrediction[]>([]);
   const [isLoadingLocations, setIsLoadingLocations] = useState(false);
-  const [eventSearch, setEventSearch] = useState("");
   const roleDropdownRef = useRef<HTMLDivElement>(null);
   const locationDropdownRef = useRef<HTMLDivElement>(null);
-  const eventDropdownRef = useRef<HTMLDivElement>(null);
   const [selectedCtaPageValue, setSelectedCtaPageValue] = useState(initialCtaMatch.page.value);
   const [, setSelectedCtaSubpageValue] = useState(initialCtaMatch.subpage?.value || "");
-  const [ctaDestinationType, setCtaDestinationType] = useState<"page" | "job">("page");
+  const [ctaDestinationType, setCtaDestinationType] = useState<"page" | "job" | "event">("page");
   const [selectedCtaLocale, setSelectedCtaLocale] = useState(ctaLocaleOptions[0].value);
   const [selectedCtaPersona, setSelectedCtaPersona] = useState(ctaPersonaOptions[0].value);
   const [selectedCtaJob, setSelectedCtaJob] = useState(ctaJobOptions[0].value);
-  const showEventFields = isEventCampaignBrief(brief) || Boolean(eventType);
+  const [selectedCtaEvent, setSelectedCtaEvent] = useState(ctaEventOptions[0].value);
   const selectedCtaPage = cmsDestinationPages.find((page) => page.value === selectedCtaPageValue) || cmsDestinationPages[1];
   const selectedCtaDestination =
-    ctaDestinationType === "job"
-      ? selectedCtaJob
-      : selectedCtaPage.value;
+    ctaDestinationType === "job" ? selectedCtaJob : ctaDestinationType === "event" ? selectedCtaEvent : selectedCtaPage.value;
+  const selectedCtaEventLabel = ctaEventOptions.find((event) => event.value === selectedCtaEvent)?.label || "";
+  const eventTemplatePrompt = templateCards.find((template) => template.icon === "calendar")?.prompt.toLowerCase() || "";
+  const isEventTemplateSelected = eventTemplatePrompt ? brief.toLowerCase().includes(eventTemplatePrompt) : false;
+  const shouldShowEventContext = isEventTemplateSelected || ctaDestinationType === "event";
   const effectiveBrief = buildStructuredBrief({
     brief,
+    jobCategory,
     role: roleDetails,
     location: locationDetails,
-    eventName: showEventFields ? eventType : "",
+    eventName: shouldShowEventContext ? selectedCtaEventLabel : "",
     eventDate: "",
     eventFormat: "",
   });
@@ -876,19 +1204,18 @@ const GenerateCampaignModal = ({
   }, [effectiveBrief, initialCampaignName]);
 
   useEffect(() => {
-    if (!isRoleDropdownOpen && !isLocationDropdownOpen && !isEventDropdownOpen) return undefined;
+    if (!isRoleDropdownOpen && !isLocationDropdownOpen) return undefined;
 
     const handlePointerDown = (event: PointerEvent) => {
       if (!(event.target instanceof Node)) return;
-      if (roleDropdownRef.current?.contains(event.target) || locationDropdownRef.current?.contains(event.target) || eventDropdownRef.current?.contains(event.target)) return;
+      if (roleDropdownRef.current?.contains(event.target) || locationDropdownRef.current?.contains(event.target)) return;
       setIsRoleDropdownOpen(false);
       setIsLocationDropdownOpen(false);
-      setIsEventDropdownOpen(false);
     };
 
     document.addEventListener("pointerdown", handlePointerDown);
     return () => document.removeEventListener("pointerdown", handlePointerDown);
-  }, [isRoleDropdownOpen, isLocationDropdownOpen, isEventDropdownOpen]);
+  }, [isRoleDropdownOpen, isLocationDropdownOpen]);
 
   useEffect(() => {
     const query = locationSearch.trim();
@@ -961,16 +1288,6 @@ const GenerateCampaignModal = ({
   const canUseTypedLocation =
     locationSearch.trim().length > 1 &&
     !filteredLocationOptions.some((location) => location.toLowerCase() === locationSearch.trim().toLowerCase());
-  const selectedEvents = eventType.split(";").map((event) => event.trim()).filter(Boolean);
-  const updateSelectedEvents = (events: string[]) => setEventType(events.join("; "));
-  const toggleEvent = (eventName: string) => {
-    updateSelectedEvents(selectedEvents.includes(eventName) ? selectedEvents.filter((item) => item !== eventName) : [...selectedEvents, eventName]);
-  };
-  const removeEvent = (eventName: string) => updateSelectedEvents(selectedEvents.filter((item) => item !== eventName));
-  const visibleEvents = selectedEvents.slice(0, 2);
-  const additionalEventCount = Math.max(selectedEvents.length - visibleEvents.length, 0);
-  const availableEventOptions = Array.from(new Set([...eventOptions, ...selectedEvents]));
-  const filteredEventOptions = availableEventOptions.filter((eventName) => eventName.toLowerCase().includes(eventSearch.trim().toLowerCase()));
   const canContinue = Boolean(campaignName.trim() && dueDate && selectedChannels.length && selectedCtaDestination);
 
   return (
@@ -1016,6 +1333,15 @@ const GenerateCampaignModal = ({
                   <strong><span aria-hidden="true">✦</span> Additional details - extracted from prompt</strong>
                 </div>
                 <div className="cs-extracted-card__body">
+                  <div className="cs-field">
+                    <label>Job category <span className="cs-ai-badge">AI filled</span></label>
+                    <SingleSelectDropdown
+                      value={jobCategory}
+                      options={jobCategoryOptions.map((option) => ({ value: option, label: option }))}
+                      onChange={setJobCategory}
+                      placeholder="Select job category"
+                    />
+                  </div>
                   <div className="cs-field cs-role-select" ref={roleDropdownRef}>
                     <label>Role(s) <span className="cs-ai-badge">AI filled</span></label>
                     <div
@@ -1026,14 +1352,12 @@ const GenerateCampaignModal = ({
                       aria-expanded={isRoleDropdownOpen}
                       onClick={() => {
                         setIsLocationDropdownOpen(false);
-                        setIsEventDropdownOpen(false);
                         setIsRoleDropdownOpen((current) => !current);
                       }}
                       onKeyDown={(event) => {
                         if (event.key === "Enter" || event.key === " ") {
                           event.preventDefault();
                           setIsLocationDropdownOpen(false);
-                          setIsEventDropdownOpen(false);
                           setIsRoleDropdownOpen((current) => !current);
                         }
                       }}
@@ -1134,7 +1458,6 @@ const GenerateCampaignModal = ({
                         aria-expanded={isLocationDropdownOpen}
                         onFocus={() => {
                           setIsRoleDropdownOpen(false);
-                          setIsEventDropdownOpen(false);
                           setIsLocationDropdownOpen(true);
                         }}
                         onChange={(event) => {
@@ -1187,92 +1510,15 @@ const GenerateCampaignModal = ({
                       </div>
                     )}
                   </div>
-                  {showEventFields && (
-                    <div className="cs-field cs-role-select" ref={eventDropdownRef}>
+                  {shouldShowEventContext && (
+                    <div className="cs-field cs-event-context-field">
                       <label>Event <span className="cs-ai-badge">AI filled</span></label>
-                      <div
-                        className={`cs-role-select__control ${isEventDropdownOpen ? "is-open" : ""}`}
-                        role="button"
-                        tabIndex={0}
-                        aria-haspopup="listbox"
-                        aria-expanded={isEventDropdownOpen}
-                        onClick={() => {
-                          setIsRoleDropdownOpen(false);
-                          setIsLocationDropdownOpen(false);
-                          setIsEventDropdownOpen((current) => !current);
-                        }}
-                        onKeyDown={(event) => {
-                          if (event.key === "Enter" || event.key === " ") {
-                            event.preventDefault();
-                            setIsRoleDropdownOpen(false);
-                            setIsLocationDropdownOpen(false);
-                            setIsEventDropdownOpen((current) => !current);
-                          }
-                        }}
-                      >
-                        {selectedEvents.length ? (
-                          <span className="cs-role-tags">
-                            {visibleEvents.map((eventName) => (
-                              <span className="cs-role-tag" key={eventName}>
-                                <span>{eventName}</span>
-                                <button
-                                  type="button"
-                                  aria-label={`Remove ${eventName}`}
-                                  onClick={(event) => {
-                                    event.stopPropagation();
-                                    removeEvent(eventName);
-                                  }}
-                                >
-                                  ×
-                                </button>
-                              </span>
-                            ))}
-                            {additionalEventCount > 0 && <span className="cs-role-tag cs-role-tag--count">+{additionalEventCount}</span>}
-                          </span>
-                        ) : (
-                          <span className="cs-role-select__placeholder">Select events</span>
-                        )}
-                        {selectedEvents.length > 0 && (
-                          <button
-                            type="button"
-                            className="cs-role-select__clear"
-                            aria-label="Clear selected events"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              updateSelectedEvents([]);
-                            }}
-                          >
-                            ×
-                          </button>
-                        )}
-                      </div>
-                      {isEventDropdownOpen && (
-                        <div className="cs-role-select__menu" role="listbox" aria-multiselectable="true">
-                          <div className="cs-role-select__search">
-                            <span aria-hidden="true" />
-                            <input
-                              value={eventSearch}
-                              placeholder="Search"
-                              onChange={(event) => setEventSearch(event.target.value)}
-                              onClick={(event) => event.stopPropagation()}
-                            />
-                          </div>
-                          {filteredEventOptions.map((eventName) => (
-                            <button
-                              type="button"
-                              key={eventName}
-                              className={selectedEvents.includes(eventName) ? "is-selected" : ""}
-                              role="option"
-                              aria-selected={selectedEvents.includes(eventName)}
-                              onClick={() => toggleEvent(eventName)}
-                            >
-                              <span className="cs-role-select__checkbox" aria-hidden="true" />
-                              <span>{eventName}</span>
-                            </button>
-                          ))}
-                          {!filteredEventOptions.length && <div className="cs-role-select__empty">No events found</div>}
-                        </div>
-                      )}
+                      <SingleSelectDropdown
+                        value={selectedCtaEvent}
+                        options={ctaEventOptions}
+                        onChange={setSelectedCtaEvent}
+                        placeholder="Select event"
+                      />
                     </div>
                   )}
                 </div>
@@ -1286,6 +1532,7 @@ const GenerateCampaignModal = ({
                     {[
                       { value: "page", label: "Page" },
                       { value: "job", label: "Job" },
+                      { value: "event", label: "Event" },
                     ].map((option) => (
                       <button
                         type="button"
@@ -1293,7 +1540,7 @@ const GenerateCampaignModal = ({
                         className={ctaDestinationType === option.value ? "is-active" : ""}
                         role="tab"
                         aria-selected={ctaDestinationType === option.value}
-                        onClick={() => setCtaDestinationType(option.value as "page" | "job")}
+                        onClick={() => setCtaDestinationType(option.value as "page" | "job" | "event")}
                       >
                         {option.label}
                       </button>
@@ -1344,6 +1591,17 @@ const GenerateCampaignModal = ({
                       />
                     </div>
                   )}
+                  {ctaDestinationType === "event" && (
+                    <div className="cs-field cs-cta-destination-single">
+                      <label>Event</label>
+                      <SingleSelectDropdown
+                        value={selectedCtaEvent}
+                        options={ctaEventOptions}
+                        onChange={setSelectedCtaEvent}
+                        placeholder="Select event"
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="cs-field cs-channels-field">
@@ -1357,8 +1615,7 @@ const GenerateCampaignModal = ({
                       onClick={() => toggleChannel(channel)}
                     >
                       <span className="cs-channel-check" aria-hidden="true">{selectedChannels.includes(channel) ? "✓" : ""}</span>
-                      <span>{channel}</span>
-                      <span className="cs-channel-logo"><img src={channelLogoMap[channel]} alt="" /></span>
+                      <span>{getChannelSelectionLabel(channel)}</span>
                     </button>
                   ))}
                 </div>
@@ -1366,10 +1623,10 @@ const GenerateCampaignModal = ({
             </div>
         </section>
         <footer className="cs-wizard-footer">
-          <Button variant="secondary" onClick={onBack}>
-            Exit
-          </Button>
           <div className="cs-wizard-footer__actions">
+            <Button variant="secondary" onClick={onBack}>
+              Cancel
+            </Button>
             <Button
               variant="primary"
               disabled={!canContinue}
@@ -1384,9 +1641,14 @@ const GenerateCampaignModal = ({
   );
 };
 
-const LoadingPage = ({ onDone, onExit, showWizardProgress = false }: { onDone: () => void; onExit?: () => void; showWizardProgress?: boolean }) => {
+const LoadingPage = ({ onDone, onExit, showWizardProgress = false, campaign }: { onDone: () => void; onExit?: () => void; showWizardProgress?: boolean; campaign?: Campaign }) => {
   const [step, setStep] = useState(0);
   const progress = Math.min((step + 1) * 20, 100);
+  const skeletonCount = Math.max(campaign?.platforms.length || 4, 1);
+
+  useLayoutEffect(() => {
+    if (showWizardProgress) scrollPageToTop();
+  }, [showWizardProgress]);
 
   useEffect(() => {
     const interval = window.setInterval(() => {
@@ -1410,7 +1672,7 @@ const LoadingPage = ({ onDone, onExit, showWizardProgress = false }: { onDone: (
       </div>
       <div className="cs-progress"><span style={{ width: `${progress}%` }} /></div>
       <div className="cs-skeleton-grid">
-        {[1, 2, 3, 4].map((item) => <div key={item} className="cs-skeleton-card" />)}
+        {Array.from({ length: skeletonCount }, (_, index) => <div key={index} className="cs-skeleton-card" />)}
       </div>
     </div>
   );
@@ -1420,7 +1682,7 @@ const LoadingPage = ({ onDone, onExit, showWizardProgress = false }: { onDone: (
       <main className="campaign-studio campaign-studio--wizard campaign-studio--generating-wizard">
         <header className="cs-wizard-header">
           <div>
-            {onExit && <BackEditLink onClick={onExit} />}
+            {onExit && <BackToCampaignStudioLink onClick={onExit} />}
           </div>
           <CampaignWizardHeader activeStep={2} />
         </header>
@@ -1478,6 +1740,9 @@ const PostPreview = ({
   const copyPostText = () => {
     void navigator.clipboard?.writeText(post.copy);
   };
+  const copyDestinationLink = () => {
+    void navigator.clipboard?.writeText(post.utmLink || post.ctaDestination);
+  };
   const downloadPostText = () => {
     const blob = new Blob([post.copy], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -1494,6 +1759,13 @@ const PostPreview = ({
       </button>
       <button type="button" className="cs-post__asset-action" onClick={copyPostText}>
         <img src={copyIcon} alt="" /> Copy text
+      </button>
+      <button type="button" className="cs-post__asset-action" onClick={copyDestinationLink}>
+        <svg className="cs-post__asset-action-icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+          <path d="M8.2 11.8a3.1 3.1 0 0 0 4.4 0l2.8-2.8a3.1 3.1 0 0 0-4.4-4.4l-.7.7" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" />
+          <path d="M11.8 8.2a3.1 3.1 0 0 0-4.4 0L4.6 11a3.1 3.1 0 0 0 4.4 4.4l.7-.7" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" />
+        </svg>
+        Copy destination link
       </button>
     </div>
   ) : null;
@@ -1723,9 +1995,20 @@ const SaveModal = ({ campaign, onClose }: { campaign: Campaign; onClose: () => v
         <h2>Your campaign has been saved</h2>
         <p>{campaign.name} is now available in the Created campaigns table.</p>
       </div>
-      <ExportRows campaign={campaign} buttonVariant="ghost" buttonClassName="cs-btn--secondary-ghost" />
       <div className="cs-save-modal__actions">
-        <Button variant="primary" onClick={onClose}>Back to Campaign Studio</Button>
+        <Button variant="secondary" onClick={onClose}>
+          <svg className="cs-btn__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <path d="M9.8 3.5 5.3 8l4.5 4.5" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" />
+          </svg>
+          Back to Campaign Studio
+        </Button>
+        <Button variant="primary" onClick={() => downloadCampaignContentZip(campaign)}>
+          <svg className="cs-btn__icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+            <path d="M10 3v9m0 0L6.5 8.5M10 12l3.5-3.5" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" />
+            <path d="M4 14.5v1A1.5 1.5 0 0 0 5.5 17h9a1.5 1.5 0 0 0 1.5-1.5v-1" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.6" />
+          </svg>
+          Download all assets as zip
+        </Button>
       </div>
     </div>
   </Modal>
@@ -1779,7 +2062,7 @@ const UpdatePublishDateModal = ({
   const [publishDate, setPublishDate] = useState(value);
 
   return (
-    <Modal title="Update publish date" onClose={onCancel}>
+    <Modal title="Update publish date" onClose={onCancel} className="cs-update-publish-modal">
       <div className="cs-modal__body">
         <div className="cs-field cs-date-field">
           <label>Publish date</label>
@@ -1788,7 +2071,7 @@ const UpdatePublishDateModal = ({
       </div>
       <div className="cs-modal__footer">
         <Button variant="ghost" onClick={onCancel}>Cancel</Button>
-        <Button variant="primary" disabled={!publishDate} onClick={() => onConfirm(publishDate)}>Update publish date</Button>
+        <Button variant="secondary" disabled={!publishDate} onClick={() => onConfirm(publishDate)}>Update publish date</Button>
       </div>
     </Modal>
   );
@@ -1827,7 +2110,7 @@ const EditDrawer = ({
   onClose: () => void;
   onSave: (post: CampaignPlatformOutput) => void;
 }) => {
-  const [draft, setDraft] = useState(post);
+  const [draft, setDraft] = useState<CampaignPlatformOutput>({ ...post, copy: stripGeneratedLinksFromCopy(post.copy) });
   const [showImageModal, setShowImageModal] = useState(false);
   const [selectedImageSrc, setSelectedImageSrc] = useState(post.image);
   const selectedImageOption = imageOptions.find((option) => option.src === selectedImageSrc) || imageOptions[0];
@@ -1847,14 +2130,17 @@ const EditDrawer = ({
           <div className="cs-drawer__header">
             <span>Edit</span>
             <h2>{post.platform} content</h2>
-            <button className="cs-icon-button" onClick={onClose}>×</button>
+            <button className="cs-icon-button cs-drawer__close" onClick={onClose} aria-label="Close edit panel">
+              <svg viewBox="0 0 18 18" aria-hidden="true" focusable="false">
+                <path d="M4.8 4.8 13.2 13.2M13.2 4.8 4.8 13.2" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+              </svg>
+            </button>
           </div>
           <div className="cs-drawer__body">
             <div className="cs-field cs-post-copy-field">
               <label>Post copy</label>
               <div className="cs-post-copy-editor">
                 <textarea rows={8} value={draft.copy} onChange={(event) => setDraft({ ...draft, copy: event.target.value })} />
-                <Button variant="ghost" className="cs-post-copy-shorten" onClick={() => setDraft({ ...draft, copy: shortenPostCopy(draft.copy) })}>Shorten text</Button>
               </div>
             </div>
             <div className="cs-field">
@@ -1997,7 +2283,16 @@ const CampaignTable = ({
           </tr>
         </thead>
         <tbody>
-          {campaigns.map((campaign) => {
+          {!campaigns.length ? (
+            <tr className="cs-table-empty-row">
+              <td colSpan={9}>
+                <div className="cs-table-empty-state">
+                  <h3>No created campaigns</h3>
+                  <p>Once you create a campaign it will appear in this table.</p>
+                </div>
+              </td>
+            </tr>
+          ) : campaigns.map((campaign) => {
             const tableStatus = getCampaignTableStatus(campaign);
             const orderedPlatforms = getOrderedCampaignPlatforms(campaign.platforms);
 
@@ -2016,17 +2311,21 @@ const CampaignTable = ({
                     {campaign.name}
                   </a>
                 </td>
-                <td><span className={`cs-status cs-status--${tableStatus.className}`}>{tableStatus.label}</span></td>
-                <td>
+                <td className="cs-status-cell">
+                  <span className={`cs-status cs-status--${tableStatus.className}`} title={tableStatus.label}>
+                    <span className="cs-status__label">{tableStatus.label}</span>
+                  </span>
+                </td>
+                <td className="cs-channels-cell">
                   <div className="cs-channel-pills">
                     {orderedPlatforms.slice(0, 4).map((platform, index) => (
                       <span className={`cs-channel-pill-icon cs-channel-pill-icon--${index + 1}`} key={platform.platform} title={platform.platform}>
                         <img src={channelLogoMap[platform.platform]} alt={platform.platform} />
                       </span>
                     ))}
-                    {orderedPlatforms.length > 4 && <span className="cs-channel-pill-count cs-channel-pill-count--default">+{orderedPlatforms.length - 4}</span>}
-                    {orderedPlatforms.length > 3 && <span className="cs-channel-pill-count cs-channel-pill-count--plus-1">+{orderedPlatforms.length - 3}</span>}
-                    {orderedPlatforms.length > 2 && <span className="cs-channel-pill-count cs-channel-pill-count--plus-2">+{orderedPlatforms.length - 2}</span>}
+                    {orderedPlatforms.length > 5 && <span className="cs-channel-pill-count cs-channel-pill-count--default">+{orderedPlatforms.length - 4}</span>}
+                    {orderedPlatforms.length > 4 && <span className="cs-channel-pill-count cs-channel-pill-count--plus-1">+{orderedPlatforms.length - 3}</span>}
+                    {orderedPlatforms.length > 3 && <span className="cs-channel-pill-count cs-channel-pill-count--plus-2">+{orderedPlatforms.length - 2}</span>}
                   </div>
                 </td>
                 <td><MetricCell campaign={campaign} metric="clicks" /></td>
@@ -2121,10 +2420,15 @@ export const CampaignStudioList: React.FC = () => {
   if (isGenerating && pendingCampaign) {
     return (
       <LoadingPage
-        onDone={() => setIsGenerating(false)}
+        onDone={() => {
+          scrollPageToTop();
+          setIsGenerating(false);
+        }}
+        campaign={pendingCampaign}
         showWizardProgress
         onExit={() => {
-          openCampaignEditor(pendingCampaign);
+          setPendingCampaign(null);
+          navigate(listPath);
         }}
       />
     );
@@ -2163,6 +2467,7 @@ export const CampaignStudioList: React.FC = () => {
           setGenerateDraft(null);
         }}
         onStart={(campaign) => {
+          scrollPageToTop();
           setShowGenerateModal(false);
           setGenerateDraft(null);
           setPendingCampaign(campaign);
@@ -2240,7 +2545,7 @@ export const CampaignStudioCreate: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const listPath = getCampaignStudioListPath(customerCode, refnum);
 
-  if (isGenerating && campaign) return <LoadingPage onDone={() => setIsGenerating(false)} onExit={() => setIsGenerating(false)} showWizardProgress />;
+  if (isGenerating && campaign) return <LoadingPage campaign={campaign} onDone={() => { scrollPageToTop(); setIsGenerating(false); }} onExit={() => setIsGenerating(false)} showWizardProgress />;
   if (campaign) return <CampaignStudioWorkspace initialCampaign={campaign} onExit={() => navigate(listPath)} showWizardProgress />;
 
   return (
@@ -2248,6 +2553,7 @@ export const CampaignStudioCreate: React.FC = () => {
       prompt={prompt}
       onBack={() => navigate(listPath)}
       onStart={(nextCampaign) => {
+        scrollPageToTop();
         setCampaign(nextCampaign);
         setIsGenerating(true);
       }}
@@ -2274,6 +2580,10 @@ export const CampaignStudioWorkspace: React.FC<{
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
   const listPath = getCampaignStudioListPath(customerCode, refnum);
+
+  useLayoutEffect(() => {
+    if (showWizardProgress) scrollPageToTop();
+  }, [showWizardProgress]);
 
   const saveCampaign = async () => {
     setIsSaving(true);
@@ -2309,7 +2619,7 @@ export const CampaignStudioWorkspace: React.FC<{
       {showWizardProgress && (
         <header className="cs-wizard-header">
           <div>
-            <BackEditLink onClick={() => (onBackEdit ? onBackEdit(campaign) : navigate(listPath))} />
+            <BackToCampaignStudioLink onClick={() => (onExit ? onExit() : navigate(listPath))} />
           </div>
           <CampaignWizardHeader activeStep={2} />
         </header>
@@ -2352,6 +2662,18 @@ export const CampaignStudioWorkspace: React.FC<{
               </div>
             ))}
           </section>
+          {showWizardProgress && (
+            <footer className="cs-wizard-footer cs-wizard-footer--assets">
+              <div className="cs-wizard-footer__actions">
+                <Button variant="secondary" onClick={() => (onExit ? onExit() : navigate(listPath))}>
+                  Cancel
+                </Button>
+                <Button variant={saved ? "secondary" : "primary"} onClick={saveCampaign} disabled={isSaving}>
+                  {saved && <img src={tickIcon} alt="" />} {isSaving ? "Saving..." : saved ? "Campaign saved" : "Save campaign"}
+                </Button>
+              </div>
+            </footer>
+          )}
         </section>
       </section>
       {editingPost && <EditDrawer post={editingPost} onClose={() => setEditingPost(null)} onSave={savePost} />}
@@ -2362,7 +2684,6 @@ export const CampaignStudioWorkspace: React.FC<{
 
 export const CampaignStudioDashboard: React.FC = () => {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-  const [exportCampaign, setExportCampaign] = useState<Campaign | null>(null);
   const [isUpdatingPublishDate, setIsUpdatingPublishDate] = useState(false);
   const navigate = useNavigate();
   const { customerCode, refnum, campaignId } = useParams();
@@ -2376,6 +2697,14 @@ export const CampaignStudioDashboard: React.FC = () => {
   const campaign = campaigns.find((item) => item.id === campaignId) || campaigns[0];
   const channelNames = campaign?.platforms.map((platform) => platform.platform).join(", ") || "LinkedIn";
   const overviewStatus = campaign ? getCampaignTableStatus(campaign) : { label: "Published", className: "published" };
+  const tokenParsed = (window as any).keycloakInstance?.tokenParsed;
+  const loggedUserDetails = tokenParsed?.userDetails;
+  const createdByName =
+    tokenParsed?.name ||
+    loggedUserDetails?.displayName ||
+    [loggedUserDetails?.firstName, loggedUserDetails?.lastName].filter(Boolean).join(" ") ||
+    loggedUserDetails?.userName ||
+    "Local Preview User";
   const overviewAssetColumns = campaign
     ? [0, 1, 2].map((columnIndex) => campaign.platforms.filter((_, platformIndex) => platformIndex % 3 === columnIndex))
     : [];
@@ -2412,12 +2741,17 @@ export const CampaignStudioDashboard: React.FC = () => {
                   <div><dt>Location</dt><dd>{campaign.location}</dd></div>
                   <div><dt>Tone</dt><dd>{campaign.tone}</dd></div>
                   <div><dt>Publish date</dt><dd>{formatDisplayDate(campaign.postDate) || formatDate(campaign.postDate)}</dd></div>
+                  <div><dt>Created by</dt><dd>{createdByName}</dd></div>
+                  <div><dt>Creation date</dt><dd>{formatDate(campaign.createdAt)}</dd></div>
                   <div><dt>Channels</dt><dd>{channelNames}</dd></div>
                 </dl>
               </div>
               <div className="cs-overview__actions">
-                <Button variant="primary" onClick={() => setIsUpdatingPublishDate(true)}>
+                <Button variant="secondary" onClick={() => setIsUpdatingPublishDate(true)}>
                   <img src={calendarIcon} alt="" /> Update Publish date
+                </Button>
+                <Button variant="primary" onClick={() => downloadCampaignContentZip(campaign)}>
+                  <img src={downloadIcon} alt="" /> Download all content as zip
                 </Button>
               </div>
             </div>
@@ -2429,9 +2763,6 @@ export const CampaignStudioDashboard: React.FC = () => {
                 <div>
                   <h2>View created assets</h2>
                 </div>
-                <Button variant="primary" onClick={() => setExportCampaign(campaign)}>
-                  <img src={downloadIcon} alt="" /> Copy & download content
-                </Button>
               </div>
               <div className="cs-overview-assets__grid">
                 {overviewAssetColumns.map((column, columnIndex) => (
@@ -2443,7 +2774,6 @@ export const CampaignStudioDashboard: React.FC = () => {
                 ))}
               </div>
             </section>
-            {exportCampaign && <ExportModal campaign={exportCampaign} onClose={() => setExportCampaign(null)} />}
             {isUpdatingPublishDate && (
               <UpdatePublishDateModal
                 value={campaign.postDate}
