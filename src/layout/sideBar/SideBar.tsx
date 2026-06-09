@@ -33,6 +33,12 @@ function ToolsSideBar(props: any) {
     fetchedApps = JSON.parse(sessionStorage.getItem("allapps") || "[]");
   }
   let detailsApp = fetchedApps && fetchedApps.length && findAppConfigByRoutes(fetchedApps, `/${window.location.pathname.split('/').slice(3).join('/')}`)[0];
+  const campaignStudioNewApp = categories
+    ?.flatMap((category: any) => category?.children || [category])
+    ?.find((app: any) => app?.name === "Campaign Studio New");
+  if (window.location.pathname.includes("/campaign-studio/campaigns") && campaignStudioNewApp) {
+    detailsApp = campaignStudioNewApp;
+  }
   const selectedApp = useSelector((state: any) => {
     const selectedAppFromSession = JSON.parse(
       sessionStorage.getItem("selectedApp") || "null"
@@ -99,6 +105,12 @@ function ToolsSideBar(props: any) {
         selectedTenant: selectedTenant,
       }
       appSelectionHandler(appSelectionOptions);
+    } else if (app?.name === "Campaign Studio New") {
+      dispatch(setDashboardSelected(false));
+      dispatch(setAppDetails(app));
+      sessionStorage.setItem("selectedApp", JSON.stringify(app));
+      sessionStorage.removeItem("txeCustomPath");
+      navigate(`/${selectedTenant.customerCode}/${selectedTenant.refNum}/campaign-studio/campaigns`);
     } else if (app?.name === "Candidate Journeys") {
       dispatch(setDashboardSelected(false));
       dispatch(setAppDetails(app));

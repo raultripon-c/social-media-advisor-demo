@@ -5,6 +5,10 @@ import CreateContentCluster from "../screens/CreateContentCluster/CreateContentC
 import ClusterDetails from "../screens/ContentClusterDetails/ContentClusterDetails";
 import ContentClustersList from "../screens/ContentClustersList/ContentClustersList";
 import CandidateJourneys from "../screens/CandidateJourneys/CandidateJourneys";
+import CampaignStudioAllCampaigns from "../screens/CampaignStudioAllCampaigns/CampaignStudioAllCampaigns";
+import CampaignStudioNewCampaign from "../screens/CampaignStudioNewCampaign/CampaignStudioNewCampaign";
+import CampaignStudioDashboard from "../screens/CampaignStudioDashboard/CampaignStudioDashboard";
+import CampaignStudioOnePage from "../screens/CampaignStudioOnePage/CampaignStudioOnePage";
 import { withDynamicScript } from "../layout/dynamicScripts/WithDynamicScript";
 
 export interface IRoute {
@@ -58,6 +62,51 @@ const candidateJourneys = {
   component: CandidateJourneys,
 }
 
+const campaignStudioNew = {
+  path: "/:customerCode/:refnum/campaign-studio-new",
+  component: CampaignStudioAllCampaigns,
+}
+
+const campaignStudioAllCampaigns = {
+  path: "/:customerCode/:refnum/campaign-studio/campaigns",
+  component: CampaignStudioAllCampaigns,
+}
+
+const campaignStudioNewCampaign = {
+  path: "/:customerCode/:refnum/campaign-studio/campaigns/new",
+  component: CampaignStudioNewCampaign,
+}
+
+const campaignStudioWorkspace = {
+  path: "/:customerCode/:refnum/campaign-studio/campaigns/workspace/:campaignWorkspaceId",
+  component: CampaignStudioOnePage,
+}
+
+const campaignStudioDashboard = {
+  path: "/:customerCode/:refnum/campaign-studio/campaigns/:campaignId/dashboard",
+  component: CampaignStudioDashboard,
+}
+
+const localCampaignStudioAllCampaigns = {
+  path: "/campaign-studio/campaigns",
+  component: CampaignStudioAllCampaigns,
+}
+
+const localCampaignStudioNewCampaign = {
+  path: "/campaign-studio/campaigns/new",
+  component: CampaignStudioNewCampaign,
+}
+
+const localCampaignStudioWorkspace = {
+  path: "/campaign-studio/campaigns/workspace/:campaignWorkspaceId",
+  component: CampaignStudioOnePage,
+}
+
+const localCampaignStudioDashboard = {
+  path: "/campaign-studio/campaigns/:campaignId/dashboard",
+  component: CampaignStudioDashboard,
+}
+
 const unmatchedRoutePage = {
   path: "*",
   component: UnmatchedRoutePage
@@ -73,5 +122,14 @@ export const appRoutes = [
   clusterDetail,
   clusterList,
   candidateJourneys,
+  campaignStudioNew,
+  campaignStudioAllCampaigns,
+  campaignStudioNewCampaign,
+  campaignStudioWorkspace,
+  campaignStudioDashboard,
+  localCampaignStudioAllCampaigns,
+  localCampaignStudioNewCampaign,
+  localCampaignStudioWorkspace,
+  localCampaignStudioDashboard,
   unmatchedRoutePage
 ];

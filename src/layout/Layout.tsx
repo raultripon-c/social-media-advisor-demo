@@ -33,8 +33,14 @@ const Layout = () => {
   const sessionTrackerProjectKey = `${(window as any)._env_.SESSION_TRACKER_PROJECT_KEY || ""}`;
   const sessionTrackerIngestPoint = `${(window as any)._env_.SESSION_TRACKER_INGEST_POINT || ""}`;
   const userId = userDetails?.userName;
+  const currentPath = window.location.pathname.replace("/dashboard/dashboard", "/dashboard");
+  const isLocalCampaignStudioPreview = currentPath.startsWith("/campaign-studio/campaigns");
 
   useEffect(()=>{
+    if (isLocalCampaignStudioPreview) {
+      setKeycloakAvailable(true);
+      return;
+    }
     if(window?.keycloakInstance?.userInfo) {
       setKeycloakAvailable(true);
     } else {
@@ -58,12 +64,14 @@ const Layout = () => {
       return;
     }
     const tenantsList = JSON.parse(sessionStorage.getItem("tenants") || "[]");
-    const currentPath = window.location.pathname.replace("/dashboard/dashboard", "/dashboard");
     const splitPath = currentPath.split('/')
     const urlRefnum = splitPath[2];
     const urlCustomerCode = splitPath[1];
     const isRefnumValid = Array.isArray(tenantsList) && tenantsList.some(customer => customer.refNum === urlRefnum);
     const isCustomerCodeValid = Array.isArray(tenantsList) && tenantsList.some(customer => customer.customerCode === urlCustomerCode);
+    if (isLocalCampaignStudioPreview) {
+      return;
+    }
     if(isCustomerCodeValid && isRefnumValid) {
       currentPath.includes("dashboard") && sessionStorage.setItem("txeCustomPath", currentPath.split('/').filter(Boolean).splice(2).join('/'))
       navigate(`${currentPath}`)
@@ -130,7 +138,7 @@ const Layout = () => {
   }
   return (
     <>
-      {keycloakAvailable && initialized && (
+      {keycloakAvailable && (initialized || isLocalCampaignStudioPreview) && (
         <div className="servicehub-tools">
           <PhollySdkRoot />
           <div className="service-tools-app-header">

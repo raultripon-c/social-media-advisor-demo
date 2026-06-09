@@ -61,14 +61,19 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { keycloak } = useKeycloak();
-  const [allRoutes, setAllRoutes] = useState<IRoute[]>([]);
+  const [allRoutes, setAllRoutes] = useState<IRoute[]>(appRoutes);
   const [transformedAppData, setTransformedAppData] = useState({});
   const [customerTenantApps, setCustomerTenantApps] = useState();
   const [appsLoader, setAppsLoader] = useState(true);
   const [rolesLoader, setRolesLoader] = useState(true);
   const [isAppsLoaded, setIsAppsLoaded] = useState(false);
   const isLoadingAppsRef = useRef(false);
-  const userDetails = window?.keycloakInstance?.tokenParsed?.userDetails;
+  const isLocalCampaignStudioPreview = window.location.pathname.startsWith("/campaign-studio/campaigns");
+  const userDetails =
+    window?.keycloakInstance?.tokenParsed?.userDetails ||
+    (isLocalCampaignStudioPreview
+      ? { userType: "LOCAL_PREVIEW", userOrg: "MIB", userName: "local-preview" }
+      : undefined);
   const [showSidebarMenu, toggleSidebarMenu] = useState(false);
   const { selectedApp, allApps } = useSelector((state: any) => state.app);
   let selectedTenant = JSON.parse(
@@ -324,6 +329,77 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
     const filteredApps: any = transformAppData(response); // filters customerTenantApps and platformApps
     setTransformedAppData(filteredApps);
 
+    const addCampaignStudioNewApp = (categories: any[] = []) => {
+      const campaignStudioNewRoute = "/campaign-studio/campaigns";
+      let inserted = false;
+
+      const updatedCategories = categories.map((category: any) => {
+        const children = category?.children;
+        if (!Array.isArray(children)) return category;
+
+        if (children.some((child: any) => child?.appConfig?.route === campaignStudioNewRoute)) {
+          inserted = true;
+          return category;
+        }
+
+        const campaignStudioIndex = children.findIndex((child: any) => {
+          const label = `${child?.name || ""} ${child?.hoverText || ""}`.toLowerCase();
+          const route = child?.appConfig?.route || "";
+          return label.includes("campaign studio") || route === "/campaign-studio";
+        });
+
+        if (campaignStudioIndex === -1) return category;
+
+        const campaignStudioApp = children[campaignStudioIndex];
+        const campaignStudioNewApp = {
+          id: "campaign-studio-new",
+          name: "Campaign Studio New",
+          icon: campaignStudioApp?.icon || PathSvg,
+          order: (campaignStudioApp?.order || 0) + 0.1,
+          isParent: false,
+          parentName: category.name,
+          context: "tenant",
+          appType: "script",
+          hoverText: "Campaign Studio New",
+          appConfig: {
+            route: campaignStudioNewRoute,
+            showSideNav: "true",
+          },
+        };
+
+        inserted = true;
+        return {
+          ...category,
+          children: [
+            ...children.slice(0, campaignStudioIndex + 1),
+            campaignStudioNewApp,
+            ...children.slice(campaignStudioIndex + 1),
+          ],
+        };
+      });
+
+      if (inserted) return updatedCategories;
+
+      return [
+        ...updatedCategories,
+        {
+          id: "campaign-studio-new",
+          name: "Campaign Studio New",
+          icon: PathSvg,
+          order: 998,
+          isParent: false,
+          parentName: null,
+          context: "tenant",
+          appType: "script",
+          hoverText: "Campaign Studio New",
+          appConfig: {
+            route: campaignStudioNewRoute,
+            showSideNav: "true",
+          },
+        },
+      ];
+    };
+
     // Inject standalone "Candidate Journeys" tab into the sidebar categories
     const candidateJourneysApp = {
       id: "candidate-journeys",
@@ -342,7 +418,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
     };
 
     const categoriesWithJourneys = [
-      ...(filteredApps?.customerTenantApps || []),
+      ...addCampaignStudioNewApp(filteredApps?.customerTenantApps || []),
       candidateJourneysApp,
     ];
 
