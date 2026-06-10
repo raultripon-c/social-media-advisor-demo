@@ -2619,7 +2619,7 @@ const CampaignTable = ({
                   </button>
                   {openMenu === campaign.id && (
                     <div className="cs-menu">
-                      <button onClick={() => { setOpenMenu(null); onExport(campaign); }}><span className="cs-menu__icon" style={{ "--icon-url": `url(${downloadIcon})` } as React.CSSProperties} aria-hidden="true" /> Download & Copy Content</button>
+                      <button onClick={() => { setOpenMenu(null); onExport(campaign); }}><span className="cs-menu__icon" style={{ "--icon-url": `url(${downloadIcon})` } as React.CSSProperties} aria-hidden="true" /> Download all content as zip</button>
                       <button onClick={() => { setOpenMenu(null); onDuplicate(campaign); }}><span className="cs-menu__icon" style={{ "--icon-url": `url(${copyIcon})` } as React.CSSProperties} aria-hidden="true" /> Duplicate Campaign</button>
                       <button onClick={() => { setOpenMenu(null); onDelete(campaign); }}><span className="cs-menu__icon" style={{ "--icon-url": `url(${trashIcon})` } as React.CSSProperties} aria-hidden="true" /> Delete Campaign</button>
                     </div>
@@ -2797,7 +2797,7 @@ export const CampaignStudioList: React.FC = () => {
         <CampaignTable
           campaigns={campaigns}
           onPreview={(campaign) => campaign.status === "draft" ? openCampaignEditor(campaign) : navigate(`${listPath}/${campaign.id}/dashboard`)}
-          onExport={setExportCampaign}
+          onExport={(campaign) => downloadCampaignContentZip(campaign)}
           onDuplicate={duplicateCampaign}
           onDelete={setDeleteCampaignTarget}
         />
