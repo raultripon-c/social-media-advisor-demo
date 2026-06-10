@@ -20,27 +20,32 @@ export const toneOptions = [
 export const templateCards = [
   {
     title: "Attract Passive Talent",
-    prompt: "Attract professionals not actively looking for new roles.",
+    prompt:
+      "Create a campaign for experienced Registered Nurses in Durham, NC. Target passive candidates who are not actively job searching, and use a warm, professional tone that highlights patient impact, stability, and career growth.",
     icon: "user",
   },
   {
     title: "Showcase Your Brand",
-    prompt: "Showcase culture and values across channels.",
+    prompt:
+      "Create an employer brand campaign for Clinical Support roles in Raleigh, NC. Showcase team culture, inclusive values, learning opportunities, and why candidates should consider Duke Health before they start actively applying.",
     icon: "sparkle",
   },
   {
     title: "Build Talent Community",
-    prompt: "Grow and nurture your candidate pipeline.",
+    prompt:
+      "Create a talent community campaign for Medical Assistants and Patient Care Technicians in Charlotte, NC. Invite qualified candidates to join the pipeline for future openings with a friendly, helpful tone focused on growth and connection.",
     icon: "users",
   },
   {
     title: "Promote Your Event",
-    prompt: "Drive RSVPs and attendance for hiring events.",
+    prompt:
+      "Promote the Duke Health Nursing Hiring Event in Durham, NC. Drive RSVPs and attendance from experienced nurses with a direct, energetic tone that emphasizes meeting recruiters, learning about open roles, and next-step opportunities.",
     icon: "calendar",
   },
   {
     title: "Launch Hiring Blitz",
-    prompt: "Fast turnaround messaging for critical roles.",
+    prompt:
+      "Create a high-volume hiring blitz campaign for Registered Nurses, Medical Assistants, and Radiology Technicians in Durham, NC. Use an urgent but professional tone for critical openings and encourage candidates to apply quickly.",
     icon: "bolt",
   },
 ];
@@ -165,6 +170,25 @@ const platformSourceMap: Record<CampaignPlatformName, string> = {
   X: "x",
 };
 
+const toTrackingValue = (value: string) => value.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+
+export const buildChannelUtmLink = (destination: string, platform: CampaignPlatformName, campaignId: string) => {
+  const fallbackDestination = `https://careers.dukehealth.org/jobs?campaign=${encodeURIComponent(campaignId)}`;
+
+  try {
+    const url = new URL(destination || fallbackDestination);
+    url.searchParams.set("utm_source", platformSourceMap[platform]);
+    url.searchParams.set("utm_medium", "social");
+    url.searchParams.set("utm_campaign", campaignId);
+    url.searchParams.set("utm_content", `${toTrackingValue(platform)}-campaign-post`);
+    return url.toString();
+  } catch {
+    const baseDestination = destination || fallbackDestination;
+    const separator = baseDestination.includes("?") ? "&" : "?";
+    return `${baseDestination}${separator}utm_source=${platformSourceMap[platform]}&utm_medium=social&utm_campaign=${encodeURIComponent(campaignId)}&utm_content=${toTrackingValue(platform)}-campaign-post`;
+  }
+};
+
 const totals = (platforms: Campaign["platforms"]): CampaignMetrics =>
   platforms.reduce(
     (acc, platform) => ({
@@ -181,16 +205,18 @@ export const createCampaignFromBrief = (
   campaignName: string,
   tone: string,
   dueDate: string,
-  selectedCtaDestination?: string
+  selectedCtaDestination?: string,
+  campaignId?: string,
+  createdAt?: string
 ): Campaign => {
   const details = parseBrief(brief, tone);
-  const id = `campaign-${Date.now()}`;
+  const id = campaignId || `campaign-${Date.now()}`;
   const tenantName = getSelectedTenantName();
   const employerName = tenantName === "Phenom" ? "Duke Health" : tenantName;
   const ctaDestination = selectedCtaDestination || `https://careers.dukehealth.org/jobs?campaign=${id}`;
 
   const platforms = selectedChannels.map((platform, index) => {
-    const utmLink = `${ctaDestination}&utm_source=${platformSourceMap[platform]}&utm_medium=social&utm_campaign=${id}`;
+    const utmLink = buildChannelUtmLink(ctaDestination, platform, id);
     const copyByPlatform: Record<CampaignPlatformName, string> = {
       LinkedIn: `${employerName} is hiring ${details.role} in ${details.location}. Connect your experience with work that supports patients, families, and care teams every day. Learn more: ${utmLink}`,
       Instagram: `Ready to bring your care skills to ${employerName}? 💙 Explore ${details.role} opportunities in ${details.location} and join a team built around patient impact. #DukeHealthCareers #NursingJobs #HealthcareCareers Learn more: ${utmLink}`,
@@ -223,50 +249,147 @@ export const createCampaignFromBrief = (
     id,
     name: campaignName || makeCampaignName(brief),
     role: details.role,
+    roles: details.role.split(/[,;]/).map((item) => item.trim()).filter(Boolean),
     location: details.location,
     tone: details.tone,
     audience: details.audience,
     status: "scheduled",
-    createdAt: new Date().toISOString(),
+    createdAt: createdAt || new Date().toISOString(),
     postDate: dueDate,
+    platforms,
+    metrics: totals(platforms),
+    draftPrompt: brief,
+  };
+};
+
+const daysFromNow = (days: number) => new Date(Date.now() + days * 86400000).toISOString().slice(0, 10);
+
+const withPlatformMetrics = (
+  campaign: Campaign,
+  metricsByPlatform: Partial<Record<CampaignPlatformName, CampaignMetrics>>
+): Campaign => {
+  const platforms = campaign.platforms.map((platform) => ({
+    ...platform,
+    metrics: metricsByPlatform[platform.platform] || { clicks: 0, applicationStarts: 0, applications: 0 },
+  }));
+
+  return {
+    ...campaign,
     platforms,
     metrics: totals(platforms),
   };
 };
 
-const demoCampaigns = (): Campaign[] => [
-  createCampaignFromBrief(
-    "Create a campaign for Registered Nurse, PICU in Durham, NC. Target experienced nurses with a warm and professional tone.",
-    ["LinkedIn", "Facebook", "Instagram"],
-    "Registered Nurse, PICU Campaign",
-    toneOptions[0],
-    new Date(Date.now() + 86400000).toISOString().slice(0, 10)
-  ),
-  createCampaignFromBrief(
-    "Create a campaign for Senior Software Engineers in San Francisco, CA. Use a professional tone.",
-    ["LinkedIn", "Instagram", "Facebook", "X"],
-    "Senior Software Engineer Campaign",
-    toneOptions[2],
-    new Date(Date.now() + 172800000).toISOString().slice(0, 10)
-  ),
-].map((campaign, index) => ({
-  ...campaign,
-  id: `demo-campaign-${index + 1}`,
-  status: index === 0 ? "active" : "completed",
-  metrics: index === 0
-    ? { clicks: 3611, applicationStarts: 1940, applications: 1128 }
-    : { clicks: 3852, applicationStarts: 994, applications: 298 },
-  platforms: campaign.platforms.map((platform) => ({
-    ...platform,
-    metrics: index === 0
-      ? platform.platform === "LinkedIn"
-        ? { clicks: 2528, applicationStarts: 1264, applications: 1011 }
-        : platform.platform === "Facebook"
-          ? { clicks: 902, applicationStarts: 631, applications: 126 }
-          : { clicks: 181, applicationStarts: 45, applications: 2 }
-      : { clicks: platform.platform === "LinkedIn" ? 1233 : 873, applicationStarts: platform.platform === "LinkedIn" ? 318 : 225, applications: platform.platform === "LinkedIn" ? 95 : 68 },
-  })),
-}));
+const demoCampaigns = (): Campaign[] => {
+  const campaigns: Campaign[] = [
+    withPlatformMetrics(
+      {
+        ...createCampaignFromBrief(
+          "Create a campaign for Registered Nurse, PICU in Durham, NC. Target experienced nurses with a warm and professional tone.",
+          ["LinkedIn", "Facebook", "Instagram"],
+          "Healthcare Hiring Campaign",
+          toneOptions[0],
+          daysFromNow(0),
+          "https://careers.dukehealth.org/search-jobs/registered%20nurse",
+          "demo-campaign-1",
+          daysFromNow(-8)
+        ),
+        status: "active",
+      },
+      {
+        LinkedIn: { clicks: 2528, applicationStarts: 1264, applications: 1011 },
+        Facebook: { clicks: 902, applicationStarts: 631, applications: 126 },
+        Instagram: { clicks: 181, applicationStarts: 45, applications: 2 },
+      }
+    ),
+    withPlatformMetrics(
+      {
+        ...createCampaignFromBrief(
+          "Create a campaign for Nurse Practitioners, Medical Assistants, and Radiology Technicians in Raleigh, NC. Use a premium and polished tone.",
+          ["LinkedIn", "Facebook"],
+          "Multi-Role Clinical Hiring Campaign",
+          toneOptions[3],
+          daysFromNow(5),
+          "https://careers.dukehealth.org/search-jobs/clinical",
+          "demo-campaign-2",
+          daysFromNow(-2)
+        ),
+        roles: ["Nurse Practitioners", "Medical Assistants", "Radiology Technicians"],
+        status: "scheduled",
+      },
+      {
+        LinkedIn: { clicks: 721, applicationStarts: 302, applications: 118 },
+        Facebook: { clicks: 539, applicationStarts: 214, applications: 87 },
+      }
+    ),
+    withPlatformMetrics(
+      {
+        ...createCampaignFromBrief(
+          "Promote the Duke Health Nursing Hiring Event in Durham, NC. Drive RSVPs and attendance with a direct and energetic tone.",
+          ["Instagram", "Facebook", "X"],
+          "Nursing Event RSVP Campaign",
+          toneOptions[2],
+          daysFromNow(-7),
+          "https://careers.dukehealth.org/events/duke-health-nursing-hiring-event",
+          "demo-campaign-3",
+          daysFromNow(-20)
+        ),
+        events: ["Duke Health Nursing Hiring Event", "Clinical Careers Open House", "Virtual Nurse Recruitment Webinar"],
+        status: "completed",
+      },
+      {
+        Instagram: { clicks: 844, applicationStarts: 398, applications: 166 },
+        Facebook: { clicks: 691, applicationStarts: 286, applications: 112 },
+        X: { clicks: 254, applicationStarts: 72, applications: 29 },
+      }
+    ),
+    {
+      ...withPlatformMetrics(
+        {
+          ...createCampaignFromBrief(
+            "Create a campaign for Patient Care Technicians in Charlotte, NC. Target qualified candidates with a friendly and professional tone.",
+            ["LinkedIn", "Instagram", "Facebook", "X"],
+            "Patient Care Technician Launch",
+            toneOptions[0],
+            daysFromNow(3),
+            "https://careers.dukehealth.org/search-jobs/patient%20care%20technician",
+            "demo-campaign-4",
+            daysFromNow(0)
+          ),
+          status: "scheduled",
+        },
+        {}
+      ),
+      metrics: { clicks: 0, applicationStarts: 0, applications: 0 },
+    },
+    {
+      ...createCampaignFromBrief(
+        "Create a campaign for Pharmacy Technicians in Durham, NC. Target qualified candidates with a warm and empathetic tone.",
+        ["LinkedIn"],
+        "Pharmacy Technician Draft",
+        toneOptions[1],
+        daysFromNow(10),
+        "https://careers.dukehealth.org/search-jobs/pharmacy%20technician",
+        "demo-campaign-5",
+        daysFromNow(0)
+      ),
+      status: "draft",
+      metrics: { clicks: 0, applicationStarts: 0, applications: 0 },
+      platforms: createCampaignFromBrief(
+        "Create a campaign for Pharmacy Technicians in Durham, NC. Target qualified candidates with a warm and empathetic tone.",
+        ["LinkedIn"],
+        "Pharmacy Technician Draft",
+        toneOptions[1],
+        daysFromNow(10),
+        "https://careers.dukehealth.org/search-jobs/pharmacy%20technician",
+        "demo-campaign-5",
+        daysFromNow(0)
+      ).platforms.map((platform) => ({ ...platform, metrics: { clicks: 0, applicationStarts: 0, applications: 0 } })),
+    },
+  ];
+
+  return campaigns;
+};
 
 const storageKey = (refNum: string) => `${STORAGE_PREFIX}.${refNum || "demo"}`;
 const memoryCampaignStore: Record<string, Campaign[]> = {};
@@ -316,14 +439,22 @@ const normalizeCampaignName = (campaign: Campaign): Campaign => {
   };
 };
 
+const normalizeCampaignTracking = (campaign: Campaign): Campaign => ({
+  ...campaign,
+  platforms: campaign.platforms.map((platform) => ({
+    ...platform,
+    utmLink: buildChannelUtmLink(platform.ctaDestination, platform.platform, campaign.id),
+  })),
+});
+
 const getCampaignObjectiveBrief = (campaign: Campaign) => {
   const location = campaign.location && campaign.location !== "target markets" ? ` in ${campaign.location}` : "";
   return `Create a campaign for ${campaign.role}${location}. Target ${campaign.audience} with a ${campaign.tone.toLowerCase()} tone.`;
 };
 
 const withBaseCampaigns = (campaigns: Campaign[]) => {
-  const baseCampaigns = demoCampaigns().map(normalizeCampaignName);
-  const userCampaigns = campaigns.filter((campaign) => !isDemoCampaign(campaign)).map(normalizeCampaignName);
+  const baseCampaigns = demoCampaigns().map(normalizeCampaignName).map(normalizeCampaignTracking);
+  const userCampaigns = campaigns.filter((campaign) => !isDemoCampaign(campaign)).map(normalizeCampaignName).map(normalizeCampaignTracking);
   return [
     ...userCampaigns,
     ...baseCampaigns.filter((baseCampaign) => !userCampaigns.some((campaign) => campaign.id === baseCampaign.id)),
@@ -340,9 +471,10 @@ export const campaignStudioAdapter: CampaignStudioAdapter = {
   saveCampaign: async (refNum: string, campaign: Campaign) => {
     const key = storageKey(refNum);
     const campaigns = readStoredCampaigns(key).filter((item) => !isDemoCampaign(item));
-    const nextCampaigns = [campaign, ...campaigns.filter((item) => item.id !== campaign.id)];
+    const normalizedCampaign = normalizeCampaignTracking(campaign);
+    const nextCampaigns = [normalizedCampaign, ...campaigns.filter((item) => item.id !== campaign.id)];
     writeStoredCampaigns(key, nextCampaigns);
-    return campaign;
+    return normalizedCampaign;
   },
   deleteCampaign: async (refNum: string, campaignId: string) => {
     const key = storageKey(refNum);

@@ -1,4 +1,4 @@
-export type CampaignStatus = "active" | "scheduled" | "completed";
+export type CampaignStatus = "active" | "scheduled" | "completed" | "draft";
 
 export type CampaignPlatformName = "LinkedIn" | "Instagram" | "Facebook" | "X";
 
@@ -27,6 +27,8 @@ export interface Campaign {
   id: string;
   name: string;
   role: string;
+  roles?: string[];
+  events?: string[];
   location: string;
   tone: string;
   audience: string;
@@ -35,6 +37,7 @@ export interface Campaign {
   postDate: string;
   platforms: CampaignPlatformOutput[];
   metrics: CampaignMetrics;
+  draftPrompt?: string;
 }
 
 export interface CampaignStudioAdapter {

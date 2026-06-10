@@ -64,6 +64,9 @@ type GenerateCampaignDraft = {
   tone: string;
   channels: CampaignPlatformName[];
   dueDate: string;
+  ctaDestination?: string;
+  campaignId?: string;
+  createdAt?: string;
 };
 
 const platformMeta: Record<CampaignPlatformName, { handle: string; actions: string[] }> = {
@@ -430,6 +433,8 @@ const downloadCampaignContentZip = async (campaign: Campaign) => {
 };
 
 const getCampaignTableStatus = (campaign: Campaign) => {
+  if (campaign.status === "draft") return { label: "Draft", className: "draft" };
+
   const postDate = new Date(campaign.postDate);
   const today = new Date();
 
@@ -544,7 +549,7 @@ const CampaignSankeyDiagram = ({ campaign }: { campaign: Campaign }) => {
   }, []);
 
   const vbWidth = sankeyWidth;
-  const headerHeight = 86;
+  const headerHeight = 108;
   const nodeWidth = 34;
   const fixedGap = 1;
   const channelCount = campaign.platforms.length;
@@ -563,26 +568,31 @@ const CampaignSankeyDiagram = ({ campaign }: { campaign: Campaign }) => {
   const totalClicks = Math.max(totalsByStage[0], 1);
   const toK = (value: number) => (value >= 1000 ? `${(value / 1000).toFixed(1)}k` : value.toLocaleString());
   const pct = (value: number, total: number) => (total ? `${((value / total) * 100).toFixed(1)}%` : "0%");
+  const dropRateValue = (stageIndex: number) => {
+    if (stageIndex === 0) return 0;
+    const previousTotal = totalsByStage[stageIndex - 1];
+    if (!previousTotal) return 0;
+    return Math.max(0, 100 - (totalsByStage[stageIndex] / previousTotal) * 100);
+  };
+  const dropRate = (stageIndex: number) => `${dropRateValue(stageIndex).toFixed(1)}%`;
   const stagePct = (platform: CampaignPlatformOutput, stageIndex: number) => {
     if (stageIndex === 0) return pct(stageValue(platform, 0), totalsByStage[0]);
     return pct(stageValue(platform, stageIndex), stageValue(platform, stageIndex - 1));
   };
+  const defaultFlowOpacity = 0.72;
   const nodeOpacity = (platform: CampaignPlatformName) => (!activeChannel || activeChannel === platform ? 1 : 0.18);
-  const flowOpacity = (platform: CampaignPlatformName) => (!activeChannel ? 0.7 : activeChannel === platform ? 0.82 : 0.08);
-  const clickedTotalHeight = 210;
-  const minFlowHeight = 32;
-  const clickedHeights = campaign.platforms.map((platform) => Math.max(minFlowHeight, (stageValue(platform, 0) / totalClicks) * clickedTotalHeight));
+  const flowOpacity = (platform: CampaignPlatformName) => (!activeChannel || activeChannel === platform ? defaultFlowOpacity : 0.06);
+  const clickedTotalHeight = 320;
+  const baseFlowHeight = 20;
+  const valueToHeight = (value: number) => baseFlowHeight + (Math.max(value, 0) / totalClicks) * clickedTotalHeight;
   const stageHeights = stages.map((stage, stageIndex) =>
-    campaign.platforms.map((platform, platformIndex) => {
-      if (stageIndex === 0) return clickedHeights[platformIndex];
-
-      const stepRatio = stageValue(platform, stageIndex) / Math.max(stageValue(platform, 0), 1);
-      return Math.max(minFlowHeight, clickedHeights[platformIndex] * stepRatio);
-    })
+    campaign.platforms.map((platform) => valueToHeight(stageValue(platform, stageIndex)))
   );
   const blockHeight = (heights: number[]) => heights.reduce((sum, height) => sum + height, 0) + fixedGap * Math.max(channelCount - 1, 0);
   const maxBlockHeight = Math.max(...stageHeights.map(blockHeight));
-  const height = headerHeight + maxBlockHeight + 24;
+  const graphBottom = headerHeight + maxBlockHeight;
+  const dropRateY = graphBottom + 34;
+  const height = graphBottom + 64;
   const distributeY = (heights: number[]) => {
     const total = blockHeight(heights);
     let y = headerHeight + (maxBlockHeight - total) / 2;
@@ -616,16 +626,33 @@ const CampaignSankeyDiagram = ({ campaign }: { campaign: Campaign }) => {
               x1={x}
               y1={headerHeight - 12}
               x2={x}
-              y2={height - 16}
+              y2={graphBottom + 8}
               className="cs-sankey__step-guide"
             />
           ))}
           {stages.map((stage, index) => (
             <g key={stage.key}>
-              <text x={colX[index]} y="14" className="cs-sankey__stage-label">{`${stage.label} (${toK(totalsByStage[index])})`}</text>
-              <text x={colX[index]} y="42" className="cs-sankey__stage-total">{pct(totalsByStage[index], totalsByStage[0])}</text>
+              <text x={colX[index]} y="14" className="cs-sankey__stage-label">{stage.label}</text>
+              <text x={colX[index]} y="42" className="cs-sankey__stage-total">
+                {pct(totalsByStage[index], totalsByStage[0])}
+                <tspan className="cs-sankey__stage-count" dx="8">{`(${toK(totalsByStage[index])})`}</tspan>
+              </text>
             </g>
           ))}
+          {stages.slice(1).map((stage, index) => {
+            const stageIndex = index + 1;
+            const midpointX = (colX[stageIndex - 1] + nodeWidth + colX[stageIndex]) / 2;
+            if (dropRateValue(stageIndex) <= 0) return null;
+
+            return (
+              <g key={`${stage.key}-drop-rate`} className="cs-sankey__drop-rate" transform={`translate(${midpointX} ${dropRateY})`}>
+                <text x="-5" y="0" textAnchor="end">{`${dropRate(stageIndex)} dropped`}</text>
+                <svg x="3" y="-13" width="16" height="16" viewBox="0 0 18 18" aria-hidden="true" focusable="false">
+                  <path d="M9 3.75v8.5m0 0 3.25-3.25M9 12.25 5.75 9" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+                </svg>
+              </g>
+            );
+          })}
           {campaign.platforms.flatMap((platform, platformIndex) =>
             stages.slice(1).map((stage, stageIndex) => {
               const from = stageNodes[stageIndex][platformIndex];
@@ -673,15 +700,18 @@ const CampaignSankeyDiagram = ({ campaign }: { campaign: Campaign }) => {
         </svg>
         <div className="cs-sankey__history" aria-label="Channel history">
           {campaign.platforms.map((platform) => (
-            <div
+            <button
+              type="button"
               key={platform.platform}
               className={activeChannel === platform.platform ? "is-active" : ""}
               onMouseEnter={() => setActiveChannel(platform.platform)}
               onMouseLeave={() => setActiveChannel(null)}
+              onFocus={() => setActiveChannel(platform.platform)}
+              onBlur={() => setActiveChannel(null)}
             >
               <span style={{ backgroundColor: sankeyAccentMap[platform.platform] }} aria-hidden="true" />
               {platform.platform}
-            </div>
+            </button>
           ))}
         </div>
       </div>
@@ -690,19 +720,23 @@ const CampaignSankeyDiagram = ({ campaign }: { campaign: Campaign }) => {
 };
 
 const MetricCell = ({ campaign, metric }: { campaign: Campaign; metric: keyof Campaign["metrics"] }) => {
-  const top = getTopChannel(campaign, metric);
-  const metricLabels: Record<keyof Campaign["metrics"], string> = {
-    clicks: "Clicks by channel",
-    applicationStarts: "Application starts by channel",
-    applications: "Applications by channel",
-  };
+  const hasNoAnalytics = !campaign.metrics.clicks && !campaign.metrics.applicationStarts && !campaign.metrics.applications;
+
+  if (campaign.status === "draft" || hasNoAnalytics) {
+    return <span className="cs-table-text cs-table-text--empty">-</span>;
+  }
+
+  const conversionPercent =
+    metric === "clicks" || !campaign.metrics.clicks
+      ? ""
+      : `${Math.round((campaign.metrics[metric] / campaign.metrics.clicks) * 100)}%`;
+
   return (
     <div className="cs-table-metric">
       <span className="cs-table-metric__value-row">
         <span className="cs-table-metric__value">{campaign.metrics[metric].toLocaleString()}</span>
-        <MetricInfoPopover title={metricLabels[metric]} items={getMetricBreakdown(campaign, metric)} />
+        {conversionPercent && <span className="cs-table-metric__conversion">({conversionPercent})</span>}
       </span>
-      {campaign.platforms.length > 1 && <small>{top.platform} {top.percent}%</small>}
     </div>
   );
 };
@@ -816,15 +850,21 @@ const Button = ({
   </button>
 );
 
+const BackArrowIcon = () => (
+  <svg className="cs-back-edit__icon" viewBox="0 0 14 12" aria-hidden="true" focusable="false">
+    <path d="M0.23125 6.54554C0.084375 6.40179 0 6.20804 0 6.00179C0 5.79554 0.084375 5.60179 0.23125 5.45804L5.73125 0.208037C6.03125 -0.0794632 6.50625 -0.0669631 6.79063 0.233037C7.075 0.533037 7.06563 1.00804 6.76562 1.29241L2.62188 5.25179H13.25C13.6656 5.25179 14 5.58616 14 6.00179C14 6.41741 13.6656 6.75179 13.25 6.75179H2.62188L6.76875 10.708C7.06875 10.9955 7.07812 11.4674 6.79375 11.7674C6.50937 12.0674 6.03438 12.0768 5.73438 11.7924L0.234375 6.54241L0.23125 6.54554Z" fill="currentColor" />
+  </svg>
+);
+
 const BackEditLink = ({ onClick }: { onClick?: () => void }) => (
   <button className="cs-back-edit" onClick={onClick}>
-    <span aria-hidden="true">‹</span> Go Back and Edit
+    <BackArrowIcon /> Go Back and Edit
   </button>
 );
 
 const BackToCampaignStudioLink = ({ onClick }: { onClick?: () => void }) => (
   <button className="cs-back-edit" onClick={onClick}>
-    <span aria-hidden="true">‹</span> Back to Campaigns Studio
+    <BackArrowIcon /> Back to Campaigns Studio
   </button>
 );
 
@@ -901,6 +941,77 @@ type DropdownOption = { value: string; label: string };
 type GooglePlacePrediction = {
   description: string;
   place_id: string;
+};
+
+type SelectedChipItem = {
+  key: string;
+  label: string;
+  onRemove: () => void;
+};
+
+const estimateChipWidth = (label: string) => Math.min(220, Math.ceil(label.length * 7.2) + 44);
+
+const getVisibleChipCount = (labels: string[], availableWidth: number) => {
+  if (!labels.length || availableWidth <= 0) return labels.length;
+
+  const gap = 8;
+  const countChipWidth = 48;
+  const chipWidths = labels.map(estimateChipWidth);
+  const allChipsWidth = chipWidths.reduce((total, width) => total + width, 0) + gap * Math.max(labels.length - 1, 0);
+  if (allChipsWidth <= availableWidth) return labels.length;
+
+  for (let count = labels.length - 1; count > 0; count -= 1) {
+    const chipsWidth = chipWidths.slice(0, count).reduce((total, width) => total + width, 0);
+    const totalWidth = chipsWidth + gap * count + countChipWidth;
+    if (totalWidth <= availableWidth) return count;
+  }
+
+  return 0;
+};
+
+const SelectedChipList = ({ items, maxVisibleItems }: { items: SelectedChipItem[]; maxVisibleItems?: number }) => {
+  const listRef = useRef<HTMLSpanElement | null>(null);
+  const [visibleCount, setVisibleCount] = useState(items.length);
+
+  useLayoutEffect(() => {
+    const node = listRef.current;
+    if (!node) return undefined;
+
+    const updateVisibleCount = () => {
+      setVisibleCount(getVisibleChipCount(items.map((item) => item.label), node.getBoundingClientRect().width));
+    };
+
+    updateVisibleCount();
+    const resizeObserver = new ResizeObserver(updateVisibleCount);
+    resizeObserver.observe(node);
+    return () => resizeObserver.disconnect();
+  }, [items]);
+
+  const cappedVisibleCount = maxVisibleItems ?? visibleCount;
+  const safeVisibleCount = Math.min(cappedVisibleCount, items.length);
+  const visibleItems = items.slice(0, safeVisibleCount);
+  const additionalCount = Math.max(items.length - safeVisibleCount, 0);
+
+  return (
+    <span className="cs-role-tags" ref={listRef}>
+      {visibleItems.map((item) => (
+        <span className="cs-role-tag" key={item.key}>
+          <span>{item.label}</span>
+          <button
+            type="button"
+            aria-label={`Remove ${item.label}`}
+            onClick={(event) => {
+              event.stopPropagation();
+              item.onRemove();
+            }}
+          >
+            ×
+          </button>
+        </span>
+      ))}
+      {additionalCount > 0 && <span className="cs-role-tag cs-role-tag--count">+{additionalCount}</span>}
+    </span>
+  );
 };
 
 const GOOGLE_PLACES_SCRIPT_ID = "google-places-autocomplete";
@@ -991,6 +1102,118 @@ const SingleSelectDropdown = ({
               {option.label}
             </button>
           ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const MultiSelectDropdown = ({
+  values,
+  options,
+  onChange,
+  placeholder = "Select options",
+  searchPlaceholder = "Search",
+  maxVisibleChips,
+}: {
+  values: string[];
+  options: DropdownOption[];
+  onChange: (values: string[]) => void;
+  placeholder?: string;
+  searchPlaceholder?: string;
+  maxVisibleChips?: number;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const selectedOptions = values
+    .map((value) => options.find((option) => option.value === value))
+    .filter((option): option is DropdownOption => Boolean(option));
+  const filteredOptions = options.filter((option) => option.label.toLowerCase().includes(search.trim().toLowerCase()));
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!(event.target instanceof Node) || dropdownRef.current?.contains(event.target)) return;
+      setIsOpen(false);
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, [isOpen]);
+
+  const toggleValue = (value: string) => {
+    onChange(values.includes(value) ? values.filter((item) => item !== value) : [...values, value]);
+  };
+
+  return (
+    <div className="cs-role-select" ref={dropdownRef}>
+      <div
+        className={`cs-role-select__control ${isOpen ? "is-open" : ""}`}
+        role="button"
+        tabIndex={0}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        onClick={() => setIsOpen((current) => !current)}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            setIsOpen((current) => !current);
+          }
+        }}
+      >
+        {selectedOptions.length ? (
+          <SelectedChipList
+            maxVisibleItems={maxVisibleChips}
+            items={selectedOptions.map((option) => ({
+              key: option.value,
+              label: option.label,
+              onRemove: () => onChange(values.filter((value) => value !== option.value)),
+            }))}
+          />
+        ) : (
+          <span className="cs-role-select__placeholder">{placeholder}</span>
+        )}
+        {selectedOptions.length > 0 && (
+          <button
+            type="button"
+            className="cs-role-select__clear"
+            aria-label="Clear selected options"
+            onClick={(event) => {
+              event.stopPropagation();
+              onChange([]);
+            }}
+          >
+            ×
+          </button>
+        )}
+      </div>
+      {isOpen && (
+        <div className="cs-role-select__menu" role="listbox" aria-multiselectable="true">
+          <div className="cs-role-select__search">
+            <span aria-hidden="true" />
+            <input
+              value={search}
+              placeholder={searchPlaceholder}
+              onChange={(event) => setSearch(event.target.value)}
+              onClick={(event) => event.stopPropagation()}
+            />
+          </div>
+          {filteredOptions.map((option) => (
+            <button
+              type="button"
+              key={option.value}
+              className={values.includes(option.value) ? "is-selected" : ""}
+              role="option"
+              aria-selected={values.includes(option.value)}
+              onClick={() => toggleValue(option.value)}
+            >
+              <span className="cs-role-select__checkbox" aria-hidden="true" />
+              <span>{option.label}</span>
+            </button>
+          ))}
+          {!filteredOptions.length && <div className="cs-role-select__empty">No options found</div>}
         </div>
       )}
     </div>
@@ -1124,20 +1347,54 @@ const DatePickerField = ({ value, onChange }: { value: string; onChange: (date: 
   );
 };
 
+const campaignWizardSteps = [
+  { title: "Details", description: "Review auto-filled fields." },
+  { title: "Preview & Publish", description: "Review generated content." },
+];
+
 const CampaignWizardProgress = ({ activeStep }: { activeStep: 1 | 2 }) => (
   <div className="cs-wizard-steps" aria-label="Generate campaign steps">
-    <span className={activeStep === 1 ? "is-active" : ""}><em>1</em><strong>Details</strong></span>
-    <span className={activeStep === 2 ? "is-active" : ""}><em>2</em><strong>Preview & publish</strong></span>
+    {campaignWizardSteps.map((step, index) => {
+      const stepNumber = (index + 1) as 1 | 2;
+      const isActive = activeStep === stepNumber;
+      const isCompleted = activeStep > stepNumber;
+
+      return (
+        <span
+          key={step.title}
+          className={`${isActive ? "is-active" : ""} ${isCompleted ? "is-completed" : ""}`}
+        >
+          <span className="cs-wizard-step__rail" aria-hidden="true">
+            <em>
+              {isCompleted ? (
+                <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                  <path d="M3.5 8.2 6.5 11l6-6.4" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+                </svg>
+              ) : (
+                stepNumber
+              )}
+            </em>
+          </span>
+          <strong>{step.title}</strong>
+          <small>{step.description}</small>
+        </span>
+      );
+    })}
   </div>
 );
 
-const CampaignWizardHeader = ({ activeStep }: { activeStep: 1 | 2 }) => (
+const CampaignWizardHeader = ({ activeStep, onBack, actions }: { activeStep: 1 | 2; onBack?: () => void; actions?: React.ReactNode }) => (
   <div className="cs-wizard-header__content">
-    <div className="cs-wizard-title">
-      <h1>Generate campaign</h1>
-      <p>Review campaign details, generate channel assets, and prepare content for publishing.</p>
+    <div className="cs-wizard-hero">
+      {onBack && <BackToCampaignStudioLink onClick={onBack} />}
+      <div className="cs-wizard-title">
+        <h1>Generate campaign</h1>
+      </div>
     </div>
-    <CampaignWizardProgress activeStep={activeStep} />
+    <div className="cs-wizard-stepper-row">
+      <CampaignWizardProgress activeStep={activeStep} />
+      {actions && <div className="cs-wizard-header__actions">{actions}</div>}
+    </div>
   </div>
 );
 
@@ -1147,6 +1404,9 @@ const GenerateCampaignModal = ({
   initialTone,
   initialChannels,
   initialDueDate,
+  initialCtaDestination,
+  initialCampaignId,
+  initialCreatedAt,
   onBack,
   onStart,
 }: {
@@ -1155,11 +1415,20 @@ const GenerateCampaignModal = ({
   initialTone?: string;
   initialChannels?: CampaignPlatformName[];
   initialDueDate?: string;
+  initialCtaDestination?: string;
+  initialCampaignId?: string;
+  initialCreatedAt?: string;
   onBack: () => void;
   onStart: (campaign: Campaign) => void;
 }) => {
   const initialDetails = parseBrief(prompt, initialTone);
-  const initialCtaMatch = getCmsDestinationMatch(cmsDestinationPages[1].value);
+  const resolvedInitialCtaDestination = initialCtaDestination || cmsDestinationPages[1].value;
+  const initialCtaMatch = getCmsDestinationMatch(resolvedInitialCtaDestination);
+  const initialCtaDestinationType = ctaJobOptions.some((option) => option.value === resolvedInitialCtaDestination)
+    ? "job"
+    : ctaEventOptions.some((option) => option.value === resolvedInitialCtaDestination)
+      ? "event"
+      : "page";
   const [brief, setBrief] = useState(prompt);
   const [tone, setTone] = useState(initialTone || parseBrief(prompt).tone);
   const [campaignName, setCampaignName] = useState(initialCampaignName || makeCampaignName(prompt));
@@ -1178,15 +1447,29 @@ const GenerateCampaignModal = ({
   const locationDropdownRef = useRef<HTMLDivElement>(null);
   const [selectedCtaPageValue, setSelectedCtaPageValue] = useState(initialCtaMatch.page.value);
   const [, setSelectedCtaSubpageValue] = useState(initialCtaMatch.subpage?.value || "");
-  const [ctaDestinationType, setCtaDestinationType] = useState<"page" | "job" | "event">("page");
+  const [ctaDestinationType, setCtaDestinationType] = useState<"page" | "job" | "event">(initialCtaDestinationType);
   const [selectedCtaLocale, setSelectedCtaLocale] = useState(ctaLocaleOptions[0].value);
   const [selectedCtaPersona, setSelectedCtaPersona] = useState(ctaPersonaOptions[0].value);
-  const [selectedCtaJob, setSelectedCtaJob] = useState(ctaJobOptions[0].value);
-  const [selectedCtaEvent, setSelectedCtaEvent] = useState(ctaEventOptions[0].value);
+  const [selectedCtaJob, setSelectedCtaJob] = useState(
+    ctaJobOptions.some((option) => option.value === resolvedInitialCtaDestination) ? resolvedInitialCtaDestination : ctaJobOptions[0].value
+  );
+  const [selectedCtaEvent, setSelectedCtaEvent] = useState(
+    ctaEventOptions.some((option) => option.value === resolvedInitialCtaDestination) ? resolvedInitialCtaDestination : ctaEventOptions[0].value
+  );
+  const [selectedContextEvents, setSelectedContextEvents] = useState<string[]>(
+    initialCtaDestinationType === "event" ? [resolvedInitialCtaDestination] : [ctaEventOptions[0].value]
+  );
+  const updateSelectedCtaEvent = (eventValue: string) => {
+    setSelectedCtaEvent(eventValue);
+    setSelectedContextEvents((current) => (current.includes(eventValue) ? current : [...current, eventValue]));
+  };
   const selectedCtaPage = cmsDestinationPages.find((page) => page.value === selectedCtaPageValue) || cmsDestinationPages[1];
   const selectedCtaDestination =
     ctaDestinationType === "job" ? selectedCtaJob : ctaDestinationType === "event" ? selectedCtaEvent : selectedCtaPage.value;
-  const selectedCtaEventLabel = ctaEventOptions.find((event) => event.value === selectedCtaEvent)?.label || "";
+  const selectedContextEventLabels = selectedContextEvents
+    .map((eventValue) => ctaEventOptions.find((event) => event.value === eventValue)?.label)
+    .filter(Boolean)
+    .join(", ");
   const eventTemplatePrompt = templateCards.find((template) => template.icon === "calendar")?.prompt.toLowerCase() || "";
   const isEventTemplateSelected = eventTemplatePrompt ? brief.toLowerCase().includes(eventTemplatePrompt) : false;
   const shouldShowEventContext = isEventTemplateSelected || ctaDestinationType === "event";
@@ -1195,7 +1478,7 @@ const GenerateCampaignModal = ({
     jobCategory,
     role: roleDetails,
     location: locationDetails,
-    eventName: shouldShowEventContext ? selectedCtaEventLabel : "",
+    eventName: shouldShowEventContext ? selectedContextEventLabels : "",
     eventDate: "",
     eventFormat: "",
   });
@@ -1270,8 +1553,6 @@ const GenerateCampaignModal = ({
     updateSelectedRoles(selectedRoles.includes(role) ? selectedRoles.filter((item) => item !== role) : [...selectedRoles, role]);
   };
   const removeRole = (role: string) => updateSelectedRoles(selectedRoles.filter((item) => item !== role));
-  const visibleRoles = selectedRoles.slice(0, 2);
-  const additionalRoleCount = Math.max(selectedRoles.length - visibleRoles.length, 0);
   const filteredRoleOptions = roleOptions.filter((role) => role.toLowerCase().includes(roleSearch.trim().toLowerCase()));
   const selectedLocations = locationDetails.split(";").map((location) => location.trim()).filter(Boolean);
   const updateSelectedLocations = (locations: string[]) => setLocationDetails(locations.join("; "));
@@ -1280,40 +1561,26 @@ const GenerateCampaignModal = ({
     setLocationSearch("");
   };
   const removeLocation = (location: string) => updateSelectedLocations(selectedLocations.filter((item) => item !== location));
-  const visibleLocations = selectedLocations.slice(0, 2);
-  const additionalLocationCount = Math.max(selectedLocations.length - visibleLocations.length, 0);
   const googleLocationLabels = googleLocationOptions.map((location) => location.description);
   const availableLocationOptions = Array.from(new Set([...googleLocationLabels, ...selectedLocations]));
   const filteredLocationOptions = availableLocationOptions.filter((location) => location.toLowerCase().includes(locationSearch.trim().toLowerCase()));
   const canUseTypedLocation =
     locationSearch.trim().length > 1 &&
     !filteredLocationOptions.some((location) => location.toLowerCase() === locationSearch.trim().toLowerCase());
-  const canContinue = Boolean(campaignName.trim() && dueDate && selectedChannels.length && selectedCtaDestination);
+  const effectivePublishDate = dueDate || new Date().toISOString().slice(0, 10);
+  const canContinue = Boolean(campaignName.trim() && selectedChannels.length && selectedCtaDestination);
 
   return (
     <main className="campaign-studio campaign-studio--wizard">
       <header className="cs-wizard-header">
-        <div>
-          <button className="cs-back-edit" onClick={onBack}>
-            <span aria-hidden="true">‹</span> Back to Campaigns Studio
-          </button>
-        </div>
-        <CampaignWizardHeader activeStep={1} />
+        <CampaignWizardHeader activeStep={1} onBack={onBack} />
       </header>
       <section className="cs-wizard-page">
         <section className="cs-wizard-section cs-details-step">
-            <div className="cs-details-step__intro">
-              <h2>Campaign details</h2>
-              <p>Review and adjust the auto-filled fields before continuing.</p>
-            </div>
             <div className="cs-details-form">
               <div className="cs-field">
                 <label>Campaign title <span className="cs-required">*</span><span className="cs-ai-badge">AI filled</span></label>
                 <input value={campaignName} onChange={(event) => setCampaignName(event.target.value)} />
-              </div>
-              <div className="cs-field cs-date-field">
-                <label>Expected publish date <span className="cs-required">*</span></label>
-                <DatePickerField value={dueDate} onChange={setDueDate} />
               </div>
               <div className="cs-field">
                 <label>Tone of voice <span className="cs-required">*</span><span className="cs-ai-badge">AI filled</span></label>
@@ -1327,6 +1594,10 @@ const GenerateCampaignModal = ({
               <div className="cs-field cs-prompt-connector-field">
                 <label>Prompt</label>
                 <textarea value={brief} onChange={(event) => setBrief(event.target.value)} rows={5} />
+              </div>
+              <div className="cs-field cs-date-field">
+                <label>Expected publish date</label>
+                <DatePickerField value={dueDate} onChange={setDueDate} />
               </div>
               <div className="cs-extracted-card">
                 <div className="cs-extracted-card__header">
@@ -1343,7 +1614,7 @@ const GenerateCampaignModal = ({
                     />
                   </div>
                   <div className="cs-field cs-role-select" ref={roleDropdownRef}>
-                    <label>Role(s) <span className="cs-ai-badge">AI filled</span></label>
+                    <label>Job Title(s) <span className="cs-ai-badge">AI filled</span></label>
                     <div
                       className={`cs-role-select__control ${isRoleDropdownOpen ? "is-open" : ""}`}
                       role="button"
@@ -1363,24 +1634,13 @@ const GenerateCampaignModal = ({
                       }}
                     >
                       {selectedRoles.length ? (
-                        <span className="cs-role-tags">
-                          {visibleRoles.map((role) => (
-                            <span className="cs-role-tag" key={role}>
-                              <span>{role}</span>
-                              <button
-                                type="button"
-                                aria-label={`Remove ${role}`}
-                                onClick={(event) => {
-                                  event.stopPropagation();
-                                  removeRole(role);
-                                }}
-                              >
-                                ×
-                              </button>
-                            </span>
-                          ))}
-                          {additionalRoleCount > 0 && <span className="cs-role-tag cs-role-tag--count">+{additionalRoleCount}</span>}
-                        </span>
+                        <SelectedChipList
+                          items={selectedRoles.map((role) => ({
+                            key: role,
+                            label: role,
+                            onRemove: () => removeRole(role),
+                          }))}
+                        />
                       ) : (
                         <span className="cs-role-select__placeholder">Select roles</span>
                       )}
@@ -1431,24 +1691,14 @@ const GenerateCampaignModal = ({
                     <div className={`cs-location-searchbox ${isLocationDropdownOpen ? "is-open" : ""}`}>
                       <img className="cs-location-searchbox__icon" src={searchIcon} alt="" />
                       {selectedLocations.length > 0 && (
-                        <span className="cs-role-tags">
-                          {visibleLocations.map((location) => (
-                            <span className="cs-role-tag" key={location}>
-                              <span>{location}</span>
-                              <button
-                                type="button"
-                                aria-label={`Remove ${location}`}
-                                onClick={(event) => {
-                                  event.stopPropagation();
-                                  removeLocation(location);
-                                }}
-                              >
-                                ×
-                              </button>
-                            </span>
-                          ))}
-                          {additionalLocationCount > 0 && <span className="cs-role-tag cs-role-tag--count">+{additionalLocationCount}</span>}
-                        </span>
+                        <SelectedChipList
+                          maxVisibleItems={2}
+                          items={selectedLocations.map((location) => ({
+                            key: location,
+                            label: location,
+                            onRemove: () => removeLocation(location),
+                          }))}
+                        />
                       )}
                       <input
                         value={locationSearch}
@@ -1513,11 +1763,13 @@ const GenerateCampaignModal = ({
                   {shouldShowEventContext && (
                     <div className="cs-field cs-event-context-field">
                       <label>Event <span className="cs-ai-badge">AI filled</span></label>
-                      <SingleSelectDropdown
-                        value={selectedCtaEvent}
+                      <MultiSelectDropdown
+                        values={selectedContextEvents}
                         options={ctaEventOptions}
-                        onChange={setSelectedCtaEvent}
+                        onChange={setSelectedContextEvents}
                         placeholder="Select event"
+                        searchPlaceholder="Search events"
+                        maxVisibleChips={2}
                       />
                     </div>
                   )}
@@ -1597,7 +1849,7 @@ const GenerateCampaignModal = ({
                       <SingleSelectDropdown
                         value={selectedCtaEvent}
                         options={ctaEventOptions}
-                        onChange={setSelectedCtaEvent}
+                        onChange={updateSelectedCtaEvent}
                         placeholder="Select event"
                       />
                     </div>
@@ -1614,8 +1866,9 @@ const GenerateCampaignModal = ({
                       className={selectedChannels.includes(channel) ? "is-selected" : ""}
                       onClick={() => toggleChannel(channel)}
                     >
+                      <span className="cs-channel-logo" aria-hidden="true"><img src={channelLogoMap[channel]} alt="" /></span>
+                      <span className="cs-channel-title">{getChannelSelectionLabel(channel)}</span>
                       <span className="cs-channel-check" aria-hidden="true">{selectedChannels.includes(channel) ? "✓" : ""}</span>
-                      <span>{getChannelSelectionLabel(channel)}</span>
                     </button>
                   ))}
                 </div>
@@ -1630,7 +1883,7 @@ const GenerateCampaignModal = ({
             <Button
               variant="primary"
               disabled={!canContinue}
-              onClick={() => onStart(createCampaignFromBrief(effectiveBrief, selectedChannels, campaignName, tone, dueDate, selectedCtaDestination))}
+              onClick={() => onStart(createCampaignFromBrief(effectiveBrief, selectedChannels, campaignName, tone, effectivePublishDate, selectedCtaDestination, initialCampaignId, initialCreatedAt))}
             >
               Continue
             </Button>
@@ -1681,17 +1934,10 @@ const LoadingPage = ({ onDone, onExit, showWizardProgress = false, campaign }: {
     return (
       <main className="campaign-studio campaign-studio--wizard campaign-studio--generating-wizard">
         <header className="cs-wizard-header">
-          <div>
-            {onExit && <BackToCampaignStudioLink onClick={onExit} />}
-          </div>
-          <CampaignWizardHeader activeStep={2} />
+          <CampaignWizardHeader activeStep={2} onBack={onExit} />
         </header>
         <section className="cs-wizard-page">
           <section className="cs-wizard-section cs-details-step">
-            <div className="cs-details-step__intro">
-              <h2>Generating campaign assets</h2>
-              <p>Your campaign is being built. Posts will appear here as they are ready.</p>
-            </div>
             {progressContent}
           </section>
         </section>
@@ -1730,6 +1976,7 @@ const PostPreview = ({
   const instagramName = handle.replace("@", "").split("·")[0].trim();
   const xHandle = handle.split("·")[0].trim();
   const postCopy = post.copy.replace(/Learn more:?\s+\S+/i, "").trim();
+  const trackingLink = post.utmLink || post.ctaDestination;
   const statsByPlatform: Record<CampaignPlatformName, string> = {
     LinkedIn: "1,607 · 112 Comments · 32,234 Views",
     Instagram: "1,248 likes",
@@ -1741,10 +1988,11 @@ const PostPreview = ({
     void navigator.clipboard?.writeText(post.copy);
   };
   const copyDestinationLink = () => {
-    void navigator.clipboard?.writeText(post.utmLink || post.ctaDestination);
+    void navigator.clipboard?.writeText(trackingLink);
   };
   const downloadPostText = () => {
-    const blob = new Blob([post.copy], { type: "text/plain;charset=utf-8" });
+    const fileContent = [`${post.platform} campaign content`, `CTA link: ${trackingLink}`, "", "Post text:", stripGeneratedLinksFromCopy(post.copy)].join("\n");
+    const blob = new Blob([fileContent], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
@@ -1945,7 +2193,7 @@ const PostPreview = ({
         </div>
       </div>
       <p className="cs-post__copy">
-        {postCopy} <a href={post.ctaDestination}>Learn more</a>
+        {postCopy} <a href={trackingLink}>Learn more</a>
       </p>
       <div className="cs-post__image-wrap">
         <img src={post.image} alt={post.altText} />
@@ -2046,6 +2294,32 @@ const DeleteCampaignModal = ({
     <div className="cs-modal__footer">
       <Button variant="ghost" onClick={onCancel}>Cancel</Button>
       <Button variant="primary" onClick={onConfirm}>Delete campaign</Button>
+    </div>
+  </Modal>
+);
+
+const SaveDraftPromptModal = ({
+  campaign,
+  isSaving,
+  onSaveDraft,
+  onExitWithoutSaving,
+  onCancel,
+}: {
+  campaign: Campaign;
+  isSaving: boolean;
+  onSaveDraft: () => void;
+  onExitWithoutSaving: () => void;
+  onCancel: () => void;
+}) => (
+  <Modal title="Save campaign as draft?" onClose={onCancel}>
+    <div className="cs-modal__body cs-delete-modal__body">
+      <p>
+        Save <strong>{campaign.name}</strong> as a draft so you can finish it later, or exit without saving.
+      </p>
+    </div>
+    <div className="cs-modal__footer">
+      <Button variant="secondary" onClick={onExitWithoutSaving}>Exit without saving</Button>
+      <Button variant="primary" onClick={onSaveDraft} disabled={isSaving}>{isSaving ? "Saving..." : "Save as draft"}</Button>
     </div>
   </Modal>
 );
@@ -2265,7 +2539,6 @@ const CampaignTable = ({
           <col className="cs-col-metric" />
           <col className="cs-col-metric" />
           <col className="cs-col-metric" />
-          <col className="cs-col-conversion" />
           <col className="cs-col-date" />
           <col className="cs-col-actions" />
         </colgroup>
@@ -2274,10 +2547,9 @@ const CampaignTable = ({
             <th>Campaign Name</th>
             <th>Status</th>
             <th>Channels Selected</th>
-            <th>Clicks</th>
-            <th>Application Starts</th>
-            <th>Applications</th>
-            <th>Conversion</th>
+            <th>Clicked</th>
+            <th>Click to Apply</th>
+            <th>Applied</th>
             <th>Date Created</th>
             <th aria-label="More actions" />
           </tr>
@@ -2285,7 +2557,7 @@ const CampaignTable = ({
         <tbody>
           {!campaigns.length ? (
             <tr className="cs-table-empty-row">
-              <td colSpan={9}>
+              <td colSpan={8}>
                 <div className="cs-table-empty-state">
                   <h3>No created campaigns</h3>
                   <p>Once you create a campaign it will appear in this table.</p>
@@ -2331,11 +2603,10 @@ const CampaignTable = ({
                 <td><MetricCell campaign={campaign} metric="clicks" /></td>
                 <td><MetricCell campaign={campaign} metric="applicationStarts" /></td>
                 <td><MetricCell campaign={campaign} metric="applications" /></td>
-                <td><ConversionCell campaign={campaign} /></td>
                 <td><span className="cs-table-text" title={formatDate(campaign.createdAt)}>{formatDate(campaign.createdAt)}</span></td>
                 <td className="cs-actions-cell">
                   <button
-                    className={`cs-more-button ${openMenu === campaign.id ? "is-open" : ""}`}
+                    className={`cs-more-button cs-table-more-button ${openMenu === campaign.id ? "is-open" : ""}`}
                     aria-label={`More actions for ${campaign.name}`}
                     aria-expanded={openMenu === campaign.id}
                     onClick={() => setOpenMenu(openMenu === campaign.id ? null : campaign.id)}
@@ -2348,9 +2619,9 @@ const CampaignTable = ({
                   </button>
                   {openMenu === campaign.id && (
                     <div className="cs-menu">
-                      <button onClick={() => { setOpenMenu(null); onExport(campaign); }}><img src={downloadIcon} alt="" /> Download & Copy Content</button>
-                      <button onClick={() => { setOpenMenu(null); onDuplicate(campaign); }}><img src={copyIcon} alt="" /> Duplicate Campaign</button>
-                      <button onClick={() => { setOpenMenu(null); onDelete(campaign); }}><img src={trashIcon} alt="" /> Delete Campaign</button>
+                      <button onClick={() => { setOpenMenu(null); onExport(campaign); }}><span className="cs-menu__icon" style={{ "--icon-url": `url(${downloadIcon})` } as React.CSSProperties} aria-hidden="true" /> Download & Copy Content</button>
+                      <button onClick={() => { setOpenMenu(null); onDuplicate(campaign); }}><span className="cs-menu__icon" style={{ "--icon-url": `url(${copyIcon})` } as React.CSSProperties} aria-hidden="true" /> Duplicate Campaign</button>
+                      <button onClick={() => { setOpenMenu(null); onDelete(campaign); }}><span className="cs-menu__icon" style={{ "--icon-url": `url(${trashIcon})` } as React.CSSProperties} aria-hidden="true" /> Delete Campaign</button>
                     </div>
                   )}
                 </td>
@@ -2387,14 +2658,18 @@ export const CampaignStudioList: React.FC = () => {
   useEffect(refreshCampaigns, [refNum]);
 
   const openCampaignEditor = (campaign: Campaign) => {
+    const editorPrompt = campaign.draftPrompt || getCampaignPrompt(campaign);
     setGenerateDraft({
-      prompt: getCampaignPrompt(campaign),
+      prompt: editorPrompt,
       campaignName: campaign.name,
       tone: campaign.tone,
       channels: campaign.platforms.map((platform) => platform.platform),
       dueDate: campaign.postDate,
+      ctaDestination: campaign.platforms[0]?.ctaDestination,
+      campaignId: campaign.id,
+      createdAt: campaign.createdAt,
     });
-    setPrompt(getCampaignPrompt(campaign));
+    setPrompt(editorPrompt);
     setPendingCampaign(null);
     setIsGenerating(false);
     setShowGenerateModal(true);
@@ -2407,6 +2682,7 @@ export const CampaignStudioList: React.FC = () => {
       tone: campaign.tone,
       channels: campaign.platforms.map((platform) => platform.platform),
       dueDate: campaign.postDate,
+      ctaDestination: campaign.platforms[0]?.ctaDestination,
     });
     setShowGenerateModal(true);
   };
@@ -2462,6 +2738,9 @@ export const CampaignStudioList: React.FC = () => {
         initialTone={generateDraft?.tone}
         initialChannels={generateDraft?.channels}
         initialDueDate={generateDraft?.dueDate}
+        initialCtaDestination={generateDraft?.ctaDestination}
+        initialCampaignId={generateDraft?.campaignId}
+        initialCreatedAt={generateDraft?.createdAt}
         onBack={() => {
           setShowGenerateModal(false);
           setGenerateDraft(null);
@@ -2505,7 +2784,7 @@ export const CampaignStudioList: React.FC = () => {
         <h3>Or start with a template</h3>
         <div className="cs-template-grid">
           {templateCards.map((template) => (
-            <button key={template.title} className="cs-template-card" onClick={() => setPrompt(`${defaultPrompt} ${template.prompt}`)}>
+            <button key={template.title} className="cs-template-card" onClick={() => setPrompt(template.prompt)}>
               <TemplateIcon type={template.icon} />
               <strong>{template.title}</strong>
             </button>
@@ -2517,7 +2796,7 @@ export const CampaignStudioList: React.FC = () => {
         <p>Track generated campaigns and review top-channel attribution from career-site UTM activity.</p>
         <CampaignTable
           campaigns={campaigns}
-          onPreview={(campaign) => navigate(`${listPath}/${campaign.id}/dashboard`)}
+          onPreview={(campaign) => campaign.status === "draft" ? openCampaignEditor(campaign) : navigate(`${listPath}/${campaign.id}/dashboard`)}
           onExport={setExportCampaign}
           onDuplicate={duplicateCampaign}
           onDelete={setDeleteCampaignTarget}
@@ -2541,19 +2820,51 @@ export const CampaignStudioCreate: React.FC = () => {
   const { customerCode, refnum } = useParams();
   const refNum = refnum || getRefNum();
   const [prompt] = useState(defaultPrompt);
+  const [generateDraft, setGenerateDraft] = useState<GenerateCampaignDraft | null>(null);
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const listPath = getCampaignStudioListPath(customerCode, refnum);
 
   if (isGenerating && campaign) return <LoadingPage campaign={campaign} onDone={() => { scrollPageToTop(); setIsGenerating(false); }} onExit={() => setIsGenerating(false)} showWizardProgress />;
-  if (campaign) return <CampaignStudioWorkspace initialCampaign={campaign} onExit={() => navigate(listPath)} showWizardProgress />;
+  if (campaign) {
+    return (
+      <CampaignStudioWorkspace
+        initialCampaign={campaign}
+        onExit={() => navigate(listPath)}
+        onBackEdit={(currentCampaign) => {
+          const editorPrompt = currentCampaign.draftPrompt || getCampaignPrompt(currentCampaign);
+          setGenerateDraft({
+            prompt: editorPrompt,
+            campaignName: currentCampaign.name,
+            tone: currentCampaign.tone,
+            channels: currentCampaign.platforms.map((platform) => platform.platform),
+            dueDate: currentCampaign.postDate,
+            ctaDestination: currentCampaign.platforms[0]?.ctaDestination,
+            campaignId: currentCampaign.id,
+            createdAt: currentCampaign.createdAt,
+          });
+          setCampaign(null);
+          setIsGenerating(false);
+        }}
+        showWizardProgress
+      />
+    );
+  }
 
   return (
     <GenerateCampaignModal
-      prompt={prompt}
+      prompt={generateDraft?.prompt || prompt}
+      initialCampaignName={generateDraft?.campaignName}
+      initialTone={generateDraft?.tone}
+      initialChannels={generateDraft?.channels}
+      initialDueDate={generateDraft?.dueDate}
+      initialCtaDestination={generateDraft?.ctaDestination}
+      initialCampaignId={generateDraft?.campaignId}
+      initialCreatedAt={generateDraft?.createdAt}
       onBack={() => navigate(listPath)}
       onStart={(nextCampaign) => {
         scrollPageToTop();
+        setGenerateDraft(null);
         setCampaign(nextCampaign);
         setIsGenerating(true);
       }}
@@ -2578,6 +2889,8 @@ export const CampaignStudioWorkspace: React.FC<{
   const [saveModalCampaign, setSaveModalCampaign] = useState<Campaign | null>(null);
   const [saved, setSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
+  const [showDraftPrompt, setShowDraftPrompt] = useState(false);
   const [saveError, setSaveError] = useState("");
   const listPath = getCampaignStudioListPath(customerCode, refnum);
 
@@ -2589,7 +2902,10 @@ export const CampaignStudioWorkspace: React.FC<{
     setIsSaving(true);
     setSaveError("");
     try {
-      const savedCampaign = await campaignStudioAdapter.saveCampaign(refNum, campaign);
+      const savedCampaign = await campaignStudioAdapter.saveCampaign(refNum, {
+        ...campaign,
+        status: campaign.status === "draft" ? "scheduled" : campaign.status,
+      });
       setCampaign(savedCampaign);
       setSaved(true);
       onSaved?.(savedCampaign);
@@ -2598,6 +2914,22 @@ export const CampaignStudioWorkspace: React.FC<{
       setSaveError("We couldn't save this campaign. Please try again.");
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const saveDraftCampaign = async () => {
+    setIsSavingDraft(true);
+    setSaveError("");
+    try {
+      const draftCampaign = await campaignStudioAdapter.saveCampaign(refNum, { ...campaign, status: "draft" });
+      setCampaign(draftCampaign);
+      onSaved?.(draftCampaign);
+      setShowDraftPrompt(false);
+      onExit ? onExit() : navigate(listPath);
+    } catch {
+      setSaveError("We couldn't save this draft. Please try again.");
+    } finally {
+      setIsSavingDraft(false);
     }
   };
 
@@ -2618,34 +2950,31 @@ export const CampaignStudioWorkspace: React.FC<{
     <main className={`campaign-studio ${showWizardProgress ? "campaign-studio--wizard campaign-studio--assets-step" : ""}`}>
       {showWizardProgress && (
         <header className="cs-wizard-header">
-          <div>
-            <BackToCampaignStudioLink onClick={() => (onExit ? onExit() : navigate(listPath))} />
-          </div>
-          <CampaignWizardHeader activeStep={2} />
+          <CampaignWizardHeader
+            activeStep={2}
+            onBack={() => (onExit ? onExit() : navigate(listPath))}
+          />
         </header>
       )}
       <section className={showWizardProgress ? "cs-wizard-page" : "cs-assets-page"}>
         <section className={showWizardProgress ? "cs-wizard-section cs-details-step" : ""}>
-          <header className="cs-assets-header">
+          <header className={`cs-assets-header ${showWizardProgress ? "cs-assets-header--wizard" : ""}`}>
             <div>
               {!showWizardProgress && <BackEditLink onClick={() => (onBackEdit ? onBackEdit(campaign) : navigate(listPath))} />}
-              {showWizardProgress ? (
-                <div className="cs-details-step__intro">
-                  <h2>Generated campaign assets</h2>
-                  <p>Review all AI-generated social content in one place. Hover any piece to edit the asset.</p>
-                </div>
-              ) : (
+              {!showWizardProgress && (
                 <>
                   <h1>Generated campaign assets</h1>
                   <p>Review all AI-generated social content in one place. Hover any piece to edit the asset.</p>
                 </>
               )}
             </div>
-            <div className="cs-assets-actions">
-              <Button variant={saved ? "secondary" : "primary"} onClick={saveCampaign} disabled={isSaving}>
-                {saved && <img src={tickIcon} alt="" />} {isSaving ? "Saving..." : saved ? "Campaign saved" : "Save campaign"}
-              </Button>
-            </div>
+            {!showWizardProgress && (
+              <div className="cs-assets-actions">
+                <Button variant={saved ? "secondary" : "primary"} onClick={saveCampaign} disabled={isSaving}>
+                  {saved && <img src={tickIcon} alt="" />} {isSaving ? "Saving..." : saved ? "Campaign saved" : "Save campaign"}
+                </Button>
+              </div>
+            )}
           </header>
           {(saved || saveError) && (
             <div className={`cs-save-feedback ${saveError ? "cs-save-feedback--error" : ""}`}>
@@ -2664,8 +2993,13 @@ export const CampaignStudioWorkspace: React.FC<{
           </section>
           {showWizardProgress && (
             <footer className="cs-wizard-footer cs-wizard-footer--assets">
+              <div className="cs-wizard-footer__back">
+                <Button variant="ghost" onClick={() => (onBackEdit ? onBackEdit(campaign) : (onExit ? onExit() : navigate(listPath)))}>
+                  <BackArrowIcon /> Back
+                </Button>
+              </div>
               <div className="cs-wizard-footer__actions">
-                <Button variant="secondary" onClick={() => (onExit ? onExit() : navigate(listPath))}>
+                <Button variant="secondary" onClick={() => setShowDraftPrompt(true)}>
                   Cancel
                 </Button>
                 <Button variant={saved ? "secondary" : "primary"} onClick={saveCampaign} disabled={isSaving}>
@@ -2678,6 +3012,15 @@ export const CampaignStudioWorkspace: React.FC<{
       </section>
       {editingPost && <EditDrawer post={editingPost} onClose={() => setEditingPost(null)} onSave={savePost} />}
       {saveModalCampaign && <SaveModal campaign={saveModalCampaign} onClose={closeSaveModal} />}
+      {showDraftPrompt && (
+        <SaveDraftPromptModal
+          campaign={campaign}
+          isSaving={isSavingDraft}
+          onSaveDraft={saveDraftCampaign}
+          onExitWithoutSaving={() => (onExit ? onExit() : navigate(listPath))}
+          onCancel={() => setShowDraftPrompt(false)}
+        />
+      )}
     </main>
   );
 };
@@ -2685,6 +3028,8 @@ export const CampaignStudioWorkspace: React.FC<{
 export const CampaignStudioDashboard: React.FC = () => {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [isUpdatingPublishDate, setIsUpdatingPublishDate] = useState(false);
+  const [isOverviewMenuOpen, setIsOverviewMenuOpen] = useState(false);
+  const overviewMenuRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
   const { customerCode, refnum, campaignId } = useParams();
   const refNum = refnum || getRefNum();
@@ -2694,17 +3039,47 @@ export const CampaignStudioDashboard: React.FC = () => {
     campaignStudioAdapter.listCampaigns(refNum).then(setCampaigns);
   }, [refNum]);
 
+  useEffect(() => {
+    if (!isOverviewMenuOpen) return undefined;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!(event.target instanceof Node)) return;
+      if (overviewMenuRef.current?.contains(event.target)) return;
+      setIsOverviewMenuOpen(false);
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, [isOverviewMenuOpen]);
+
   const campaign = campaigns.find((item) => item.id === campaignId) || campaigns[0];
-  const channelNames = campaign?.platforms.map((platform) => platform.platform).join(", ") || "LinkedIn";
+  const destinationLink = campaign?.platforms[0]?.ctaDestination || campaign?.platforms[0]?.utmLink || "";
+  const isEventDestination = destinationLink.includes("/events/");
+  const matchedEventOption = ctaEventOptions.find((event) => event.value === destinationLink);
+  const fallbackJobValues = (campaign?.role || "").split(/[,;]/).map((item) => item.trim()).filter((item) => item && item !== "priority roles");
+  const jobEventValues = isEventDestination
+    ? (campaign?.events?.length ? campaign.events : [matchedEventOption?.label || campaign?.name || ""]).filter(Boolean)
+    : campaign?.roles?.length ? campaign.roles : fallbackJobValues;
+  const jobEventLabel = isEventDestination ? (jobEventValues.length > 1 ? "Events" : "Event") : jobEventValues.length > 1 ? "Jobs" : "Job";
+  const visibleJobEventValue = jobEventValues[0] || "";
+  const visibleJobEventLabel = visibleJobEventValue.length > 20 ? `${visibleJobEventValue.slice(0, 18).trimEnd()}..` : visibleJobEventValue;
+  const additionalJobEventCount = Math.max(jobEventValues.length - 1, 0);
+  const jobEventTooltipLabel = `Selected ${jobEventLabel.toLowerCase()}: ${jobEventValues.join(", ")}`;
+  const locationLabel = campaign?.location && campaign.location !== "target markets" ? campaign.location : "";
   const overviewStatus = campaign ? getCampaignTableStatus(campaign) : { label: "Published", className: "published" };
   const tokenParsed = (window as any).keycloakInstance?.tokenParsed;
   const loggedUserDetails = tokenParsed?.userDetails;
+  const toTitleCase = (name: string) =>
+    name.replace(/\S+/g, (part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase());
   const createdByName =
-    tokenParsed?.name ||
-    loggedUserDetails?.displayName ||
-    [loggedUserDetails?.firstName, loggedUserDetails?.lastName].filter(Boolean).join(" ") ||
-    loggedUserDetails?.userName ||
-    "Local Preview User";
+    toTitleCase(
+      tokenParsed?.name ||
+        loggedUserDetails?.displayName ||
+        [loggedUserDetails?.firstName, loggedUserDetails?.lastName].filter(Boolean).join(" ") ||
+        loggedUserDetails?.userName ||
+        "Local Preview User"
+    );
+  const orderedPlatforms = campaign ? getOrderedCampaignPlatforms(campaign.platforms) : [];
   const overviewAssetColumns = campaign
     ? [0, 1, 2].map((columnIndex) => campaign.platforms.filter((_, platformIndex) => platformIndex % 3 === columnIndex))
     : [];
@@ -2725,7 +3100,7 @@ export const CampaignStudioDashboard: React.FC = () => {
       <section className="cs-overview">
         <div className="cs-overview__topbar">
           <button className="cs-back-edit cs-overview__back" onClick={() => navigate(listPath)}>
-            <span aria-hidden="true">‹</span> Back to Campaigns Studio
+            <BackArrowIcon /> Back to Campaigns Studio
           </button>
         </div>
         {campaign ? (
@@ -2737,22 +3112,90 @@ export const CampaignStudioDashboard: React.FC = () => {
                   <span className={`cs-status cs-status--${overviewStatus.className}`}>{overviewStatus.label}</span>
                 </div>
                 <dl className="cs-overview__details">
-                  <div><dt>Role</dt><dd>{campaign.role}</dd></div>
-                  <div><dt>Location</dt><dd>{campaign.location}</dd></div>
-                  <div><dt>Tone</dt><dd>{campaign.tone}</dd></div>
+                  <div>
+                    <dt>Channels</dt>
+                    <dd>
+                      <div className="cs-channel-pills" aria-label={orderedPlatforms.map((platform) => platform.platform).join(", ")}>
+                        {orderedPlatforms.map((platform, index) => (
+                          <span className={`cs-channel-pill-icon cs-channel-pill-icon--${index + 1}`} key={platform.platform} title={platform.platform}>
+                            <img src={channelLogoMap[platform.platform]} alt={platform.platform} />
+                          </span>
+                        ))}
+                      </div>
+                    </dd>
+                  </div>
+                  {visibleJobEventValue && (
+                    <div>
+                      <dt>{jobEventLabel}</dt>
+                      <dd>
+                        <span className="cs-overview-tags">
+                          <span className="cs-overview-tag" title={visibleJobEventValue}>{visibleJobEventLabel}</span>
+                          {additionalJobEventCount > 0 && (
+                            <span className="cs-overview-tag cs-overview-tag--count" tabIndex={0} aria-label={jobEventTooltipLabel}>
+                              +{additionalJobEventCount}
+                              <span className="cs-overview-tag__popover" role="tooltip">
+                                <strong>{`Selected ${jobEventLabel}`}</strong>
+                                {jobEventValues.map((value) => (
+                                  <span key={value}>{value}</span>
+                                ))}
+                              </span>
+                            </span>
+                          )}
+                        </span>
+                      </dd>
+                    </div>
+                  )}
+                  {locationLabel && <div><dt>Location</dt><dd>{locationLabel}</dd></div>}
+                  {destinationLink && (
+                    <div>
+                      <dt>Destination link</dt>
+                      <dd>
+                        <a className="cs-overview-open-link" href={destinationLink} target="_blank" rel="noreferrer">
+                          Open Link
+                          <span className="cs-overview-open-link__icon" aria-hidden="true">
+                            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M11.875 0.9375C11.875 1.45703 12.293 1.875 12.8125 1.875H16.8008L8.08594 10.5859C7.71875 10.9531 7.71875 11.5469 8.08594 11.9102C8.45312 12.2734 9.04687 12.2773 9.41016 11.9102L18.1211 3.19922L18.125 7.1875C18.125 7.70703 18.543 8.125 19.0625 8.125C19.582 8.125 20 7.70703 20 7.1875V0.9375C20 0.417969 19.582 0 19.0625 0H12.8125C12.293 0 11.875 0.417969 11.875 0.9375ZM2.8125 1.25C1.25781 1.25 0 2.50781 0 4.0625V17.1875C0 18.7422 1.25781 20 2.8125 20H15.9375C17.4922 20 18.75 18.7422 18.75 17.1875V12.1875C18.75 11.668 18.332 11.25 17.8125 11.25C17.293 11.25 16.875 11.668 16.875 12.1875V17.1875C16.875 17.707 16.457 18.125 15.9375 18.125H2.8125C2.29297 18.125 1.875 17.707 1.875 17.1875V4.0625C1.875 3.54297 2.29297 3.125 2.8125 3.125H7.8125C8.33203 3.125 8.75 2.70703 8.75 2.1875C8.75 1.66797 8.33203 1.25 7.8125 1.25H2.8125Z" fill="currentColor" />
+                            </svg>
+                          </span>
+                        </a>
+                      </dd>
+                    </div>
+                  )}
+                  <div><dt>Creator</dt><dd>{createdByName}</dd></div>
+                  <div><dt>Created date</dt><dd>{formatDate(campaign.createdAt)}</dd></div>
                   <div><dt>Publish date</dt><dd>{formatDisplayDate(campaign.postDate) || formatDate(campaign.postDate)}</dd></div>
-                  <div><dt>Created by</dt><dd>{createdByName}</dd></div>
-                  <div><dt>Creation date</dt><dd>{formatDate(campaign.createdAt)}</dd></div>
-                  <div><dt>Channels</dt><dd>{channelNames}</dd></div>
                 </dl>
               </div>
               <div className="cs-overview__actions">
-                <Button variant="secondary" onClick={() => setIsUpdatingPublishDate(true)}>
-                  <img src={calendarIcon} alt="" /> Update Publish date
-                </Button>
                 <Button variant="primary" onClick={() => downloadCampaignContentZip(campaign)}>
                   <img src={downloadIcon} alt="" /> Download all content as zip
                 </Button>
+                <div className="cs-overview-more" ref={overviewMenuRef}>
+                  <button
+                    className={`cs-more-button ${isOverviewMenuOpen ? "is-open" : ""}`}
+                    aria-label="More campaign actions"
+                    aria-expanded={isOverviewMenuOpen}
+                    onClick={() => setIsOverviewMenuOpen((current) => !current)}
+                  >
+                    <span className="cs-more-button__dots" aria-hidden="true">
+                      <span />
+                      <span />
+                      <span />
+                    </span>
+                  </button>
+                  {isOverviewMenuOpen && (
+                    <div className="cs-menu cs-overview-more__menu">
+                      <button
+                        onClick={() => {
+                          setIsOverviewMenuOpen(false);
+                          setIsUpdatingPublishDate(true);
+                        }}
+                      >
+                        <img src={calendarIcon} alt="" /> Update Publish date
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
