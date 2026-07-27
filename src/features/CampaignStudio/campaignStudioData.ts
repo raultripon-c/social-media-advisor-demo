@@ -19,22 +19,22 @@ export const toneOptions = [
 
 export const templateCards = [
   {
-    title: "Attract Passive Talent",
+    title: "Start Testimonial Campaign",
     prompt:
-      "Create a campaign for experienced Registered Nurses in Durham, NC. Target passive candidates who are not actively job searching, and use a warm, professional tone that highlights patient impact, stability, and career growth.",
+      "Create an employee testimonial campaign for Duke Health. Feature authentic teammate stories that highlight growth, belonging, and patient impact. Target qualified candidates in Durham, NC with a warm, professional tone and invite them to explore open roles.",
     icon: "user",
   },
   {
-    title: "Showcase Your Brand",
+    title: "Showcase Your Culture",
     prompt:
-      "Create an employer brand campaign for Clinical Support roles in Raleigh, NC. Showcase team culture, inclusive values, learning opportunities, and why candidates should consider Duke Health before they start actively applying.",
+      "Create an employer brand campaign for Duke Health that showcases culture, community, and inclusive values. Highlight learning opportunities, team camaraderie, and why candidates should consider Duke Health before they start actively applying. Use a warm, professional tone.",
     icon: "sparkle",
   },
   {
-    title: "Build Talent Community",
+    title: "Promote Your Achievements",
     prompt:
-      "Create a talent community campaign for Medical Assistants and Patient Care Technicians in Charlotte, NC. Invite qualified candidates to join the pipeline for future openings with a friendly, helpful tone focused on growth and connection.",
-    icon: "users",
+      "Create an employer brand campaign for Duke Health that promotes recent awards, recognition, and achievements. Emphasize excellence, pride, and why top talent should join the team. Target qualified candidates with a confident, professional tone and a clear call to explore open roles.",
+    icon: "award",
   },
   {
     title: "Promote Your Event",
@@ -207,13 +207,15 @@ export const createCampaignFromBrief = (
   dueDate: string,
   selectedCtaDestination?: string,
   campaignId?: string,
-  createdAt?: string
+  createdAt?: string,
+  options?: { mediaImages?: string[] }
 ): Campaign => {
   const details = parseBrief(brief, tone);
   const id = campaignId || `campaign-${Date.now()}`;
   const tenantName = getSelectedTenantName();
   const employerName = tenantName === "Phenom" ? "Duke Health" : tenantName;
   const ctaDestination = selectedCtaDestination || `https://careers.dukehealth.org/jobs?campaign=${id}`;
+  const mediaImages = options?.mediaImages?.filter(Boolean) || [];
 
   const platforms = selectedChannels.map((platform, index) => {
     const utmLink = buildChannelUtmLink(ctaDestination, platform, id);
@@ -224,19 +226,28 @@ export const createCampaignFromBrief = (
       X: `${employerName} is hiring ${details.role} in ${details.location}. Make a difference with a team focused on care, community, and growth. #DukeHealth #HealthcareJobs Learn more: ${utmLink}`,
     };
     const copy = copyByPlatform[platform];
+    const mediaImage = mediaImages[index % Math.max(mediaImages.length, 1)];
+    const isVideoMedia = Boolean(mediaImage);
 
     return {
       platform,
-      format: platform === "X" ? "Short social post" : "Social feed post",
+      format: isVideoMedia
+        ? "Vertical video (9:16)"
+        : platform === "X"
+          ? "Short social post"
+          : "Social feed post",
       postDate: dueDate,
       copy,
       utmLink,
-      assetName: `${platform.toLowerCase()}-${id}.png`,
-      assetSize: platform === "LinkedIn" ? "1200 x 627" : "1080 x 1080",
+      assetName: `${platform.toLowerCase()}-${id}.${isVideoMedia ? "mp4" : "png"}`,
+      assetSize: isVideoMedia ? "1080 x 1920" : platform === "LinkedIn" ? "1200 x 627" : "1080 x 1080",
       accent: platformAccentMap[platform],
-      image: platformImageMap[platform],
+      image: mediaImage || platformImageMap[platform],
+      mediaKind: isVideoMedia ? "video" : "image",
       ctaDestination,
-      altText: `${employerName} nursing team lifestyle image for ${platform}`,
+      altText: mediaImage
+        ? `${employerName} employee testimonial still for ${platform}`
+        : `${employerName} nursing team lifestyle image for ${platform}`,
       metrics: {
         clicks: 140 + index * 37,
         applicationStarts: 34 + index * 9,

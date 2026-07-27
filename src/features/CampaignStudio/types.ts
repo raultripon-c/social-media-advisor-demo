@@ -18,6 +18,8 @@ export interface CampaignPlatformOutput {
   assetSize: string;
   accent: string;
   image: string;
+  /** Vertical Video Hub testimonial stills render as 9:16 in post previews */
+  mediaKind?: "image" | "video";
   ctaDestination: string;
   altText: string;
   metrics: CampaignMetrics;

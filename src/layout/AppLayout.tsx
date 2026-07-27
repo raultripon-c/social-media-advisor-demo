@@ -68,7 +68,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   const [rolesLoader, setRolesLoader] = useState(true);
   const [isAppsLoaded, setIsAppsLoaded] = useState(false);
   const isLoadingAppsRef = useRef(false);
-  const isLocalCampaignStudioPreview = window.location.pathname.startsWith("/campaign-studio/campaigns");
+  const isLocalCampaignStudioPreview = window.location.pathname.startsWith("/campaign-studio/");
   const userDetails =
     window?.keycloakInstance?.tokenParsed?.userDetails ||
     (isLocalCampaignStudioPreview
@@ -331,67 +331,71 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
 
     const addCampaignStudioNewApp = (categories: any[] = []) => {
       const campaignStudioNewRoute = "/campaign-studio/campaigns";
-      let inserted = false;
+      let hasAdvisor = false;
+
+      const isAdvisorOrStudioApp = (child: any) => {
+        const label = `${child?.name || ""} ${child?.hoverText || ""}`.toLowerCase();
+        const route = child?.appConfig?.route || "";
+        return (
+          child?.id === "campaign-studio-new" ||
+          label.includes("campaign studio") ||
+          label.includes("social media advisor") ||
+          route === "/campaign-studio" ||
+          route === campaignStudioNewRoute
+        );
+      };
 
       const updatedCategories = categories.map((category: any) => {
         const children = category?.children;
         if (!Array.isArray(children)) return category;
 
-        if (children.some((child: any) => child?.appConfig?.route === campaignStudioNewRoute)) {
-          inserted = true;
-          return category;
-        }
+        const matches = children
+          .map((child: any, index: number) => ({ child, index }))
+          .filter(({ child }) => isAdvisorOrStudioApp(child));
 
-        const campaignStudioIndex = children.findIndex((child: any) => {
-          const label = `${child?.name || ""} ${child?.hoverText || ""}`.toLowerCase();
-          const route = child?.appConfig?.route || "";
-          return label.includes("campaign studio") || route === "/campaign-studio";
-        });
+        if (matches.length === 0) return category;
 
-        if (campaignStudioIndex === -1) return category;
-
-        const campaignStudioApp = children[campaignStudioIndex];
-        const campaignStudioNewApp = {
-          id: "campaign-studio-new",
-          name: "Campaign Studio New",
-          icon: campaignStudioApp?.icon || PathSvg,
-          order: (campaignStudioApp?.order || 0) + 0.1,
-          isParent: false,
-          parentName: category.name,
-          context: "tenant",
-          appType: "script",
-          hoverText: "Campaign Studio New",
+        hasAdvisor = true;
+        const primary = matches[0].child;
+        const socialMediaAdvisorApp = {
+          ...primary,
+          id: primary?.id || "campaign-studio-new",
+          name: "Social Media Advisor",
+          hoverText: "Social Media Advisor",
+          order: primary?.order || 0,
           appConfig: {
+            ...(primary?.appConfig || {}),
             route: campaignStudioNewRoute,
             showSideNav: "true",
           },
         };
 
-        inserted = true;
-        return {
-          ...category,
-          children: [
-            ...children.slice(0, campaignStudioIndex + 1),
-            campaignStudioNewApp,
-            ...children.slice(campaignStudioIndex + 1),
-          ],
-        };
+        const dropIndexes = new Set(matches.slice(1).map(({ index }) => index));
+        const nextChildren = children
+          .map((child: any, index: number) => {
+            if (index === matches[0].index) return socialMediaAdvisorApp;
+            if (dropIndexes.has(index)) return null;
+            return child;
+          })
+          .filter(Boolean);
+
+        return { ...category, children: nextChildren };
       });
 
-      if (inserted) return updatedCategories;
+      if (hasAdvisor) return updatedCategories;
 
       return [
         ...updatedCategories,
         {
           id: "campaign-studio-new",
-          name: "Campaign Studio New",
+          name: "Social Media Advisor",
           icon: PathSvg,
           order: 998,
           isParent: false,
           parentName: null,
           context: "tenant",
           appType: "script",
-          hoverText: "Campaign Studio New",
+          hoverText: "Social Media Advisor",
           appConfig: {
             route: campaignStudioNewRoute,
             showSideNav: "true",

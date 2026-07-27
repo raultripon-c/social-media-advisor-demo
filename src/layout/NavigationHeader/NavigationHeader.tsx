@@ -1,5 +1,4 @@
 import React from "react";
-import { useSelector } from "react-redux";
 
 import rightNav from "../../assets/images/right.svg";
 
@@ -23,12 +22,17 @@ const NavigationHeader: React.FC<Props> = ({
   const handleBackClick = () => {
     toggleSidebarMenu(!showSidebarMenu);
   };
+  const isSocialMediaAdvisorRoute = window.location.pathname.includes("/campaign-studio/");
+  const appDisplayName = isSocialMediaAdvisorRoute
+    ? "Social Media Advisor"
+    : selectedApp?.name;
+
   return (
     <div className="module-federated-app-header-container">
       <button className="mf-header-left" onClick={handleBackClick}>
         <span className="back-navigation">Apps</span>
         <img src={rightNav} alt="" className="back-arrow" />
-        {selectedApp && <span className="app-name">{selectedApp.name}</span>}
+        {appDisplayName && <span className="app-name">{appDisplayName}</span>}
       </button>
     </div>
   );

@@ -35,9 +35,19 @@ function ToolsSideBar(props: any) {
   let detailsApp = fetchedApps && fetchedApps.length && findAppConfigByRoutes(fetchedApps, `/${window.location.pathname.split('/').slice(3).join('/')}`)[0];
   const campaignStudioNewApp = categories
     ?.flatMap((category: any) => category?.children || [category])
-    ?.find((app: any) => app?.name === "Campaign Studio New");
-  if (window.location.pathname.includes("/campaign-studio/campaigns") && campaignStudioNewApp) {
-    detailsApp = campaignStudioNewApp;
+    ?.find(
+      (app: any) =>
+        app?.name === "Social Media Advisor" ||
+        app?.id === "campaign-studio-new" ||
+        app?.appConfig?.route === "/campaign-studio/campaigns" ||
+        `${app?.name || ""}`.toLowerCase().includes("campaign studio"),
+    );
+  if (window.location.pathname.includes("/campaign-studio/") && campaignStudioNewApp) {
+    detailsApp = {
+      ...campaignStudioNewApp,
+      name: "Social Media Advisor",
+      hoverText: "Social Media Advisor",
+    };
   }
   const selectedApp = useSelector((state: any) => {
     const selectedAppFromSession = JSON.parse(
@@ -105,10 +115,16 @@ function ToolsSideBar(props: any) {
         selectedTenant: selectedTenant,
       }
       appSelectionHandler(appSelectionOptions);
-    } else if (app?.name === "Campaign Studio New") {
+    } else if (
+      app?.name === "Social Media Advisor" ||
+      app?.id === "campaign-studio-new" ||
+      `${app?.name || ""}`.toLowerCase().includes("campaign studio") ||
+      app?.appConfig?.route === "/campaign-studio/campaigns"
+    ) {
+      const advisorApp = { ...app, name: "Social Media Advisor", hoverText: "Social Media Advisor" };
       dispatch(setDashboardSelected(false));
-      dispatch(setAppDetails(app));
-      sessionStorage.setItem("selectedApp", JSON.stringify(app));
+      dispatch(setAppDetails(advisorApp));
+      sessionStorage.setItem("selectedApp", JSON.stringify(advisorApp));
       sessionStorage.removeItem("txeCustomPath");
       navigate(`/${selectedTenant.customerCode}/${selectedTenant.refNum}/campaign-studio/campaigns`);
     } else if (app?.name === "Candidate Journeys") {

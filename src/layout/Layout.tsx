@@ -34,7 +34,7 @@ const Layout = () => {
   const sessionTrackerIngestPoint = `${(window as any)._env_.SESSION_TRACKER_INGEST_POINT || ""}`;
   const userId = userDetails?.userName;
   const currentPath = window.location.pathname.replace("/dashboard/dashboard", "/dashboard");
-  const isLocalCampaignStudioPreview = currentPath.startsWith("/campaign-studio/campaigns");
+  const isLocalCampaignStudioPreview = currentPath.startsWith("/campaign-studio/");
 
   useEffect(()=>{
     if (isLocalCampaignStudioPreview) {

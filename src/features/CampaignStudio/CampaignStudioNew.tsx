@@ -1,6 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 import enhanceIcon from "../../assets/svg/enhanceIcon.svg";
 import generateIcon from "../../assets/svg/arrow-up-plain.svg";
@@ -50,7 +50,14 @@ import {
   toneOptions,
 } from "./campaignStudioData";
 import { Campaign, CampaignMetrics, CampaignPlatformName, CampaignPlatformOutput } from "./types";
+import { CampaignStudioSubNav } from "./ContentBoard/CampaignStudioSubNav";
+import { EmployerBrandSignals } from "./Nudges/EmployerBrandSignals";
+import { buildNudgeCampaignPrompt, AdvisorCampaignHandoff, advisorBoardAdapter } from "./ContentBoard/contentBoardData";
+import { AdvisorCard, VideoHubVideo } from "./ContentBoard/contentBoardTypes";
+import { videoHubCatalog } from "./ContentBoard/videoHubData";
+import { UiDropdown } from "./UiDropdown";
 import "./CampaignStudio.css";
+import "./ContentBoard/ContentBoard.css";
 
 const defaultPrompt =
   "Create a campaign for Registered Nurses in Durham, NC. Target experienced nurses with a warm and professional tone.";
@@ -67,6 +74,13 @@ type GenerateCampaignDraft = {
   ctaDestination?: string;
   campaignId?: string;
   createdAt?: string;
+  videos?: VideoHubVideo[];
+  enableVideoHubPicker?: boolean;
+  /** When true, selected videos start from `videos`; template flow leaves selection empty. */
+  prefillSelectedVideos?: boolean;
+  /** Ready single-video flow: hide library and remove controls. */
+  lockVideoSelection?: boolean;
+  sourceCardId?: string;
 };
 
 const platformMeta: Record<CampaignPlatformName, { handle: string; actions: string[] }> = {
@@ -899,6 +913,15 @@ const TemplateIcon = ({ type }: { type: string }) => {
       </svg>
     );
   }
+  if (type === "award") {
+    return (
+      <svg className="cs-template-card__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+        <circle cx="8" cy="6.2" r="3.4" fill="none" stroke="currentColor" strokeWidth="1.4" />
+        <path d="M8 4.4v3.6M6.2 6.2h3.6" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.4" />
+        <path d="M5.6 9.4 4.4 14.2 8 12.4l3.6 1.8-1.2-4.8" fill="none" stroke="currentColor" strokeLinejoin="round" strokeWidth="1.4" />
+      </svg>
+    );
+  }
   return (
     <svg className="cs-template-card__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
       <path d="M6.4 7.4a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM2.2 13.5c.4-2.4 1.9-3.8 4.2-3.8s3.8 1.4 4.2 3.8" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.4" />
@@ -1057,56 +1080,9 @@ const SingleSelectDropdown = ({
   options: DropdownOption[];
   onChange: (value: string) => void;
   placeholder?: string;
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const selectedOption = options.find((option) => option.value === value);
-
-  useEffect(() => {
-    if (!isOpen) return undefined;
-
-    const handlePointerDown = (event: PointerEvent) => {
-      if (!(event.target instanceof Node) || dropdownRef.current?.contains(event.target)) return;
-      setIsOpen(false);
-    };
-
-    document.addEventListener("pointerdown", handlePointerDown);
-    return () => document.removeEventListener("pointerdown", handlePointerDown);
-  }, [isOpen]);
-
-  return (
-    <div className="cs-ds-dropdown" ref={dropdownRef}>
-      <button
-        type="button"
-        className={`cs-ds-dropdown__control ${isOpen ? "is-open" : ""}`}
-        aria-haspopup="listbox"
-        aria-expanded={isOpen}
-        onClick={() => setIsOpen((current) => !current)}
-      >
-        <span className={selectedOption ? "" : "is-placeholder"}>{selectedOption?.label || placeholder}</span>
-      </button>
-      {isOpen && (
-        <div className="cs-ds-dropdown__menu" role="listbox">
-          {options.map((option) => (
-            <button
-              type="button"
-              key={option.value}
-              className={option.value === value ? "is-selected" : ""}
-              role="option"
-              aria-selected={option.value === value}
-              onClick={() => {
-                onChange(option.value);
-                setIsOpen(false);
-              }}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
+}) => (
+  <UiDropdown value={value} options={options} onChange={onChange} placeholder={placeholder} />
+);
 
 const MultiSelectDropdown = ({
   values,
@@ -1407,6 +1383,10 @@ const GenerateCampaignModal = ({
   initialCtaDestination,
   initialCampaignId,
   initialCreatedAt,
+  initialVideos,
+  enableVideoHubPicker = false,
+  prefillSelectedVideos = false,
+  lockVideoSelection = false,
   onBack,
   onStart,
 }: {
@@ -1418,6 +1398,10 @@ const GenerateCampaignModal = ({
   initialCtaDestination?: string;
   initialCampaignId?: string;
   initialCreatedAt?: string;
+  initialVideos?: VideoHubVideo[];
+  enableVideoHubPicker?: boolean;
+  prefillSelectedVideos?: boolean;
+  lockVideoSelection?: boolean;
   onBack: () => void;
   onStart: (campaign: Campaign) => void;
 }) => {
@@ -1434,6 +1418,15 @@ const GenerateCampaignModal = ({
   const [campaignName, setCampaignName] = useState(initialCampaignName || makeCampaignName(prompt));
   const [selectedChannels, setSelectedChannels] = useState<CampaignPlatformName[]>(initialChannels || ["Facebook", "Instagram", "X", "LinkedIn"]);
   const [dueDate, setDueDate] = useState(initialDueDate || "");
+  const [selectedVideos, setSelectedVideos] = useState<VideoHubVideo[]>(
+    prefillSelectedVideos && initialVideos?.length ? initialVideos : [],
+  );
+  const [videoFilter, setVideoFilter] = useState("all");
+  const [videoSearch, setVideoSearch] = useState("");
+  const [showVideoLibrary, setShowVideoLibrary] = useState(
+    Boolean(prefillSelectedVideos) && !lockVideoSelection,
+  );
+  const videoLibrary = videoHubCatalog;
   const [jobCategory, setJobCategory] = useState(jobCategoryOptions[0]);
   const [roleDetails, setRoleDetails] = useState(initialDetails.role === "priority roles" ? "" : initialDetails.role);
   const [locationDetails, setLocationDetails] = useState(initialDetails.location === "target markets" ? "" : initialDetails.location);
@@ -1473,6 +1466,32 @@ const GenerateCampaignModal = ({
   const eventTemplatePrompt = templateCards.find((template) => template.icon === "calendar")?.prompt.toLowerCase() || "";
   const isEventTemplateSelected = eventTemplatePrompt ? brief.toLowerCase().includes(eventTemplatePrompt) : false;
   const shouldShowEventContext = isEventTemplateSelected || ctaDestinationType === "event";
+  const testimonialTemplatePrompt =
+    templateCards.find((template) => template.title === "Start Testimonial Campaign")?.prompt.toLowerCase() || "";
+  const isTestimonialFlow =
+    enableVideoHubPicker ||
+    Boolean(initialVideos?.length) ||
+    (testimonialTemplatePrompt ? brief.toLowerCase().includes(testimonialTemplatePrompt.slice(0, 48)) : false);
+  const videoDepartments = Array.from(
+    new Set(videoLibrary.map((video) => video.department).filter(Boolean) as string[]),
+  ).sort();
+  const filteredVideoCatalog = videoLibrary.filter((video) => {
+    const matchesDepartment = videoFilter === "all" || video.department === videoFilter;
+    const query = videoSearch.trim().toLowerCase();
+    const matchesSearch =
+      !query ||
+      video.employeeName.toLowerCase().includes(query) ||
+      video.title.toLowerCase().includes(query) ||
+      (video.department || "").toLowerCase().includes(query);
+    return matchesDepartment && matchesSearch;
+  });
+  const toggleVideo = (video: VideoHubVideo) => {
+    setSelectedVideos((current) =>
+      current.some((item) => item.id === video.id)
+        ? current.filter((item) => item.id !== video.id)
+        : [...current, video],
+    );
+  };
   const effectiveBrief = buildStructuredBrief({
     brief,
     jobCategory,
@@ -1568,7 +1587,12 @@ const GenerateCampaignModal = ({
     locationSearch.trim().length > 1 &&
     !filteredLocationOptions.some((location) => location.toLowerCase() === locationSearch.trim().toLowerCase());
   const effectivePublishDate = dueDate || new Date().toISOString().slice(0, 10);
-  const canContinue = Boolean(campaignName.trim() && selectedChannels.length && selectedCtaDestination);
+  const canContinue = Boolean(
+    campaignName.trim() &&
+      selectedChannels.length &&
+      selectedCtaDestination &&
+      (!isTestimonialFlow || selectedVideos.length > 0),
+  );
 
   return (
     <main className="campaign-studio campaign-studio--wizard">
@@ -1578,6 +1602,152 @@ const GenerateCampaignModal = ({
       <section className="cs-wizard-page">
         <section className="cs-wizard-section cs-details-step">
             <div className="cs-details-form">
+              {isTestimonialFlow && (
+                <div className="cs-video-hub-picker">
+                  <div className="cs-video-hub-picker__header">
+                    <div>
+                      <label>
+                        Video Hub testimonials <span className="cs-required">*</span>
+                      </label>
+                      <p className="cs-video-hub-picker__hint">
+                        {lockVideoSelection
+                          ? "This campaign uses the uploaded testimonial below."
+                          : prefillSelectedVideos
+                            ? "Uploaded videos are ready below. Add or remove as needed."
+                            : "Add vertical (9:16) front-camera testimonials from Video Hub."}
+                      </p>
+                    </div>
+                    {!lockVideoSelection && (
+                      <span className="cs-video-hub-picker__count">
+                        {selectedVideos.length} selected
+                      </span>
+                    )}
+                  </div>
+
+                  {selectedVideos.length === 0 ? (
+                    <div className="cs-video-hub-picker__empty-field">
+                      <p>No videos added</p>
+                      <span>Choose testimonials from Video Hub to feature in this campaign.</span>
+                      {!showVideoLibrary && !lockVideoSelection && (
+                        <button
+                          type="button"
+                          className="cs-btn cs-btn--secondary"
+                          onClick={() => setShowVideoLibrary(true)}
+                        >
+                          Add from Video Hub
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="cs-video-hub-picker__selected" aria-label="Selected videos">
+                      {selectedVideos.map((video) => (
+                        <div key={video.id} className="cs-video-hub-picker__selected-item">
+                          <img src={video.thumbnailUrl} alt="" />
+                          <div>
+                            <strong>{video.employeeName}</strong>
+                            <span>{video.title}</span>
+                          </div>
+                          {!lockVideoSelection && (
+                            <button
+                              type="button"
+                              className="cs-video-hub-picker__remove"
+                              aria-label={`Remove ${video.employeeName}`}
+                              onClick={() =>
+                                setSelectedVideos((current) => current.filter((item) => item.id !== video.id))
+                              }
+                            >
+                              ×
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                      {!showVideoLibrary && !lockVideoSelection && (
+                        <button
+                          type="button"
+                          className="cb-link-btn"
+                          onClick={() => setShowVideoLibrary(true)}
+                        >
+                          Add more from Video Hub
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  {showVideoLibrary && !lockVideoSelection && (
+                    <>
+                      <div className="cs-video-hub-picker__library-header">
+                        <p className="cs-video-hub-picker__library-label">Video Hub library</p>
+                        <button
+                          type="button"
+                          className="cb-link-btn"
+                          onClick={() => setShowVideoLibrary(false)}
+                        >
+                          Hide library
+                        </button>
+                      </div>
+                      <div className="cs-video-hub-picker__toolbar">
+                        <div className="cs-video-hub-picker__search">
+                          <img src={searchIcon} alt="" aria-hidden="true" />
+                          <input
+                            value={videoSearch}
+                            onChange={(event) => setVideoSearch(event.target.value)}
+                            placeholder="Search by name, title, or department"
+                          />
+                        </div>
+                        <UiDropdown
+                          size="sm"
+                          className="cs-video-hub-picker__dept"
+                          value={videoFilter}
+                          ariaLabel="Filter by department"
+                          options={[
+                            { value: "all", label: "All departments" },
+                            ...videoDepartments.map((department) => ({
+                              value: department,
+                              label: department,
+                            })),
+                          ]}
+                          onChange={setVideoFilter}
+                        />
+                      </div>
+                      <div className="cs-video-hub-picker__grid" role="listbox" aria-label="Video Hub library">
+                        {filteredVideoCatalog.map((video) => {
+                          const isSelected = selectedVideos.some((item) => item.id === video.id);
+                          return (
+                            <button
+                              key={video.id}
+                              type="button"
+                              role="option"
+                              aria-selected={isSelected}
+                              className={`cs-video-hub-card${isSelected ? " is-selected" : ""}`}
+                              onClick={() => toggleVideo(video)}
+                            >
+                              <span className="cs-video-hub-card__media">
+                                <img src={video.thumbnailUrl} alt="" />
+                                <span className="cs-video-hub-card__play" aria-hidden="true" />
+                                <span className="cs-video-hub-card__format">9:16</span>
+                                <span className="cs-video-hub-card__duration">{video.durationLabel}</span>
+                                {isSelected && (
+                                  <span className="cs-video-hub-card__check" aria-hidden="true">
+                                    ✓
+                                  </span>
+                                )}
+                              </span>
+                              <span className="cs-video-hub-card__body">
+                                <strong>{video.employeeName}</strong>
+                                <span>{video.title}</span>
+                                {video.department && <em>{video.department}</em>}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {filteredVideoCatalog.length === 0 && (
+                        <p className="cs-video-hub-picker__empty">No videos match this filter.</p>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
               <div className="cs-field">
                 <label>Campaign title <span className="cs-required">*</span><span className="cs-ai-badge">AI filled</span></label>
                 <input value={campaignName} onChange={(event) => setCampaignName(event.target.value)} />
@@ -1883,7 +2053,23 @@ const GenerateCampaignModal = ({
             <Button
               variant="primary"
               disabled={!canContinue}
-              onClick={() => onStart(createCampaignFromBrief(effectiveBrief, selectedChannels, campaignName, tone, effectivePublishDate, selectedCtaDestination, initialCampaignId, initialCreatedAt))}
+              onClick={() =>
+                onStart(
+                  createCampaignFromBrief(
+                    effectiveBrief,
+                    selectedChannels,
+                    campaignName,
+                    tone,
+                    effectivePublishDate,
+                    selectedCtaDestination,
+                    initialCampaignId,
+                    initialCreatedAt,
+                    {
+                      mediaImages: selectedVideos.map((video) => video.thumbnailUrl),
+                    },
+                  ),
+                )
+              }
             >
               Continue
             </Button>
@@ -1961,6 +2147,32 @@ const LoadingPage = ({ onDone, onExit, showWizardProgress = false, campaign }: {
   );
 };
 
+const isVerticalVideoPost = (post: CampaignPlatformOutput) =>
+  post.mediaKind === "video" || /testimonial still/i.test(post.altText || "");
+
+const PostMedia = ({
+  post,
+  wrapClassName,
+}: {
+  post: CampaignPlatformOutput;
+  wrapClassName: string;
+}) => {
+  const isVideo = isVerticalVideoPost(post);
+  return (
+    <div className={`${wrapClassName}${isVideo ? ` ${wrapClassName}--video` : ""}`}>
+      <img src={post.image} alt={post.altText} />
+      {isVideo && (
+        <span className="cs-post__video-play" aria-hidden="true">
+          <svg viewBox="0 0 48 48" focusable="false">
+            <circle cx="24" cy="24" r="24" fill="rgba(0,0,0,0.45)" />
+            <path d="M20 15.5v17l14-8.5-14-8.5z" fill="#fff" />
+          </svg>
+        </span>
+      )}
+    </div>
+  );
+};
+
 const PostPreview = ({
   post,
   onEdit,
@@ -1977,6 +2189,7 @@ const PostPreview = ({
   const xHandle = handle.split("·")[0].trim();
   const postCopy = post.copy.replace(/Learn more:?\s+\S+/i, "").trim();
   const trackingLink = post.utmLink || post.ctaDestination;
+  const isVideoMedia = isVerticalVideoPost(post);
   const statsByPlatform: Record<CampaignPlatformName, string> = {
     LinkedIn: "1,607 · 112 Comments · 32,234 Views",
     Instagram: "1,248 likes",
@@ -2020,7 +2233,7 @@ const PostPreview = ({
 
   if (post.platform === "LinkedIn") {
     return (
-      <article className="cs-post cs-post--linkedin cs-linkedin-post">
+      <article className={`cs-post cs-post--linkedin cs-linkedin-post${isVideoMedia ? " cs-post--video" : ""}`}>
         <div className="cs-post__platform-chip">
           <img src={channelLogoMap[post.platform]} alt="" />
           <span>{post.platform}</span>
@@ -2036,16 +2249,16 @@ const PostPreview = ({
           </div>
         </div>
         <p className="cs-linkedin-post__copy">{postCopy}</p>
-        <div className="cs-linkedin-post__image-wrap">
-          <img src={post.image} alt={post.altText} />
-        </div>
-        <div className="cs-linkedin-post__link">
-          <div>
-            <strong>Your next career move starts here.</strong>
-            <span>{new URL(post.ctaDestination).hostname}</span>
+        <PostMedia post={post} wrapClassName="cs-linkedin-post__image-wrap" />
+        {!isVideoMedia && (
+          <div className="cs-linkedin-post__link">
+            <div>
+              <strong>Your next career move starts here.</strong>
+              <span>{new URL(post.ctaDestination).hostname}</span>
+            </div>
+            <button>Learn More</button>
           </div>
-          <button>Learn More</button>
-        </div>
+        )}
         <div className="cs-linkedin-post__stats">{statsByPlatform.LinkedIn}</div>
         <div className="cs-linkedin-post__actions">
           <span><img src={linkedinLikeOutlineIcon} alt="" /> Like</span>
@@ -2058,7 +2271,7 @@ const PostPreview = ({
 
   if (post.platform === "Instagram") {
     return (
-      <article className="cs-post cs-post--instagram cs-instagram-post">
+      <article className={`cs-post cs-post--instagram cs-instagram-post${isVideoMedia ? " cs-post--video" : ""}`}>
         <div className="cs-post__platform-chip">
           <img src={channelLogoMap[post.platform]} alt="" />
           <span>{post.platform}</span>
@@ -2069,12 +2282,10 @@ const PostPreview = ({
           <img className="cs-instagram-post__avatar" src={dukeHealthLogo} alt={`${tenantName} logo`} />
           <div>
             <strong>{instagramName}</strong>
-            <small>Sponsored campaign</small>
+            <small>{isVideoMedia ? "Reel · Sponsored" : "Sponsored campaign"}</small>
           </div>
         </div>
-        <div className="cs-instagram-post__image-wrap">
-          <img src={post.image} alt={post.altText} />
-        </div>
+        <PostMedia post={post} wrapClassName="cs-instagram-post__image-wrap" />
         <div className="cs-instagram-post__actions" aria-label="Instagram post actions">
           <div>
             <img src={heartIcon} alt="" />
@@ -2093,7 +2304,7 @@ const PostPreview = ({
 
   if (post.platform === "Facebook") {
     return (
-      <article className="cs-post cs-post--facebook cs-facebook-post">
+      <article className={`cs-post cs-post--facebook cs-facebook-post${isVideoMedia ? " cs-post--video" : ""}`}>
         <div className="cs-post__platform-chip">
           <img src={channelLogoMap[post.platform]} alt="" />
           <span>{post.platform}</span>
@@ -2108,18 +2319,18 @@ const PostPreview = ({
           </div>
         </div>
         <p className="cs-facebook-post__copy">{postCopy}</p>
-        <div className="cs-facebook-post__image-wrap">
-          <img src={post.image} alt={post.altText} />
-        </div>
-        <div className="cs-facebook-post__link">
-          <span className="cs-facebook-post__domain">
-            <img src={dukeHealthLogo} alt="" />
-            {new URL(post.ctaDestination).hostname.toUpperCase()}
-          </span>
-          <strong>Your next career move starts here.</strong>
-          <p>Explore open roles and learn why this opportunity could be the right fit for you.</p>
-          <button>Learn more</button>
-        </div>
+        <PostMedia post={post} wrapClassName="cs-facebook-post__image-wrap" />
+        {!isVideoMedia && (
+          <div className="cs-facebook-post__link">
+            <span className="cs-facebook-post__domain">
+              <img src={dukeHealthLogo} alt="" />
+              {new URL(post.ctaDestination).hostname.toUpperCase()}
+            </span>
+            <strong>Your next career move starts here.</strong>
+            <p>Explore open roles and learn why this opportunity could be the right fit for you.</p>
+            <button>Learn more</button>
+          </div>
+        )}
         <div className="cs-facebook-post__engagement">
           <span className="cs-facebook-post__reactions">
             <img src={facebookReactionLikeIcon} alt="" />
@@ -2139,7 +2350,7 @@ const PostPreview = ({
 
   if (post.platform === "X") {
     return (
-      <article className="cs-post cs-post--x cs-x-post">
+      <article className={`cs-post cs-post--x cs-x-post${isVideoMedia ? " cs-post--video" : ""}`}>
         <div className="cs-post__platform-chip">
           <img src={channelLogoMap[post.platform]} alt="" />
           <span>{post.platform}</span>
@@ -2163,9 +2374,7 @@ const PostPreview = ({
               : part
           ))}
         </p>
-        <div className="cs-x-post__image-wrap">
-          <img src={post.image} alt={post.altText} />
-        </div>
+        <PostMedia post={post} wrapClassName="cs-x-post__image-wrap" />
         <div className="cs-x-post__actions">
           <span><img src={commentIcon} alt="" />34</span>
           <span><img src={retweetIcon} alt="" />2.3K</span>
@@ -2178,7 +2387,7 @@ const PostPreview = ({
   }
 
   return (
-    <article className={`cs-post cs-post--${post.platform.toLowerCase()}`}>
+    <article className={`cs-post cs-post--${post.platform.toLowerCase()}${isVideoMedia ? " cs-post--video" : ""}`}>
       <div className="cs-post__platform-chip">
         <img src={channelLogoMap[post.platform]} alt="" />
         <span>{post.platform}</span>
@@ -2195,9 +2404,7 @@ const PostPreview = ({
       <p className="cs-post__copy">
         {postCopy} <a href={trackingLink}>Learn more</a>
       </p>
-      <div className="cs-post__image-wrap">
-        <img src={post.image} alt={post.altText} />
-      </div>
+      <PostMedia post={post} wrapClassName="cs-post__image-wrap" />
       <div className="cs-post__stats">{statsByPlatform[post.platform]}</div>
       <div className="cs-post__actions">
         {visibleActions.map((action) => (
@@ -2248,7 +2455,7 @@ const SaveModal = ({ campaign, onClose }: { campaign: Campaign; onClose: () => v
           <svg className="cs-btn__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
             <path d="M9.8 3.5 5.3 8l4.5 4.5" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" />
           </svg>
-          Back to Campaign Studio
+          Back to Social Media Advisor
         </Button>
         <Button variant="primary" onClick={() => downloadCampaignContentZip(campaign)}>
           <svg className="cs-btn__icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
@@ -2393,7 +2600,12 @@ const EditDrawer = ({
     setShowImageModal(true);
   };
   const confirmImageReplacement = () => {
-    setDraft({ ...draft, image: selectedImageOption.src, altText: `${selectedImageOption.label} for ${post.platform}` });
+    setDraft({
+      ...draft,
+      image: selectedImageOption.src,
+      altText: `${selectedImageOption.label} for ${post.platform}`,
+      mediaKind: "image",
+    });
     setShowImageModal(false);
   };
 
@@ -2636,6 +2848,7 @@ const CampaignTable = ({
 
 export const CampaignStudioList: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { customerCode, refnum } = useParams();
   const refNum = refnum || getRefNum();
   const [prompt, setPrompt] = useState("");
@@ -2656,6 +2869,27 @@ export const CampaignStudioList: React.FC = () => {
   };
 
   useEffect(refreshCampaigns, [refNum]);
+
+  useEffect(() => {
+    const draft = (location.state as { advisorCampaignDraft?: AdvisorCampaignHandoff } | null)?.advisorCampaignDraft;
+    if (!draft) return;
+    setPrompt(draft.prompt);
+    setGenerateDraft({
+      prompt: draft.prompt,
+      campaignName: draft.campaignName,
+      tone: draft.tone,
+      channels: draft.channels,
+      dueDate: draft.dueDate,
+      ctaDestination: draft.ctaDestination,
+      videos: draft.videos,
+      enableVideoHubPicker: Boolean(draft.videos?.length) || Boolean(draft.sourceCardId),
+      prefillSelectedVideos: Boolean(draft.videos?.length),
+      lockVideoSelection: Boolean(draft.lockVideoSelection),
+      sourceCardId: draft.sourceCardId,
+    });
+    setShowGenerateModal(true);
+    navigate(listPath, { replace: true, state: {} });
+  }, [location.state, listPath, navigate]);
 
   const openCampaignEditor = (campaign: Campaign) => {
     const editorPrompt = campaign.draftPrompt || getCampaignPrompt(campaign);
@@ -2683,6 +2917,59 @@ export const CampaignStudioList: React.FC = () => {
       channels: campaign.platforms.map((platform) => platform.platform),
       dueDate: campaign.postDate,
       ctaDestination: campaign.platforms[0]?.ctaDestination,
+    });
+    setShowGenerateModal(true);
+  };
+
+  const useBrandNudge = (card: AdvisorCard) => {
+    const nudgePrompt = buildNudgeCampaignPrompt(card);
+    setPrompt(nudgePrompt);
+    setGenerateDraft({
+      prompt: nudgePrompt,
+      campaignName: card.title,
+      tone: "Warm and empathetic",
+      channels: ["LinkedIn", "Instagram", "Facebook", "X"],
+      dueDate: new Date().toISOString().slice(0, 10),
+      ctaDestination: card.suggestedCta,
+    });
+    setShowGenerateModal(true);
+  };
+
+  const useTestimonialReady = (card: AdvisorCard) => {
+    const nudgePrompt = buildNudgeCampaignPrompt(card);
+    const videos = card.campaignInfo?.videos || [];
+    const lockVideoSelection = Boolean(card.campaignInfo?.lockVideoSelection);
+    setPrompt(nudgePrompt);
+    setGenerateDraft({
+      prompt: nudgePrompt,
+      campaignName: card.title.replace(/\s+—\s+videos? ready$/i, ""),
+      tone: "Warm and empathetic",
+      channels: ["LinkedIn", "Instagram", "Facebook", "X"],
+      dueDate: new Date().toISOString().slice(0, 10),
+      ctaDestination: card.suggestedCta,
+      videos,
+      enableVideoHubPicker: true,
+      prefillSelectedVideos: true,
+      lockVideoSelection,
+      sourceCardId: card.id,
+    });
+    setShowGenerateModal(true);
+  };
+
+  const openTestimonialTemplate = () => {
+    const template = templateCards.find((item) => item.title === "Start Testimonial Campaign");
+    if (!template) return;
+    setPrompt(template.prompt);
+    setGenerateDraft({
+      prompt: template.prompt,
+      campaignName: "Employee Testimonial Campaign",
+      tone: "Warm and empathetic",
+      channels: ["LinkedIn", "Instagram", "Facebook", "X"],
+      dueDate: new Date().toISOString().slice(0, 10),
+      videos: [],
+      enableVideoHubPicker: true,
+      prefillSelectedVideos: false,
+      sourceCardId: undefined,
     });
     setShowGenerateModal(true);
   };
@@ -2733,6 +3020,13 @@ export const CampaignStudioList: React.FC = () => {
   if (showGenerateModal) {
     return (
       <GenerateCampaignModal
+        key={
+          generateDraft?.prefillSelectedVideos && generateDraft.sourceCardId
+            ? `ready-${generateDraft.sourceCardId}`
+            : generateDraft?.enableVideoHubPicker
+              ? "testimonial-manual-empty"
+              : `draft-${generateDraft?.campaignId || "new"}`
+        }
         prompt={generateDraft?.prompt || prompt}
         initialCampaignName={generateDraft?.campaignName}
         initialTone={generateDraft?.tone}
@@ -2741,16 +3035,24 @@ export const CampaignStudioList: React.FC = () => {
         initialCtaDestination={generateDraft?.ctaDestination}
         initialCampaignId={generateDraft?.campaignId}
         initialCreatedAt={generateDraft?.createdAt}
+        initialVideos={generateDraft?.prefillSelectedVideos ? generateDraft.videos : []}
+        enableVideoHubPicker={Boolean(generateDraft?.enableVideoHubPicker)}
+        prefillSelectedVideos={Boolean(generateDraft?.prefillSelectedVideos)}
+        lockVideoSelection={Boolean(generateDraft?.lockVideoSelection)}
         onBack={() => {
           setShowGenerateModal(false);
           setGenerateDraft(null);
         }}
         onStart={(campaign) => {
+          const sourceCardId = generateDraft?.sourceCardId;
           scrollPageToTop();
           setShowGenerateModal(false);
           setGenerateDraft(null);
           setPendingCampaign(campaign);
           setIsGenerating(true);
+          if (sourceCardId) {
+            void advisorBoardAdapter.markTestimonialConfigured(refNum, new Date().getFullYear(), sourceCardId);
+          }
         }}
       />
     );
@@ -2758,7 +3060,12 @@ export const CampaignStudioList: React.FC = () => {
 
   return (
     <main className="campaign-studio">
-      <header className="cs-page-header"><h1>Campaign Studio</h1></header>
+      <header className="cs-page-header">
+        <div>
+          <h1>Social Media Advisor</h1>
+          <CampaignStudioSubNav />
+        </div>
+      </header>
       <section className="cs-prompt-panel">
         <h2>Generate new campaign</h2>
         <div className="cs-prompt-box">
@@ -2776,7 +3083,23 @@ export const CampaignStudioList: React.FC = () => {
           />
           <div className="cs-prompt-actions">
             <button className="cs-enhance" disabled={!prompt.trim()}><img src={enhanceIcon} alt="" /> Enhance with X+</button>
-            <button className="cs-generate-icon" disabled={!prompt.trim()} onClick={() => setShowGenerateModal(true)}>
+            <button
+              className="cs-generate-icon"
+              disabled={!prompt.trim()}
+              onClick={() => {
+                const testimonialPrompt =
+                  templateCards.find((item) => item.title === "Start Testimonial Campaign")?.prompt || "";
+                const isTestimonialPrompt =
+                  Boolean(testimonialPrompt) &&
+                  prompt.toLowerCase().includes(testimonialPrompt.slice(0, 48).toLowerCase());
+                if (isTestimonialPrompt) {
+                  openTestimonialTemplate();
+                  return;
+                }
+                setGenerateDraft(null);
+                setShowGenerateModal(true);
+              }}
+            >
               <img src={generateIcon} alt="" />
             </button>
           </div>
@@ -2784,13 +3107,29 @@ export const CampaignStudioList: React.FC = () => {
         <h3>Or start with a template</h3>
         <div className="cs-template-grid">
           {templateCards.map((template) => (
-            <button key={template.title} className="cs-template-card" onClick={() => setPrompt(template.prompt)}>
+            <button
+              key={template.title}
+              className="cs-template-card"
+              title={template.title}
+              onClick={() => {
+                if (template.title === "Start Testimonial Campaign") {
+                  openTestimonialTemplate();
+                  return;
+                }
+                setPrompt(template.prompt);
+              }}
+            >
               <TemplateIcon type={template.icon} />
               <strong>{template.title}</strong>
             </button>
           ))}
         </div>
       </section>
+      <EmployerBrandSignals
+        refNum={refNum}
+        onUseMedia={useBrandNudge}
+        onUseTestimonialReady={useTestimonialReady}
+      />
       <section className="cs-table-section">
         <h2>Created campaigns</h2>
         <p>Track generated campaigns and review top-channel attribution from career-site UTM activity.</p>
