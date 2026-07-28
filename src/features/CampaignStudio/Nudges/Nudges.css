@@ -196,7 +196,7 @@
   line-height: 18px;
   color: var(--neutrals-nn-500, #353b46);
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -327,18 +327,6 @@
   font-size: 14px;
   line-height: 22px;
   white-space: pre-wrap;
-}
-
-.cs-nudge-preview__cta {
-  margin: 0;
-  color: var(--neutrals-nn-300, #637085);
-  font-size: 12px;
-  line-height: 18px;
-  word-break: break-all;
-}
-
-.cs-nudge-preview__cta a {
-  color: #2927b2;
 }
 
 .cs-nudge-preview__footer {

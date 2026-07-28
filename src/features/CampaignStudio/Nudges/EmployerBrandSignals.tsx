@@ -36,16 +36,35 @@ const nudgeLead = (card: AdvisorCard) => {
       const count = card.campaignInfo?.recipients?.length || 0;
       return count > 0 ? `Waiting on ${count} video${count === 1 ? "" : "s"}` : "Waiting for uploads";
     }
-    if (card.title.toLowerCase().includes("marcus")) return "Marcus hit 5 years — request a testimonial?";
+    if (card.title.toLowerCase().includes("marcus")) return "Marcus hit 5 years. Request a testimonial?";
     if (card.title.toLowerCase().includes("applications") || card.title.toLowerCase().includes("slowed"))
-      return "Apps slowed in Raleigh — feature a local teammate?";
+      return "Apps slowed in Raleigh. Feature a local teammate?";
     if (card.title.toLowerCase().includes("priya") || card.title.toLowerCase().includes("intern"))
-      return "Priya went intern → RN — share her story?";
+      return "Priya went from intern to RN. Share her story?";
     if (card.title.toLowerCase().includes("certification"))
-      return "New Radiology certifications — spotlight them?";
-    if (card.title.toLowerCase().includes("daisy")) return "DAISY Award winner — capture a story?";
-    if (card.title.toLowerCase().includes("anniversary")) return "5-year story ready to publish";
+      return "New Radiology certifications. Spotlight them?";
+    if (card.title.toLowerCase().includes("daisy")) return "DAISY Award winner. Capture a story?";
+    if (card.title.toLowerCase().includes("anniversary")) return "5 year story ready to publish";
     return card.title;
+  }
+
+  if (card.source === "media_listening") {
+    const anywhere = "You haven't posted it anywhere";
+    if (card.contentType === "Award") {
+      if (card.title.toLowerCase().includes("forbes") || card.title.toLowerCase().includes("new grads"))
+        return `Forbes named you a Best Employer for New Grads. ${anywhere}. Want to share it?`;
+      if (card.title.toLowerCase().includes("diversity"))
+        return `You were recognized for workplace diversity. ${anywhere}. Want to celebrate it?`;
+      if (card.title.toLowerCase().includes("magnet"))
+        return `Nursing earned Magnet recognition. ${anywhere}. Want to post about it?`;
+      return `You earned a new award. ${anywhere}. Want to share it?`;
+    }
+
+    if (card.title.toLowerCase().includes("minimum wage") || card.title.toLowerCase().includes("$20"))
+      return `You raised the minimum wage to $20/hr. ${anywhere}. Want to amplify it?`;
+    if (card.title.toLowerCase().includes("homegrown") || card.title.toLowerCase().includes("$203"))
+      return `You launched a $203M HomeGrown initiative. ${anywhere}. Consider sharing it?`;
+    return `You got positive brand coverage. ${anywhere}. Want to turn it into a post?`;
   }
 
   return card.title;
@@ -284,12 +303,6 @@ const NudgeDraftPreview: React.FC<{
         </header>
         <div className="cs-nudge-preview__body">
           <p className="cs-nudge-preview__draft">{card.copy}</p>
-          <p className="cs-nudge-preview__cta">
-            Default CTA:{" "}
-            <a href={card.suggestedCta} target="_blank" rel="noreferrer">
-              {card.suggestedCta}
-            </a>
-          </p>
         </div>
         <footer className="cs-nudge-preview__footer">
           <button type="button" className="cs-btn cs-btn--secondary" onClick={onClose}>

@@ -67,14 +67,14 @@ const CalendarHeader: React.FC<{
       {subtitle && <p>{subtitle}</p>}
     </div>
     <div className="cb-view__controls">
-      <div className="cb-horizon" role="tablist" aria-label="Board horizon">
+      <div className="cs-switch-button" role="tablist" aria-label="Board horizon">
         {HORIZONS.map((item) => (
           <button
             key={item.id}
             type="button"
             role="tab"
             aria-selected={horizon === item.id}
-            className={`cb-horizon__btn${horizon === item.id ? " is-active" : ""}`}
+            className={horizon === item.id ? "is-active" : ""}
             onClick={() => onHorizonChange(item.id)}
           >
             {item.label}

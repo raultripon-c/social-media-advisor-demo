@@ -921,37 +921,6 @@
   padding: 0;
 }
 
-.cb-horizon {
-  display: inline-flex;
-  align-items: center;
-  height: 40px;
-  padding: 3px;
-  border: 1px solid var(--neutrals-nn-75, #d1d5dc);
-  border-radius: 8px;
-  background: #f8f9fb;
-  box-sizing: border-box;
-}
-
-.cb-horizon__btn {
-  min-width: 56px;
-  height: 32px;
-  padding: 0 10px;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--neutrals-nn-300, #637085);
-  font-family: var(--family-body, Poppins), system-ui, sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.cb-horizon__btn.is-active {
-  background: #fff;
-  color: var(--secondary-blue-bb-300, #2927b2);
-  box-shadow: 0 1px 2px rgba(17, 24, 39, 0.08);
-}
-
 .cb-toolbar__actions .cs-btn--primary {
   min-height: 36px;
   white-space: nowrap;

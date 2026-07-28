@@ -10,6 +10,7 @@ import CampaignStudioNewCampaign from "../screens/CampaignStudioNewCampaign/Camp
 import CampaignStudioDashboard from "../screens/CampaignStudioDashboard/CampaignStudioDashboard";
 import CampaignStudioOnePage from "../screens/CampaignStudioOnePage/CampaignStudioOnePage";
 import CampaignStudioContentBoard from "../screens/CampaignStudioContentBoard/CampaignStudioContentBoard";
+import CampaignStudioAmplify from "../screens/CampaignStudioAmplify/CampaignStudioAmplify";
 import { withDynamicScript } from "../layout/dynamicScripts/WithDynamicScript";
 
 export interface IRoute {
@@ -93,6 +94,11 @@ const campaignStudioContentBoard = {
   component: CampaignStudioContentBoard,
 }
 
+const campaignStudioAmplify = {
+  path: "/:customerCode/:refnum/campaign-studio/amplify",
+  component: CampaignStudioAmplify,
+}
+
 const localCampaignStudioAllCampaigns = {
   path: "/campaign-studio/campaigns",
   component: CampaignStudioAllCampaigns,
@@ -118,6 +124,11 @@ const localCampaignStudioContentBoard = {
   component: CampaignStudioContentBoard,
 }
 
+const localCampaignStudioAmplify = {
+  path: "/campaign-studio/amplify",
+  component: CampaignStudioAmplify,
+}
+
 const unmatchedRoutePage = {
   path: "*",
   component: UnmatchedRoutePage
@@ -139,10 +150,12 @@ export const appRoutes = [
   campaignStudioWorkspace,
   campaignStudioDashboard,
   campaignStudioContentBoard,
+  campaignStudioAmplify,
   localCampaignStudioAllCampaigns,
   localCampaignStudioNewCampaign,
   localCampaignStudioWorkspace,
   localCampaignStudioDashboard,
   localCampaignStudioContentBoard,
+  localCampaignStudioAmplify,
   unmatchedRoutePage
 ];

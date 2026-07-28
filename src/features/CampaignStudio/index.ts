@@ -7,6 +7,7 @@ export {
 
 export { ContentBoardPage } from "./ContentBoard/ContentBoardPage";
 export { CampaignStudioSubNav } from "./ContentBoard/CampaignStudioSubNav";
+export { AmplifyPage } from "./Amplify/AmplifyPage";
 export { EmployerBrandSignals } from "./Nudges/EmployerBrandSignals";
 
 export type {

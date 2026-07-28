@@ -2105,6 +2105,60 @@ body:has(.campaign-studio--wizard) {
   height: 16px;
 }
 
+/* Phenom Switch Button group — Big (DS node 7730:42442) */
+.cs-switch-button {
+  --cs-switch-radius: var(--border-border-radius-xl, 10px);
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  width: fit-content;
+  max-width: 100%;
+  border: 1px solid var(--neutrals-nn-75, #d1d5dc);
+  border-radius: var(--cs-switch-radius);
+  background: var(--grays-grgr-25, #f8f9fb);
+  box-sizing: border-box;
+}
+
+.cs-switch-button button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-spacing-lg, 8px);
+  height: 40px;
+  padding: 0 var(--spacing-spacing-4xl, 16px);
+  border: 0;
+  border-radius: var(--cs-switch-radius);
+  background: transparent;
+  color: var(--neutrals-nn-300, #637085);
+  font-family: var(--family-body, Poppins), system-ui, sans-serif;
+  font-size: var(--size-font-size-base, 14px);
+  font-weight: var(--weight-medium, 500);
+  line-height: var(--line-height-line-height-md, 20px);
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  cursor: pointer;
+  box-sizing: border-box;
+  box-shadow: none;
+}
+
+.cs-switch-button button:hover {
+  color: var(--neutrals-nn-400, #464f5e);
+}
+
+.cs-switch-button button.is-active {
+  z-index: 1;
+  background: var(--Core-White, #fff);
+  color: var(--neutrals-nn-400, #464f5e);
+  /* Paint over the track border without changing layout */
+  box-shadow: 0 0 0 1px var(--neutrals-nn-200, #8c95a8);
+}
+
+.cs-switch-button button:focus-visible {
+  outline: 2px solid var(--secondary-blue-bb-200, #4d3ee0);
+  outline-offset: 1px;
+}
+
 .cs-segmented-control {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

@@ -16,3 +16,79 @@ body {
 #phenomChatbotWrapper {
     display: none;
 }
+
+/* Phenom DS checkbox — https://www.figma.com/design/6Vd1BU48fnhA5F0eg8d57S?node-id=3816-36244 */
+input[type="checkbox"] {
+  --cs-checkbox-size: 16px;
+  --cs-checkbox-radius: 4px;
+  --cs-checkbox-brand: var(--secondary-blue-bb-200, #4d3ee0);
+  --cs-checkbox-brand-strong: var(--secondary-blue-bb-300, #2927b2);
+  --cs-checkbox-border: var(--neutrals-nn-75, #d1d5dc);
+  --cs-checkbox-border-disabled: var(--neutrals-nn-50, #e8eaee);
+  appearance: none;
+  -webkit-appearance: none;
+  width: var(--cs-checkbox-size);
+  height: var(--cs-checkbox-size);
+  min-width: var(--cs-checkbox-size);
+  min-height: var(--cs-checkbox-size);
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--cs-checkbox-border);
+  border-radius: var(--cs-checkbox-radius);
+  background-color: var(--Core-White, #fff);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 10px 10px;
+  box-sizing: border-box;
+  cursor: pointer;
+  flex-shrink: 0;
+  vertical-align: middle;
+  transition: border-color 0.12s ease, background-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+input[type="checkbox"]:hover:not(:disabled) {
+  border-color: var(--cs-checkbox-brand);
+}
+
+input[type="checkbox"]:focus {
+  outline: none;
+}
+
+input[type="checkbox"]:focus-visible {
+  border-color: var(--cs-checkbox-brand);
+  box-shadow: 0 0 0 3px rgba(77, 62, 224, 0.24);
+}
+
+input[type="checkbox"]:checked {
+  border-color: var(--cs-checkbox-brand);
+  background-color: var(--cs-checkbox-brand);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3.5 8.2 6.5 11l6-6.4' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+input[type="checkbox"]:checked:hover:not(:disabled) {
+  border-color: var(--cs-checkbox-brand-strong);
+  background-color: var(--cs-checkbox-brand-strong);
+}
+
+input[type="checkbox"]:checked:focus-visible {
+  border-color: var(--cs-checkbox-brand-strong);
+  box-shadow: 0 0 0 3px rgba(77, 62, 224, 0.28);
+}
+
+input[type="checkbox"]:disabled {
+  border-color: var(--cs-checkbox-border-disabled);
+  background-color: var(--grays-grgr-25, #f8f9fb);
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+input[type="checkbox"]:checked:disabled {
+  border-color: var(--neutrals-nn-200, #8c95a8);
+  background-color: var(--neutrals-nn-200, #8c95a8);
+}
+
+input[type="checkbox"]:indeterminate {
+  border-color: var(--cs-checkbox-brand);
+  background-color: var(--cs-checkbox-brand);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3.5 8h9' stroke='%23fff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+}
