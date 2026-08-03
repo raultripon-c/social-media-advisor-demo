@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { CampaignStudioSubNav } from "../ContentBoard/CampaignStudioSubNav";
 import "../CampaignStudio.css";
 import "../ContentBoard/ContentBoard.css";
 import "./Amplify.css";
 import { demoSharePacks } from "./amplifyData";
-import { AmplifyMode, SharePack } from "./amplifyTypes";
+import { AmplifyCampaignSeed, AmplifyMode, SharePack } from "./amplifyTypes";
 import { DispatchWizard } from "./DispatchWizard";
 import { ImpactView } from "./ImpactView";
 import { PackDrawer } from "./PackDrawer";
@@ -15,18 +16,34 @@ const VIEW_MODES: { id: Exclude<AmplifyMode, "dispatch">; label: string }[] = [
   { id: "impact", label: "Impact" },
 ];
 
+type AmplifyLocationState = {
+  openAmplifyDispatch?: boolean;
+  amplifyFromCampaign?: AmplifyCampaignSeed;
+} | null;
+
 export const AmplifyPage: React.FC = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [mode, setMode] = useState<AmplifyMode>("packs");
   const [packs, setPacks] = useState<SharePack[]>(() => demoSharePacks);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [activePackId, setActivePackId] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [campaignSeed, setCampaignSeed] = useState<AmplifyCampaignSeed | null>(null);
 
   const needsApprovalCount = useMemo(
     () => packs.filter((pack) => pack.status === "needs_approval").length,
     [packs],
   );
   const activePack = packs.find((pack) => pack.id === activePackId) || null;
+
+  useEffect(() => {
+    const state = location.state as AmplifyLocationState;
+    if (!state?.openAmplifyDispatch) return;
+    setCampaignSeed(state.amplifyFromCampaign || null);
+    setMode("dispatch");
+    navigate(location.pathname, { replace: true, state: {} });
+  }, [location.pathname, location.state, navigate]);
 
   useEffect(() => {
     if (!toast) return undefined;
@@ -73,15 +90,20 @@ export const AmplifyPage: React.FC = () => {
     showToast(ids.length > 1 ? `${ids.length} packs sent` : "Pack sent");
   };
 
+  const leaveDispatch = () => {
+    setCampaignSeed(null);
+    setMode("packs");
+  };
+
   const handleDispatchSend = (pack: SharePack) => {
     setPacks((current) => [pack, ...current]);
-    setMode("packs");
+    leaveDispatch();
     showToast("Share pack sent");
   };
 
   const handleDispatchDraft = (pack: SharePack) => {
     setPacks((current) => [pack, ...current]);
-    setMode("packs");
+    leaveDispatch();
     showToast("Draft saved");
   };
 
@@ -137,12 +159,16 @@ export const AmplifyPage: React.FC = () => {
             onOpen={(pack) => setActivePackId(pack.id)}
             onApprove={approvePacks}
             onSend={sendPacks}
-            onCreate={() => setMode("dispatch")}
+            onCreate={() => {
+              setCampaignSeed(null);
+              setMode("dispatch");
+            }}
           />
         )}
         {mode === "dispatch" && (
           <DispatchWizard
-            onCancel={() => setMode("packs")}
+            campaignSeed={campaignSeed}
+            onCancel={leaveDispatch}
             onSend={handleDispatchSend}
             onSaveDraft={handleDispatchDraft}
           />

@@ -1145,17 +1145,34 @@ body:has(.campaign-studio--wizard) {
 }
 
 .cs-btn--secondary-ghost {
+  min-height: 40px;
+  padding: 10px 16px;
+  border-color: transparent;
+  border-radius: var(--border-border-radius-xl, 10px);
   background: transparent;
-  color: var(--secondary-blue-bb-200, #4d3ee0);
+  color: var(--components-button-secondary-ghost-text-default, #2927b2);
+  font-size: var(--size-font-size-base, 14px);
+  line-height: var(--line-height-line-height-md, 20px);
+  letter-spacing: 0.3px;
+  box-shadow: none;
 }
 
 .cs-btn--secondary-ghost:not(:disabled):hover {
-  background: rgba(77, 62, 224, 0.06);
-  color: #2927b2;
+  border-color: transparent;
+  background: var(--components-button-secondary-ghost-bg-hover, #e8eaee);
+  color: var(--components-button-secondary-ghost-text-hover, #2927b2);
 }
 
 .cs-btn--secondary-ghost:not(:disabled):active {
-  background: rgba(77, 62, 224, 0.12);
+  border-color: transparent;
+  background: var(--components-button-secondary-ghost-bg-active, #d1d5dc);
+  color: var(--components-button-secondary-ghost-text-active, #2927b2);
+}
+
+.cs-btn--secondary-ghost:disabled {
+  background: transparent;
+  color: var(--components-button-secondary-ghost-text-disabled, #a0a8b8);
+  opacity: 1;
 }
 
 .cs-btn:focus-visible,
@@ -1165,6 +1182,14 @@ body:has(.campaign-studio--wizard) {
 .cs-post__edit:focus-visible {
   outline: none;
   box-shadow: 0 0 0 2px rgba(77, 62, 224, 0.24);
+}
+
+.cs-btn--secondary-ghost:focus-visible {
+  outline: none;
+  border-color: var(--components-button-secondary-ghost-border-focus, #2927b2);
+  background: transparent;
+  color: var(--components-button-secondary-ghost-text-default, #2927b2);
+  box-shadow: none;
 }
 
 .campaign-studio .cs-btn--secondary:focus-visible,
@@ -2433,18 +2458,25 @@ body:has(.campaign-studio--wizard) {
 
 .cs-role-select {
   position: relative;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .cs-role-select__control {
   width: 100%;
+  min-width: 0;
+  height: 40px;
   min-height: 40px;
+  max-height: 40px;
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 8px;
   border: 1px solid var(--components-multi-select-stroke-default, var(--neutrals-nn-200, #8c95a8));
   border-radius: var(--border-border-radius-lg, 8px);
-  padding: 6px 72px 6px 12px;
+  padding: 0 72px 0 12px;
   background: var(--Core-White, #fff);
   color: var(--neutrals-nn-500, #353b46);
   font-family: var(--family-body, Poppins), system-ui, sans-serif;
@@ -2453,11 +2485,46 @@ body:has(.campaign-studio--wizard) {
   text-align: left;
   cursor: pointer;
   position: relative;
+  overflow: hidden;
 }
 
 .cs-role-select__control.is-open {
   border-color: var(--secondary-blue-bb-200, #4d3ee0);
-  box-shadow: 0 0 0 2px rgba(77, 62, 224, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(77, 62, 224, 0.35);
+}
+
+.cs-role-select.is-disabled .cs-role-select__control {
+  border-color: var(--neutrals-nn-75, #d1d5dc);
+  background: var(--grays-grgr-25, #f8f9fb);
+  color: var(--neutrals-nn-300, #637085);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.cs-role-select.is-disabled .cs-role-select__placeholder,
+.cs-role-select.is-disabled .cs-role-tags {
+  color: var(--neutrals-nn-300, #637085);
+}
+
+.cs-role-select.is-disabled .cs-role-select__control::after {
+  border-color: var(--neutrals-nn-200, #8c95a8);
+}
+
+.cs-role-select__menu button.is-option-disabled,
+.cs-role-select__menu button:disabled {
+  color: var(--neutrals-nn-200, #8c95a8);
+  cursor: not-allowed;
+}
+
+.cs-role-select__menu button.is-option-disabled:hover,
+.cs-role-select__menu button:disabled:hover {
+  background: transparent;
+}
+
+.cs-role-select__menu button.is-option-disabled .cs-role-select__checkbox,
+.cs-role-select__menu button:disabled .cs-role-select__checkbox {
+  border-color: var(--neutrals-nn-100, #b6bdc9);
+  background: var(--grays-grgr-25, #f8f9fb);
 }
 
 .cs-location-search__control {
@@ -2588,9 +2655,11 @@ body:has(.campaign-studio--wizard) {
   display: flex;
   flex: 1 1 auto;
   flex-wrap: nowrap;
+  align-items: center;
   gap: 8px;
   min-width: 0;
   max-width: 100%;
+  height: 100%;
   overflow: hidden;
 }
 
@@ -2600,18 +2669,18 @@ body:has(.campaign-studio--wizard) {
   justify-content: center;
   gap: 0;
   max-width: 200px;
-  height: 28px;
+  height: 24px;
   flex: 0 1 auto;
   min-width: 0;
   box-sizing: border-box;
-  padding: 6px;
+  padding: 2px 6px;
   border-radius: 50px;
   background: var(--components-input-chip-bg-default-default, var(--neutrals-nn-50, #e8eaee));
   color: var(--components-input-chip-text-default, var(--neutrals-nn-400, #464f5e));
   font-size: var(--size-font-size-sm, 12px);
   font-weight: var(--weight-medium, 500);
   letter-spacing: 0.4px;
-  line-height: var(--line-height-line-height-sm, 16px);
+  line-height: 16px;
 }
 
 .cs-role-tag span {
@@ -2662,7 +2731,18 @@ body:has(.campaign-studio--wizard) {
   transform: translateY(-50%);
 }
 
+.cs-role-select__clear.is-hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .cs-role-select__placeholder {
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: var(--neutrals-nn-300, #637085);
   font-size: var(--size-font-size-base, 14px);
   line-height: var(--line-height-line-height-md, 20px);
@@ -2691,9 +2771,28 @@ body:has(.campaign-studio--wizard) {
   box-shadow: var(--components-input-overlay-shadow, 0 4px 12px rgba(0, 0, 0, 0.15));
 }
 
+.cs-role-select__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0 12px 10px 12px;
+  border-bottom: 1px solid var(--neutrals-nn-50, #e8eaee);
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .cs-role-select__search {
   position: relative;
   margin: 0 10px 10px;
+  min-width: 0;
+}
+
+.cs-role-select__toolbar .cs-role-select__search {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+  margin: 0;
 }
 
 .cs-role-select__search span {
@@ -2721,6 +2820,7 @@ body:has(.campaign-studio--wizard) {
 
 .cs-role-select__search input {
   width: 100%;
+  max-width: 100%;
   height: 38px;
   box-sizing: border-box;
   border: 1px solid var(--neutrals-nn-100, #b6bdc9);
@@ -2735,7 +2835,12 @@ body:has(.campaign-studio--wizard) {
 
 .cs-role-select__search input:focus {
   border-color: var(--secondary-blue-bb-200, #4d3ee0);
-  box-shadow: 0 0 0 2px rgba(77, 62, 224, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(77, 62, 224, 0.24);
+}
+
+.cs-role-select__options {
+  max-height: 220px;
+  overflow-y: auto;
 }
 
 .cs-role-select__menu button {
@@ -2746,7 +2851,7 @@ body:has(.campaign-studio--wizard) {
   gap: 12px;
   border: 0;
   border-radius: 0;
-  padding: 10px 20px;
+  padding: 10px 12px;
   background: transparent;
   color: var(--neutrals-nn-500, #353b46);
   font-family: var(--family-body, Poppins), system-ui, sans-serif;
@@ -2758,17 +2863,118 @@ body:has(.campaign-studio--wizard) {
   cursor: pointer;
 }
 
-.cs-role-select__menu button.is-selected {
+.cs-role-select__select-all {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.cs-role-select__menu .cs-role-select__select-all {
+  width: 16px;
+  min-width: 16px;
+  max-width: 16px;
+  height: 16px;
+  padding: 0;
+  gap: 0;
+  color: inherit;
+  background: transparent;
+}
+
+.cs-role-select__select-all:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.cs-role-select__select-all:hover,
+.cs-role-select__menu .cs-role-select__select-all:hover,
+.cs-role-select__menu .cs-role-select__select-all.is-selected,
+.cs-role-select__menu .cs-role-select__select-all.is-selected:hover,
+.cs-role-select__menu .cs-role-select__select-all.is-partial,
+.cs-role-select__menu .cs-role-select__select-all.is-partial:hover {
+  background: transparent;
+  color: inherit;
+}
+
+.cs-role-select__select-all.is-selected .cs-role-select__checkbox,
+.cs-role-select__menu .cs-role-select__select-all.is-selected .cs-role-select__checkbox {
+  border-color: var(--secondary-blue-bb-200, #4d3ee0);
+  background: var(--secondary-blue-bb-200, #4d3ee0);
+}
+
+.cs-role-select__select-all.is-selected .cs-role-select__checkbox::after,
+.cs-role-select__menu .cs-role-select__select-all.is-selected .cs-role-select__checkbox::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 5px;
+  height: 9px;
+  border-right: 2px solid var(--Core-White, #fff);
+  border-bottom: 2px solid var(--Core-White, #fff);
+  transform: rotate(45deg);
+}
+
+.cs-role-select__select-all.is-partial .cs-role-select__checkbox {
+  border-color: var(--secondary-blue-bb-200, #4d3ee0);
+  background: var(--secondary-blue-bb-200, #4d3ee0);
+}
+
+.cs-role-select__select-all.is-partial .cs-role-select__checkbox::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 3px;
+  right: 3px;
+  width: auto;
+  height: 2px;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  transform: translateY(-50%);
+}
+
+.cs-role-select__menu .cs-role-select__options button.is-selected,
+.cs-role-select__menu > button.is-selected {
   background: var(--secondary-purple-pp-50, #eeebff);
   color: var(--secondary-blue-bb-200, #4d3ee0);
 }
 
-.cs-role-select__menu button:hover {
+.cs-role-select__menu .cs-role-select__options button:hover,
+.cs-role-select__menu > button:hover {
   background: var(--neutrals-nn-25, #f8f9fb);
 }
 
-.cs-role-select__menu button.is-selected:hover {
+.cs-role-select__menu .cs-role-select__options button.is-selected:hover,
+.cs-role-select__menu > button.is-selected:hover {
   background: var(--secondary-purple-pp-50, #eeebff);
+}
+
+.cs-role-select__option-copy {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.cs-role-select__option-copy em {
+  font-style: normal;
+  font-size: var(--size-font-size-sm, 12px);
+  font-weight: var(--weight-regular, 400);
+  line-height: 16px;
+  color: var(--neutrals-nn-300, #637085);
+}
+
+.cs-role-select__menu button.is-selected .cs-role-select__option-copy em {
+  color: var(--secondary-blue-bb-200, #4d3ee0);
 }
 
 .cs-role-select__checkbox {
@@ -2782,12 +2988,14 @@ body:has(.campaign-studio--wizard) {
   flex: 0 0 auto;
 }
 
-.cs-role-select__menu button.is-selected .cs-role-select__checkbox {
+.cs-role-select__menu .cs-role-select__options button.is-selected .cs-role-select__checkbox,
+.cs-role-select__menu > button.is-selected .cs-role-select__checkbox {
   border-color: var(--secondary-blue-bb-200, #4d3ee0);
   background: var(--secondary-blue-bb-200, #4d3ee0);
 }
 
-.cs-role-select__menu button.is-selected .cs-role-select__checkbox::after {
+.cs-role-select__menu .cs-role-select__options button.is-selected .cs-role-select__checkbox::after,
+.cs-role-select__menu > button.is-selected .cs-role-select__checkbox::after {
   content: "";
   position: absolute;
   left: 4px;
@@ -2800,7 +3008,7 @@ body:has(.campaign-studio--wizard) {
 }
 
 .cs-role-select__empty {
-  padding: 10px 20px;
+  padding: 10px 12px;
   color: var(--neutrals-nn-300, #637085);
   font-size: var(--size-font-size-base, 14px);
   line-height: var(--line-height-line-height-md, 20px);

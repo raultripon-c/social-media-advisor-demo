@@ -40,6 +40,8 @@ export interface Campaign {
   platforms: CampaignPlatformOutput[];
   metrics: CampaignMetrics;
   draftPrompt?: string;
+  /** Display name of the user who created the campaign */
+  createdByName?: string;
 }
 
 export interface CampaignStudioAdapter {

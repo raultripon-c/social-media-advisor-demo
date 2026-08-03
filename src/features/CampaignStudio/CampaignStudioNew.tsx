@@ -42,6 +42,7 @@ import {
   channelOptions,
   createCampaignFromBrief,
   generationSteps,
+  getCampaignCreatorName,
   getRefNum,
   getSelectedTenantName,
   makeCampaignName,
@@ -50,11 +51,13 @@ import {
   toneOptions,
 } from "./campaignStudioData";
 import { Campaign, CampaignMetrics, CampaignPlatformName, CampaignPlatformOutput } from "./types";
-import { CampaignStudioSubNav } from "./ContentBoard/CampaignStudioSubNav";
+import { CampaignStudioSubNav, getCampaignStudioPaths } from "./ContentBoard/CampaignStudioSubNav";
 import { EmployerBrandSignals } from "./Nudges/EmployerBrandSignals";
 import { buildNudgeCampaignPrompt, AdvisorCampaignHandoff, advisorBoardAdapter } from "./ContentBoard/contentBoardData";
 import { AdvisorCard, VideoHubVideo } from "./ContentBoard/contentBoardTypes";
 import { videoHubCatalog } from "./ContentBoard/videoHubData";
+import { AmplifyCampaignSeed } from "./Amplify/amplifyTypes";
+import paperPlane16Icon from "../../assets/svg/paper-plane-16.svg";
 import { UiDropdown } from "./UiDropdown";
 import "./CampaignStudio.css";
 import "./ContentBoard/ContentBoard.css";
@@ -2719,12 +2722,14 @@ const CampaignTable = ({
   onExport,
   onDuplicate,
   onDelete,
+  onAmplify,
 }: {
   campaigns: Campaign[];
   onPreview: (campaign: Campaign) => void;
   onExport: (campaign: Campaign) => void;
   onDuplicate: (campaign: Campaign) => void;
   onDelete: (campaign: Campaign) => void;
+  onAmplify: (campaign: Campaign) => void;
 }) => {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
 
@@ -2831,6 +2836,7 @@ const CampaignTable = ({
                   </button>
                   {openMenu === campaign.id && (
                     <div className="cs-menu">
+                      <button onClick={() => { setOpenMenu(null); onAmplify(campaign); }}><span className="cs-menu__icon" style={{ "--icon-url": `url(${paperPlane16Icon})` } as React.CSSProperties} aria-hidden="true" /> Amplify</button>
                       <button onClick={() => { setOpenMenu(null); onExport(campaign); }}><span className="cs-menu__icon" style={{ "--icon-url": `url(${downloadIcon})` } as React.CSSProperties} aria-hidden="true" /> Download all content as zip</button>
                       <button onClick={() => { setOpenMenu(null); onDuplicate(campaign); }}><span className="cs-menu__icon" style={{ "--icon-url": `url(${copyIcon})` } as React.CSSProperties} aria-hidden="true" /> Duplicate Campaign</button>
                       <button onClick={() => { setOpenMenu(null); onDelete(campaign); }}><span className="cs-menu__icon" style={{ "--icon-url": `url(${trashIcon})` } as React.CSSProperties} aria-hidden="true" /> Delete Campaign</button>
@@ -2976,8 +2982,21 @@ export const CampaignStudioList: React.FC = () => {
 
   const confirmDeleteCampaign = async (campaign: Campaign) => {
     await campaignStudioAdapter.deleteCampaign(refNum, campaign.id);
+    void advisorBoardAdapter.removeCampaignCard(refNum, campaign.id);
     setCampaigns((current) => current.filter((item) => item.id !== campaign.id));
     setDeleteCampaignTarget(null);
+  };
+
+  const openAmplifyForCampaign = (campaign: Campaign) => {
+    const amplifySeed: AmplifyCampaignSeed = {
+      campaignId: campaign.id,
+      name: campaign.name,
+      copy: campaign.platforms[0]?.copy || campaign.draftPrompt,
+      ctaDestination: campaign.platforms[0]?.ctaDestination,
+    };
+    navigate(getCampaignStudioPaths(customerCode, refnum).amplify, {
+      state: { openAmplifyDispatch: true, amplifyFromCampaign: amplifySeed },
+    });
   };
 
   if (isGenerating && pendingCampaign) {
@@ -3139,6 +3158,7 @@ export const CampaignStudioList: React.FC = () => {
           onExport={(campaign) => downloadCampaignContentZip(campaign)}
           onDuplicate={duplicateCampaign}
           onDelete={setDeleteCampaignTarget}
+          onAmplify={openAmplifyForCampaign}
         />
       </section>
       {previewCampaign && <PreviewModal campaign={previewCampaign} onClose={() => setPreviewCampaign(null)} />}
@@ -3244,9 +3264,11 @@ export const CampaignStudioWorkspace: React.FC<{
       const savedCampaign = await campaignStudioAdapter.saveCampaign(refNum, {
         ...campaign,
         status: campaign.status === "draft" ? "scheduled" : campaign.status,
+        createdByName: campaign.createdByName || getCampaignCreatorName(),
       });
       setCampaign(savedCampaign);
       setSaved(true);
+      void advisorBoardAdapter.syncCampaignCard(refNum, savedCampaign);
       onSaved?.(savedCampaign);
       setSaveModalCampaign(savedCampaign);
     } catch {
@@ -3260,8 +3282,13 @@ export const CampaignStudioWorkspace: React.FC<{
     setIsSavingDraft(true);
     setSaveError("");
     try {
-      const draftCampaign = await campaignStudioAdapter.saveCampaign(refNum, { ...campaign, status: "draft" });
+      const draftCampaign = await campaignStudioAdapter.saveCampaign(refNum, {
+        ...campaign,
+        status: "draft",
+        createdByName: campaign.createdByName || getCampaignCreatorName(),
+      });
       setCampaign(draftCampaign);
+      void advisorBoardAdapter.syncCampaignCard(refNum, draftCampaign);
       onSaved?.(draftCampaign);
       setShowDraftPrompt(false);
       onExit ? onExit() : navigate(listPath);
@@ -3406,18 +3433,7 @@ export const CampaignStudioDashboard: React.FC = () => {
   const jobEventTooltipLabel = `Selected ${jobEventLabel.toLowerCase()}: ${jobEventValues.join(", ")}`;
   const locationLabel = campaign?.location && campaign.location !== "target markets" ? campaign.location : "";
   const overviewStatus = campaign ? getCampaignTableStatus(campaign) : { label: "Published", className: "published" };
-  const tokenParsed = (window as any).keycloakInstance?.tokenParsed;
-  const loggedUserDetails = tokenParsed?.userDetails;
-  const toTitleCase = (name: string) =>
-    name.replace(/\S+/g, (part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase());
-  const createdByName =
-    toTitleCase(
-      tokenParsed?.name ||
-        loggedUserDetails?.displayName ||
-        [loggedUserDetails?.firstName, loggedUserDetails?.lastName].filter(Boolean).join(" ") ||
-        loggedUserDetails?.userName ||
-        "Local Preview User"
-    );
+  const createdByName = campaign?.createdByName || getCampaignCreatorName();
   const orderedPlatforms = campaign ? getOrderedCampaignPlatforms(campaign.platforms) : [];
   const overviewAssetColumns = campaign
     ? [0, 1, 2].map((columnIndex) => campaign.platforms.filter((_, platformIndex) => platformIndex % 3 === columnIndex))
@@ -3427,11 +3443,13 @@ export const CampaignStudioDashboard: React.FC = () => {
     const updatedCampaign: Campaign = {
       ...campaign,
       postDate: publishDate,
+      createdByName: campaign.createdByName || createdByName,
       platforms: campaign.platforms.map((platform) => ({ ...platform, postDate: publishDate })),
     };
     setCampaigns((current) => current.map((item) => (item.id === campaign.id ? updatedCampaign : item)));
     setIsUpdatingPublishDate(false);
     await campaignStudioAdapter.saveCampaign(refNum, updatedCampaign);
+    void advisorBoardAdapter.syncCampaignCard(refNum, updatedCampaign);
   };
 
   return (

@@ -1,12 +1,14 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   buildCulturalCampaignPrompt,
+  cardProvider,
   contentTypeLabel,
   formatBoardDate,
   parseIsoDate,
   supportsCampaignCreation,
 } from "./contentBoardData";
 import { AdvisorCard, BoardDrawerTarget } from "./contentBoardTypes";
+import { getCampaignCreatorName } from "../campaignStudioData";
 
 type SaveState = "idle" | "saving" | "saved";
 
@@ -85,24 +87,27 @@ export const ContentBoardDrawer: React.FC<ContentBoardDrawerProps> = ({
   const isAwaiting = card?.status === "awaiting_uploads";
   const isTestimonial = card?.source === "testimonial";
   const isCultural = card?.source === "cultural";
+  const isHumanCampaign = Boolean(card && cardProvider(card) === "human");
   const isCampaignPromptCard = Boolean(card && supportsCampaignCreation(card));
   const copyFieldLabel = isCampaignPromptCard ? "Prompt" : isTestimonial ? "Opportunity summary" : "Post copy";
 
   const eyebrow = isAnchor
     ? "Cultural Calendar Event"
-    : isCultural
-      ? isReviewed
-        ? "Cultural Event · Campaign Created"
-        : "Cultural Event · Draft"
-      : isReviewed
-        ? "Reviewed"
-        : isReady
-          ? "Ready for campaign"
-          : isAwaiting
-            ? "Awaiting Video Hub uploads"
-            : isTestimonial
-              ? "Testimonial Opportunity"
-              : "To Be Reviewed";
+    : isHumanCampaign
+      ? `Campaign · created by ${card?.createdByName || getCampaignCreatorName()}`
+      : isCultural
+        ? isReviewed
+          ? "System · Campaign Created"
+          : "System · Cultural Draft"
+        : isReviewed
+          ? "System · Reviewed"
+          : isReady
+            ? "System · Ready for campaign"
+            : isAwaiting
+              ? "System · Awaiting Video Hub uploads"
+              : isTestimonial
+                ? "Testimonial Opportunity"
+                : "System · To Be Reviewed";
 
   return (
     <>
@@ -115,7 +120,9 @@ export const ContentBoardDrawer: React.FC<ContentBoardDrawerProps> = ({
       >
         <header className="cb-drawer__header">
           <div>
-            <p className={`cb-drawer__eyebrow${isReviewed ? " is-reviewed" : ""}${isTestimonial ? " is-testimonial" : ""}`}>
+            <p
+              className={`cb-drawer__eyebrow${isReviewed ? " is-reviewed" : ""}${isTestimonial ? " is-testimonial" : ""}${isHumanCampaign ? " is-human" : ""}`}
+            >
               {eyebrow}
             </p>
             <h2 id="cb-drawer-title">{isAnchor ? target.event?.title : card?.title}</h2>
@@ -210,11 +217,12 @@ export const ContentBoardDrawer: React.FC<ContentBoardDrawerProps> = ({
               )}
 
               <section className="cb-drawer__ai">
-                <h3>Why the advisor suggested this</h3>
+                <h3>{isHumanCampaign ? "About this campaign" : "Why the advisor suggested this"}</h3>
                 <p>{card.aiExplanation}</p>
               </section>
 
               <section className="cb-drawer__metagrid">
+                <MetaRow label="Provider" value={isHumanCampaign ? card.createdByName || getCampaignCreatorName() : "System"} />
                 <MetaRow label="Content type" value={contentTypeLabel[card.contentType]} />
                 <MetaRow label="Category" value={card.category} />
                 <MetaRow label="Corporate value" value={card.corporateValue} />

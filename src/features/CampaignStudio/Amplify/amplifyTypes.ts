@@ -18,6 +18,13 @@ export interface ShareCaption {
   text: string;
 }
 
+export interface AmplifyCampaignSeed {
+  campaignId: string;
+  name: string;
+  copy?: string;
+  ctaDestination?: string;
+}
+
 export interface SharePackMetrics {
   shares: number;
   clicks: number;
@@ -51,6 +58,23 @@ export interface DispatchTemplate {
   title: string;
   description: string;
   audienceHint: string;
+}
+
+export type AmplifyCtaDestinationType = "page" | "job" | "event";
+
+export interface AmplifySharePackDraft {
+  templateId: string;
+  title: string;
+  note: string;
+  audiences: string[];
+  assetId: string;
+  ctaDestinationType: AmplifyCtaDestinationType;
+  ctaPageValue: string;
+  ctaJobValue: string;
+  ctaEventValue: string;
+  ctaPersona: string;
+  captions: ShareCaption[];
+  selectedCaptionIds: string[];
 }
 
 export interface ImpactKpi {

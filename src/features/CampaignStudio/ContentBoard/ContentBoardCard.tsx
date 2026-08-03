@@ -1,5 +1,5 @@
 import React from "react";
-import { contentTypeLabel } from "./contentBoardData";
+import { cardProvider } from "./contentBoardData";
 import { AdvisorCard, CulturalCalendarEvent } from "./contentBoardTypes";
 
 interface AnchorPillProps {
@@ -15,7 +15,10 @@ export const AnchorPill: React.FC<AnchorPillProps> = ({ event, compact, onClick 
     onClick={onClick}
     title={event.title}
   >
-    <span className="cb-card__badge">Cultural Calendar Event</span>
+    <span className="cb-card__top">
+      <span className="cb-card__badge">Cultural Calendar Event</span>
+      <span className="cb-card__provider cb-card__provider--system">System</span>
+    </span>
     <strong className="cb-card__title">{event.title}</strong>
     {!compact && <span className="cb-card__subtitle">{event.corporateValue}</span>}
   </button>
@@ -29,44 +32,45 @@ interface AdvisorCardChipProps {
 }
 
 export const AdvisorCardChip: React.FC<AdvisorCardChipProps> = ({ card, compact, showCopy, onClick }) => {
+  const provider = cardProvider(card);
+  const isHuman = provider === "human";
   const isCultural = card.source === "cultural";
   const isCampaignCreated = card.status === "reviewed";
-  const variant =
+  const statusVariant =
     isCampaignCreated || card.status === "ready_for_campaign"
       ? "reviewed"
       : "review";
-  const accentClass = card.accent === "yellow" ? " cb-card--testimonial" : "";
+  const providerClass = isHuman ? " cb-card--human" : " cb-card--system";
+  const statusClass = isHuman ? "" : ` cb-card--${statusVariant}`;
+  const providerLabel = isHuman
+    ? card.createdByName?.trim() || "Local Preview User"
+    : "System";
 
-  const badge = isCultural
-    ? "Cultural Event"
-    : card.status === "reviewed"
-      ? "Reviewed"
-      : card.status === "ready_for_campaign"
-        ? "Ready"
-        : card.status === "awaiting_uploads"
-          ? "Awaiting videos"
-          : card.accent === "yellow"
-            ? "Testimonial"
+  const badge = isHuman
+    ? "Campaign"
+    : isCultural
+      ? "Cultural Event"
+      : card.status === "reviewed"
+        ? "Reviewed"
+        : card.status === "ready_for_campaign"
+          ? "Ready"
+          : card.status === "awaiting_uploads"
+            ? "Awaiting videos"
             : "To Be Reviewed";
-
-  const typeLabel = isCultural
-    ? isCampaignCreated
-      ? "Campaign Created"
-      : "Draft"
-    : card.contentType === "Calendar Draft"
-      ? "Draft"
-      : contentTypeLabel[card.contentType];
 
   return (
     <button
       type="button"
-      className={`cb-card cb-card--${variant}${accentClass}${compact ? " cb-card--compact" : ""}`}
+      className={`cb-card${statusClass}${providerClass}${compact ? " cb-card--compact" : ""}`}
       onClick={onClick}
-      title={card.title}
+      title={`${card.title} · ${providerLabel}`}
+      data-provider={provider}
     >
       <span className="cb-card__top">
         <span className="cb-card__badge">{badge}</span>
-        <span className="cb-card__type">{typeLabel}</span>
+        <span className={`cb-card__provider cb-card__provider--${provider}`}>
+          {providerLabel}
+        </span>
       </span>
       <strong className="cb-card__title">{card.title}</strong>
       {showCopy && <span className="cb-card__subtitle">{card.copy}</span>}

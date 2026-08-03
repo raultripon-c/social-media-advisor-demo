@@ -90,11 +90,16 @@ export const ContentBoardPage: React.FC = () => {
     return () => window.clearTimeout(handle);
   }, [toast]);
 
-  const filterOptions = useMemo(() => getFilterOptions(cards), [cards]);
+  const filterOptions = useMemo(
+    () => getFilterOptions(cards.filter((card) => card.source !== "testimonial")),
+    [cards],
+  );
 
   const filteredCards = useMemo(() => {
     const query = filters.search.trim().toLowerCase();
     return cards.filter((card) => {
+      // Testimonials stay on the Campaigns nudges screen only
+      if (card.source === "testimonial") return false;
       if (filters.status !== "all" && card.status !== filters.status) return false;
       if (filters.category !== "all" && card.category !== filters.category) return false;
       if (filters.contentType !== "all" && card.contentType !== filters.contentType) return false;
@@ -193,9 +198,9 @@ export const ContentBoardPage: React.FC = () => {
   };
 
   const legend = [
-    { className: "cb-legend__swatch cb-legend__swatch--review", label: "Cultural Event · Draft" },
-    { className: "cb-legend__swatch cb-legend__swatch--reviewed", label: "Campaign Created" },
-    { className: "cb-legend__swatch cb-legend__swatch--testimonial", label: "Testimonial" },
+    { className: "cb-legend__swatch cb-legend__swatch--system", label: "System" },
+    { className: "cb-legend__swatch cb-legend__swatch--reviewed", label: "System · Campaign created" },
+    { className: "cb-legend__swatch cb-legend__swatch--human", label: "Creator · Campaign" },
   ];
 
   return (
@@ -217,7 +222,7 @@ export const ContentBoardPage: React.FC = () => {
               )}
             </div>
             <p className="cb-toolbar__description">
-              Review AI drafts against cultural anchors, media signals, and employee stories.
+              Review AI drafts against cultural anchors and media signals, and track campaigns you schedule.
             </p>
           </div>
         </div>

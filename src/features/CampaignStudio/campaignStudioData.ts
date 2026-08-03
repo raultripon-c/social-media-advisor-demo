@@ -117,6 +117,22 @@ export const getRefNum = () => {
   }
 };
 
+const toTitleCaseName = (name: string) =>
+  name.replace(/\S+/g, (part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase());
+
+/** Current signed-in user display name for campaign creator attribution. */
+export const getCampaignCreatorName = () => {
+  const tokenParsed = (window as any).keycloakInstance?.tokenParsed;
+  const loggedUserDetails = tokenParsed?.userDetails;
+  const raw =
+    tokenParsed?.name ||
+    loggedUserDetails?.displayName ||
+    [loggedUserDetails?.firstName, loggedUserDetails?.lastName].filter(Boolean).join(" ") ||
+    loggedUserDetails?.userName ||
+    "Local Preview User";
+  return toTitleCaseName(String(raw).trim() || "Local Preview User");
+};
+
 export const parseBrief = (brief: string, toneFallback = toneOptions[0]): BriefDetails => {
   const structuredRoleMatch = brief.match(/Target role or roles:\s*([^.]*)\./i);
   const structuredLocationMatch = brief.match(/Location or work model:\s*([^.]*)\./i);

@@ -5,6 +5,9 @@ export type CardStatus = "to_be_reviewed" | "awaiting_uploads" | "ready_for_camp
 /** Origin workflow that produced an AI card */
 export type CardSource = "cultural" | "media_listening" | "testimonial" | "campaign";
 
+/** Who authored the board item — system (AI/advisor) vs human (campaign studio) */
+export type CardProvider = "system" | "human";
+
 export type CardContentType =
   | "Calendar Draft"
   | "Brand Mention"
@@ -75,12 +78,18 @@ export interface CampaignInfo {
 export interface AdvisorCard {
   id: string;
   source: CardSource;
+  /** Defaults from source when omitted: campaign → human, else system */
+  provider?: CardProvider;
   contentType: CardContentType;
   status: CardStatus;
   /** ISO date YYYY-MM-DD in the board year */
   date: string;
   /** Linked cultural anchor, when the card is a calendar draft */
   eventId?: string;
+  /** Linked Campaign Studio campaign when source is campaign */
+  campaignId?: string;
+  /** Display name for human-created campaign cards */
+  createdByName?: string;
   title: string;
   copy: string;
   category: string;
@@ -148,4 +157,19 @@ export interface AdvisorBoardAdapter {
   ) => Promise<AdvisorCard>;
   /** Mark a ready testimonial as configured into a campaign */
   markTestimonialConfigured: (refNum: string, year: number, cardId: string) => Promise<AdvisorCard>;
+  /** Place or move a created campaign onto the content board calendar */
+  syncCampaignCard: (refNum: string, campaign: {
+    id: string;
+    name: string;
+    postDate: string;
+    status: string;
+    role?: string;
+    location?: string;
+    tone?: string;
+    draftPrompt?: string;
+    createdByName?: string;
+    platforms?: Array<{ copy?: string; ctaDestination?: string }>;
+  }) => Promise<AdvisorCard>;
+  /** Remove a campaign-backed board card after campaign delete */
+  removeCampaignCard: (refNum: string, campaignId: string) => Promise<void>;
 }

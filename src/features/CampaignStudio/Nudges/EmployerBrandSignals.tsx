@@ -49,22 +49,21 @@ const nudgeLead = (card: AdvisorCard) => {
   }
 
   if (card.source === "media_listening") {
-    const anywhere = "You haven't posted it anywhere";
     if (card.contentType === "Award") {
       if (card.title.toLowerCase().includes("forbes") || card.title.toLowerCase().includes("new grads"))
-        return `Forbes named you a Best Employer for New Grads. ${anywhere}. Want to share it?`;
+        return "Forbes Best Employer for New Grads — not posted yet";
       if (card.title.toLowerCase().includes("diversity"))
-        return `You were recognized for workplace diversity. ${anywhere}. Want to celebrate it?`;
+        return "Workplace diversity recognition — not posted yet";
       if (card.title.toLowerCase().includes("magnet"))
-        return `Nursing earned Magnet recognition. ${anywhere}. Want to post about it?`;
-      return `You earned a new award. ${anywhere}. Want to share it?`;
+        return "Nursing Magnet recognition — not posted yet";
+      return "New award earned — not posted yet";
     }
 
     if (card.title.toLowerCase().includes("minimum wage") || card.title.toLowerCase().includes("$20"))
-      return `You raised the minimum wage to $20/hr. ${anywhere}. Want to amplify it?`;
+      return "Minimum wage raised to $20/hr — not amplified yet";
     if (card.title.toLowerCase().includes("homegrown") || card.title.toLowerCase().includes("$203"))
-      return `You launched a $203M HomeGrown initiative. ${anywhere}. Consider sharing it?`;
-    return `You got positive brand coverage. ${anywhere}. Want to turn it into a post?`;
+      return "$203M HomeGrown initiative — not shared yet";
+    return "Positive brand coverage — not turned into a post yet";
   }
 
   return card.title;
@@ -92,7 +91,6 @@ export const EmployerBrandSignals: React.FC<EmployerBrandSignalsProps> = ({
       .filter((card) => card.status === "to_be_reviewed")
       .slice(0, 2);
     const awaiting = testimonials.filter((card) => card.status === "awaiting_uploads");
-    // Most actionable first: ready to launch → brand signals → suggested → in progress
     setSignals([...ready, ...brand, ...suggested, ...awaiting]);
   };
 
@@ -101,7 +99,6 @@ export const EmployerBrandSignals: React.FC<EmployerBrandSignalsProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refNum]);
 
-  /** Poll while any testimonial is awaiting uploads so ready state appears without a full refresh. */
   useEffect(() => {
     const hasAwaiting = signals.some((card) => card.status === "awaiting_uploads");
     if (!hasAwaiting) return undefined;
@@ -137,7 +134,7 @@ export const EmployerBrandSignals: React.FC<EmployerBrandSignalsProps> = ({
     <section className="cs-nudges">
       <div className="cs-nudges__header">
         <h2>Today&apos;s employer brand signals</h2>
-        <p>Opportunities discovered for your company — ready to turn into posts.</p>
+        <p>Opportunities ready to turn into posts</p>
       </div>
 
       {signals.length === 0 ? (
@@ -145,22 +142,78 @@ export const EmployerBrandSignals: React.FC<EmployerBrandSignalsProps> = ({
           <p>No new brand signals right now. Reviewed and dismissed items live on the Content Board.</p>
         </div>
       ) : (
-        <div className="cs-nudges__grid">
+        <ul className="cs-nudges__list">
           {signals.map((card) => {
             const isTestimonial = card.source === "testimonial";
             const isReady = card.status === "ready_for_campaign";
             const isAwaiting = card.status === "awaiting_uploads";
-            const stateClass = isReady ? " is-ready" : isAwaiting ? " is-awaiting" : "";
+            const tone = badgeClass(card);
+            const videos = isReady ? card.campaignInfo?.videos?.slice(0, 3) || [] : [];
 
             return (
-              <article
-                key={card.id}
-                className={`cs-nudge-card${isTestimonial ? " cs-nudge-card--testimonial" : ""}${stateClass}`}
-              >
+              <li key={card.id} className={`cs-nudge cs-nudge--${tone}`}>
+                <span className="cs-nudge__type">{badgeLabel(card)}</span>
+
+                <p className="cs-nudge__lead" title={nudgeLead(card)}>
+                  {nudgeLead(card)}
+                </p>
+
+                <div className="cs-nudge__meta">
+                  {videos.length > 0 && (
+                    <span className="cs-nudge__thumbs" aria-label="Uploaded videos">
+                      {videos.map((video) => (
+                        <img key={video.id} src={video.thumbnailUrl} alt="" />
+                      ))}
+                    </span>
+                  )}
+
+                  {card.sourceLabel && !isTestimonial && (
+                    <a
+                      className="cs-nudge__source"
+                      href={card.sourceUrl || "#"}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {card.sourceLabel}
+                    </a>
+                  )}
+
+                  {isAwaiting ? (
+                    <span className="cs-nudge__waiting">
+                      <span className="cs-nudge__waiting-dot" aria-hidden="true" />
+                      We&apos;ll notify you
+                    </span>
+                  ) : isTestimonial && isReady ? (
+                    <button
+                      type="button"
+                      className="cs-nudge__action cs-nudge__action--strong"
+                      onClick={() => onUseTestimonialReady(card)}
+                    >
+                      Configure campaign
+                    </button>
+                  ) : isTestimonial ? (
+                    <button
+                      type="button"
+                      className="cs-nudge__action"
+                      onClick={() => setVideoHubCard(card)}
+                    >
+                      Request video
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="cs-nudge__action"
+                      onClick={() => setPreviewCard(card)}
+                    >
+                      Preview prompt
+                    </button>
+                  )}
+                </div>
+
                 <button
                   type="button"
-                  className="cs-nudge-card__close"
-                  aria-label="Dismiss"
+                  className="cs-nudge__dismiss"
+                  aria-label={`Dismiss ${badgeLabel(card)}`}
                   onClick={() => handleDismiss(card.id)}
                 >
                   <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
@@ -173,75 +226,10 @@ export const EmployerBrandSignals: React.FC<EmployerBrandSignalsProps> = ({
                     />
                   </svg>
                 </button>
-
-                <span className={`cs-nudge-card__badge cs-nudge-card__badge--${badgeClass(card)}`}>
-                  {badgeLabel(card)}
-                </span>
-
-                <h3 className="cs-nudge-card__message" title={nudgeLead(card)}>
-                  {nudgeLead(card)}
-                </h3>
-
-                {isReady && card.campaignInfo?.videos && card.campaignInfo.videos.length > 0 && (
-                  <div className="cs-nudge-card__videos" aria-label="Uploaded videos">
-                    {card.campaignInfo.videos.slice(0, 3).map((video) => (
-                      <div key={video.id} className="cs-nudge-card__video-thumb">
-                        <img src={video.thumbnailUrl} alt="" />
-                        <span>{video.durationLabel}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {card.sourceLabel && !isTestimonial && (
-                  <a
-                    className="cs-nudge-card__source"
-                    href={card.sourceUrl || "#"}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {card.sourceLabel}
-                  </a>
-                )}
-
-                {isAwaiting ? (
-                  <p className="cs-nudge-card__status">
-                    <span className="cs-nudge-card__status-dot" aria-hidden="true" />
-                    We&apos;ll notify you when they&apos;re in
-                  </p>
-                ) : (
-                  <div className="cs-nudge-card__actions">
-                    {isTestimonial && isReady ? (
-                      <button
-                        type="button"
-                        className="cs-btn cs-btn--secondary"
-                        onClick={() => onUseTestimonialReady(card)}
-                      >
-                        Configure campaign
-                      </button>
-                    ) : isTestimonial ? (
-                      <button
-                        type="button"
-                        className="cs-btn cs-btn--secondary"
-                        onClick={() => setVideoHubCard(card)}
-                      >
-                        Request video
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        className="cs-btn cs-btn--secondary"
-                        onClick={() => setPreviewCard(card)}
-                      >
-                        Preview prompt
-                      </button>
-                    )}
-                  </div>
-                )}
-              </article>
+              </li>
             );
           })}
-        </div>
+        </ul>
       )}
 
       {previewCard && (

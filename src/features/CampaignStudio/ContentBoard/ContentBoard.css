@@ -21,6 +21,11 @@
   --cb-testimonial: var(--secondary-blue-bb-300, #2927b2);
   --cb-testimonial-bg: var(--secondary-blue-bb-40, #eae8fb);
   --cb-testimonial-border: var(--secondary-blue-bb-200, #4d3ee0);
+  /* Human-created campaigns on the board */
+  --cb-human: var(--neutrals-nn-500, #3d465a);
+  --cb-human-bg: var(--grays-grgr-50, #f1f3f6);
+  --cb-human-border: var(--neutrals-nn-200, #8c95a8);
+  --cb-human-accent: var(--secondary-blue-bb-200, #4d3ee0);
 }
 
 /* Fill the app shell so the calendar legend stays in the first viewport */
@@ -53,14 +58,53 @@
   color: var(--cb-testimonial);
 }
 
+.cb-card--human {
+  background: var(--cb-human-bg);
+  border-color: var(--cb-human-border);
+  color: var(--cb-human);
+  box-shadow: inset 3px 0 0 var(--cb-human-accent);
+}
+
+.cb-card__provider {
+  flex-shrink: 0;
+  max-width: 55%;
+  margin-top: 0;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  line-height: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cb-card__provider--system {
+  background: rgba(186, 72, 0, 0.12);
+  color: var(--cb-review);
+}
+
+.cb-card--reviewed .cb-card__provider--system,
+.cb-card--anchor .cb-card__provider--system {
+  background: rgba(60, 109, 104, 0.14);
+  color: var(--cb-reviewed);
+}
+
+.cb-card__provider--human {
+  background: rgba(77, 62, 224, 0.1);
+  color: var(--cb-human-accent);
+}
+
 .cb-card__top {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 4px 6px;
   width: 100%;
   min-width: 0;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .cb-card__type {
@@ -328,6 +372,10 @@
 
 .cb-drawer__eyebrow.is-testimonial {
   color: var(--cb-testimonial);
+}
+
+.cb-drawer__eyebrow.is-human {
+  color: var(--cb-human-accent);
 }
 
 .cb-drawer__savebar {
@@ -811,6 +859,17 @@
   border-color: var(--cb-testimonial-border);
 }
 
+.cb-legend__swatch--system {
+  background: var(--cb-review-bg);
+  border-color: var(--cb-review-border);
+}
+
+.cb-legend__swatch--human {
+  background: var(--cb-human-bg);
+  border-color: var(--cb-human-border);
+  box-shadow: inset 3px 0 0 var(--cb-human-accent);
+}
+
 /* Toolbar — title left, all controls on one right row */
 .cb-toolbar {
   margin: 14px 18px 0;
@@ -1168,9 +1227,9 @@
 }
 
 .cb-card--compact .cb-card__top {
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px 6px;
 }
 
 .cb-card--anchor {

@@ -2,6 +2,7 @@ import {
   AdvisorBoardAdapter,
   AdvisorCard,
   CampaignInfo,
+  CardProvider,
   CulturalCalendarEvent,
 } from "./contentBoardTypes";
 import {
@@ -9,9 +10,15 @@ import {
   buildUploadedVideosForRecipients,
   videoHubCatalog,
 } from "./videoHubData";
+import { getCampaignCreatorName } from "../campaignStudioData";
 
 const STORAGE_PREFIX = "txe.campaignStudio.advisorBoard.v6";
 const SEARCH_CTA = "https://careers.dukehealth.org/search-jobs";
+
+export const cardProvider = (card: AdvisorCard): CardProvider =>
+  card.provider || (card.source === "campaign" ? "human" : "system");
+
+export const campaignBoardCardId = (campaignId: string) => `campaign-board-${campaignId}`;
 
 /**
  * Distinct campaign-generation prompts per angle.
@@ -924,6 +931,7 @@ type CardOverride = Partial<
 >;
 
 const overridesKey = (refNum: string, year: number) => `${STORAGE_PREFIX}.overrides.${refNum}.${year}`;
+const customCardsKey = (refNum: string, year: number) => `${STORAGE_PREFIX}.custom.${refNum}.${year}`;
 
 const readOverrides = (refNum: string, year: number): Record<string, CardOverride> => {
   try {
@@ -940,8 +948,72 @@ const writeOverrides = (refNum: string, year: number, overrides: Record<string, 
   localStorage.setItem(overridesKey(refNum, year), JSON.stringify(overrides));
 };
 
+const readCustomCards = (refNum: string, year: number): AdvisorCard[] => {
+  try {
+    const raw = localStorage.getItem(customCardsKey(refNum, year));
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
+const writeCustomCards = (refNum: string, year: number, cards: AdvisorCard[]) => {
+  localStorage.setItem(customCardsKey(refNum, year), JSON.stringify(cards));
+};
+
 const applyOverride = (card: AdvisorCard, override?: CardOverride): AdvisorCard =>
   override ? { ...card, ...override } : card;
+
+type CampaignBoardInput = {
+  id: string;
+  name: string;
+  postDate: string;
+  status: string;
+  role?: string;
+  location?: string;
+  tone?: string;
+  draftPrompt?: string;
+  createdByName?: string;
+  platforms?: Array<{ copy?: string; ctaDestination?: string }>;
+};
+
+export const buildCampaignBoardCard = (campaign: CampaignBoardInput): AdvisorCard => {
+  const date = (campaign.postDate || new Date().toISOString()).slice(0, 10);
+  const primary = campaign.platforms?.[0];
+  const now = new Date().toISOString();
+  return {
+    id: campaignBoardCardId(campaign.id),
+    source: "campaign",
+    provider: "human",
+    contentType: "Hiring Campaign",
+    status: campaign.status === "draft" ? "to_be_reviewed" : "reviewed",
+    date,
+    campaignId: campaign.id,
+    createdByName: campaign.createdByName?.trim() || getCampaignCreatorName(),
+    title: campaign.name,
+    copy: primary?.copy || campaign.draftPrompt || `Campaign scheduled for ${date}.`,
+    category: "Campaign",
+    corporateValue: campaign.tone || "Employer Brand",
+    department: campaign.role,
+    region: campaign.location && campaign.location !== "target markets" ? campaign.location : undefined,
+    aiExplanation: "Created in Campaign Studio and placed on the content board for the selected publish date.",
+    suggestedCta: primary?.ctaDestination || SEARCH_CTA,
+    updatedAt: now,
+    reviewedAt: campaign.status === "draft" ? undefined : now,
+  };
+};
+
+const removeCustomCardEverywhere = (refNum: string, cardId: string) => {
+  const currentYear = new Date().getFullYear();
+  for (let offset = -1; offset <= 2; offset += 1) {
+    const year = currentYear + offset;
+    const current = readCustomCards(refNum, year);
+    const next = current.filter((card) => card.id !== cardId);
+    if (next.length !== current.length) writeCustomCards(refNum, year, next);
+  }
+};
 
 /** Auto-promote awaiting Video Hub requests once the demo upload delay has elapsed. */
 const resolveUploadTransitions = (refNum: string, year: number, cards: AdvisorCard[]): AdvisorCard[] => {
@@ -980,8 +1052,39 @@ const resolveUploadTransitions = (refNum: string, year: number, cards: AdvisorCa
 
 const composeCards = (refNum: string, year: number): AdvisorCard[] => {
   const overrides = readOverrides(refNum, year);
-  const cards = generateAllCards(year).map((card) => applyOverride(card, overrides[card.id]));
-  return resolveUploadTransitions(refNum, year, cards);
+  const seeded = generateAllCards(year).map((card) =>
+    applyOverride({ ...card, provider: card.provider || "system" }, overrides[card.id]),
+  );
+  const creatorFallback = getCampaignCreatorName();
+  const customRaw = readCustomCards(refNum, year);
+  let customDirty = false;
+  const nextCustomRaw = customRaw.map((card) => {
+    if (card.source !== "campaign" || card.createdByName?.trim()) return card;
+    customDirty = true;
+    return {
+      ...card,
+      provider: "human" as const,
+      createdByName: creatorFallback,
+    };
+  });
+  if (customDirty) writeCustomCards(refNum, year, nextCustomRaw);
+
+  const custom = nextCustomRaw.map((card) =>
+    applyOverride(
+      {
+        ...card,
+        provider: card.provider || (card.source === "campaign" ? "human" : "system"),
+        createdByName:
+          card.source === "campaign"
+            ? card.createdByName?.trim() || creatorFallback
+            : card.createdByName,
+      },
+      overrides[card.id],
+    ),
+  );
+  const seededIds = new Set(seeded.map((card) => card.id));
+  const merged = [...seeded, ...custom.filter((card) => !seededIds.has(card.id))];
+  return resolveUploadTransitions(refNum, year, merged);
 };
 
 const upsertOverride = (refNum: string, year: number, cardId: string, patch: CardOverride) => {
@@ -1077,6 +1180,23 @@ export const advisorBoardAdapter: AdvisorBoardAdapter = {
       reviewHistory,
     });
     return { ...current, status: "reviewed", reviewedAt, updatedAt: reviewedAt, reviewHistory };
+  },
+  syncCampaignCard: async (refNum, campaign) => {
+    const year = Number((campaign.postDate || "").slice(0, 4)) || new Date().getFullYear();
+    const previous = readCustomCards(refNum, year).find(
+      (item) => item.id === campaignBoardCardId(campaign.id),
+    );
+    const card = buildCampaignBoardCard({
+      ...campaign,
+      createdByName: campaign.createdByName || previous?.createdByName || getCampaignCreatorName(),
+    });
+    removeCustomCardEverywhere(refNum, card.id);
+    const existing = readCustomCards(refNum, year).filter((item) => item.id !== card.id);
+    writeCustomCards(refNum, year, [card, ...existing]);
+    return card;
+  },
+  removeCampaignCard: async (refNum, campaignId) => {
+    removeCustomCardEverywhere(refNum, campaignBoardCardId(campaignId));
   },
 };
 
