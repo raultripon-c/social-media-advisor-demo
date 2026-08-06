@@ -22,7 +22,7 @@ export const PackDrawer: React.FC<PackDrawerProps> = ({ pack, onClose, onApprove
   if (!pack) return null;
 
   const canApprove = pack.status === "needs_approval";
-  const canSend = pack.status === "needs_approval" || pack.status === "ready";
+  const canSend = pack.status === "draft" || pack.status === "needs_approval" || pack.status === "ready";
 
   return (
     <>

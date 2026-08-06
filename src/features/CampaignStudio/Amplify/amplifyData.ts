@@ -20,7 +20,7 @@ const captions = (lines: string[]): ShareCaption[] =>
   lines.map((text, index) => ({ id: `cap-${index + 1}`, text }));
 
 const utm = (slug: string) =>
-  `utm_source=amplify&utm_medium={channel}&utm_campaign=${slug}&utm_content={empId}`;
+  `utm_source=employee_advocacy&utm_medium={channel}&utm_campaign=${slug}&utm_content={empId}`;
 
 export const packAssetOptions = [
   {
@@ -110,6 +110,7 @@ export const demoSharePacks: SharePack[] = [
       `Bedside excellence and leadership, that's the RN path at ${BRAND}.`,
       `Share if you're proud of our nursing culture.`,
     ]),
+    metrics: { shares: 142, clicks: 680, applications: 18, emvUsd: 9600 },
     createdAt: "2026-07-20T09:30:00.000Z",
   },
   {
@@ -168,7 +169,7 @@ export const demoSharePacks: SharePack[] = [
     id: "pack-5yr-story",
     title: "5 year story from campaign",
     subtitle: "Marcus's milestone story packaged for employee shares",
-    status: "ready",
+    status: "draft",
     source: "Campaign",
     sourceLabel: "Published campaign",
     audienceLabel: "Nursing mentors",
@@ -194,27 +195,43 @@ export const demoSharePacks: SharePack[] = [
 export const dispatchTemplates: DispatchTemplate[] = [
   {
     id: "tmpl-job-sourcing",
-    title: "Job sourcing amplify",
+    title: "Job sourcing share pack",
     description: "Ask employees to share open roles with their network.",
     audienceHint: "Hiring managers & recruiters",
+    prompt:
+      "Generate a share pack for hiring managers/recruiters promoting our [role name(s)] openings. Highlight [team culture, growth, tech stack]. Include LinkedIn, X, and Slack versions. Link: [job posting URL]. Tone: confident and genuine, first-person.",
   },
   {
     id: "tmpl-erg",
     title: "ERG / culture event",
-    description: "Amplify ERG moments and culture celebrations.",
+    description: "Share ERG moments and culture celebrations with employees.",
     audienceHint: "ERG members & allies",
+    prompt:
+      "Generate a share pack for ERG members/allies about [event name]. Highlight why it matters and who's involved. Include LinkedIn and Instagram versions. Link: [event/RSVP URL]. Tone: warm and community-driven.",
   },
   {
     id: "tmpl-benefits",
     title: "Benefits showcase",
     description: "Highlight benefits and total rewards stories.",
     audienceHint: "All employees",
+    prompt:
+      "Generate a share pack for all employees about our benefits (e.g. PTO, learning stipend, parental leave). Include LinkedIn and X versions. Link: [benefits page URL]. Tone: relatable, like a proud employee — not an ad.",
   },
   {
     id: "tmpl-milestone",
     title: "Milestone / onboarding",
     description: "Share onboarding and tenure milestones.",
     audienceHint: "New hires & mentors",
+    prompt:
+      "Generate a share pack for a new hire's [milestone, e.g. '90 days']. Highlight the onboarding experience and team culture. Include a LinkedIn post and a mentor Slack shoutout. Link: [careers/team page URL]. Tone: personal, first-person storytelling.",
+  },
+  {
+    id: "tmpl-testimonial",
+    title: "Testimonial / video request",
+    description: "Ask employees to record short testimonials or culture videos.",
+    audienceHint: "Managers & team storytellers",
+    prompt:
+      "Generate a share pack requesting testimonial videos from employees about [topic, e.g. 'why you joined']. Include an ask message, 3 interview-style questions, and a caption for the finished video. Link: [submission URL]. Tone: warm, low-pressure invitation.",
   },
 ];
 
@@ -299,12 +316,16 @@ type AmplifyBriefTheme =
   | "milestone"
   | "event"
   | "hiring"
+  | "testimonial"
   | "general";
 
 const includesAny = (text: string, terms: string[]) => terms.some((term) => text.includes(term));
 
 const detectAmplifyBriefTheme = (brief: string): AmplifyBriefTheme => {
   const text = brief.toLowerCase();
+  if (includesAny(text, ["testimonial", "video request", "record a video", "employee video", "storyteller"])) {
+    return "testimonial";
+  }
   if (includesAny(text, ["nurse", "nursing", "rn", "picu", "bedside", "clinical care"])) return "nursing";
   if (includesAny(text, ["engineer", "engineering", "software", "developer", "atlanta eng", "clinical systems"])) {
     return "engineering";
@@ -337,12 +358,15 @@ const extractLocationFromBrief = (brief: string) => {
 const makeSharePackTitle = (brief: string, theme: AmplifyBriefTheme, role: string) => {
   const location = extractLocationFromBrief(brief);
   if (theme === "nursing") return location ? `Nursing share pack · ${location}` : "Nursing share pack";
-  if (theme === "engineering") return location ? `Engineering amplify · ${location}` : "Engineering hiring amplify";
-  if (theme === "sales") return "Sales hiring amplify";
-  if (theme === "erg") return "Culture & ERG amplify";
-  if (theme === "benefits") return "Benefits showcase amplify";
+  if (theme === "engineering") {
+    return location ? `Engineering share pack · ${location}` : "Engineering hiring share pack";
+  }
+  if (theme === "sales") return "Sales hiring share pack";
+  if (theme === "erg") return "Culture & ERG share pack";
+  if (theme === "benefits") return "Benefits showcase share pack";
   if (theme === "milestone") return "Milestone share pack";
-  if (theme === "event") return "Event amplify pack";
+  if (theme === "event") return "Event share pack";
+  if (theme === "testimonial") return "Testimonial & video request";
   if (theme === "hiring") return `${role} share pack`;
   const firstLine = brief.trim().split(/\n/)[0]?.trim();
   if (firstLine && firstLine.length <= 64) return firstLine.replace(/\.$/, "");
@@ -383,7 +407,7 @@ const buildAiCaptions = (brief: string, theme: AmplifyBriefTheme, role: string):
       `ERG moments like these are why our culture feels real. Share if you're proud.`,
       `Celebrate with us — and invite someone who wants to belong here too.`,
       `Culture isn't a poster. It's moments like this across ${BRAND}.`,
-      `Allies and ERG members: help amplify what makes us us.`,
+      `Allies and ERG members: help share what makes us us.`,
     ],
     benefits: [
       `Total rewards that support real life — benefits worth sharing at ${BRAND}.`,
@@ -409,6 +433,14 @@ const buildAiCaptions = (brief: string, theme: AmplifyBriefTheme, role: string):
       `Prefer to meet the team live? This event pack is for you.`,
       `Career fair season is here. Help us fill the room with great people.`,
     ],
+    testimonial: [
+      `Got 60 seconds? Record a quick testimonial about life at ${BRAND}.`,
+      `Your story helps candidates see the real us. Share a short video when you can.`,
+      `Managers: invite a teammate to record a culture or role testimonial this week.`,
+      `A short video from you goes further than any brochure. Ready to record?`,
+      `Help the next hire feel at home — submit a testimonial or day-in-the-life clip.`,
+      `Proud of your team? Capture it on video and send it in for our talent stories.`,
+    ],
     hiring: [
       `Proud to work at ${BRAND} and we're hiring ${role}${place}. Here's how to apply.`,
       `Know someone looking for meaningful work? Share these ${role} openings.`,
@@ -433,7 +465,7 @@ const buildAiCaptions = (brief: string, theme: AmplifyBriefTheme, role: string):
   }));
 };
 
-/** Mock AI: map an Amplify brief to template, captions, CTA, audience, and asset. */
+/** Mock AI: map an employee advocacy brief to template, captions, CTA, audience, and asset. */
 export const createSharePackDraftFromBrief = (
   brief: string,
   preferredTemplateId?: string | null,
@@ -452,6 +484,7 @@ export const createSharePackDraftFromBrief = (
     benefits: "tmpl-benefits",
     milestone: "tmpl-milestone",
     event: "tmpl-erg",
+    testimonial: "tmpl-testimonial",
     general: preferredTemplateId || "tmpl-job-sourcing",
   };
 
@@ -469,6 +502,7 @@ export const createSharePackDraftFromBrief = (
     benefits: "asset-earth-day",
     milestone: "asset-marcus",
     event: "asset-sales-fair",
+    testimonial: "asset-marcus",
     general: packAssetOptions[0].id,
   };
 
@@ -481,6 +515,7 @@ export const createSharePackDraftFromBrief = (
     benefits: ["all"],
     milestone: ["nursing"],
     event: includesAny(text, ["nurse", "nursing"]) ? ["nursing"] : ["all"],
+    testimonial: ["hiring-managers"],
     general: ["all"],
   };
 

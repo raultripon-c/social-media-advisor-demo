@@ -1,20 +1,28 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { CampaignStudioSubNav } from "../ContentBoard/CampaignStudioSubNav";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import enhanceIcon from "../../../assets/svg/enhanceIcon.svg";
+import generateIcon from "../../../assets/svg/arrow-up-plain.svg";
+import { CampaignStudioSubNav, getCampaignStudioPaths } from "../ContentBoard/CampaignStudioSubNav";
 import "../CampaignStudio.css";
 import "../ContentBoard/ContentBoard.css";
 import "./Amplify.css";
-import { demoSharePacks } from "./amplifyData";
-import { AmplifyCampaignSeed, AmplifyMode, SharePack } from "./amplifyTypes";
+import { demoSharePacks, dispatchTemplates } from "./amplifyData";
+import { AmplifyCampaignSeed, AmplifyMode, DispatchTemplate, SharePack } from "./amplifyTypes";
 import { DispatchWizard } from "./DispatchWizard";
 import { ImpactView } from "./ImpactView";
 import { PackDrawer } from "./PackDrawer";
+import { SharePackGenerating } from "./SharePackGenerating";
 import { SharePacksView } from "./SharePacksView";
+
+const ENHANCE_SUFFIX =
+  " Keep the tone warm, concise, and shareable for LinkedIn and email. Include a clear call to action.";
 
 const VIEW_MODES: { id: Exclude<AmplifyMode, "dispatch">; label: string }[] = [
   { id: "packs", label: "Share Packs" },
   { id: "impact", label: "Impact" },
 ];
+
+const templatePrompt = (item: DispatchTemplate) => item.prompt;
 
 type AmplifyLocationState = {
   openAmplifyDispatch?: boolean;
@@ -24,12 +32,19 @@ type AmplifyLocationState = {
 export const AmplifyPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { customerCode, refnum } = useParams();
+  const paths = getCampaignStudioPaths(customerCode, refnum);
+  const promptBoxRef = useRef<HTMLTextAreaElement>(null);
   const [mode, setMode] = useState<AmplifyMode>("packs");
   const [packs, setPacks] = useState<SharePack[]>(() => demoSharePacks);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [activePackId, setActivePackId] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [campaignSeed, setCampaignSeed] = useState<AmplifyCampaignSeed | null>(null);
+  const [prompt, setPrompt] = useState("");
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
+  const [dispatchBrief, setDispatchBrief] = useState<string | null>(null);
+  const [dispatchTemplateId, setDispatchTemplateId] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const needsApprovalCount = useMemo(
     () => packs.filter((pack) => pack.status === "needs_approval").length,
@@ -41,6 +56,8 @@ export const AmplifyPage: React.FC = () => {
     const state = location.state as AmplifyLocationState;
     if (!state?.openAmplifyDispatch) return;
     setCampaignSeed(state.amplifyFromCampaign || null);
+    setDispatchBrief(null);
+    setDispatchTemplateId(null);
     setMode("dispatch");
     navigate(location.pathname, { replace: true, state: {} });
   }, [location.pathname, location.state, navigate]);
@@ -53,29 +70,36 @@ export const AmplifyPage: React.FC = () => {
 
   const showToast = (message: string) => setToast(message);
 
-  const toggleSelect = (id: string) => {
-    setSelectedIds((current) =>
-      current.includes(id) ? current.filter((item) => item !== id) : [...current, id],
-    );
-  };
+  const canSendStatus = (status: SharePack["status"]) =>
+    status === "draft" || status === "needs_approval" || status === "ready";
 
   const approvePacks = (ids: string[]) => {
+    const eligible = packs.filter((pack) => ids.includes(pack.id) && pack.status === "needs_approval");
+    if (eligible.length === 0) {
+      showToast("No packs need approval");
+      return;
+    }
+    const eligibleIds = eligible.map((pack) => pack.id);
     setPacks((current) =>
       current.map((pack) =>
-        ids.includes(pack.id) && pack.status === "needs_approval" ? { ...pack, status: "ready" } : pack,
+        eligibleIds.includes(pack.id) ? { ...pack, status: "ready" } : pack,
       ),
     );
-    setSelectedIds((current) => current.filter((id) => !ids.includes(id)));
-    if (activePackId && ids.includes(activePackId)) setActivePackId(null);
-    showToast(ids.length > 1 ? `${ids.length} packs approved` : "Pack approved");
+    if (activePackId && eligibleIds.includes(activePackId)) setActivePackId(null);
+    showToast(eligibleIds.length > 1 ? `${eligibleIds.length} packs approved` : "Pack approved");
   };
 
   const sendPacks = (ids: string[]) => {
+    const eligible = packs.filter((pack) => ids.includes(pack.id) && canSendStatus(pack.status));
+    if (eligible.length === 0) {
+      showToast("No packs ready to send");
+      return;
+    }
+    const eligibleIds = eligible.map((pack) => pack.id);
     const now = new Date().toISOString();
     setPacks((current) =>
       current.map((pack) => {
-        if (!ids.includes(pack.id)) return pack;
-        if (pack.status !== "needs_approval" && pack.status !== "ready") return pack;
+        if (!eligibleIds.includes(pack.id)) return pack;
         return {
           ...pack,
           status: "sent",
@@ -85,25 +109,82 @@ export const AmplifyPage: React.FC = () => {
         };
       }),
     );
-    setSelectedIds((current) => current.filter((id) => !ids.includes(id)));
-    if (activePackId && ids.includes(activePackId)) setActivePackId(null);
-    showToast(ids.length > 1 ? `${ids.length} packs sent` : "Pack sent");
+    if (activePackId && eligibleIds.includes(activePackId)) setActivePackId(null);
+    showToast(eligibleIds.length > 1 ? `${eligibleIds.length} packs sent` : "Pack sent");
   };
 
-  const leaveDispatch = () => {
+  const leaveDispatch = (options?: { returnToCampaigns?: boolean }) => {
+    const returnToCampaigns = options?.returnToCampaigns ?? false;
     setCampaignSeed(null);
+    setDispatchBrief(null);
+    setDispatchTemplateId(null);
+    setIsGenerating(false);
+    if (returnToCampaigns) {
+      navigate(paths.campaigns);
+      return;
+    }
     setMode("packs");
+  };
+
+  const backToBrief = (brief: string, templateId: string | null) => {
+    setPrompt(brief);
+    setSelectedTemplateId(templateId);
+    setCampaignSeed(null);
+    setDispatchBrief(null);
+    setDispatchTemplateId(null);
+    setIsGenerating(false);
+    setMode("packs");
+  };
+
+  const startDispatchFromBrief = (brief: string, templateId: string | null = selectedTemplateId) => {
+    const trimmed = brief.trim();
+    if (!trimmed) return;
+    setCampaignSeed(null);
+    setDispatchBrief(trimmed);
+    setDispatchTemplateId(templateId);
+    setIsGenerating(true);
+  };
+
+  const finishGenerating = () => {
+    setIsGenerating(false);
+    setMode("dispatch");
+  };
+
+  const cancelGenerating = () => {
+    setIsGenerating(false);
+    // Keep prompt/template filled on the main page
+    setMode("packs");
+  };
+
+  const selectTemplate = (item: DispatchTemplate) => {
+    setSelectedTemplateId(item.id);
+    setPrompt(templatePrompt(item));
+  };
+
+  const enhancePrompt = () => {
+    const trimmed = prompt.trim();
+    if (!trimmed) return;
+    if (trimmed.includes("Keep the tone warm, concise, and shareable")) {
+      showToast("Brief is already enhanced");
+      return;
+    }
+    setPrompt(`${trimmed.replace(/\s+$/, "")}${trimmed.endsWith(".") ? "" : "."}${ENHANCE_SUFFIX}`);
+    showToast("Brief enhanced");
   };
 
   const handleDispatchSend = (pack: SharePack) => {
     setPacks((current) => [pack, ...current]);
     leaveDispatch();
+    setPrompt("");
+    setSelectedTemplateId(null);
     showToast("Share pack sent");
   };
 
   const handleDispatchDraft = (pack: SharePack) => {
     setPacks((current) => [pack, ...current]);
     leaveDispatch();
+    setPrompt("");
+    setSelectedTemplateId(null);
     showToast("Draft saved");
   };
 
@@ -116,65 +197,102 @@ export const AmplifyPage: React.FC = () => {
         </div>
       </header>
 
-      <section className="cb-toolbar">
-        <div className="amp-toolbar__row">
-          <div className="cb-toolbar__title-block">
-            <div className="cb-toolbar__title-row">
-              <h2>Amplify</h2>
-              {needsApprovalCount > 0 && (
-                <span className="cb-toolbar__badge">{needsApprovalCount} to approve</span>
-              )}
-            </div>
-            <p className="cb-toolbar__description">
-              Turn approved stories into employee share packs — then measure organic reach.
-            </p>
-          </div>
-        </div>
-
-        {mode !== "dispatch" && (
-          <div className="cs-switch-button" role="tablist" aria-label="Amplify modes">
-            {VIEW_MODES.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                role="tab"
-                aria-selected={mode === item.id}
-                className={mode === item.id ? "is-active" : ""}
-                onClick={() => setMode(item.id)}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-        )}
-      </section>
-
-      <section className="amp-canvas">
-        {mode === "packs" && (
-          <SharePacksView
-            packs={packs}
-            selectedIds={selectedIds}
-            onToggleSelect={toggleSelect}
-            onClearSelection={() => setSelectedIds([])}
-            onOpen={(pack) => setActivePackId(pack.id)}
-            onApprove={approvePacks}
-            onSend={sendPacks}
-            onCreate={() => {
-              setCampaignSeed(null);
-              setMode("dispatch");
-            }}
-          />
-        )}
-        {mode === "dispatch" && (
+      {isGenerating ? (
+        <SharePackGenerating onDone={finishGenerating} onExit={cancelGenerating} />
+      ) : mode === "dispatch" ? (
+        <section className="amp-wizard-shell">
           <DispatchWizard
             campaignSeed={campaignSeed}
-            onCancel={leaveDispatch}
+            initialBrief={dispatchBrief}
+            initialTemplateId={dispatchTemplateId}
+            onCancel={() => leaveDispatch({ returnToCampaigns: Boolean(campaignSeed) })}
+            onBackToBrief={backToBrief}
             onSend={handleDispatchSend}
             onSaveDraft={handleDispatchDraft}
           />
-        )}
-        {mode === "impact" && <ImpactView packs={packs} />}
-      </section>
+        </section>
+      ) : (
+        <>
+          <section className="cs-prompt-panel amp-generate-panel">
+            <h2>Generate share pack</h2>
+            <div className="cs-prompt-box">
+              <textarea
+                ref={promptBoxRef}
+                value={prompt}
+                onChange={(event) => setPrompt(event.target.value)}
+                placeholder="E.g. 'Share pack for our Backend Engineer and Product Designer roles. Highlight our remote-first culture and recent product launch. Link: careers.company.com. Tone: casual, like a teammate recommending the role — not corporate.' Mention who's sharing, what to highlight, your link, and the tone — the more specific, the better the result."
+                aria-label="Describe the share pack you need"
+              />
+              <div className="cs-prompt-actions">
+                <button
+                  type="button"
+                  className="cs-enhance"
+                  disabled={!prompt.trim()}
+                  onClick={enhancePrompt}
+                  title="Polish your brief for employee sharing"
+                >
+                  <img src={enhanceIcon} alt="" /> Enhance with X+
+                </button>
+                <button
+                  type="button"
+                  className="cs-generate-icon"
+                  disabled={!prompt.trim()}
+                  aria-label="Continue with this brief"
+                  onClick={() => startDispatchFromBrief(prompt)}
+                >
+                  <img src={generateIcon} alt="" />
+                </button>
+              </div>
+            </div>
+            <h3>Or start with a template</h3>
+            <div className="amp-template-grid">
+              {dispatchTemplates.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  className={`amp-template-card${selectedTemplateId === item.id ? " is-selected" : ""}`}
+                  onClick={() => selectTemplate(item)}
+                >
+                  <strong>{item.title}</strong>
+                  <span>{item.description}</span>
+                  <em>{item.audienceHint}</em>
+                </button>
+              ))}
+            </div>
+          </section>
+
+          <section className="amp-canvas">
+            <div className="amp-canvas__header">
+              <div className="cs-switch-button" role="tablist" aria-label="Employee Advocacy modes">
+                {VIEW_MODES.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={mode === item.id}
+                    className={mode === item.id ? "is-active" : ""}
+                    onClick={() => setMode(item.id)}
+                  >
+                    {item.label}
+                    {item.id === "packs" && needsApprovalCount > 0 ? (
+                      <span className="amp-mode-badge">{needsApprovalCount}</span>
+                    ) : null}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {mode === "packs" && (
+              <SharePacksView
+                packs={packs}
+                onOpen={(pack) => setActivePackId(pack.id)}
+                onSend={sendPacks}
+              />
+            )}
+            {mode === "impact" && <ImpactView packs={packs} />}
+          </section>
+        </>
+      )}
 
       <PackDrawer
         pack={activePack}

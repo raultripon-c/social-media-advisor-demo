@@ -97,6 +97,7 @@ function Header({
 
 
   useEffect(() => {
+    if (window.location.pathname.startsWith("/campaign-studio/")) return;
     keycloak?.loadUserInfo();
   }, []);
 

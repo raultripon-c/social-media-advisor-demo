@@ -6,7 +6,7 @@ export const getCampaignStudioPaths = (customerCode?: string, refnum?: string) =
   return {
     campaigns: `${base}/campaigns`,
     contentBoard: `${base}/content-board`,
-    amplify: `${base}/amplify`,
+    employeeAdvocacy: `${base}/employee-advocacy`,
   };
 };
 
@@ -16,7 +16,9 @@ export const CampaignStudioSubNav: React.FC = () => {
   const paths = getCampaignStudioPaths(customerCode, refnum);
   const onCampaigns = location.pathname.includes("/campaign-studio/campaigns");
   const onContentBoard = location.pathname.includes("/campaign-studio/content-board");
-  const onAmplify = location.pathname.includes("/campaign-studio/amplify");
+  const onEmployeeAdvocacy =
+    location.pathname.includes("/campaign-studio/employee-advocacy") ||
+    location.pathname.includes("/campaign-studio/amplify");
 
   return (
     <nav className="cs-subnav" aria-label="Social Media Advisor sections">
@@ -27,16 +29,16 @@ export const CampaignStudioSubNav: React.FC = () => {
         Campaigns
       </NavLink>
       <NavLink
+        to={paths.employeeAdvocacy}
+        className={({ isActive }) => `cs-subnav__link${isActive || onEmployeeAdvocacy ? " is-active" : ""}`}
+      >
+        Employee Advocacy
+      </NavLink>
+      <NavLink
         to={paths.contentBoard}
         className={({ isActive }) => `cs-subnav__link${isActive || onContentBoard ? " is-active" : ""}`}
       >
         Content Board
-      </NavLink>
-      <NavLink
-        to={paths.amplify}
-        className={({ isActive }) => `cs-subnav__link${isActive || onAmplify ? " is-active" : ""}`}
-      >
-        Amplify
       </NavLink>
     </nav>
   );

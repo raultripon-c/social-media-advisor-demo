@@ -2836,7 +2836,7 @@ const CampaignTable = ({
                   </button>
                   {openMenu === campaign.id && (
                     <div className="cs-menu">
-                      <button onClick={() => { setOpenMenu(null); onAmplify(campaign); }}><span className="cs-menu__icon" style={{ "--icon-url": `url(${paperPlane16Icon})` } as React.CSSProperties} aria-hidden="true" /> Amplify</button>
+                      <button onClick={() => { setOpenMenu(null); onAmplify(campaign); }}><span className="cs-menu__icon" style={{ "--icon-url": `url(${paperPlane16Icon})` } as React.CSSProperties} aria-hidden="true" /> Employee Advocacy</button>
                       <button onClick={() => { setOpenMenu(null); onExport(campaign); }}><span className="cs-menu__icon" style={{ "--icon-url": `url(${downloadIcon})` } as React.CSSProperties} aria-hidden="true" /> Download all content as zip</button>
                       <button onClick={() => { setOpenMenu(null); onDuplicate(campaign); }}><span className="cs-menu__icon" style={{ "--icon-url": `url(${copyIcon})` } as React.CSSProperties} aria-hidden="true" /> Duplicate Campaign</button>
                       <button onClick={() => { setOpenMenu(null); onDelete(campaign); }}><span className="cs-menu__icon" style={{ "--icon-url": `url(${trashIcon})` } as React.CSSProperties} aria-hidden="true" /> Delete Campaign</button>
@@ -2994,7 +2994,7 @@ export const CampaignStudioList: React.FC = () => {
       copy: campaign.platforms[0]?.copy || campaign.draftPrompt,
       ctaDestination: campaign.platforms[0]?.ctaDestination,
     };
-    navigate(getCampaignStudioPaths(customerCode, refnum).amplify, {
+    navigate(getCampaignStudioPaths(customerCode, refnum).employeeAdvocacy, {
       state: { openAmplifyDispatch: true, amplifyFromCampaign: amplifySeed },
     });
   };

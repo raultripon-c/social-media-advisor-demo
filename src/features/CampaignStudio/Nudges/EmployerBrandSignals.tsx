@@ -14,7 +14,7 @@ interface EmployerBrandSignalsProps {
 const badgeClass = (card: AdvisorCard) => {
   if (card.status === "ready_for_campaign") return "ready";
   if (card.status === "awaiting_uploads") return "awaiting";
-  if (card.accent === "yellow") return "testimonial";
+  if (card.source === "testimonial" || card.accent === "yellow") return "testimonial";
   if (card.contentType === "Award") return "award";
   return "mention";
 };
@@ -25,7 +25,7 @@ const badgeLabel = (card: AdvisorCard) => {
   return contentTypeLabel[card.contentType];
 };
 
-/** Short, scannable headline — one line where possible, two max */
+/** Short, scannable card headline */
 const nudgeLead = (card: AdvisorCard) => {
   if (card.source === "testimonial") {
     if (card.status === "ready_for_campaign") {
@@ -51,19 +51,19 @@ const nudgeLead = (card: AdvisorCard) => {
   if (card.source === "media_listening") {
     if (card.contentType === "Award") {
       if (card.title.toLowerCase().includes("forbes") || card.title.toLowerCase().includes("new grads"))
-        return "Forbes Best Employer for New Grads — not posted yet";
+        return "Forbes Best Employer for New Grads. Want to share it?";
       if (card.title.toLowerCase().includes("diversity"))
-        return "Workplace diversity recognition — not posted yet";
+        return "Workplace diversity recognition. Want to share it?";
       if (card.title.toLowerCase().includes("magnet"))
-        return "Nursing Magnet recognition — not posted yet";
-      return "New award earned — not posted yet";
+        return "Nursing Magnet recognition. Want to share it?";
+      return "New award earned. Want to share it?";
     }
 
     if (card.title.toLowerCase().includes("minimum wage") || card.title.toLowerCase().includes("$20"))
-      return "Minimum wage raised to $20/hr — not amplified yet";
+      return "Minimum wage raised to $20/hr. Want to share it?";
     if (card.title.toLowerCase().includes("homegrown") || card.title.toLowerCase().includes("$203"))
-      return "$203M HomeGrown initiative — not shared yet";
-    return "Positive brand coverage — not turned into a post yet";
+      return "$203M HomeGrown initiative. Want to share it?";
+    return "Positive brand coverage. Want to share it?";
   }
 
   return card.title;
@@ -134,7 +134,7 @@ export const EmployerBrandSignals: React.FC<EmployerBrandSignalsProps> = ({
     <section className="cs-nudges">
       <div className="cs-nudges__header">
         <h2>Today&apos;s employer brand signals</h2>
-        <p>Opportunities ready to turn into posts</p>
+        <p>Opportunities discovered for your company — ready to turn into posts.</p>
       </div>
 
       {signals.length === 0 ? (
@@ -152,19 +152,42 @@ export const EmployerBrandSignals: React.FC<EmployerBrandSignalsProps> = ({
 
             return (
               <li key={card.id} className={`cs-nudge cs-nudge--${tone}`}>
-                <span className="cs-nudge__type">{badgeLabel(card)}</span>
+                <div className="cs-nudge__top">
+                  <span className="cs-nudge__type">{badgeLabel(card)}</span>
+                  <button
+                    type="button"
+                    className="cs-nudge__dismiss"
+                    aria-label={`Dismiss ${badgeLabel(card)}`}
+                    onClick={() => handleDismiss(card.id)}
+                  >
+                    <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                      <path
+                        d="M4.5 4.5 11.5 11.5M11.5 4.5 4.5 11.5"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.6"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  </button>
+                </div>
 
-                <p className="cs-nudge__lead" title={nudgeLead(card)}>
-                  {nudgeLead(card)}
-                </p>
+                <div className="cs-nudge__body">
+                  <p className="cs-nudge__lead" title={nudgeLead(card)}>
+                    {nudgeLead(card)}
+                  </p>
 
-                <div className="cs-nudge__meta">
                   {videos.length > 0 && (
-                    <span className="cs-nudge__thumbs" aria-label="Uploaded videos">
+                    <div className="cs-nudge__thumbs" aria-label="Uploaded videos">
                       {videos.map((video) => (
-                        <img key={video.id} src={video.thumbnailUrl} alt="" />
+                        <div key={video.id} className="cs-nudge__thumb">
+                          <img src={video.thumbnailUrl} alt="" />
+                          {video.durationLabel && (
+                            <span className="cs-nudge__thumb-time">{video.durationLabel}</span>
+                          )}
+                        </div>
                       ))}
-                    </span>
+                    </div>
                   )}
 
                   {card.sourceLabel && !isTestimonial && (
@@ -178,15 +201,19 @@ export const EmployerBrandSignals: React.FC<EmployerBrandSignalsProps> = ({
                     </a>
                   )}
 
-                  {isAwaiting ? (
+                  {isAwaiting && (
                     <span className="cs-nudge__waiting">
                       <span className="cs-nudge__waiting-dot" aria-hidden="true" />
-                      We&apos;ll notify you
+                      We&apos;ll notify you when they&apos;re in
                     </span>
-                  ) : isTestimonial && isReady ? (
+                  )}
+                </div>
+
+                {!isAwaiting && (
+                  isTestimonial && isReady ? (
                     <button
                       type="button"
-                      className="cs-nudge__action cs-nudge__action--strong"
+                      className="cs-nudge__action"
                       onClick={() => onUseTestimonialReady(card)}
                     >
                       Configure campaign
@@ -207,25 +234,8 @@ export const EmployerBrandSignals: React.FC<EmployerBrandSignalsProps> = ({
                     >
                       Preview prompt
                     </button>
-                  )}
-                </div>
-
-                <button
-                  type="button"
-                  className="cs-nudge__dismiss"
-                  aria-label={`Dismiss ${badgeLabel(card)}`}
-                  onClick={() => handleDismiss(card.id)}
-                >
-                  <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-                    <path
-                      d="M4.5 4.5 11.5 11.5M11.5 4.5 4.5 11.5"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.6"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                </button>
+                  )
+                )}
               </li>
             );
           })}

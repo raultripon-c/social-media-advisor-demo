@@ -669,7 +669,7 @@ const generateMediaListeningCards = (year: number): AdvisorCard[] => [
     corporateValue: "Employer Brand & Early Careers",
     region: "National",
     aiExplanation:
-      "Detected a positive award mention in Forbes via media listening. Awards carry strong trust signals for early-career candidates — recommended to amplify.",
+      "Detected a positive award mention in Forbes via media listening. Awards carry strong trust signals for early-career candidates — recommended to share with employees.",
     sourceLabel: "Duke Today",
     sourceUrl: "https://today.duke.edu/",
     suggestedCta: SEARCH_CTA,

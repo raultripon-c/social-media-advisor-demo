@@ -1,9 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import enhanceIcon from "../../../assets/svg/enhanceIcon.svg";
-import generateIcon from "../../../assets/svg/arrow-up-plain.svg";
 import checkWizardIcon from "../../../assets/svg/check-wizard.svg";
 import closeIcon from "../../../assets/svg/cross.svg";
+import leftArrowIcon from "../../../assets/svg/leftArrow.svg";
 import paperPlaneIcon from "../../../assets/svg/paper-plane-16.svg";
 import { UiDropdown } from "../UiDropdown";
 import { UiMultiSelect } from "../UiMultiSelect";
@@ -21,16 +20,18 @@ import {
   packAssetOptions,
   resolveCtaDestinationMatch,
 } from "./amplifyData";
-import { AmplifyCampaignSeed, DispatchTemplate, ShareCaption, SharePack } from "./amplifyTypes";
-
-const templatePrompt = (item: DispatchTemplate) =>
-  `Create an employee share pack for ${item.title}. ${item.description} Focus on ${item.audienceHint.toLowerCase()}.`;
+import { AmplifyCampaignSeed, ShareCaption, SharePack } from "./amplifyTypes";
 
 interface DispatchWizardProps {
   onCancel: () => void;
   onSend: (pack: SharePack) => void;
   onSaveDraft: (pack: SharePack) => void;
   campaignSeed?: AmplifyCampaignSeed | null;
+  /** Brief from the Employee Advocacy main-page generate panel */
+  initialBrief?: string | null;
+  initialTemplateId?: string | null;
+  /** Return to main page with the brief preserved */
+  onBackToBrief?: (brief: string, templateId: string | null) => void;
 }
 
 type PackAssetOption = (typeof packAssetOptions)[number] | {
@@ -41,7 +42,10 @@ type PackAssetOption = (typeof packAssetOptions)[number] | {
   meta: string;
 };
 
-const STEPS = ["Template", "Content", "Preview & Save"] as const;
+const WIZARD_STEPS = [
+  { title: "Details", description: "Review auto-filled fields." },
+  { title: "Preview & Publish", description: "Review generated content." },
+] as const;
 const CTA_TYPE_OPTIONS = [
   { value: "page", label: "Page" },
   { value: "job", label: "Job" },
@@ -74,6 +78,9 @@ export const DispatchWizard: React.FC<DispatchWizardProps> = ({
   onSend,
   onSaveDraft,
   campaignSeed = null,
+  initialBrief = null,
+  initialTemplateId = null,
+  onBackToBrief,
 }) => {
   const seedCaptionId = campaignSeed?.copy ? `campaign-cap-${campaignSeed.campaignId}` : null;
   const uploadAssetInputRef = useRef<HTMLInputElement>(null);
@@ -84,13 +91,18 @@ export const DispatchWizard: React.FC<DispatchWizardProps> = ({
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [showAssetModal, setShowAssetModal] = useState(false);
   const [assetLibrary, setAssetLibrary] = useState<PackAssetOption[]>(() => [...packAssetOptions]);
-  const [selectedAssetId, setSelectedAssetId] = useState(packAssetOptions[0].id);
+  const [selectedPackAssetIds, setSelectedPackAssetIds] = useState<string[]>([packAssetOptions[0].id]);
+  const [modalSelectedAssetIds, setModalSelectedAssetIds] = useState<string[]>([packAssetOptions[0].id]);
+  const [carouselIndex, setCarouselIndex] = useState(0);
   const [assetSearch, setAssetSearch] = useState("");
-  const [templateId, setTemplateId] = useState<string | null>(null);
+  const [templateId, setTemplateId] = useState<string | null>(initialTemplateId);
   const [prompt, setPrompt] = useState(() =>
-    campaignSeed ? `Create an employee share pack from the campaign "${campaignSeed.name}".` : "",
+    initialBrief?.trim()
+      ? initialBrief
+      : campaignSeed
+        ? `Create an employee share pack from the campaign "${campaignSeed.name}".`
+        : "",
   );
-  const [isPromptFocused, setIsPromptFocused] = useState(false);
   const [packTitle, setPackTitle] = useState("");
   const [selectedCaptions, setSelectedCaptions] = useState<string[]>(() => {
     const base = dispatchCaptionPool.slice(0, 5).map((caption) => caption.id);
@@ -121,9 +133,6 @@ export const DispatchWizard: React.FC<DispatchWizardProps> = ({
       : [],
   );
   const [customCaptionDraft, setCustomCaptionDraft] = useState("");
-  const [mediaUrl, setMediaUrl] = useState(packAssetOptions[0].src);
-  const [mediaType, setMediaType] = useState<"image" | "video">(packAssetOptions[0].kind);
-  const [mediaName, setMediaName] = useState(packAssetOptions[0].label);
   const [objectUrls, setObjectUrls] = useState<string[]>([]);
   const objectUrlsRef = useRef<string[]>([]);
   objectUrlsRef.current = objectUrls;
@@ -139,8 +148,26 @@ export const DispatchWizard: React.FC<DispatchWizardProps> = ({
     );
   }, [assetLibrary, assetSearch]);
 
-  const selectedModalAsset =
-    assetLibrary.find((asset) => asset.id === selectedAssetId) || assetLibrary[0] || packAssetOptions[0];
+  const selectedPackAssets = useMemo(() => {
+    const byId = new Map(assetLibrary.map((asset) => [asset.id, asset]));
+    const resolved = selectedPackAssetIds
+      .map((id) => byId.get(id))
+      .filter((asset): asset is PackAssetOption => Boolean(asset));
+    return resolved.length ? resolved : [assetLibrary[0] || packAssetOptions[0]];
+  }, [assetLibrary, selectedPackAssetIds]);
+
+  const activeAsset =
+    selectedPackAssets[Math.min(carouselIndex, selectedPackAssets.length - 1)] || selectedPackAssets[0];
+  const mediaUrl = activeAsset.src;
+  const mediaType = activeAsset.kind;
+  const canCarousel = selectedPackAssets.length > 1;
+
+  const selectedModalAssets = useMemo(() => {
+    const byId = new Map(assetLibrary.map((asset) => [asset.id, asset]));
+    return modalSelectedAssetIds
+      .map((id) => byId.get(id))
+      .filter((asset): asset is PackAssetOption => Boolean(asset));
+  }, [assetLibrary, modalSelectedAssetIds]);
 
   const selectedTemplate = dispatchTemplates.find((item) => item.id === templateId) || null;
   const template = selectedTemplate || dispatchTemplates[0];
@@ -165,7 +192,7 @@ export const DispatchWizard: React.FC<DispatchWizardProps> = ({
     ...option,
     disabled: isAllEmployeesSelected && option.value !== ALL_EMPLOYEES_VALUE,
   }));
-  const utmPreview = `utm_source=amplify&utm_medium={channel}&utm_campaign=${templateId || "custom"}&utm_content={empId}`;
+  const utmPreview = `utm_source=employee_advocacy&utm_medium={channel}&utm_campaign=${templateId || "custom"}&utm_content={empId}&utm_locale=${selectedCtaLocale}`;
   const selectedCtaPage =
     cmsDestinationPages.find((page) => page.value === selectedCtaPageValue) || cmsDestinationPages[1];
   const selectedCtaJobOption =
@@ -203,6 +230,12 @@ export const DispatchWizard: React.FC<DispatchWizardProps> = ({
     [],
   );
 
+  useEffect(() => {
+    if (carouselIndex > selectedPackAssets.length - 1) {
+      setCarouselIndex(Math.max(selectedPackAssets.length - 1, 0));
+    }
+  }, [carouselIndex, selectedPackAssets.length]);
+
   const toggleCaption = (id: string) => {
     setSelectedCaptions((current) =>
       current.includes(id) ? current.filter((item) => item !== id) : [...current, id],
@@ -232,18 +265,35 @@ export const DispatchWizard: React.FC<DispatchWizardProps> = ({
   };
 
   const openAssetModal = () => {
-    const current = assetLibrary.find((asset) => asset.src === mediaUrl);
-    setSelectedAssetId(current?.id || assetLibrary[0]?.id || packAssetOptions[0].id);
+    setModalSelectedAssetIds(selectedPackAssetIds.length ? selectedPackAssetIds : [packAssetOptions[0].id]);
     setAssetSearch("");
     setShowAssetModal(true);
   };
 
-  const confirmAssetReplacement = () => {
-    if (!selectedModalAsset) return;
-    setMediaUrl(selectedModalAsset.src);
-    setMediaType(selectedModalAsset.kind);
-    setMediaName(selectedModalAsset.label);
+  const toggleModalAsset = (id: string) => {
+    setModalSelectedAssetIds((current) => {
+      if (current.includes(id)) {
+        if (current.length <= 1) return current;
+        return current.filter((item) => item !== id);
+      }
+      return [...current, id];
+    });
+  };
+
+  const confirmAssetSelection = () => {
+    if (!selectedModalAssets.length) return;
+    const nextIds = selectedModalAssets.map((asset) => asset.id);
+    setSelectedPackAssetIds(nextIds);
+    setCarouselIndex(0);
     setShowAssetModal(false);
+  };
+
+  const showPreviousAsset = () => {
+    setCarouselIndex((current) => (current - 1 + selectedPackAssets.length) % selectedPackAssets.length);
+  };
+
+  const showNextAsset = () => {
+    setCarouselIndex((current) => (current + 1) % selectedPackAssets.length);
   };
 
   const handleAssetLibraryUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -264,53 +314,59 @@ export const DispatchWizard: React.FC<DispatchWizardProps> = ({
     };
     setObjectUrls((current) => [...current, nextUrl]);
     setAssetLibrary((current) => [nextAsset, ...current]);
-    setSelectedAssetId(nextAsset.id);
+    setModalSelectedAssetIds((current) =>
+      current.includes(nextAsset.id) ? current : [...current, nextAsset.id],
+    );
     event.target.value = "";
   };
 
-  const canContinueStep0 = Boolean(prompt.trim()) || templateId !== null || Boolean(campaignSeed);
   const canContinue =
-    (step === 0 && canContinueStep0) ||
-    (step === 1 && selectedCaptions.length >= 5 && !!resolvedCtaDestination && audiences.length > 0) ||
-    step === 2;
+    (step === 0 && selectedCaptions.length >= 5 && !!resolvedCtaDestination && audiences.length > 0) ||
+    step === 1;
 
-  const advanceFromTemplateStep = () => {
-    if (!canContinueStep0) return;
-
-    const brief = prompt.trim();
-    if (brief) {
-      const draft = createSharePackDraftFromBrief(brief, templateId);
-      const asset =
-        assetLibrary.find((item) => item.id === draft.assetId) ||
-        packAssetOptions.find((item) => item.id === draft.assetId) ||
-        packAssetOptions[0];
-
-      setTemplateId(draft.templateId);
-      setPackTitle(draft.title);
-      setNote(draft.note);
-      setAudiences(draft.audiences);
-      setSelectedEmails([]);
-      setCustomCaptions(draft.captions);
-      setSelectedCaptions(draft.selectedCaptionIds);
-      setCtaDestinationType(draft.ctaDestinationType);
-      setSelectedCtaPageValue(draft.ctaPageValue);
-      setSelectedCtaJob(draft.ctaJobValue);
-      setSelectedCtaEvent(draft.ctaEventValue);
-      setSelectedCtaPersona(draft.ctaPersona);
-      setSelectedAssetId(asset.id);
-      setMediaUrl(asset.src);
-      setMediaType(asset.kind);
-      setMediaName(asset.label);
-    } else if (campaignSeed?.copy && seedCaptionId) {
-      setNote((current) => current || `Share pack for campaign: ${campaignSeed.name}`);
+  useEffect(() => {
+    // Campaign-seeded packs keep seed captions/CTA/note — do not overwrite with AI brief draft
+    if (campaignSeed) {
+      setPackTitle(campaignSeed.name);
+      if (campaignSeed.copy && seedCaptionId) {
+        setNote((current) => current || `Share pack for campaign: ${campaignSeed.name}`);
+      }
+      return;
     }
 
-    setStep(1);
-  };
+    const brief = (initialBrief || "").trim();
+    if (!brief) return;
 
-  const selectTemplate = (item: DispatchTemplate) => {
-    setTemplateId(item.id);
-    setPrompt(templatePrompt(item));
+    const draft = createSharePackDraftFromBrief(brief, initialTemplateId);
+    const asset =
+      packAssetOptions.find((item) => item.id === draft.assetId) || packAssetOptions[0];
+    setTemplateId(draft.templateId);
+    setPackTitle(draft.title);
+    setNote(draft.note);
+    setAudiences(draft.audiences);
+    setCustomCaptions(draft.captions);
+    setSelectedCaptions(draft.selectedCaptionIds);
+    setCtaDestinationType(draft.ctaDestinationType);
+    setSelectedCtaPageValue(draft.ctaPageValue);
+    setSelectedCtaJob(draft.ctaJobValue);
+    setSelectedCtaEvent(draft.ctaEventValue);
+    setSelectedCtaPersona(draft.ctaPersona);
+    setSelectedPackAssetIds([asset.id]);
+    setCarouselIndex(0);
+    // Apply entry brief once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleBackFromDetails = () => {
+    if (campaignSeed) {
+      onCancel();
+      return;
+    }
+    if (onBackToBrief) {
+      onBackToBrief(prompt.trim(), templateId);
+      return;
+    }
+    onCancel();
   };
 
   const buildPack = (status: "sent" | "draft"): SharePack => {
@@ -325,8 +381,13 @@ export const DispatchWizard: React.FC<DispatchWizardProps> = ({
       audienceLabel,
       audienceCount,
       channels: ["email"],
-      thumbnailUrl: mediaUrl,
-      mediaType,
+      thumbnailUrl: selectedPackAssets[0]?.src || mediaUrl,
+      mediaType: selectedPackAssets[0]?.kind || mediaType,
+      assets: selectedPackAssets.map((asset) => ({
+        src: asset.src,
+        kind: asset.kind,
+        label: asset.label,
+      })),
       ctaLabel: resolvedCtaLabel,
       ctaDestination: resolvedCtaDestination,
       utmPreview,
@@ -351,30 +412,60 @@ export const DispatchWizard: React.FC<DispatchWizardProps> = ({
     onCancel();
   };
 
+  useEffect(() => {
+    if (!confirmOpen && !showAssetModal) return undefined;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      if (confirmOpen) setConfirmOpen(false);
+      if (showAssetModal) setShowAssetModal(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [confirmOpen, showAssetModal]);
+
+  const backLabel = campaignSeed ? "Back to Campaigns" : "Back to Employee Advocacy";
+
   return (
-    <div className="amp-dispatch">
-      <div className="amp-dispatch__steps" role="list" aria-label="Dispatch steps">
-        {STEPS.map((label, index) => {
-          const isActive = index === step;
-          const isDone = index < step;
-          return (
-            <React.Fragment key={label}>
-              <div
-                role="listitem"
-                className={`amp-dispatch__step${isActive ? " is-active" : ""}${isDone ? " is-done" : ""}`}
-                aria-current={isActive ? "step" : undefined}
+    <div className="amp-dispatch amp-dispatch--wizard">
+      <header className="amp-dispatch__hero">
+        <button type="button" className="cs-back-edit" onClick={handleBackFromDetails}>
+          <svg className="cs-back-edit__icon" viewBox="0 0 14 12" aria-hidden="true" focusable="false">
+            <path
+              d="M0.23125 6.54554C0.084375 6.40179 0 6.20804 0 6.00179C0 5.79554 0.084375 5.60179 0.23125 5.45804L5.73125 0.208037C6.03125 -0.0794632 6.50625 -0.0669631 6.79063 0.233037C7.075 0.533037 7.06563 1.00804 6.76562 1.29241L2.62188 5.25179H13.25C13.6656 5.25179 14 5.58616 14 6.00179C14 6.41741 13.6656 6.75179 13.25 6.75179H2.62188L6.76875 10.708C7.06875 10.9955 7.07812 11.4674 6.79375 11.7674C6.50937 12.0674 6.03438 12.0768 5.73438 11.7924L0.234375 6.54241L0.23125 6.54554Z"
+              fill="currentColor"
+            />
+          </svg>
+          {backLabel}
+        </button>
+        <h1>Generate share pack</h1>
+      </header>
+
+      <div className="amp-dispatch__stepper-row">
+        <div className="cs-wizard-steps" aria-label="Generate share pack steps">
+          {WIZARD_STEPS.map((item, index) => {
+            const stepNumber = index + 1;
+            const isActive = step === index;
+            const isCompleted = step > index;
+            return (
+              <span
+                key={item.title}
+                className={`${isActive ? "is-active" : ""} ${isCompleted ? "is-completed" : ""}`}
               >
-                <span className="amp-dispatch__step-marker" aria-hidden="true">
-                  {isDone ? <img src={checkWizardIcon} alt="" width={14} height={10} /> : index + 1}
+                <span className="cs-wizard-step__rail" aria-hidden="true">
+                  <em>
+                    {isCompleted ? (
+                      <img src={checkWizardIcon} alt="" width={14} height={10} />
+                    ) : (
+                      stepNumber
+                    )}
+                  </em>
                 </span>
-                <span className="amp-dispatch__step-title">{label}</span>
-              </div>
-              {index < STEPS.length - 1 && (
-                <div className="amp-dispatch__step-sep" aria-hidden="true" />
-              )}
-            </React.Fragment>
-          );
-        })}
+                <strong>{item.title}</strong>
+                <small>{item.description}</small>
+              </span>
+            );
+          })}
+        </div>
       </div>
 
       {campaignSeed && (
@@ -384,57 +475,6 @@ export const DispatchWizard: React.FC<DispatchWizardProps> = ({
       )}
 
       {step === 0 && (
-        <section className="amp-prompt-step">
-          <h2 className="amp-prompt-step__title">Generate share pack</h2>
-          <div className="cs-prompt-box">
-            {!prompt.trim() && !isPromptFocused && (
-              <p className="cs-prompt-tip">
-                Tip: Describe who should share, the story or roles to amplify, the destination link, and the tone you want
-                employees to use.
-              </p>
-            )}
-            <textarea
-              value={prompt}
-              onChange={(event) => setPrompt(event.target.value)}
-              onFocus={() => setIsPromptFocused(true)}
-              onBlur={() => setIsPromptFocused(false)}
-              placeholder=""
-              aria-label="Describe the share pack you need"
-            />
-            <div className="cs-prompt-actions">
-              <button type="button" className="cs-enhance" disabled={!prompt.trim()}>
-                <img src={enhanceIcon} alt="" /> Enhance with X+
-              </button>
-              <button
-                type="button"
-                className="cs-generate-icon"
-                disabled={!prompt.trim()}
-                aria-label="Continue with this brief"
-                onClick={advanceFromTemplateStep}
-              >
-                <img src={generateIcon} alt="" />
-              </button>
-            </div>
-          </div>
-          <h3 className="amp-prompt-step__subtitle">Or start with a template</h3>
-          <div className="amp-template-grid">
-            {dispatchTemplates.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className={`amp-template-card${templateId === item.id ? " is-selected" : ""}`}
-                onClick={() => selectTemplate(item)}
-              >
-                <strong>{item.title}</strong>
-                <span>{item.description}</span>
-                <em>{item.audienceHint}</em>
-              </button>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {step === 1 && (
         <div className="amp-dispatch__content">
           <div className="amp-dispatch__media">
             <div className="amp-post-preview">
@@ -445,6 +485,29 @@ export const DispatchWizard: React.FC<DispatchWizardProps> = ({
                   <img src={mediaUrl} alt="" />
                 )}
                 {mediaType === "video" && <span className="amp-post-preview__badge">Video</span>}
+                {canCarousel && (
+                  <>
+                    <button
+                      type="button"
+                      className="amp-asset-carousel__nav amp-asset-carousel__nav--prev"
+                      onClick={showPreviousAsset}
+                      aria-label="Previous asset"
+                    >
+                      <img src={leftArrowIcon} alt="" width={7} height={13} />
+                    </button>
+                    <button
+                      type="button"
+                      className="amp-asset-carousel__nav amp-asset-carousel__nav--next"
+                      onClick={showNextAsset}
+                      aria-label="Next asset"
+                    >
+                      <img src={leftArrowIcon} alt="" width={7} height={13} />
+                    </button>
+                    <span className="amp-asset-carousel__count" aria-live="polite">
+                      {Math.min(carouselIndex, selectedPackAssets.length - 1) + 1} / {selectedPackAssets.length}
+                    </span>
+                  </>
+                )}
                 <button
                   type="button"
                   className="cs-btn cs-btn--secondary amp-post-preview__replace"
@@ -484,7 +547,7 @@ export const DispatchWizard: React.FC<DispatchWizardProps> = ({
                       strokeWidth="1.6"
                     />
                   </svg>
-                  Replace asset
+                  {selectedPackAssets.length > 1 ? "Edit assets" : "Select assets"}
                 </button>
               </div>
               <div className="amp-post-preview__body">
@@ -690,61 +753,174 @@ export const DispatchWizard: React.FC<DispatchWizardProps> = ({
         </div>
       )}
 
-      {step === 2 && (
+      {step === 1 && (
         <div className="amp-dispatch__review">
-          <h3>Preview & Save</h3>
-          <dl className="amp-review-list">
-            <div>
-              <dt>{selectedTemplate ? "Template" : "Brief"}</dt>
-              <dd>{packTitle || (selectedTemplate ? template.title : promptTitle)}</dd>
-            </div>
-            <div>
-              <dt>Media</dt>
-              <dd>
-                {mediaType === "video" ? "Video" : "Image"} · {mediaName}
-              </dd>
-            </div>
-            <div>
-              <dt>Captions</dt>
-              <dd>{selectedCaptions.length} variants</dd>
-            </div>
-            <div>
-              <dt>CTA</dt>
-              <dd>
-                {resolvedCtaLabel}
-                <br />
-                <a href={resolvedCtaDestination} target="_blank" rel="noreferrer">
-                  {resolvedCtaDestination}
-                </a>
-              </dd>
-            </div>
-            <div>
-              <dt>Audience</dt>
-              <dd>
-                {selectedAudienceOptions.map((option) => option.label).join(", ") || "None"}
-                {" "}
-                ({segmentRecipientCount})
-                {!isAllEmployeesSelected && selectedEmails.length > 0 && (
-                  <>
-                    <br />
-                    <span className="amp-review-list__muted">
-                      + {selectedEmails.length} by email: {selectedEmails.join(", ")}
-                    </span>
-                  </>
-                )}
-              </dd>
-            </div>
-            <div>
-              <dt>Channel</dt>
-              <dd>Email</dd>
-            </div>
-            {note.trim() && (
-              <div>
-                <dt>Note</dt>
-                <dd>{note}</dd>
+          <div className="amp-dispatch__review-header">
+            <h3>Preview & Publish</h3>
+            <p className="amp-help">This is the email employees will receive with your share pack.</p>
+          </div>
+
+          <div className="amp-dispatch__review-layout">
+            <div className="amp-email-preview" aria-label="Employee email preview">
+              <div className="amp-email-preview__chrome">
+                <div className="amp-email-preview__meta-row">
+                  <span>From</span>
+                  <strong>Talent Brand · Duke Health</strong>
+                </div>
+                <div className="amp-email-preview__meta-row">
+                  <span>To</span>
+                  <strong>
+                    {audienceLabel}
+                    {audienceCount > 0 ? ` (${audienceCount})` : ""}
+                  </strong>
+                </div>
+                <div className="amp-email-preview__meta-row">
+                  <span>Subject</span>
+                  <strong>You&apos;re invited to share: {packTitle || promptTitle}</strong>
+                </div>
               </div>
-            )}
-          </dl>
+
+              <div className="amp-email-preview__body">
+                <p className="amp-email-preview__greeting">Hi {"{{first_name}}"},</p>
+                <p className="amp-email-preview__intro">
+                  We put together a ready-to-share pack for <strong>{packTitle || promptTitle}</strong>. It only takes a
+                  minute — pick a caption you like, open the attached assets, and post to your network.
+                </p>
+                <p className="amp-email-preview__intro">
+                  Destination for your post:{" "}
+                  <a href={resolvedCtaDestination || "#"} target="_blank" rel="noreferrer">
+                    {resolvedCtaLabel}
+                  </a>
+                  .
+                </p>
+
+                <div className="amp-email-preview__captions">
+                  <p className="amp-email-preview__section-label">Caption options (pick one)</p>
+                  <ol className="amp-email-preview__caption-list">
+                    {selectedCaptionTexts.map((caption) => (
+                      <li key={caption.id}>{caption.text}</li>
+                    ))}
+                  </ol>
+                </div>
+
+                <div className="amp-email-preview__attachments">
+                  <p className="amp-email-preview__section-label">Attachments</p>
+                  <p className="amp-email-preview__attachments-note">
+                    Delivered as{" "}
+                    <strong>
+                      {(packTitle || promptTitle || "share-pack")
+                        .toLowerCase()
+                        .replace(/[^a-z0-9]+/g, "-")
+                        .replace(/^-|-$/g, "")}
+                      .zip
+                    </strong>
+                  </p>
+                  <ul className="amp-email-preview__attachment-list">
+                    {selectedPackAssets.map((asset) => {
+                      const extension = asset.kind === "video" ? "mp4" : "jpg";
+                      const fileName = `${asset.label
+                        .toLowerCase()
+                        .replace(/[^a-z0-9]+/g, "-")
+                        .replace(/^-|-$/g, "")}.${extension}`;
+                      return (
+                        <li key={asset.id}>
+                          <span className="amp-email-preview__attachment-icon" aria-hidden="true">
+                            {asset.kind === "video" ? "VID" : "IMG"}
+                          </span>
+                          <div>
+                            <strong>{fileName}</strong>
+                            <small>{asset.kind === "video" ? "Video" : "Image"} · Ready to share</small>
+                          </div>
+                        </li>
+                      );
+                    })}
+                    <li>
+                      <span className="amp-email-preview__attachment-icon" aria-hidden="true">
+                        TXT
+                      </span>
+                      <div>
+                        <strong>captions.txt</strong>
+                        <small>
+                          {selectedCaptionTexts.length} caption
+                          {selectedCaptionTexts.length === 1 ? "" : "s"} · Copy and paste
+                        </small>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+
+                <p className="amp-email-preview__footer">
+                  Thanks for helping candidates discover careers at Duke Health. If you have questions, reply to this
+                  email.
+                </p>
+              </div>
+            </div>
+
+            <aside className="amp-dispatch__review-summary" aria-label="Pack details">
+              <h3 className="amp-dispatch__review-summary-title">Pack details</h3>
+              <div className="amp-review-list">
+                <div className="amp-review-list__title-row">
+                  <span className="amp-review-list__title-label">Pack title</span>
+                  <input
+                    type="text"
+                    className="amp-review-list__title-input"
+                    value={packTitle || promptTitle}
+                    onChange={(event) => setPackTitle(event.target.value)}
+                    aria-label="Share pack title"
+                  />
+                </div>
+                <dl className="amp-review-list__fields">
+                  <div>
+                    <dt>Media</dt>
+                    <dd>
+                      {selectedPackAssets.length === 1
+                        ? `${activeAsset.kind === "video" ? "Video" : "Image"} · ${activeAsset.label}`
+                        : `${selectedPackAssets.length} assets`}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Captions</dt>
+                    <dd>{selectedCaptions.length} variants</dd>
+                  </div>
+                  <div>
+                    <dt>CTA</dt>
+                    <dd>
+                      {resolvedCtaLabel}
+                      <br />
+                      <a href={resolvedCtaDestination} target="_blank" rel="noreferrer">
+                        {resolvedCtaDestination}
+                      </a>
+                      {ctaDestinationType === "page" && (
+                        <>
+                          <br />
+                          <span className="amp-review-list__muted">
+                            Locale:{" "}
+                            {ctaLocaleOptions.find((item) => item.value === selectedCtaLocale)?.label ||
+                              selectedCtaLocale}
+                          </span>
+                        </>
+                      )}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Audience</dt>
+                    <dd>
+                      {selectedAudienceOptions.map((option) => option.label).join(", ") || "None"} (
+                      {segmentRecipientCount})
+                      {!isAllEmployeesSelected && selectedEmails.length > 0 && (
+                        <>
+                          <br />
+                          <span className="amp-review-list__muted">
+                            + {selectedEmails.length} by email: {selectedEmails.join(", ")}
+                          </span>
+                        </>
+                      )}
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+            </aside>
+          </div>
         </div>
       )}
 
@@ -752,40 +928,43 @@ export const DispatchWizard: React.FC<DispatchWizardProps> = ({
         <button
           type="button"
           className="cs-btn cs-btn--secondary-ghost amp-dispatch__cancel"
-          onClick={() => (step === 0 ? onCancel() : setConfirmOpen(true))}
+          onClick={() => (step === 0 ? handleBackFromDetails() : setConfirmOpen(true))}
         >
-          Cancel
+          {step === 0 ? "Cancel" : "Leave"}
         </button>
         <div className="amp-dispatch__footer-actions">
-          {step > 0 && (
-            <button
-              type="button"
-              className="cs-btn cs-btn--secondary"
-              onClick={() => setStep((current) => current - 1)}
-            >
-              Back
-            </button>
-          )}
-          {step < STEPS.length - 1 ? (
+          <button
+            type="button"
+            className="cs-btn cs-btn--secondary"
+            onClick={() => {
+              if (step === 0) {
+                handleBackFromDetails();
+                return;
+              }
+              setStep((current) => current - 1);
+            }}
+          >
+            Back
+          </button>
+          {step < WIZARD_STEPS.length - 1 ? (
             <button
               type="button"
               className="cs-btn cs-btn--primary"
               disabled={!canContinue}
-              onClick={() => {
-                if (step === 0) {
-                  advanceFromTemplateStep();
-                  return;
-                }
-                setStep((current) => current + 1);
-              }}
+              onClick={() => setStep((current) => current + 1)}
             >
               Continue
             </button>
           ) : (
-            <button type="button" className="cs-btn cs-btn--primary amp-dispatch__send" onClick={handleSend}>
-              Send now
-              <img src={paperPlaneIcon} alt="" width={16} height={16} />
-            </button>
+            <>
+              <button type="button" className="cs-btn cs-btn--secondary" onClick={handleSaveDraft}>
+                Save draft
+              </button>
+              <button type="button" className="cs-btn cs-btn--primary amp-dispatch__send" onClick={handleSend}>
+                Send now
+                <img src={paperPlaneIcon} alt="" width={16} height={16} />
+              </button>
+            </>
           )}
         </div>
       </footer>
@@ -823,7 +1002,7 @@ export const DispatchWizard: React.FC<DispatchWizardProps> = ({
             </div>
             <footer className="amp-confirm__footer">
               <button type="button" className="cs-btn cs-btn--secondary-ghost amp-confirm__discard" onClick={handleDiscard}>
-                Cancel
+                Leave without saving
               </button>
               <div className="amp-confirm__footer-actions">
                 <button
@@ -855,7 +1034,7 @@ export const DispatchWizard: React.FC<DispatchWizardProps> = ({
           >
             <div className="cs-modal cs-modal--lg cs-replace-image-modal">
               <div className="cs-modal__header">
-                <h2 id="amp-replace-asset-title">Replace asset</h2>
+                <h2 id="amp-replace-asset-title">Select assets</h2>
                 <button
                   type="button"
                   className="cs-icon-button"
@@ -910,33 +1089,40 @@ export const DispatchWizard: React.FC<DispatchWizardProps> = ({
                       {filteredAssets.some((asset) => asset.kind === "video") ? "Assets" : "Images"} (
                       {filteredAssets.length})
                     </h3>
+                    <p className="amp-asset-modal__hint">
+                      Select one or more assets. Multiple assets appear as a carousel in the share pack.
+                    </p>
                   </div>
                   <div className="cs-image-options">
-                    {filteredAssets.map((option) => (
-                      <button
-                        type="button"
-                        key={option.id}
-                        className={selectedAssetId === option.id ? "is-selected" : ""}
-                        onClick={() => setSelectedAssetId(option.id)}
-                      >
-                        <span className="cs-image-options__preview">
-                          {option.kind === "video" ? (
-                            <video src={option.src} muted playsInline preload="metadata" />
-                          ) : (
-                            <img src={option.src} alt="" />
-                          )}
-                          {selectedAssetId === option.id && (
-                            <span className="cs-image-options__check" aria-hidden="true">
-                              ✓
-                            </span>
-                          )}
-                        </span>
-                        <span className="cs-image-options__meta">
-                          <strong>{option.label}</strong>
-                          <small>{option.meta}</small>
-                        </span>
-                      </button>
-                    ))}
+                    {filteredAssets.map((option) => {
+                      const isSelected = modalSelectedAssetIds.includes(option.id);
+                      return (
+                        <button
+                          type="button"
+                          key={option.id}
+                          className={isSelected ? "is-selected" : ""}
+                          onClick={() => toggleModalAsset(option.id)}
+                          aria-pressed={isSelected}
+                        >
+                          <span className="cs-image-options__preview">
+                            {option.kind === "video" ? (
+                              <video src={option.src} muted playsInline preload="metadata" />
+                            ) : (
+                              <img src={option.src} alt="" />
+                            )}
+                            {isSelected && (
+                              <span className="cs-image-options__check" aria-hidden="true">
+                                ✓
+                              </span>
+                            )}
+                          </span>
+                          <span className="cs-image-options__meta">
+                            <strong>{option.label}</strong>
+                            <small>{option.meta}</small>
+                          </span>
+                        </button>
+                      );
+                    })}
                     {!filteredAssets.length && (
                       <p className="amp-asset-modal__empty">No assets found. Upload a new asset to continue.</p>
                     )}
@@ -957,10 +1143,10 @@ export const DispatchWizard: React.FC<DispatchWizardProps> = ({
                 <button
                   type="button"
                   className="cs-btn cs-btn--primary"
-                  onClick={confirmAssetReplacement}
-                  disabled={!selectedModalAsset}
+                  onClick={confirmAssetSelection}
+                  disabled={!selectedModalAssets.length}
                 >
-                  Replace asset
+                  Use {selectedModalAssets.length} asset{selectedModalAssets.length === 1 ? "" : "s"}
                 </button>
               </div>
             </div>

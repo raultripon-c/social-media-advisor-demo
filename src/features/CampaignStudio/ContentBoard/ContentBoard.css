@@ -872,7 +872,7 @@
 
 /* Toolbar — title left, all controls on one right row */
 .cb-toolbar {
-  margin: 14px 18px 0;
+  margin: 18px 18px 0;
   padding: 16px 18px;
   border: 1px solid var(--neutrals-nn-75, #d1d5dc);
   border-radius: 10px;

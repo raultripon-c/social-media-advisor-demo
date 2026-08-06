@@ -106,6 +106,7 @@ const Layout = () => {
   });
 
   useEffect(() => {
+    if (isLocalCampaignStudioPreview) return;
     if (keycloakAvailable) {
       const tracker = new Tracker({
         projectKey: sessionTrackerProjectKey,

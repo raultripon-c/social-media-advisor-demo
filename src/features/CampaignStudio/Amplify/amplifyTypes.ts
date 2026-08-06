@@ -44,6 +44,7 @@ export interface SharePack {
   channels: AmplifyChannel[];
   thumbnailUrl: string;
   mediaType: "image" | "video";
+  assets?: { src: string; kind: "image" | "video"; label: string }[];
   ctaLabel: string;
   ctaDestination: string;
   utmPreview: string;
@@ -58,6 +59,7 @@ export interface DispatchTemplate {
   title: string;
   description: string;
   audienceHint: string;
+  prompt: string;
 }
 
 export type AmplifyCtaDestinationType = "page" | "job" | "event";

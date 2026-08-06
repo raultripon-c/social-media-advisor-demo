@@ -206,6 +206,33 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   }
 
   useEffect(() => {
+    if (isLocalCampaignStudioPreview) {
+      setAllRoutes(appRoutes);
+      setIsAppsLoaded(true);
+      setAppsLoader(false);
+      setRolesLoader(false);
+      if (!window.keycloakInstance) {
+        (window as any).keycloakInstance = keycloak || {
+          token: "local-preview",
+          authenticated: false,
+          loadUserInfo: async () => ({}),
+        };
+      }
+      if (!window.keycloakInstance.bearer_token) {
+        window.keycloakInstance.bearer_token = "Bearer local-preview";
+      }
+      window.addEventListener(
+        "txeInternalNavigation",
+        handleInternalNavigation as EventListener
+      );
+      return () => {
+        window.removeEventListener(
+          "txeInternalNavigation",
+          handleInternalNavigation as EventListener
+        );
+      };
+    }
+
     (async () => {
       const refNum = window.location.pathname.split("/")[2];
       const CustomerCode = window.location.pathname.split("/")[1];
@@ -291,6 +318,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
 
   useEffect(() => {
     setRolesLoader(false);
+    if (isLocalCampaignStudioPreview) {
+      setAppsLoader(false);
+      setIsAppsLoaded(true);
+      handleCRMFilterAPICompletion();
+      return;
+    }
     if (selectedTenant?.customerId) {
       setAppsLoader(true);
       setCmsSiteMetaData();

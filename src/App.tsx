@@ -4,14 +4,15 @@ import "react-toastify/dist/ReactToastify.css";
 import "../index.scss";
 import Layout from "./layout/Layout";
 import { InitialLoader } from "./layout/Loader";
+import { LocalPreviewKeycloakProvider } from "./layout/LocalPreviewKeycloakProvider";
 import { FeatureFlagsProvider } from "./context/FeatureFlagsContext";
-import { APIService } from './utils/api.service';
-import { triggerRefreshToken, waitForToken } from "./utils/api";
+import { triggerRefreshToken } from "./utils/api";
 
 /** When true, opening Candidate Journeys from the sidebar runs the same flow as Generate Journeys */
 const autoGenerateCandidateJourneysOnSidebarNav = true;
 
 const App = (): JSX.Element => {
+  const isLocalCampaignStudioPreview = window.location.pathname.startsWith("/campaign-studio/");
   const keyCloakConfig = {
     loginHost: (window as any)._env_.APP_KEYCLOAK_URL,
     clientId: (window as any)._env_.APP_CLIENT_ID,
@@ -25,18 +26,18 @@ const App = (): JSX.Element => {
   const tokenLogger = (tokens: any) => {
     try {
       console.log("onKeycloaktokenEvent from TXE", tokens);
-      // triggerRefreshToken();
     } catch (error) {
       console.error("Error", error);
     }
   };
   useEffect(() => {
+    if (isLocalCampaignStudioPreview) return undefined;
     const interval: number = new Function(`return ${(window as any)._env_.REFRESH_TOKEN_TIMEOUT_CMS}`)() || 10 * 60 * 1000;
     let intervalId: NodeJS.Timeout | null = null;
     if (interval) {
       intervalId = setInterval(async () => {
         await triggerRefreshToken();
-      }, interval); // 10 minutes
+      }, interval);
     }
 
     return () => {
@@ -44,7 +45,20 @@ const App = (): JSX.Element => {
         clearInterval(intervalId);
       }
     };
-  }, []);
+  }, [isLocalCampaignStudioPreview]);
+
+  const appTree = (
+    <FeatureFlagsProvider
+      value={{ autoGenerateCandidateJourneysOnSidebarNav }}
+    >
+      <Layout />
+    </FeatureFlagsProvider>
+  );
+
+  if (isLocalCampaignStudioPreview) {
+    return <LocalPreviewKeycloakProvider>{appTree}</LocalPreviewKeycloakProvider>;
+  }
+
   return (
     <>
       <ReactKeycloakProvider
@@ -59,11 +73,7 @@ const App = (): JSX.Element => {
         onEvent={eventLogger}
         onTokens={tokenLogger}
       >
-        <FeatureFlagsProvider
-          value={{ autoGenerateCandidateJourneysOnSidebarNav }}
-        >
-          <Layout />
-        </FeatureFlagsProvider>
+        {appTree}
         <div className="notify-toaster" style={{ display: "none" }}>
           {/* <Notify /> */}
         </div>
