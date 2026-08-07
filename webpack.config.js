@@ -30,16 +30,15 @@ module.exports = {
     },
     hot: true,
     liveReload: true,
-    allowedHosts: [
-      ".phenompro.com",
-      ".phenom.com",
-      ".phenomxai.com",
-      ".phenomhub.net",
-      ".phenompeople.com",
-    ],
-    historyApiFallback: true,
+    host: "0.0.0.0",
+    allowedHosts: "all",
+    historyApiFallback: {
+      disableDotRule: true,
+      index: "/index.html",
+    },
     client: {
       overlay: false,
+      webSocketURL: "auto://0.0.0.0:0/ws",
     },
   },
   module: {

@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import infoIcon from "../../../assets/svg/info.svg";
 import { attributionRows } from "./amplifyData";
 import { SharePack } from "./amplifyTypes";
 
@@ -6,11 +7,13 @@ interface ImpactViewProps {
   packs: SharePack[];
 }
 
+const EMV_PER_CLICK = 15.5;
+
 const formatCount = (value: number) => value.toLocaleString("en-US");
 
 const formatEmv = (value: number) => {
   if (value >= 1000) return `$${Math.round(value / 1000)}k`;
-  return `$${value}`;
+  return `$${value.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
 };
 
 export const ImpactView: React.FC<ImpactViewProps> = ({ packs }) => {
@@ -21,11 +24,11 @@ export const ImpactView: React.FC<ImpactViewProps> = ({ packs }) => {
       (acc, pack) => {
         acc.clicks += pack.metrics?.clicks || 0;
         acc.applications += pack.metrics?.applications || 0;
-        acc.emvUsd += pack.metrics?.emvUsd || 0;
         return acc;
       },
-      { clicks: 0, applications: 0, emvUsd: 0 },
+      { clicks: 0, applications: 0 },
     );
+    const mediaValue = totals.clicks * EMV_PER_CLICK;
     return [
       {
         id: "clicks",
@@ -40,7 +43,8 @@ export const ImpactView: React.FC<ImpactViewProps> = ({ packs }) => {
       {
         id: "emv",
         label: "Media value",
-        value: formatEmv(totals.emvUsd),
+        value: formatEmv(mediaValue),
+        info: "Estimated Total EMV = Total Clicks × 15.50",
       },
     ];
   }, [packsWithMetrics]);
@@ -54,7 +58,17 @@ export const ImpactView: React.FC<ImpactViewProps> = ({ packs }) => {
       <div className="amp-kpi-row amp-kpi-row--three">
         {liveKpis.map((kpi) => (
           <article key={kpi.id} className="amp-kpi">
-            <p>{kpi.label}</p>
+            <p className="amp-kpi__label">
+              <span>{kpi.label}</span>
+              {"info" in kpi && kpi.info ? (
+                <span className="amp-kpi__info" tabIndex={0} aria-label={kpi.info}>
+                  <img src={infoIcon} alt="" width={14} height={14} />
+                  <span className="amp-kpi__tooltip" role="tooltip">
+                    {kpi.info}
+                  </span>
+                </span>
+              ) : null}
+            </p>
             <strong>{kpi.value}</strong>
           </article>
         ))}
@@ -85,7 +99,6 @@ export const ImpactView: React.FC<ImpactViewProps> = ({ packs }) => {
             <table className="amp-table">
               <thead>
                 <tr>
-                  <th>Employee</th>
                   <th>Pack</th>
                   <th>Clicks</th>
                   <th>Apps</th>
@@ -94,7 +107,6 @@ export const ImpactView: React.FC<ImpactViewProps> = ({ packs }) => {
               <tbody>
                 {attributionRows.map((row) => (
                   <tr key={row.id}>
-                    <td>{row.employee}</td>
                     <td>{row.pack}</td>
                     <td>{row.clicks}</td>
                     <td>{row.applications}</td>

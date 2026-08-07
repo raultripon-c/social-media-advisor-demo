@@ -13,6 +13,7 @@ import { ImpactView } from "./ImpactView";
 import { PackDrawer } from "./PackDrawer";
 import { SharePackGenerating } from "./SharePackGenerating";
 import { SharePacksView } from "./SharePacksView";
+import { VideoRequestDrawer } from "./VideoRequestDrawer";
 
 const ENHANCE_SUFFIX =
   " Keep the tone warm, concise, and shareable for LinkedIn and email. Include a clear call to action.";
@@ -45,6 +46,7 @@ export const AmplifyPage: React.FC = () => {
   const [dispatchBrief, setDispatchBrief] = useState<string | null>(null);
   const [dispatchTemplateId, setDispatchTemplateId] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [videoRequestOpen, setVideoRequestOpen] = useState(false);
 
   const needsApprovalCount = useMemo(
     () => packs.filter((pack) => pack.status === "needs_approval").length,
@@ -188,6 +190,16 @@ export const AmplifyPage: React.FC = () => {
     showToast("Draft saved");
   };
 
+  const handleVideoRequestSend = (pack: SharePack) => {
+    setPacks((current) => [pack, ...current]);
+    setVideoRequestOpen(false);
+    showToast(
+      pack.audienceCount > 1
+        ? `Video request sent to ${pack.audienceCount.toLocaleString("en-US")} people`
+        : "Video request sent",
+    );
+  };
+
   return (
     <main className="campaign-studio amplify-page">
       <header className="cs-page-header">
@@ -280,6 +292,16 @@ export const AmplifyPage: React.FC = () => {
                   </button>
                 ))}
               </div>
+              <button
+                type="button"
+                className="cs-btn cs-btn--primary amp-canvas__cta"
+                onClick={() => {
+                  setActivePackId(null);
+                  setVideoRequestOpen(true);
+                }}
+              >
+                Request a video
+              </button>
             </div>
 
             {mode === "packs" && (
@@ -299,6 +321,12 @@ export const AmplifyPage: React.FC = () => {
         onClose={() => setActivePackId(null)}
         onApprove={(id) => approvePacks([id])}
         onSend={(id) => sendPacks([id])}
+      />
+
+      <VideoRequestDrawer
+        open={videoRequestOpen}
+        onClose={() => setVideoRequestOpen(false)}
+        onSend={handleVideoRequestSend}
       />
 
       {toast && (

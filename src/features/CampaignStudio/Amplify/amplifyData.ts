@@ -199,7 +199,7 @@ export const dispatchTemplates: DispatchTemplate[] = [
     description: "Ask employees to share open roles with their network.",
     audienceHint: "Hiring managers & recruiters",
     prompt:
-      "Generate a share pack for hiring managers/recruiters promoting our [role name(s)] openings. Highlight [team culture, growth, tech stack]. Include LinkedIn, X, and Slack versions. Link: [job posting URL]. Tone: confident and genuine, first-person.",
+      "Generate a share pack for hiring managers/recruiters promoting our [role name(s)] openings. Highlight [team culture, growth, tech stack]. Link: [job posting URL]. Tone: confident and genuine, first-person.",
   },
   {
     id: "tmpl-erg",
@@ -207,7 +207,7 @@ export const dispatchTemplates: DispatchTemplate[] = [
     description: "Share ERG moments and culture celebrations with employees.",
     audienceHint: "ERG members & allies",
     prompt:
-      "Generate a share pack for ERG members/allies about [event name]. Highlight why it matters and who's involved. Include LinkedIn and Instagram versions. Link: [event/RSVP URL]. Tone: warm and community-driven.",
+      "Generate a share pack for ERG members/allies about [event name]. Highlight why it matters and who's involved. Link: [event/RSVP URL]. Tone: warm and community-driven.",
   },
   {
     id: "tmpl-benefits",
@@ -215,7 +215,7 @@ export const dispatchTemplates: DispatchTemplate[] = [
     description: "Highlight benefits and total rewards stories.",
     audienceHint: "All employees",
     prompt:
-      "Generate a share pack for all employees about our benefits (e.g. PTO, learning stipend, parental leave). Include LinkedIn and X versions. Link: [benefits page URL]. Tone: relatable, like a proud employee — not an ad.",
+      "Generate a share pack for all employees about our benefits (e.g. PTO, learning stipend, parental leave). Link: [benefits page URL]. Tone: relatable, like a proud employee — not an ad.",
   },
   {
     id: "tmpl-milestone",
@@ -223,15 +223,15 @@ export const dispatchTemplates: DispatchTemplate[] = [
     description: "Share onboarding and tenure milestones.",
     audienceHint: "New hires & mentors",
     prompt:
-      "Generate a share pack for a new hire's [milestone, e.g. '90 days']. Highlight the onboarding experience and team culture. Include a LinkedIn post and a mentor Slack shoutout. Link: [careers/team page URL]. Tone: personal, first-person storytelling.",
+      "Generate a share pack for a new hire's [milestone, e.g. '90 days']. Highlight the onboarding experience and team culture. Link: [careers/team page URL]. Tone: personal, first-person storytelling.",
   },
   {
     id: "tmpl-testimonial",
-    title: "Testimonial / video request",
-    description: "Ask employees to record short testimonials or culture videos.",
-    audienceHint: "Managers & team storytellers",
+    title: "Employee testimonial / video",
+    description: "Share an employee testimonial or culture video with their network.",
+    audienceHint: "All employees",
     prompt:
-      "Generate a share pack requesting testimonial videos from employees about [topic, e.g. 'why you joined']. Include an ask message, 3 interview-style questions, and a caption for the finished video. Link: [submission URL]. Tone: warm, low-pressure invitation.",
+      "Generate a share pack for employees to share an existing testimonial or culture video about [topic, e.g. 'why you joined']. Highlight the story and why it matters. Link: [careers/story URL]. Tone: warm, first-person, authentic.",
   },
 ];
 
