@@ -1,4 +1,4 @@
-export type AmplifyMode = "packs" | "dispatch" | "impact";
+export type AmplifyMode = "packs" | "dispatch";
 
 export type SharePackStatus = "draft" | "needs_approval" | "ready" | "sent" | "archived";
 
@@ -51,8 +51,12 @@ export interface SharePack {
   captions: ShareCaption[];
   metrics?: SharePackMetrics;
   createdAt: string;
+  createdByName?: string;
   sentAt?: string;
+  employeeNote?: string;
 }
+
+export type DispatchTemplateIcon = "bolt" | "sparkle" | "award" | "calendar" | "user";
 
 export interface DispatchTemplate {
   id: string;
@@ -60,9 +64,10 @@ export interface DispatchTemplate {
   description: string;
   audienceHint: string;
   prompt: string;
+  icon: DispatchTemplateIcon;
 }
 
-export type AmplifyCtaDestinationType = "page" | "job" | "event";
+export type AmplifyCtaDestinationType = "page" | "job" | "event" | "blog";
 
 export interface AmplifySharePackDraft {
   templateId: string;
@@ -74,6 +79,7 @@ export interface AmplifySharePackDraft {
   ctaPageValue: string;
   ctaJobValue: string;
   ctaEventValue: string;
+  ctaBlogValue: string;
   ctaPersona: string;
   captions: ShareCaption[];
   selectedCaptionIds: string[];

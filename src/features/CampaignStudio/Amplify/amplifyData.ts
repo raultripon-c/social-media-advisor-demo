@@ -85,6 +85,7 @@ export const demoSharePacks: SharePack[] = [
       `From EHR integrations to patient apps, our Atlanta eng team is expanding.`,
     ]),
     createdAt: "2026-07-12T14:00:00.000Z",
+    createdByName: "Jordan Blake",
   },
   {
     id: "pack-rn-journey",
@@ -112,6 +113,7 @@ export const demoSharePacks: SharePack[] = [
     ]),
     metrics: { shares: 142, clicks: 680, applications: 18, emvUsd: 9600 },
     createdAt: "2026-07-20T09:30:00.000Z",
+    createdByName: "Aisha Rahman",
   },
   {
     id: "pack-earth-day",
@@ -137,6 +139,7 @@ export const demoSharePacks: SharePack[] = [
     ]),
     metrics: { shares: 312, clicks: 1480, applications: 27, emvUsd: 18400 },
     createdAt: "2026-04-18T11:00:00.000Z",
+    createdByName: "Harper Diaz",
     sentAt: "2026-04-20T15:00:00.000Z",
   },
   {
@@ -163,6 +166,7 @@ export const demoSharePacks: SharePack[] = [
     ]),
     metrics: { shares: 88, clicks: 420, applications: 14, emvUsd: 6200 },
     createdAt: "2026-06-02T10:00:00.000Z",
+    createdByName: "Chris Nguyen",
     sentAt: "2026-06-04T13:00:00.000Z",
   },
   {
@@ -189,60 +193,57 @@ export const demoSharePacks: SharePack[] = [
       `Celebrate tenure. Share this milestone pack with your network.`,
     ]),
     createdAt: "2026-07-08T16:20:00.000Z",
+    createdByName: "Marcus Chen",
   },
 ];
 
 export const dispatchTemplates: DispatchTemplate[] = [
   {
     id: "tmpl-job-sourcing",
-    title: "Job sourcing share pack",
+    title: "Share Open Roles",
     description: "Ask employees to share open roles with their network.",
     audienceHint: "Hiring managers & recruiters",
+    icon: "bolt",
     prompt:
       "Generate a share pack for hiring managers/recruiters promoting our [role name(s)] openings. Highlight [team culture, growth, tech stack]. Link: [job posting URL]. Tone: confident and genuine, first-person.",
   },
   {
     id: "tmpl-erg",
-    title: "ERG / culture event",
+    title: "Share Culture Events",
     description: "Share ERG moments and culture celebrations with employees.",
     audienceHint: "ERG members & allies",
+    icon: "sparkle",
     prompt:
       "Generate a share pack for ERG members/allies about [event name]. Highlight why it matters and who's involved. Link: [event/RSVP URL]. Tone: warm and community-driven.",
   },
   {
     id: "tmpl-benefits",
-    title: "Benefits showcase",
+    title: "Showcase Benefits",
     description: "Highlight benefits and total rewards stories.",
     audienceHint: "All employees",
+    icon: "award",
     prompt:
       "Generate a share pack for all employees about our benefits (e.g. PTO, learning stipend, parental leave). Link: [benefits page URL]. Tone: relatable, like a proud employee — not an ad.",
   },
   {
     id: "tmpl-milestone",
-    title: "Milestone / onboarding",
+    title: "Share Team Milestones",
     description: "Share onboarding and tenure milestones.",
     audienceHint: "New hires & mentors",
+    icon: "user",
     prompt:
       "Generate a share pack for a new hire's [milestone, e.g. '90 days']. Highlight the onboarding experience and team culture. Link: [careers/team page URL]. Tone: personal, first-person storytelling.",
-  },
-  {
-    id: "tmpl-testimonial",
-    title: "Employee testimonial / video",
-    description: "Share an employee testimonial or culture video with their network.",
-    audienceHint: "All employees",
-    prompt:
-      "Generate a share pack for employees to share an existing testimonial or culture video about [topic, e.g. 'why you joined']. Highlight the story and why it matters. Link: [careers/story URL]. Tone: warm, first-person, authentic.",
   },
 ];
 
 export const dispatchCaptionPool = captions([
-  `Join a team that puts people first. Explore careers at ${BRAND}.`,
-  `Proud to work at ${BRAND} and we're hiring. Here's how to apply.`,
-  `Know someone looking for meaningful work in healthcare? Share this.`,
-  `Great roles, real impact. See what's open at ${BRAND}.`,
-  `Our culture shows up in every shift. Curious? Start here.`,
-  `From clinic to community, build your career at ${BRAND}.`,
-  `I'm sharing this because I'd want someone to share it with me.`,
+  `Proud to work at ${BRAND} — and we're hiring.\n\nIf you know someone who'd thrive in healthcare, this is worth sharing.\n\nLink in the pack below.\n\n#DukeHealth #HealthcareCareers #Hiring #EmployeeAdvocacy`,
+  `Real impact. Real teammates. Real growth.\n\nThat's why I share openings at ${BRAND} with my network.\n\nKnow someone looking? Pass this along.\n\n#DukeHealth #Careers #HealthcareJobs #WorkWithPurpose`,
+  `Not every job post gets a personal recommendation — this one does.\n\n${BRAND} is growing, and employee referrals matter here.\n\nShare if someone in your network is exploring.\n\n#DukeHealth #Referrals #Healthcare #NowHiring`,
+  `Culture isn't a slide deck. It's how people show up every day.\n\nGrateful to share what working at ${BRAND} actually feels like.\n\n#DukeHealth #CompanyCulture #Healthcare #TeamDuke`,
+  `Great care starts with great people — and we're looking for more of both.\n\nExplore open roles at ${BRAND} and share with someone who'd be a fit.\n\n#DukeHealth #HealthcareHeroes #Careers #JoinOurTeam`,
+  `I'd want someone to send me this if roles like these opened up.\n\nSharing ${BRAND} careers with my LinkedIn network today.\n\n#DukeHealth #OpenToWork #HealthcareCareers #EmployeeShare`,
+  `Mission-driven work, supportive teams, room to grow.\n\nIf healthcare is calling for someone you know, start here.\n\n#DukeHealth #PurposeDriven #HealthcareJobs #CareerGrowth`,
 ]);
 
 export const cmsDestinationPages = [
@@ -299,6 +300,25 @@ export const ctaEventOptions = [
   label: eventName,
   value: `https://careers.dukehealth.org/events/${eventName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`,
 }));
+
+export const ctaBlogOptions = [
+  {
+    label: "Life at Duke Health",
+    value: "https://careers.dukehealth.org/blog/life-at-duke-health",
+  },
+  {
+    label: "Nursing career stories",
+    value: "https://careers.dukehealth.org/blog/nursing-career-stories",
+  },
+  {
+    label: "Why I joined Duke Health",
+    value: "https://careers.dukehealth.org/blog/why-i-joined-duke-health",
+  },
+  {
+    label: "Employee wellbeing spotlight",
+    value: "https://careers.dukehealth.org/blog/employee-wellbeing-spotlight",
+  },
+];
 
 export const resolveCtaDestinationMatch = (destination: string) => {
   const fallbackPage = cmsDestinationPages[1];
@@ -373,89 +393,482 @@ const makeSharePackTitle = (brief: string, theme: AmplifyBriefTheme, role: strin
   return "Employee share pack";
 };
 
+const formatSocialCaption = (...parts: string[]) =>
+  parts
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .join("\n\n");
+
+/** Compact caption list display: one paragraph of body copy, then hashtags. */
+export const formatCaptionForPicker = (text: string): string => {
+  const trimmed = text.trim();
+  if (!trimmed) return trimmed;
+
+  const segments = trimmed.split(/\n\n+/);
+  if (segments.length <= 1) return trimmed;
+
+  const lastSegment = segments[segments.length - 1].trim();
+  const hasHashtagTail = /#\w/.test(lastSegment);
+
+  if (!hasHashtagTail) {
+    return segments.join(" ").replace(/\s+/g, " ").trim();
+  }
+
+  const body = segments
+    .slice(0, -1)
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return body ? `${body}\n\n${lastSegment}` : lastSegment;
+};
+
+const hashtagSets: Record<AmplifyBriefTheme, string> = {
+  nursing: "#DukeHealth #NursingCareers #RNJobs #HealthcareHeroes #NursingLife",
+  engineering: "#DukeHealth #TechCareers #HealthcareIT #EngineeringJobs #HealthTech",
+  sales: "#DukeHealth #SalesCareers #HealthcareSales #Hiring #CareerOpportunity",
+  erg: "#DukeHealth #WorkCulture #EmployeeResourceGroup #BelongingAtWork #Healthcare",
+  benefits: "#DukeHealth #EmployeeBenefits #WorkLifeBalance #HealthcareCareers #GreatPlaceToWork",
+  milestone: "#DukeHealth #EmployeeStory #CareerGrowth #Healthcare #TeamCelebration",
+  event: "#DukeHealth #HiringEvent #CareerFair #HealthcareJobs #Networking",
+  testimonial: "#DukeHealth #EmployeeVoice #HealthcareCareers #WorkCulture #ShareYourStory",
+  hiring: "#DukeHealth #NowHiring #HealthcareJobs #Careers #JoinOurTeam",
+  general: "#DukeHealth #HealthcareCareers #Hiring #EmployeeAdvocacy #WorkWithPurpose",
+};
+
 const buildAiCaptions = (brief: string, theme: AmplifyBriefTheme, role: string): ShareCaption[] => {
   const location = extractLocationFromBrief(brief);
   const place = location ? ` in ${location}` : "";
+  const tags = hashtagSets[theme];
   const linesByTheme: Record<AmplifyBriefTheme, string[]> = {
     nursing: [
-      `From first shift to charge nurse, growth stories like this are why I love ${BRAND}.`,
-      `Thinking about a nursing career? Here's one teammate's journey at ${BRAND}.`,
-      `Compassionate care + real career pathways. Proud to share this RN story.`,
-      `If you know a nurse looking for the next step, send them this.`,
-      `Our nurses grow here. This journey story says it better than I can.`,
-      `Bedside excellence and leadership — that's the RN path at ${BRAND}.`,
+      formatSocialCaption(
+        "Proud to work somewhere nurses actually grow into leaders.",
+        "From first shift to charge nurse — stories like this are why I stay at Duke Health.",
+        "Know an RN looking for their next chapter? Worth sharing with your network.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Bedside care + real career pathways. That's the nursing story at Duke Health.",
+        "If you know a nurse who's ready for more than just another job posting, send this their way.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Compassionate teams. Strong mentors. Room to lead.",
+        "Our nurses don't just show up — they build careers here. Sharing a pack for anyone exploring nursing roles.",
+        tags,
+      ),
+      formatSocialCaption(
+        "The best referrals come from people who've lived the culture.",
+        "I'm sharing Duke Health nursing openings because I'd want someone to share them with me.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Healthcare needs great nurses. Duke Health is hiring.",
+        "Short version: meaningful work, supportive teams, and paths into leadership.",
+        "Pass this to someone in your network who's exploring RN roles.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Not every hospital invests in nurse development like this.",
+        "Proud to amplify nursing careers at Duke Health — link and captions in the pack.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Thinking about nursing at Duke Health?",
+        "Here's an easy share pack if you want to help someone in your network take the next step.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Clinical excellence starts with the people behind the scrubs.",
+        "Sharing nursing opportunities at Duke Health — tag someone who should see this.",
+        tags,
+      ),
     ],
     engineering: [
-      `We're hiring engineers${place} who want to build tools that help caregivers. See open roles at ${BRAND}.`,
-      `Proud of our engineering team and growing. Interested in impactful work?`,
-      `Clinical systems + modern software. That's the mix our eng org is hiring for.`,
-      `Know a great engineer? Share this ${BRAND} hiring pack.`,
-      `Build products that support patients and care teams. Engineering roles are open.`,
-      `From EHR integrations to patient apps, our eng team is expanding.`,
+      formatSocialCaption(
+        `We're hiring engineers${place} who want their code to matter.`,
+        "At Duke Health, engineering work supports caregivers and patients — not just dashboards.",
+        "Know a builder who'd thrive here? Share this pack.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Health tech with a human purpose.",
+        "Our engineering team is growing — from clinical systems to patient-facing tools.",
+        "Worth a share if someone in your network is job searching.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Great engineers want impact, not just uptime.",
+        "Proud to share Duke Health engineering openings with my LinkedIn network.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Modern stack. Mission-driven product. Real users on the front lines of care.",
+        "Duke Health is hiring engineers — help us reach the right people.",
+        tags,
+      ),
+      formatSocialCaption(
+        "If you love solving hard problems that actually help people, this one's for you.",
+        `Sharing ${role} engineering roles${place} at Duke Health.`,
+        tags,
+      ),
+      formatSocialCaption(
+        "Referrals beat job boards every time.",
+        "Passing along Duke Health engineering careers to anyone exploring their next move.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Building tools clinicians rely on is a different kind of product work.",
+        "Open engineering roles at Duke Health — share with your network.",
+        tags,
+      ),
+      formatSocialCaption(
+        "From integrations to patient experience — our eng org is expanding.",
+        "Know someone who'd be a great fit? This pack makes it easy to share.",
+        tags,
+      ),
     ],
     sales: [
-      `Come meet our recruiting team at the next ${BRAND} hiring fair.`,
-      `Looking for your next sales role in healthcare? Start here.`,
-      `Great culture, clear goals, and real impact. See sales openings at ${BRAND}.`,
-      `Know a strong seller who cares about mission? Share this pack.`,
-      `Our sales team helps connect talent to care. We're hiring — pass it on.`,
-      `Career growth + purpose. Explore sales roles at ${BRAND}.`,
+      formatSocialCaption(
+        "Mission-led sales is a different conversation — and we're hiring.",
+        "Duke Health sales roles connect talent to care teams that need great people.",
+        "Share if you know a strong seller exploring healthcare.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Come meet the team at our next Duke Health hiring event.",
+        "Real conversations, open roles, no cold-pitch energy.",
+        "RSVP and share with someone who'd enjoy the room.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Clear goals. Supportive leadership. Work that actually matters.",
+        "Sharing sales openings at Duke Health — link in the pack below.",
+        tags,
+      ),
+      formatSocialCaption(
+        "The best sales hires often come from employee networks.",
+        "If someone in your circle is looking, this is an easy share.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Healthcare sales with purpose > generic quota chasing.",
+        "Proud to amplify Duke Health sales careers today.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Hiring fair season is here.",
+        "Help us fill the room with great people — share this event pack.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Growing team, strong culture, roles worth talking about.",
+        "Duke Health sales is hiring — pass it on.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Know a seller who cares about impact?",
+        "Point them to Duke Health — captions and assets ready to post.",
+        tags,
+      ),
     ],
     erg: [
-      `Proud of how our teams showed up for culture and community this week.`,
-      `Earth Day (and every day) — sustainability is part of how we work at ${BRAND}.`,
-      `ERG moments like these are why our culture feels real. Share if you're proud.`,
-      `Celebrate with us — and invite someone who wants to belong here too.`,
-      `Culture isn't a poster. It's moments like this across ${BRAND}.`,
-      `Allies and ERG members: help share what makes us us.`,
+      formatSocialCaption(
+        "Culture shows up in moments like this — not just on posters.",
+        "Proud of how our ERG community showed up this week at Duke Health.",
+        "Share if you're proud of where you work too.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Belonging is built in public.",
+        "Celebrating our ERG and the people who make Duke Health feel like a community.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Sustainability, inclusion, allyship — this is part of how we work.",
+        "Help us share what makes Duke Health culture real.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Allies and ERG members: your voice helps candidates see the real us.",
+        "Easy share pack — pick a caption and post.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Earth Day every day? That's the energy on our team.",
+        "Sharing a culture moment from Duke Health — tag a teammate.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Moments like these are why referrals work.",
+        "People want to join teams that celebrate together.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Proud to work somewhere that invests in employee communities.",
+        "Share this Duke Health culture pack with your network.",
+        tags,
+      ),
+      formatSocialCaption(
+        "When culture is authentic, employees become the best recruiters.",
+        "Pass along this ERG story from Duke Health.",
+        tags,
+      ),
     ],
     benefits: [
-      `Total rewards that support real life — benefits worth sharing at ${BRAND}.`,
-      `Curious what working here actually feels like day to day? Start with benefits.`,
-      `From wellbeing to growth, our rewards story is ready to share.`,
-      `Know someone weighing an offer? Send them our benefits pack.`,
-      `Great care for patients starts with care for our people.`,
-      `See how ${BRAND} invests in the whole employee — not just the shift.`,
+      formatSocialCaption(
+        "Benefits aren't a footnote — they're part of why people stay.",
+        "Sharing what total rewards actually look like at Duke Health.",
+        "Know someone comparing offers? This helps.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Wellbeing, growth, flexibility — the full picture matters.",
+        "Proud to share Duke Health's benefits story with my network.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Candidates ask what day-to-day life is really like.",
+        "Start with how Duke Health invests in employees — not just the shift.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Great care for patients starts with care for our people.",
+        "Easy share pack on benefits and culture at Duke Health.",
+        tags,
+      ),
+      formatSocialCaption(
+        "The perks slide never tells the whole story.",
+        "Here's a more honest share about working at Duke Health.",
+        tags,
+      ),
+      formatSocialCaption(
+        "If someone you know is weighing a move into healthcare, send this.",
+        "Benefits + culture pack from Duke Health.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Work-life balance isn't a buzzword on our team.",
+        "Sharing why Duke Health is worth a closer look.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Referrals land better when you can speak to more than the job title.",
+        "Benefits and culture captions ready to post.",
+        tags,
+      ),
     ],
     milestone: [
-      `Celebrating another milestone on the team — grateful to grow at ${BRAND}.`,
-      `New hires and mentors: stories like this are why onboarding matters.`,
-      `Tenure moments remind me why I stay. Proud to share this one.`,
-      `From day one to year five — growth is real here.`,
-      `If you're mentoring someone new, this pack is an easy share.`,
-      `Milestones like these deserve a wider audience. Pass it on.`,
+      formatSocialCaption(
+        "Another milestone on the team — grateful to grow at Duke Health.",
+        "From day one to year five, growth here is real.",
+        "Share if you've had a similar journey.",
+        tags,
+      ),
+      formatSocialCaption(
+        "New hires deserve to see what the path can look like.",
+        "Celebrating a teammate milestone and sharing our story.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Tenure moments remind me why I stay.",
+        "Proud to amplify Duke Health career stories today.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Mentorship + opportunity = stories worth sharing.",
+        "Pass this Duke Health pack to someone early in their career.",
+        tags,
+      ),
+      formatSocialCaption(
+        "This is what career growth looks like in healthcare.",
+        "Sharing a milestone moment from Duke Health.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Employee stories beat generic recruiting copy every time.",
+        "Help us celebrate and share — captions in the pack.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Onboarding matters. So does what happens after.",
+        "Duke Health milestone story — worth a share.",
+        tags,
+      ),
+      formatSocialCaption(
+        "People join teams. They stay for moments like this.",
+        "Tag someone who'd appreciate this career story.",
+        tags,
+      ),
     ],
     event: [
-      `Join us at the next ${BRAND} careers event — details inside.`,
-      `Hiring event alert: bring a friend who's curious about healthcare careers.`,
-      `Open house energy, real conversations, open roles. See you there.`,
-      `RSVP and share — seats go fast for our recruiting events.`,
-      `Prefer to meet the team live? This event pack is for you.`,
-      `Career fair season is here. Help us fill the room with great people.`,
+      formatSocialCaption(
+        "Hiring event alert — Duke Health careers, live and in person.",
+        "Bring a friend who's curious about healthcare roles.",
+        "Details in the pack. Share to fill the room.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Prefer meeting the team face-to-face?",
+        "Our next Duke Health recruiting event is coming up — RSVP and share.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Open roles + real conversations + no awkward sales pitch.",
+        "Help us spread the word about this Duke Health event.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Career fairs hit different when employees invite their network.",
+        "Sharing our event pack — takes one minute to post.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Seats go fast for these sessions.",
+        "Pass this Duke Health hiring event to someone exploring options.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Recruiting events work best when employees show up as advocates.",
+        "Share this invite with your LinkedIn network.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Meet recruiters, ask real questions, explore open roles.",
+        "Duke Health event pack ready to share.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Know someone job searching in healthcare?",
+        "Point them to our upcoming Duke Health careers event.",
+        tags,
+      ),
     ],
     testimonial: [
-      `Got 60 seconds? Record a quick testimonial about life at ${BRAND}.`,
-      `Your story helps candidates see the real us. Share a short video when you can.`,
-      `Managers: invite a teammate to record a culture or role testimonial this week.`,
-      `A short video from you goes further than any brochure. Ready to record?`,
-      `Help the next hire feel at home — submit a testimonial or day-in-the-life clip.`,
-      `Proud of your team? Capture it on video and send it in for our talent stories.`,
+      formatSocialCaption(
+        "Got 60 seconds?",
+        "Record a quick testimonial about life at Duke Health — your story helps candidates see the real us.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Short video > long brochure.",
+        "Share a day-in-the-life or culture clip when you can.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Managers: invite a teammate to record this week.",
+        "Employee voices are our best recruiting asset.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Proud of your team? Capture it on camera.",
+        "Duke Health is collecting talent stories — easy ask in the pack.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Authentic beats polished every time.",
+        "A quick testimonial from you goes further than you think.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Help the next hire feel at home before day one.",
+        "Record a short Duke Health story — link in the pack.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Your perspective matters to candidates.",
+        "Share a video testimonial about working at Duke Health.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Employee advocacy isn't just sharing job links.",
+        "Sometimes it's sharing why you stay.",
+        tags,
+      ),
     ],
     hiring: [
-      `Proud to work at ${BRAND} and we're hiring ${role}${place}. Here's how to apply.`,
-      `Know someone looking for meaningful work? Share these ${role} openings.`,
-      `Great roles, real impact. See what's open for ${role} at ${BRAND}.`,
-      `Join a team that puts people first. Explore ${role} careers at ${BRAND}.`,
-      `I'm sharing this because I'd want someone to share it with me.`,
-      `From clinic to community, build your career at ${BRAND}.`,
+      formatSocialCaption(
+        `Proud to work at Duke Health — and we're hiring ${role}${place}.`,
+        "Know someone looking for meaningful work? This pack makes it easy to share.",
+        tags,
+      ),
+      formatSocialCaption(
+        `Open ${role} roles${place} worth talking about.`,
+        "Employee referrals are how great teams get built. Pass this along.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Great roles. Real impact. Strong teammates.",
+        `Sharing Duke Health ${role} openings with my network today.`,
+        tags,
+      ),
+      formatSocialCaption(
+        "Not every opening gets a personal recommendation — this one does.",
+        `Exploring ${role} careers at Duke Health? Start here.`,
+        tags,
+      ),
+      formatSocialCaption(
+        "Healthcare needs great people. We're hiring.",
+        `Help us reach the right ${role} candidates — share the pack below.`,
+        tags,
+      ),
+      formatSocialCaption(
+        "I'd want someone to send me this if I were job searching.",
+        `Duke Health ${role} roles${place} — captions ready to copy and post.`,
+        tags,
+      ),
+      formatSocialCaption(
+        "Join a team that puts people first.",
+        `Sharing ${role} opportunities at Duke Health — link in the pack.`,
+        tags,
+      ),
+      formatSocialCaption(
+        "From clinic to community, careers here mean something.",
+        "Tag someone who should see these openings.",
+        tags,
+      ),
     ],
     general: [
-      `Join a team that puts people first. Explore careers at ${BRAND}.`,
-      `Proud to work at ${BRAND} and we're hiring. Here's how to apply.`,
-      `Know someone looking for meaningful work in healthcare? Share this.`,
-      `Great roles, real impact. See what's open at ${BRAND}.`,
-      `Our culture shows up in every shift. Curious? Start here.`,
-      `I'm sharing this because I'd want someone to share it with me.`,
+      formatSocialCaption(
+        "Proud to work at Duke Health — and we're hiring.",
+        "If you know someone who'd thrive in healthcare, this is worth sharing.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Real impact. Real teammates. Real growth.",
+        "Pass this careers pack to someone exploring their next move.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Employee shares beat cold job posts every time.",
+        "Pick a caption, grab the assets, post to your network.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Culture shows up in how we talk about work.",
+        "Sharing Duke Health careers with my LinkedIn network today.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Know someone looking for meaningful work in healthcare?",
+        "Easy share pack — takes a minute to post.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Great roles, real impact.",
+        "Explore what's open at Duke Health and share with your network.",
+        tags,
+      ),
+      formatSocialCaption(
+        "Referrals matter here.",
+        "Help us reach great candidates — captions and assets in the pack.",
+        tags,
+      ),
+      formatSocialCaption(
+        "I'm sharing this because I'd want someone to share it with me.",
+        "Duke Health careers — link below.",
+        tags,
+      ),
     ],
   };
 
@@ -484,7 +897,7 @@ export const createSharePackDraftFromBrief = (
     benefits: "tmpl-benefits",
     milestone: "tmpl-milestone",
     event: "tmpl-erg",
-    testimonial: "tmpl-testimonial",
+    testimonial: "tmpl-milestone",
     general: preferredTemplateId || "tmpl-job-sourcing",
   };
 
@@ -523,6 +936,7 @@ export const createSharePackDraftFromBrief = (
   let ctaPageValue = cmsDestinationPages[1].value;
   let ctaJobValue = ctaJobOptions[0].value;
   let ctaEventValue = ctaEventOptions[0].value;
+  let ctaBlogValue = ctaBlogOptions[0].value;
   let ctaPersona = ctaPersonaOptions[0].value;
 
   if (theme === "nursing" || includesAny(text, ["nurse", "rn", "picu"])) {
@@ -544,6 +958,9 @@ export const createSharePackDraftFromBrief = (
       cmsDestinationPages.find((page) => page.label === "Benefits and culture")?.value || ctaPageValue;
   } else if (theme === "sales" || theme === "hiring") {
     ctaPageValue = cmsDestinationPages.find((page) => page.label === "All open jobs")?.value || ctaPageValue;
+  } else if (includesAny(text, ["blog", "article", "blog post", "story post"])) {
+    ctaDestinationType = "blog";
+    ctaBlogValue = ctaBlogOptions[0].value;
   }
 
   const urlInBrief = trimmed.match(/https?:\/\/[^\s)]+/i)?.[0];
@@ -551,6 +968,7 @@ export const createSharePackDraftFromBrief = (
     const pageMatch = cmsDestinationPages.find((page) => page.value === urlInBrief);
     const jobMatch = ctaJobOptions.find((job) => job.value === urlInBrief);
     const eventMatch = ctaEventOptions.find((event) => event.value === urlInBrief);
+    const blogMatch = ctaBlogOptions.find((blog) => blog.value === urlInBrief);
     if (pageMatch) {
       ctaDestinationType = "page";
       ctaPageValue = pageMatch.value;
@@ -560,6 +978,9 @@ export const createSharePackDraftFromBrief = (
     } else if (eventMatch) {
       ctaDestinationType = "event";
       ctaEventValue = eventMatch.value;
+    } else if (blogMatch) {
+      ctaDestinationType = "blog";
+      ctaBlogValue = blogMatch.value;
     }
   }
 
@@ -577,6 +998,7 @@ export const createSharePackDraftFromBrief = (
     ctaPageValue,
     ctaJobValue,
     ctaEventValue,
+    ctaBlogValue,
     ctaPersona,
     captions,
     selectedCaptionIds,

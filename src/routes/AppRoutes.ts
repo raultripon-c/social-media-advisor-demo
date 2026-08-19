@@ -12,6 +12,7 @@ import CampaignStudioOnePage from "../screens/CampaignStudioOnePage/CampaignStud
 import CampaignStudioContentBoard from "../screens/CampaignStudioContentBoard/CampaignStudioContentBoard";
 import CampaignStudioAmplify from "../screens/CampaignStudioAmplify/CampaignStudioAmplify";
 import CampaignStudioAmplifyRedirect from "../screens/CampaignStudioAmplify/CampaignStudioAmplifyRedirect";
+import CampaignStudioSharePackDetail from "../screens/CampaignStudioSharePackDetail/CampaignStudioSharePackDetail";
 import { withDynamicScript } from "../layout/dynamicScripts/WithDynamicScript";
 
 export interface IRoute {
@@ -105,6 +106,11 @@ const campaignStudioAmplifyLegacy = {
   component: CampaignStudioAmplifyRedirect,
 }
 
+const campaignStudioSharePackDetail = {
+  path: "/:customerCode/:refnum/campaign-studio/employee-advocacy/:packId",
+  component: CampaignStudioSharePackDetail,
+}
+
 const localCampaignStudioAllCampaigns = {
   path: "/campaign-studio/campaigns",
   component: CampaignStudioAllCampaigns,
@@ -140,6 +146,11 @@ const localCampaignStudioAmplifyLegacy = {
   component: CampaignStudioAmplifyRedirect,
 }
 
+const localCampaignStudioSharePackDetail = {
+  path: "/campaign-studio/employee-advocacy/:packId",
+  component: CampaignStudioSharePackDetail,
+}
+
 const unmatchedRoutePage = {
   path: "*",
   component: UnmatchedRoutePage
@@ -163,6 +174,7 @@ export const appRoutes = [
   campaignStudioContentBoard,
   campaignStudioAmplify,
   campaignStudioAmplifyLegacy,
+  campaignStudioSharePackDetail,
   localCampaignStudioAllCampaigns,
   localCampaignStudioNewCampaign,
   localCampaignStudioWorkspace,
@@ -170,5 +182,6 @@ export const appRoutes = [
   localCampaignStudioContentBoard,
   localCampaignStudioAmplify,
   localCampaignStudioAmplifyLegacy,
+  localCampaignStudioSharePackDetail,
   unmatchedRoutePage
 ];

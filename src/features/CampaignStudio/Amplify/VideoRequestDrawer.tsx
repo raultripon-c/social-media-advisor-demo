@@ -3,6 +3,7 @@ import paperPlaneIcon from "../../../assets/svg/paper-plane-16.svg";
 import marcusThumb from "../../../assets/campaign-studio/amplify/amp-pack-marcus-5yr.jpg";
 import { UiMultiSelect } from "../UiMultiSelect";
 import { audienceEmployeeOptions, audienceSegmentOptions } from "./amplifyData";
+import { getCampaignCreatorName } from "../campaignStudioData";
 import { SharePack } from "./amplifyTypes";
 
 interface VideoRequestDrawerProps {
@@ -128,6 +129,7 @@ export const VideoRequestDrawer: React.FC<VideoRequestDrawerProps> = ({ open, on
         },
       ],
       createdAt: now,
+      createdByName: getCampaignCreatorName(),
       sentAt: now,
     };
     onSend(pack);
@@ -156,16 +158,13 @@ export const VideoRequestDrawer: React.FC<VideoRequestDrawerProps> = ({ open, on
 
         <div className="amp-drawer__body">
           <section>
-            <h3>
+            <label className="amp-field amp-field--compact">
               Topic <span className="cs-required" aria-hidden="true">*</span>
-            </h3>
-            <label className="amp-field">
               <textarea
                 value={topic}
                 onChange={(event) => setTopic(event.target.value)}
                 rows={3}
                 placeholder="e.g. Why you joined Duke Health and what keeps you here"
-                aria-label="Video topic"
               />
             </label>
             <div className="amp-video-request__chips" role="group" aria-label="Topic suggestions">
@@ -183,25 +182,22 @@ export const VideoRequestDrawer: React.FC<VideoRequestDrawerProps> = ({ open, on
           </section>
 
           <section>
-            <h3>
-              Deadline <span className="amp-optional">(optional)</span>
-            </h3>
             <label className="amp-field amp-field--compact">
+              Deadline <span className="amp-optional">(optional)</span>
               <input
                 type="date"
                 value={deadline}
                 onChange={(event) => setDeadline(event.target.value)}
-                aria-label="Optional deadline"
               />
             </label>
           </section>
 
           <section>
-            <h3>
-              Who <span className="cs-required" aria-hidden="true">*</span>
-            </h3>
             <div className="amp-audience">
-              <div className="amp-audience__panel" role="group" aria-label="Video request audience">
+              <p className="amp-audience__title" id="amp-video-audience-label">
+                Who <span className="cs-required" aria-hidden="true">*</span>
+              </p>
+              <div className="amp-audience__panel" role="group" aria-labelledby="amp-video-audience-label">
                 <label className="amp-field amp-field--compact amp-audience__segment">
                   Audience segment
                   <UiMultiSelect

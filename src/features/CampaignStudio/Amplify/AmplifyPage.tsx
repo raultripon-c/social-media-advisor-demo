@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import enhanceIcon from "../../../assets/svg/enhanceIcon.svg";
 import generateIcon from "../../../assets/svg/arrow-up-plain.svg";
@@ -6,24 +6,58 @@ import { CampaignStudioSubNav, getCampaignStudioPaths } from "../ContentBoard/Ca
 import "../CampaignStudio.css";
 import "../ContentBoard/ContentBoard.css";
 import "./Amplify.css";
-import { demoSharePacks, dispatchTemplates } from "./amplifyData";
+import { dispatchTemplates } from "./amplifyData";
 import { AmplifyCampaignSeed, AmplifyMode, DispatchTemplate, SharePack } from "./amplifyTypes";
 import { DispatchWizard } from "./DispatchWizard";
-import { ImpactView } from "./ImpactView";
-import { PackDrawer } from "./PackDrawer";
 import { SharePackGenerating } from "./SharePackGenerating";
 import { SharePacksView } from "./SharePacksView";
 import { VideoRequestDrawer } from "./VideoRequestDrawer";
+import { loadSharePacks, saveSharePacks } from "./sharePackStorage";
 
 const ENHANCE_SUFFIX =
   " Keep the tone warm, concise, and shareable for LinkedIn and email. Include a clear call to action.";
 
-const VIEW_MODES: { id: Exclude<AmplifyMode, "dispatch">; label: string }[] = [
-  { id: "packs", label: "Share Packs" },
-  { id: "impact", label: "Impact" },
-];
-
 const templatePrompt = (item: DispatchTemplate) => item.prompt;
+
+const AmpTemplateIcon = ({ type }: { type: DispatchTemplate["icon"] }) => {
+  if (type === "user") {
+    return (
+      <svg className="cs-template-card__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+        <path d="M8 8.2a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" fill="none" stroke="currentColor" strokeWidth="1.4" />
+        <path d="M3.2 14c.5-2.5 2.3-4 4.8-4s4.3 1.5 4.8 4" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.4" />
+      </svg>
+    );
+  }
+  if (type === "calendar") {
+    return (
+      <svg className="cs-template-card__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+        <path d="M4.5 2v2.2M11.5 2v2.2M3 5.5h10" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.4" />
+        <path d="M3.2 3.5h9.6c.7 0 1.2.5 1.2 1.2v7.6c0 .7-.5 1.2-1.2 1.2H3.2c-.7 0-1.2-.5-1.2-1.2V4.7c0-.7.5-1.2 1.2-1.2Z" fill="none" stroke="currentColor" strokeWidth="1.4" />
+      </svg>
+    );
+  }
+  if (type === "bolt") {
+    return (
+      <svg className="cs-template-card__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+        <path d="M8.9 1.8 3.8 8.7h3.4l-.3 5.5 5.3-7.2H8.8l.1-5.2Z" fill="none" stroke="currentColor" strokeLinejoin="round" strokeWidth="1.4" />
+      </svg>
+    );
+  }
+  if (type === "sparkle") {
+    return (
+      <svg className="cs-template-card__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+        <path d="M8 1.8 9.4 6 13.6 8l-4.2 2L8 14.2 6.6 10 2.4 8l4.2-2L8 1.8Z" fill="none" stroke="currentColor" strokeLinejoin="round" strokeWidth="1.4" />
+      </svg>
+    );
+  }
+  return (
+    <svg className="cs-template-card__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+      <circle cx="8" cy="6.2" r="3.4" fill="none" stroke="currentColor" strokeWidth="1.4" />
+      <path d="M8 4.4v3.6M6.2 6.2h3.6" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.4" />
+      <path d="M5.6 9.4 4.4 14.2 8 12.4l3.6 1.8-1.2-4.8" fill="none" stroke="currentColor" strokeLinejoin="round" strokeWidth="1.4" />
+    </svg>
+  );
+};
 
 type AmplifyLocationState = {
   openAmplifyDispatch?: boolean;
@@ -37,8 +71,7 @@ export const AmplifyPage: React.FC = () => {
   const paths = getCampaignStudioPaths(customerCode, refnum);
   const promptBoxRef = useRef<HTMLTextAreaElement>(null);
   const [mode, setMode] = useState<AmplifyMode>("packs");
-  const [packs, setPacks] = useState<SharePack[]>(() => demoSharePacks);
-  const [activePackId, setActivePackId] = useState<string | null>(null);
+  const [packs, setPacks] = useState<SharePack[]>(() => loadSharePacks());
   const [toast, setToast] = useState<string | null>(null);
   const [campaignSeed, setCampaignSeed] = useState<AmplifyCampaignSeed | null>(null);
   const [prompt, setPrompt] = useState("");
@@ -46,13 +79,18 @@ export const AmplifyPage: React.FC = () => {
   const [dispatchBrief, setDispatchBrief] = useState<string | null>(null);
   const [dispatchTemplateId, setDispatchTemplateId] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isPromptFocused, setIsPromptFocused] = useState(false);
   const [videoRequestOpen, setVideoRequestOpen] = useState(false);
 
-  const needsApprovalCount = useMemo(
-    () => packs.filter((pack) => pack.status === "needs_approval").length,
-    [packs],
-  );
-  const activePack = packs.find((pack) => pack.id === activePackId) || null;
+  useEffect(() => {
+    saveSharePacks(packs);
+  }, [packs]);
+
+  useEffect(() => {
+    if (location.pathname.endsWith("/employee-advocacy") || location.pathname.endsWith("/amplify")) {
+      setPacks(loadSharePacks());
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     const state = location.state as AmplifyLocationState;
@@ -72,24 +110,7 @@ export const AmplifyPage: React.FC = () => {
 
   const showToast = (message: string) => setToast(message);
 
-  const canSendStatus = (status: SharePack["status"]) =>
-    status === "draft" || status === "needs_approval" || status === "ready";
-
-  const approvePacks = (ids: string[]) => {
-    const eligible = packs.filter((pack) => ids.includes(pack.id) && pack.status === "needs_approval");
-    if (eligible.length === 0) {
-      showToast("No packs need approval");
-      return;
-    }
-    const eligibleIds = eligible.map((pack) => pack.id);
-    setPacks((current) =>
-      current.map((pack) =>
-        eligibleIds.includes(pack.id) ? { ...pack, status: "ready" } : pack,
-      ),
-    );
-    if (activePackId && eligibleIds.includes(activePackId)) setActivePackId(null);
-    showToast(eligibleIds.length > 1 ? `${eligibleIds.length} packs approved` : "Pack approved");
-  };
+  const canSendStatus = (status: SharePack["status"]) => status === "draft" || status === "ready";
 
   const sendPacks = (ids: string[]) => {
     const eligible = packs.filter((pack) => ids.includes(pack.id) && canSendStatus(pack.status));
@@ -111,7 +132,6 @@ export const AmplifyPage: React.FC = () => {
         };
       }),
     );
-    if (activePackId && eligibleIds.includes(activePackId)) setActivePackId(null);
     showToast(eligibleIds.length > 1 ? `${eligibleIds.length} packs sent` : "Pack sent");
   };
 
@@ -193,46 +213,52 @@ export const AmplifyPage: React.FC = () => {
   const handleVideoRequestSend = (pack: SharePack) => {
     setPacks((current) => [pack, ...current]);
     setVideoRequestOpen(false);
-    showToast(
-      pack.audienceCount > 1
-        ? `Video request sent to ${pack.audienceCount.toLocaleString("en-US")} people`
-        : "Video request sent",
-    );
+    showToast("Video request sent");
   };
 
+  const isWizardFlow = isGenerating || mode === "dispatch";
+  const wizardClassName = isGenerating ? "campaign-studio--wizard campaign-studio--generating-wizard" : "campaign-studio--wizard";
+
   return (
-    <main className="campaign-studio amplify-page">
-      <header className="cs-page-header">
-        <div>
-          <h1>Social Media Advisor</h1>
-          <CampaignStudioSubNav />
-        </div>
-      </header>
+    <main className={`campaign-studio ${isWizardFlow ? wizardClassName : "amplify-page"}`}>
+      {!isWizardFlow && (
+        <header className="cs-page-header">
+          <div>
+            <h1>Social Media Advisor</h1>
+            <CampaignStudioSubNav />
+          </div>
+        </header>
+      )}
 
       {isGenerating ? (
         <SharePackGenerating onDone={finishGenerating} onExit={cancelGenerating} />
       ) : mode === "dispatch" ? (
-        <section className="amp-wizard-shell">
-          <DispatchWizard
-            campaignSeed={campaignSeed}
-            initialBrief={dispatchBrief}
-            initialTemplateId={dispatchTemplateId}
-            onCancel={() => leaveDispatch({ returnToCampaigns: Boolean(campaignSeed) })}
-            onBackToBrief={backToBrief}
-            onSend={handleDispatchSend}
-            onSaveDraft={handleDispatchDraft}
-          />
-        </section>
+        <DispatchWizard
+          campaignSeed={campaignSeed}
+          initialBrief={dispatchBrief}
+          initialTemplateId={dispatchTemplateId}
+          onCancel={() => leaveDispatch({ returnToCampaigns: Boolean(campaignSeed) })}
+          onBackToBrief={backToBrief}
+          onSend={handleDispatchSend}
+          onSaveDraft={handleDispatchDraft}
+        />
       ) : (
         <>
           <section className="cs-prompt-panel amp-generate-panel">
             <h2>Generate share pack</h2>
             <div className="cs-prompt-box">
+              {!prompt.trim() && !isPromptFocused && (
+                <p className="cs-prompt-tip">
+                  Tip: Start with which employees will share the pack, what the pack should promote, your link, and the tone you want for the generated share pack.
+                </p>
+              )}
               <textarea
                 ref={promptBoxRef}
                 value={prompt}
                 onChange={(event) => setPrompt(event.target.value)}
-                placeholder="E.g. 'Share pack for our Backend Engineer and Product Designer roles. Highlight our remote-first culture and recent product launch. Link: careers.company.com. Tone: casual, like a teammate recommending the role — not corporate.' Mention who's sharing, what to highlight, your link, and the tone — the more specific, the better the result."
+                onFocus={() => setIsPromptFocused(true)}
+                onBlur={() => setIsPromptFocused(false)}
+                placeholder=""
                 aria-label="Describe the share pack you need"
               />
               <div className="cs-prompt-actions">
@@ -257,71 +283,27 @@ export const AmplifyPage: React.FC = () => {
               </div>
             </div>
             <h3>Or start with a template</h3>
-            <div className="amp-template-grid">
+            <div className="cs-template-grid">
               {dispatchTemplates.map((item) => (
                 <button
                   key={item.id}
                   type="button"
-                  className={`amp-template-card${selectedTemplateId === item.id ? " is-selected" : ""}`}
+                  className={`cs-template-card${selectedTemplateId === item.id ? " is-selected" : ""}`}
+                  title={item.description}
                   onClick={() => selectTemplate(item)}
                 >
+                  <AmpTemplateIcon type={item.icon} />
                   <strong>{item.title}</strong>
-                  <span>{item.description}</span>
-                  <em>{item.audienceHint}</em>
                 </button>
               ))}
             </div>
           </section>
 
           <section className="amp-canvas">
-            <div className="amp-canvas__header">
-              <div className="cs-switch-button" role="tablist" aria-label="Employee Advocacy modes">
-                {VIEW_MODES.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    role="tab"
-                    aria-selected={mode === item.id}
-                    className={mode === item.id ? "is-active" : ""}
-                    onClick={() => setMode(item.id)}
-                  >
-                    {item.label}
-                    {item.id === "packs" && needsApprovalCount > 0 ? (
-                      <span className="amp-mode-badge">{needsApprovalCount}</span>
-                    ) : null}
-                  </button>
-                ))}
-              </div>
-              <button
-                type="button"
-                className="cs-btn cs-btn--primary amp-canvas__cta"
-                onClick={() => {
-                  setActivePackId(null);
-                  setVideoRequestOpen(true);
-                }}
-              >
-                Request a video
-              </button>
-            </div>
-
-            {mode === "packs" && (
-              <SharePacksView
-                packs={packs}
-                onOpen={(pack) => setActivePackId(pack.id)}
-                onSend={sendPacks}
-              />
-            )}
-            {mode === "impact" && <ImpactView packs={packs} />}
+            <SharePacksView packs={packs} onSend={sendPacks} onRequestVideo={() => setVideoRequestOpen(true)} />
           </section>
         </>
       )}
-
-      <PackDrawer
-        pack={activePack}
-        onClose={() => setActivePackId(null)}
-        onApprove={(id) => approvePacks([id])}
-        onSend={(id) => sendPacks([id])}
-      />
 
       <VideoRequestDrawer
         open={videoRequestOpen}
@@ -330,7 +312,7 @@ export const AmplifyPage: React.FC = () => {
       />
 
       {toast && (
-        <div className="amp-toast" role="status">
+        <div className="amp-toast" role="status" aria-live="polite">
           {toast}
         </div>
       )}

@@ -10,6 +10,11 @@ export const getCampaignStudioPaths = (customerCode?: string, refnum?: string) =
   };
 };
 
+export const getSharePackDetailPath = (customerCode?: string, refnum?: string, packId?: string) => {
+  const base = customerCode && refnum ? `/${customerCode}/${refnum}/campaign-studio` : "/campaign-studio";
+  return `${base}/employee-advocacy/${packId || ""}`;
+};
+
 export const CampaignStudioSubNav: React.FC = () => {
   const { customerCode, refnum } = useParams();
   const location = useLocation();
