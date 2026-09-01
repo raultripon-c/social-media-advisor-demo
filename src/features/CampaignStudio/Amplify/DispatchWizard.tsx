@@ -1091,7 +1091,7 @@ export const DispatchWizard: React.FC<DispatchWizardProps> = ({
         <div className="cs-wizard-footer__actions">
           <button
             type="button"
-            className="cs-btn cs-btn--secondary"
+            className="cs-btn cs-btn--secondary-ghost"
             onClick={() => (step === 0 ? handleBackFromDetails() : setConfirmOpen(true))}
           >
             Cancel
@@ -1151,20 +1151,15 @@ export const DispatchWizard: React.FC<DispatchWizardProps> = ({
                 Are you sure you want to cancel? You can save a draft of your progress and finish later, or leave
                 without saving.
               </p>
-              <div className="amp-confirm__leave">
-                <button type="button" className="cs-btn cs-btn--ghost" onClick={handleDiscard}>
-                  <BackArrowIcon /> Leave without saving
-                </button>
-              </div>
             </div>
             <footer className="amp-confirm__footer">
               <div className="amp-confirm__footer-actions">
                 <button
                   type="button"
-                  className="cs-btn cs-btn--secondary amp-confirm__keep"
-                  onClick={() => setConfirmOpen(false)}
+                  className="cs-btn cs-btn--secondary amp-confirm__discard"
+                  onClick={handleDiscard}
                 >
-                  Keep editing
+                  Leave without Saving
                 </button>
                 <button type="button" className="cs-btn cs-btn--primary amp-confirm__save" onClick={handleSaveDraft}>
                   Save draft

@@ -9,6 +9,7 @@ interface UiDropdownProps {
   placeholder?: string;
   ariaLabel?: string;
   className?: string;
+  disabled?: boolean;
   /** Compact control for dense filter bars */
   size?: "md" | "sm";
 }
@@ -20,6 +21,7 @@ export const UiDropdown: React.FC<UiDropdownProps> = ({
   placeholder = "Placeholder",
   ariaLabel,
   className = "",
+  disabled = false,
   size = "md",
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -56,6 +58,7 @@ export const UiDropdown: React.FC<UiDropdownProps> = ({
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         aria-label={ariaLabel}
+        disabled={disabled}
         onClick={() => setIsOpen((current) => !current)}
       >
         <span className={selectedOption ? "" : "is-placeholder"}>

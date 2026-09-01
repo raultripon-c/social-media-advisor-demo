@@ -32,6 +32,22 @@ export interface SharePackMetrics {
   emvUsd: number;
 }
 
+export interface VideoRequestDetails {
+  locale: string;
+  persona: string;
+  landingPageId: string;
+  landingPageLabel: string;
+  landingPageUrl: string;
+  introTitle: string;
+  introDescription: string;
+  introVideoName?: string;
+  videoPrompt: string;
+  maximumVideoLengthSeconds: number;
+  videoOrientation: string;
+  tags: string[];
+  applyDefaultBranding: boolean;
+}
+
 export interface SharePack {
   id: string;
   title: string;
@@ -54,6 +70,7 @@ export interface SharePack {
   createdByName?: string;
   sentAt?: string;
   employeeNote?: string;
+  videoRequest?: VideoRequestDetails;
 }
 
 export type DispatchTemplateIcon = "bolt" | "sparkle" | "award" | "calendar" | "user";
