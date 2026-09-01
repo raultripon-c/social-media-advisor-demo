@@ -299,8 +299,22 @@ export const AmplifyPage: React.FC = () => {
             </div>
           </section>
 
+          <section className="amp-canvas amp-video-cta">
+            <div className="amp-video-cta__copy">
+              <h2>Source employee videos</h2>
+              <p>Ask employees to record a short video you can turn into a share pack.</p>
+            </div>
+            <button
+              type="button"
+              className="cs-btn cs-btn--secondary amp-video-cta__button"
+              onClick={() => setVideoRequestOpen(true)}
+            >
+              Request a video
+            </button>
+          </section>
+
           <section className="amp-canvas">
-            <SharePacksView packs={packs} onSend={sendPacks} onRequestVideo={() => setVideoRequestOpen(true)} />
+            <SharePacksView packs={packs} onSend={sendPacks} />
           </section>
         </>
       )}

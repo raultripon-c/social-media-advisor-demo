@@ -8,7 +8,6 @@ import { SharePack } from "./amplifyTypes";
 interface SharePacksViewProps {
   packs: SharePack[];
   onSend: (ids: string[]) => void;
-  onRequestVideo?: () => void;
 }
 
 const formatDate = (date: string) =>
@@ -55,7 +54,7 @@ const PackMetricCell = ({
   );
 };
 
-export const SharePacksView: React.FC<SharePacksViewProps> = ({ packs, onSend, onRequestVideo }) => {
+export const SharePacksView: React.FC<SharePacksViewProps> = ({ packs, onSend }) => {
   const navigate = useNavigate();
   const { customerCode, refnum } = useParams();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
@@ -79,19 +78,12 @@ export const SharePacksView: React.FC<SharePacksViewProps> = ({ packs, onSend, o
 
   return (
     <div className="amp-packs">
-      <div className="amp-packs-table__header amp-canvas__header">
-        <div>
-          <h2>Share packs</h2>
-          <p>
-            See how employee advocacy is performing across clicks, applications, and estimated media value —
-            then manage every pack in the table below.
-          </p>
-        </div>
-        {onRequestVideo && (
-          <button type="button" className="cs-btn cs-btn--secondary amp-canvas__cta" onClick={onRequestVideo}>
-            Request a video
-          </button>
-        )}
+      <div className="amp-packs-table__header">
+        <h2>Share packs</h2>
+        <p>
+          See how employee advocacy is performing across clicks, applications, and estimated media value —
+          then manage every pack in the table below.
+        </p>
       </div>
 
       <ImpactKpiRow packs={packs} />

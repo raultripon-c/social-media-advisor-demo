@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
+import phenomLogo from "../../../assets/images/Phenom-title-logo.svg";
 import paperPlaneIcon from "../../../assets/svg/paper-plane-16.svg";
 import marcusThumb from "../../../assets/campaign-studio/amplify/amp-pack-marcus-5yr.jpg";
 import { APIService } from "../../../utils/api.service";
@@ -37,6 +38,11 @@ const VIDEO_ORIENTATION_OPTIONS: UiDropdownOption[] = [
   { value: "1:1", label: "1:1 (Square)" },
 ];
 
+/** The branded preview is only rendered for landscape and portrait frames. */
+const PREVIEW_ORIENTATION_OPTIONS: UiDropdownOption[] = VIDEO_ORIENTATION_OPTIONS.filter((option) =>
+  ["16:9", "9:16"].includes(option.value),
+);
+
 const DEFAULT_INTRO_TITLE = "Welcome to your Video Capture request!";
 const DEFAULT_INTRO_DESCRIPTION =
   "We are looking for an authentic video. Remember to smile and have fun! Follow the instructions below to complete your video.";
@@ -53,12 +59,41 @@ const mapSiteVariantToLabel = (variant: string) => {
 const getPageId = (page: any, index: number) =>
   String(page?.pageId || page?._id || page?.id || page?.url || page?.path || `page-${index}`);
 
+/** CMS pages expose an absolute `fullUrl` and a site-relative `url`. */
 const getPageUrl = (page: any) =>
-  String(page?.url || page?.pageUrl || page?.publishedUrl || page?.path || page?.slug || "");
+  String(page?.fullUrl || page?.url || page?.pageUrl || page?.publishedUrl || page?.path || page?.slug || "");
+
+const readJson = (raw: string | null) => {
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+};
+
+/** Tenant site metadata cached by AppLayout after sign-in. */
+const readSiteMetaData = () => readJson(sessionStorage.getItem("site")) || {};
+
+const toLocaleOption = (language: any): UiDropdownOption => ({
+  label: String(language?.description || language?.language || ""),
+  value: String(language?.language || "").toLowerCase(),
+});
+
+const toPersonaOption = (variant: any): UiDropdownOption => {
+  const value = String(typeof variant === "string" ? variant : variant?.value || variant?.variantName || "");
+  return {
+    label: String((typeof variant === "object" && variant?.label) || mapSiteVariantToLabel(value)),
+    value,
+  };
+};
+
+const isUsableOption = (option: UiDropdownOption) => Boolean(option.label && option.value);
 
 export const VideoRequestDrawer: React.FC<VideoRequestDrawerProps> = ({ open, onClose, onSend }) => {
   const { refnum } = useParams();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const brandingLogoInputRef = useRef<HTMLInputElement>(null);
   const [requestName, setRequestName] = useState("");
   const [locale, setLocale] = useState("");
   const [persona, setPersona] = useState("");
@@ -79,17 +114,44 @@ export const VideoRequestDrawer: React.FC<VideoRequestDrawerProps> = ({ open, on
   const [pagesLoading, setPagesLoading] = useState(false);
   const [tenantOptionsError, setTenantOptionsError] = useState("");
   const [brandingMessage, setBrandingMessage] = useState("");
+  const [brandingModalOpen, setBrandingModalOpen] = useState(false);
+  const [brandingLogoEnabled, setBrandingLogoEnabled] = useState(true);
+  const [brandingLogoPlacement, setBrandingLogoPlacement] = useState<"top-left" | "top-right">("top-left");
+  const [brandingOrientation, setBrandingOrientation] = useState("16:9");
+  const [brandingLogoPreview, setBrandingLogoPreview] = useState(phenomLogo);
+  const brandingSnapshotRef = useRef({
+    logoEnabled: true,
+    logoPlacement: "top-left" as "top-left" | "top-right",
+    orientation: "16:9",
+    logoPreview: phenomLogo,
+  });
 
   const refNum = refnum || getRefNum();
+  const hasTenant = Boolean(refNum) && refNum !== "demo";
+
+  const cancelBranding = () => {
+    const snapshot = brandingSnapshotRef.current;
+    setBrandingLogoEnabled(snapshot.logoEnabled);
+    setBrandingLogoPlacement(snapshot.logoPlacement);
+    setBrandingOrientation(snapshot.orientation);
+    setBrandingLogoPreview(snapshot.logoPreview);
+    setBrandingMessage("");
+    setBrandingModalOpen(false);
+  };
 
   useEffect(() => {
     if (!open) return undefined;
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (event.key !== "Escape") return;
+      if (brandingModalOpen) {
+        cancelBranding();
+        return;
+      }
+      onClose();
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [open, onClose]);
+  }, [brandingModalOpen, open, onClose]);
 
   useEffect(() => {
     if (!open) return;
@@ -109,11 +171,25 @@ export const VideoRequestDrawer: React.FC<VideoRequestDrawerProps> = ({ open, on
     setTenantPages([]);
     setTenantOptionsError("");
     setBrandingMessage("");
+    setBrandingModalOpen(false);
+    setBrandingLogoEnabled(true);
+    setBrandingLogoPlacement("top-left");
+    setBrandingOrientation("16:9");
+    setBrandingLogoPreview(phenomLogo);
   }, [open]);
 
   useEffect(() => {
     if (!open) return undefined;
+
+    if (!hasTenant) {
+      setLocaleOptions([]);
+      setPersonaOptions([]);
+      setTenantOptionsError("Select a tenant to load its locales, personas, and landing pages.");
+      return undefined;
+    }
+
     let active = true;
+    const siteMetaData = readSiteMetaData();
 
     const loadTenantOptions = async () => {
       setTenantOptionsLoading(true);
@@ -125,36 +201,37 @@ export const VideoRequestDrawer: React.FC<VideoRequestDrawerProps> = ({ open, on
         ]);
         if (!active) return;
 
-        const nextLocales = Array.isArray(languages)
-          ? languages
-              .map((language: any) => ({
-                label: String(language?.description || language?.language || ""),
-                value: String(language?.language || "").toLowerCase(),
-              }))
-              .filter((option) => option.label && option.value)
-          : [];
-        const nextPersonas = Array.isArray(variants)
-          ? variants
-              .map((variant: any) => {
-                const value = String(variant?.value || variant?.variantName || variant || "");
-                return {
-                  label: String(variant?.label || mapSiteVariantToLabel(value)),
-                  value,
-                };
-              })
-              .filter((option) => option.label && option.value)
-          : [];
+        const cachedLanguages = Array.isArray(siteMetaData?.supportedLangs) ? siteMetaData.supportedLangs : [];
+        const nextLocales = (Array.isArray(languages) && languages.length ? languages : cachedLanguages)
+          .map(toLocaleOption)
+          .filter(isUsableOption);
+        const nextPersonas = (Array.isArray(variants) ? variants : []).map(toPersonaOption).filter(isUsableOption);
 
         setLocaleOptions(nextLocales);
         setPersonaOptions(nextPersonas);
-        if (!nextLocales.length || !nextPersonas.length) {
-          setTenantOptionsError("Locale or persona information is unavailable for this tenant.");
+
+        const defaultLocale = String(
+          siteMetaData?.defaultLang?.language || siteMetaData?.defaultLanguage || "",
+        ).toLowerCase();
+        if (defaultLocale && nextLocales.some((option) => option.value === defaultLocale)) {
+          setLocale(defaultLocale);
+        }
+
+        if (!nextLocales.length && !nextPersonas.length) {
+          setTenantOptionsError("This tenant has no CMS locales or personas configured.");
+        } else if (!nextLocales.length) {
+          setTenantOptionsError("This tenant has no CMS locales configured.");
+        } else if (!nextPersonas.length) {
+          setTenantOptionsError("This tenant has no CMS site variants configured.");
         }
       } catch {
         if (!active) return;
-        setLocaleOptions([]);
+        const cachedLocales = (Array.isArray(siteMetaData?.supportedLangs) ? siteMetaData.supportedLangs : [])
+          .map(toLocaleOption)
+          .filter(isUsableOption);
+        setLocaleOptions(cachedLocales);
         setPersonaOptions([]);
-        setTenantOptionsError("We couldn’t load locale and persona information. Please try again.");
+        setTenantOptionsError("We couldn’t reach the CMS for this tenant. Reopen the drawer to retry.");
       } finally {
         if (active) setTenantOptionsLoading(false);
       }
@@ -164,12 +241,12 @@ export const VideoRequestDrawer: React.FC<VideoRequestDrawerProps> = ({ open, on
     return () => {
       active = false;
     };
-  }, [open, refNum]);
+  }, [hasTenant, open, refNum]);
 
   useEffect(() => {
     setLandingPageId("");
     setTenantPages([]);
-    if (!open || !locale || !persona) return undefined;
+    if (!open || !hasTenant || !locale || !persona) return undefined;
     let active = true;
 
     const loadPages = async () => {
@@ -194,11 +271,11 @@ export const VideoRequestDrawer: React.FC<VideoRequestDrawerProps> = ({ open, on
           : [];
         setTenantPages(nextPages);
         if (!nextPages.length) {
-          setTenantOptionsError("No landing pages are available for the selected locale and persona.");
+          setTenantOptionsError("No CMS pages are published for the selected locale and persona.");
         }
       } catch {
         if (!active) return;
-        setTenantOptionsError("We couldn’t load landing pages for this tenant.");
+        setTenantOptionsError("We couldn’t load CMS pages for the selected locale and persona.");
       } finally {
         if (active) setPagesLoading(false);
       }
@@ -208,7 +285,7 @@ export const VideoRequestDrawer: React.FC<VideoRequestDrawerProps> = ({ open, on
     return () => {
       active = false;
     };
-  }, [locale, open, persona, refNum]);
+  }, [hasTenant, locale, open, persona, refNum]);
 
   const landingPageOptions = useMemo(
     () => tenantPages.map((page) => ({ value: page.id, label: page.label })),
@@ -244,6 +321,47 @@ export const VideoRequestDrawer: React.FC<VideoRequestDrawerProps> = ({ open, on
     }
     setIntroVideo(file);
     setTenantOptionsError("");
+  };
+
+  const handleBrandingLogo = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setBrandingMessage("The branding logo must be an image file.");
+      event.target.value = "";
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        setBrandingLogoPreview(reader.result);
+        setBrandingLogoEnabled(true);
+        setBrandingMessage("");
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const openBrandingModal = () => {
+    const orientation = PREVIEW_ORIENTATION_OPTIONS.some((option) => option.value === videoOrientation)
+      ? videoOrientation
+      : "16:9";
+    brandingSnapshotRef.current = {
+      logoEnabled: brandingLogoEnabled,
+      logoPlacement: brandingLogoPlacement,
+      orientation,
+      logoPreview: brandingLogoPreview,
+    };
+    setBrandingOrientation(orientation);
+    setBrandingMessage("");
+    setBrandingModalOpen(true);
+  };
+
+  const saveBranding = () => {
+    setApplyDefaultBranding(true);
+    setBrandingMessage("");
+    setBrandingModalOpen(false);
   };
 
   const handleSend = () => {
@@ -311,259 +429,285 @@ export const VideoRequestDrawer: React.FC<VideoRequestDrawerProps> = ({ open, on
             <h2 id="amp-video-request-title">Request a video</h2>
             <p className="amp-drawer__subtitle">Configure the video experience employees will receive.</p>
           </div>
-          <button type="button" className="amp-drawer__close" onClick={onClose} aria-label="Close">
+          <button type="button" className="cs-icon-button" onClick={onClose} aria-label="Close">
             ×
           </button>
         </header>
 
         <div className="amp-drawer__body amp-video-request">
-          <section className="amp-video-request__section">
-            <label className="amp-field amp-field--compact" htmlFor="amp-video-request-name">
-              <span className="amp-video-request__label-row">
-                <span>
-                  Request Name <span className="cs-required">*</span>
-                </span>
-                <span className="amp-video-request__counter">
-                  {requestName.length} / {MAX_REQUEST_NAME}
-                </span>
-              </span>
-              <span className="amp-video-request__help">This name will be attached to each video file</span>
-              <input
-                id="amp-video-request-name"
-                value={requestName}
-                maxLength={MAX_REQUEST_NAME}
-                onChange={(event) => setRequestName(event.target.value)}
-                placeholder="e.g. Marketing Testimonials"
-              />
-            </label>
-          </section>
-
-          <section className="amp-video-request__section amp-video-request__grid">
-            <div className="amp-field amp-field--compact">
-              <span className="amp-video-request__field-title">
-                Locale <span className="cs-required">*</span>
-              </span>
-              <span className="amp-video-request__help">Select the site’s locale for the request</span>
-              <UiDropdown
-                value={locale}
-                options={localeOptions}
-                onChange={setLocale}
-                placeholder={tenantOptionsLoading ? "Loading locales…" : "Select Locale"}
-                ariaLabel="Locale"
-                disabled={tenantOptionsLoading || !localeOptions.length}
-              />
-            </div>
-            <div className="amp-field amp-field--compact">
-              <span className="amp-video-request__field-title">
-                Persona <span className="cs-required">*</span>
-              </span>
-              <span className="amp-video-request__help">Select a persona for the request</span>
-              <UiDropdown
-                value={persona}
-                options={personaOptions}
-                onChange={setPersona}
-                placeholder={tenantOptionsLoading ? "Loading personas…" : "Select Persona"}
-                ariaLabel="Persona"
-                disabled={tenantOptionsLoading || !personaOptions.length}
-              />
-            </div>
-          </section>
-
-          <section className="amp-video-request__section">
-            <div className="amp-field amp-field--compact">
-              <span className="amp-video-request__field-title">
-                Landing page <span className="cs-required">*</span>
-              </span>
-              <span className="amp-video-request__help">Select the landing page for the request</span>
-              <UiDropdown
-                value={landingPageId}
-                options={landingPageOptions}
-                onChange={setLandingPageId}
-                placeholder={
-                  pagesLoading
-                    ? "Loading pages…"
-                    : locale && persona
-                      ? "Select Link"
-                      : "Select Locale and Persona first"
-                }
-                ariaLabel="Landing page"
-                disabled={!locale || !persona || pagesLoading || !landingPageOptions.length}
-              />
-            </div>
-          </section>
-
-          <section className="amp-video-request__section">
-            <div className="amp-video-request__section-heading">
-              <h3>Intro text</h3>
-              <p>Personalize your intro text to encourage participants to respond.</p>
-            </div>
-            <label className="amp-field amp-field--compact" htmlFor="amp-video-intro-title">
-              <span className="amp-video-request__label-row">
-                <span>Title <span className="cs-required">*</span></span>
-                <span className="amp-video-request__counter">
-                  {introTitle.length} / {MAX_INTRO_TITLE}
-                </span>
-              </span>
-              <input
-                id="amp-video-intro-title"
-                value={introTitle}
-                maxLength={MAX_INTRO_TITLE}
-                onChange={(event) => setIntroTitle(event.target.value)}
-              />
-            </label>
-            <label className="amp-field amp-field--compact" htmlFor="amp-video-intro-description">
-              <span className="amp-video-request__label-row">
-                <span>Description <span className="cs-required">*</span></span>
-                <span className="amp-video-request__counter">
-                  {introDescription.length} / {MAX_INTRO_DESCRIPTION}
-                </span>
-              </span>
-              <textarea
-                id="amp-video-intro-description"
-                rows={4}
-                value={introDescription}
-                maxLength={MAX_INTRO_DESCRIPTION}
-                onChange={(event) => setIntroDescription(event.target.value)}
-              />
-            </label>
-          </section>
-
-          <section className="amp-video-request__section">
-            <span className="amp-video-request__field-title">
-              Intro video <span className="amp-optional">(optional)</span>
-            </span>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="video/mp4,.mp4"
-              className="amp-video-request__file-input"
-              onChange={handleIntroVideo}
-            />
-            <button
-              type="button"
-              className={`amp-video-request__upload${introVideo ? " has-file" : ""}`}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <strong>{introVideo ? introVideo.name : "Select video files"}</strong>
-              <span>{introVideo ? "Choose a different MP4 file" : "Vertical video recommended · Supported: MP4"}</span>
-            </button>
-            {introVideo && (
-              <button
-                type="button"
-                className="amp-video-request__remove-file"
-                onClick={() => {
-                  setIntroVideo(null);
-                  if (fileInputRef.current) fileInputRef.current.value = "";
-                }}
-              >
-                Remove video
-              </button>
-            )}
-          </section>
-
-          <section className="amp-video-request__section">
-            <label className="amp-field amp-field--compact" htmlFor="amp-video-prompt">
-              Video Prompt <span className="cs-required">*</span>
-              <span className="amp-video-request__help">
-                Write a question or topic you want the recipient to talk about.
-              </span>
-              <input
-                id="amp-video-prompt"
-                value={videoPrompt}
-                onChange={(event) => setVideoPrompt(event.target.value)}
-                placeholder="e.g. Tell us about your role in our company"
-              />
-            </label>
-          </section>
-
-          <section className="amp-video-request__section amp-video-request__grid">
-            <div className="amp-field amp-field--compact">
-              <span className="amp-video-request__field-title">
-                Maximum Video Length <span className="cs-required">*</span>
-              </span>
-              <span className="amp-video-request__help">Set a time limit for the video</span>
-              <UiDropdown
-                value={maximumVideoLength}
-                options={VIDEO_LENGTH_OPTIONS}
-                onChange={setMaximumVideoLength}
-                placeholder="Select Video Length"
-                ariaLabel="Maximum Video Length"
-              />
-            </div>
-            <div className="amp-field amp-field--compact">
-              <span className="amp-video-request__field-title">
-                Video Orientation <span className="cs-required">*</span>
-              </span>
-              <span className="amp-video-request__help">Choose the format for the recorded video</span>
-              <UiDropdown
-                value={videoOrientation}
-                options={VIDEO_ORIENTATION_OPTIONS}
-                onChange={setVideoOrientation}
-                ariaLabel="Video Orientation"
-              />
-            </div>
-          </section>
-
-          <section className="amp-video-request__section">
-            <label className="amp-field amp-field--compact" htmlFor="amp-video-tags">
-              Tags <span className="amp-optional">(optional)</span>
-              <span className="amp-video-request__help">
-                Tags make content easier to sort, search, and personalize.
-              </span>
-              <div className="amp-video-request__tag-input">
-                <input
-                  id="amp-video-tags"
-                  value={tagDraft}
-                  onChange={(event) => setTagDraft(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") {
-                      event.preventDefault();
-                      addTag();
-                    }
-                  }}
-                  placeholder="e.g. Marketing, Career Growth, Diversity"
-                />
-                <button type="button" onClick={addTag} disabled={!tagDraft.trim()}>
-                  + Add
-                </button>
-              </div>
-            </label>
-            {tags.length > 0 && (
-              <div className="amp-video-request__tags" aria-label="Added tags">
-                {tags.map((tag) => (
-                  <span key={tag}>
-                    {tag}
-                    <button
-                      type="button"
-                      onClick={() => setTags((current) => current.filter((item) => item !== tag))}
-                      aria-label={`Remove ${tag}`}
-                    >
-                      ×
-                    </button>
+          <section className="amp-video-request__group">
+            <div className="amp-video-request__block">
+              <label className="amp-field amp-field--compact" htmlFor="amp-video-request-name">
+                <span className="amp-video-request__label-row">
+                  <span>
+                    Request Name <span className="cs-required">*</span>
                   </span>
-                ))}
+                  <span className="amp-video-request__counter">
+                    {requestName.length} / {MAX_REQUEST_NAME}
+                  </span>
+                </span>
+                <span className="amp-video-request__help">This name will be attached to each video file</span>
+                <input
+                  id="amp-video-request-name"
+                  type="text"
+                  value={requestName}
+                  maxLength={MAX_REQUEST_NAME}
+                  onChange={(event) => setRequestName(event.target.value)}
+                  placeholder="e.g. Marketing Testimonials"
+                />
+              </label>
+            </div>
+
+            <div className="amp-video-request__block amp-video-request__grid">
+              <div className="amp-field amp-field--compact">
+                <span className="amp-video-request__field-title">
+                  Locale <span className="cs-required">*</span>
+                </span>
+                <span className="amp-video-request__help">Select the site’s locale for the request</span>
+                <UiDropdown
+                  value={locale}
+                  options={localeOptions}
+                  onChange={setLocale}
+                  placeholder={
+                    tenantOptionsLoading
+                      ? "Loading locales…"
+                      : localeOptions.length
+                        ? "Select Locale"
+                        : "No locales available"
+                  }
+                  ariaLabel="Locale"
+                  disabled={tenantOptionsLoading || !localeOptions.length}
+                />
               </div>
-            )}
+              <div className="amp-field amp-field--compact">
+                <span className="amp-video-request__field-title">
+                  Persona <span className="cs-required">*</span>
+                </span>
+                <span className="amp-video-request__help">Select a persona for the request</span>
+                <UiDropdown
+                  value={persona}
+                  options={personaOptions}
+                  onChange={setPersona}
+                  placeholder={
+                    tenantOptionsLoading
+                      ? "Loading personas…"
+                      : personaOptions.length
+                        ? "Select Persona"
+                        : "No personas available"
+                  }
+                  ariaLabel="Persona"
+                  disabled={tenantOptionsLoading || !personaOptions.length}
+                />
+              </div>
+            </div>
           </section>
 
-          <section className="amp-video-request__section">
-            <span className="amp-video-request__field-title">Branding</span>
-            <label className="amp-video-request__branding">
+          <section className="amp-video-request__group">
+            <div className="amp-video-request__block">
+              <div className="amp-field amp-field--compact">
+                <span className="amp-video-request__field-title">
+                  Landing page <span className="cs-required">*</span>
+                </span>
+                <span className="amp-video-request__help">Select the landing page for the request</span>
+                <UiDropdown
+                  value={landingPageId}
+                  options={landingPageOptions}
+                  onChange={setLandingPageId}
+                  placeholder={
+                    pagesLoading
+                      ? "Loading pages…"
+                      : !locale || !persona
+                        ? "Select Locale and Persona first"
+                        : landingPageOptions.length
+                          ? "Select Link"
+                          : "No pages available"
+                  }
+                  ariaLabel="Landing page"
+                  disabled={!locale || !persona || pagesLoading || !landingPageOptions.length}
+                />
+              </div>
+            </div>
+
+            <div className="amp-video-request__block">
+              <div className="amp-video-request__section-heading">
+                <h3>Intro text</h3>
+                <p>Personalize your intro text to encourage participants to respond.</p>
+              </div>
+              <label className="amp-field amp-field--compact" htmlFor="amp-video-intro-title">
+                <span className="amp-video-request__label-row">
+                  <span>Title <span className="cs-required">*</span></span>
+                  <span className="amp-video-request__counter">
+                    {introTitle.length} / {MAX_INTRO_TITLE}
+                  </span>
+                </span>
+                <input
+                  id="amp-video-intro-title"
+                  type="text"
+                  value={introTitle}
+                  maxLength={MAX_INTRO_TITLE}
+                  onChange={(event) => setIntroTitle(event.target.value)}
+                />
+              </label>
+              <label className="amp-field amp-field--compact" htmlFor="amp-video-intro-description">
+                <span className="amp-video-request__label-row">
+                  <span>Description <span className="cs-required">*</span></span>
+                  <span className="amp-video-request__counter">
+                    {introDescription.length} / {MAX_INTRO_DESCRIPTION}
+                  </span>
+                </span>
+                <textarea
+                  id="amp-video-intro-description"
+                  rows={4}
+                  value={introDescription}
+                  maxLength={MAX_INTRO_DESCRIPTION}
+                  onChange={(event) => setIntroDescription(event.target.value)}
+                />
+              </label>
+            </div>
+
+            <div className="amp-video-request__block">
+              <span className="amp-video-request__field-title">
+                Intro video <span className="amp-optional">(optional)</span>
+              </span>
               <input
-                type="checkbox"
-                checked={applyDefaultBranding}
-                onChange={(event) => setApplyDefaultBranding(event.target.checked)}
+                ref={fileInputRef}
+                type="file"
+                accept="video/mp4,.mp4"
+                className="amp-video-request__file-input"
+                onChange={handleIntroVideo}
               />
-              <span>Apply default branding to all videos.</span>
               <button
                 type="button"
-                onClick={() =>
-                  setBrandingMessage("Default branding configuration is not available in Campaign Studio yet.")
-                }
+                className={`amp-video-request__upload${introVideo ? " has-file" : ""}`}
+                onClick={() => fileInputRef.current?.click()}
               >
-                Configure default branding
+                <strong>{introVideo ? introVideo.name : "Select video files"}</strong>
+                <span>{introVideo ? "Choose a different MP4 file" : "Vertical video recommended · Supported: MP4"}</span>
               </button>
-            </label>
+              {introVideo && (
+                <button
+                  type="button"
+                  className="amp-video-request__remove-file"
+                  onClick={() => {
+                    setIntroVideo(null);
+                    if (fileInputRef.current) fileInputRef.current.value = "";
+                  }}
+                >
+                  Remove video
+                </button>
+              )}
+            </div>
+          </section>
+
+          <section className="amp-video-request__group">
+            <div className="amp-video-request__block">
+              <label className="amp-field amp-field--compact" htmlFor="amp-video-prompt">
+                <span className="amp-video-request__field-title">
+                  Video Prompt <span className="cs-required">*</span>
+                </span>
+                <span className="amp-video-request__help">
+                  Write a question or topic you want the recipient to talk about.
+                </span>
+                <input
+                  id="amp-video-prompt"
+                  type="text"
+                  value={videoPrompt}
+                  onChange={(event) => setVideoPrompt(event.target.value)}
+                  placeholder="e.g. Tell us about your role in our company"
+                />
+              </label>
+            </div>
+
+            <div className="amp-video-request__block amp-video-request__grid">
+              <div className="amp-field amp-field--compact">
+                <span className="amp-video-request__field-title">
+                  Maximum Video Length <span className="cs-required">*</span>
+                </span>
+                <span className="amp-video-request__help">Set a time limit for the video</span>
+                <UiDropdown
+                  value={maximumVideoLength}
+                  options={VIDEO_LENGTH_OPTIONS}
+                  onChange={setMaximumVideoLength}
+                  placeholder="Select Video Length"
+                  ariaLabel="Maximum Video Length"
+                />
+              </div>
+              <div className="amp-field amp-field--compact">
+                <span className="amp-video-request__field-title">
+                  Video Orientation <span className="cs-required">*</span>
+                </span>
+                <span className="amp-video-request__help">Choose the format for the recorded video</span>
+                <UiDropdown
+                  value={videoOrientation}
+                  options={VIDEO_ORIENTATION_OPTIONS}
+                  onChange={setVideoOrientation}
+                  ariaLabel="Video Orientation"
+                />
+              </div>
+            </div>
+
+            <div className="amp-video-request__block">
+              <label className="amp-field amp-field--compact" htmlFor="amp-video-tags">
+                <span className="amp-video-request__field-title">
+                  Tags <span className="amp-optional">(optional)</span>
+                </span>
+                <span className="amp-video-request__help">
+                  Tags make content easier to sort, search, and personalize.
+                </span>
+                <div className="amp-video-request__tag-input">
+                  <input
+                    id="amp-video-tags"
+                    type="text"
+                    value={tagDraft}
+                    onChange={(event) => setTagDraft(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        addTag();
+                      }
+                    }}
+                    placeholder="e.g. Marketing, Career Growth, Diversity"
+                  />
+                  <button type="button" onClick={addTag} disabled={!tagDraft.trim()}>
+                    + Add
+                  </button>
+                </div>
+              </label>
+              {tags.length > 0 && (
+                <div className="amp-video-request__tags" aria-label="Added tags">
+                  {tags.map((tag) => (
+                    <span key={tag}>
+                      {tag}
+                      <button
+                        type="button"
+                        onClick={() => setTags((current) => current.filter((item) => item !== tag))}
+                        aria-label={`Remove ${tag}`}
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="amp-video-request__block">
+              <span className="amp-video-request__field-title">Branding</span>
+              <label className="amp-video-request__branding">
+                <input
+                  type="checkbox"
+                  checked={applyDefaultBranding}
+                  onChange={(event) => setApplyDefaultBranding(event.target.checked)}
+                />
+                <span>Apply default branding to all videos.</span>
+                <button
+                  type="button"
+                  onClick={openBrandingModal}
+                >
+                  Configure default branding
+                </button>
+              </label>
+            </div>
           </section>
 
           {(tenantOptionsError || brandingMessage) && (
@@ -588,6 +732,123 @@ export const VideoRequestDrawer: React.FC<VideoRequestDrawerProps> = ({ open, on
           </button>
         </footer>
       </aside>
+
+      {brandingModalOpen && (
+        <div
+          className="amp-branding-modal__backdrop"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="amp-branding-modal-title"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) cancelBranding();
+          }}
+        >
+          <div className="amp-branding-modal">
+            <header className="amp-branding-modal__header">
+              <h2 id="amp-branding-modal-title">Default Branding</h2>
+              <button type="button" className="cs-icon-button" onClick={cancelBranding} aria-label="Close branding settings">
+                ×
+              </button>
+            </header>
+
+            <div className="amp-branding-modal__body">
+              <section className="amp-branding-modal__settings">
+                <div className="amp-branding-modal__intro">
+                  <h3>Branding</h3>
+                  <p>Changing the default values may create inconsistencies between this video and others.</p>
+                </div>
+
+                <div className="amp-branding-modal__logo-heading">
+                  <h3>Logo</h3>
+                  <button
+                    type="button"
+                    className={`amp-branding-modal__switch${brandingLogoEnabled ? " is-on" : ""}`}
+                    role="switch"
+                    aria-checked={brandingLogoEnabled}
+                    aria-label="Show logo"
+                    onClick={() => setBrandingLogoEnabled((current) => !current)}
+                  >
+                    <span />
+                  </button>
+                </div>
+
+                <div className="amp-branding-modal__logo-label">
+                  <span>Logo file</span>
+                  <button type="button" onClick={() => brandingLogoInputRef.current?.click()}>
+                    ↻ Replace
+                  </button>
+                </div>
+                <input
+                  ref={brandingLogoInputRef}
+                  className="amp-video-request__file-input"
+                  type="file"
+                  accept="image/png,image/jpeg,image/svg+xml,image/webp"
+                  onChange={handleBrandingLogo}
+                />
+                <button
+                  type="button"
+                  className="amp-branding-modal__logo-file"
+                  onClick={() => brandingLogoInputRef.current?.click()}
+                  aria-label="Replace logo file"
+                >
+                  <img src={brandingLogoPreview} alt="Brand logo" />
+                </button>
+
+                <fieldset className="amp-branding-modal__placement">
+                  <legend>Placement</legend>
+                  <div>
+                    {(["top-left", "top-right"] as const).map((placement) => (
+                      <button
+                        type="button"
+                        key={placement}
+                        className={brandingLogoPlacement === placement ? "is-selected" : ""}
+                        onClick={() => setBrandingLogoPlacement(placement)}
+                        aria-label={placement === "top-left" ? "Place logo top left" : "Place logo top right"}
+                        aria-pressed={brandingLogoPlacement === placement}
+                      >
+                        <span className={`amp-branding-modal__placement-mark is-${placement}`} />
+                      </button>
+                    ))}
+                  </div>
+                </fieldset>
+              </section>
+
+              <section className="amp-branding-modal__preview">
+                <div className="amp-branding-modal__preview-heading">
+                  <h3>Preview of a branded video</h3>
+                  <UiDropdown
+                    value={brandingOrientation}
+                    options={PREVIEW_ORIENTATION_OPTIONS}
+                    onChange={setBrandingOrientation}
+                    ariaLabel="Preview orientation"
+                  />
+                </div>
+                <div className={`amp-branding-modal__video is-${brandingOrientation.replace(":", "-")}`}>
+                  {brandingLogoEnabled && (
+                    <img
+                      className={`amp-branding-modal__preview-logo is-${brandingLogoPlacement}`}
+                      src={brandingLogoPreview}
+                      alt=""
+                    />
+                  )}
+                  <div className="amp-branding-modal__avatar-head" />
+                  <div className="amp-branding-modal__avatar-body" />
+                  <span className="amp-branding-modal__play" aria-hidden="true" />
+                </div>
+              </section>
+            </div>
+
+            <footer className="amp-branding-modal__footer">
+              <button type="button" className="cs-btn cs-btn--secondary-ghost" onClick={cancelBranding}>
+                Cancel
+              </button>
+              <button type="button" className="cs-btn cs-btn--primary" onClick={saveBranding}>
+                Save
+              </button>
+            </footer>
+          </div>
+        </div>
+      )}
     </>
   );
 };

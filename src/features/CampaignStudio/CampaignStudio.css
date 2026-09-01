@@ -71,9 +71,7 @@ body:has(.campaign-studio--wizard) {
 }
 
 .cs-table-section {
-  padding: 0;
-  border: 0;
-  background: transparent;
+  padding: 18px;
 }
 
 .cs-prompt-panel h2,

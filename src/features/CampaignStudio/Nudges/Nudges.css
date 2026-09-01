@@ -29,9 +29,9 @@
 .cs-nudges__header h2 {
   margin: 0;
   font-family: var(--family-title, Poppins), system-ui, sans-serif;
-  font-size: 16px;
+  font-size: var(--size-font-size-xl, 18px);
   font-weight: 600;
-  line-height: 22px;
+  line-height: var(--line-height-line-height-lg, 24px);
   color: var(--neutrals-nn-500, #353b46);
 }
 
