@@ -3,6 +3,13 @@ import earthDayThumb from "../../../assets/campaign-studio/amplify/amp-pack-eart
 import marcusThumb from "../../../assets/campaign-studio/amplify/amp-pack-marcus-5yr.jpg";
 import rnJourneyThumb from "../../../assets/campaign-studio/amplify/amp-pack-rn-journey.jpg";
 import salesFairThumb from "../../../assets/campaign-studio/amplify/amp-pack-sales-fair.jpg";
+import aishaThumb from "../../../assets/campaign-studio/video-hub/vh-aisha-rahman.jpg";
+import elenaThumb from "../../../assets/campaign-studio/video-hub/vh-elena-vasquez.jpg";
+import jordanThumb from "../../../assets/campaign-studio/video-hub/vh-jordan-blake.jpg";
+import marcusVhThumb from "../../../assets/campaign-studio/video-hub/vh-marcus-chen.jpg";
+import priyaThumb from "../../../assets/campaign-studio/video-hub/vh-priya-patel.jpg";
+import samThumb from "../../../assets/campaign-studio/video-hub/vh-sam-okonkwo.jpg";
+import taylorThumb from "../../../assets/campaign-studio/video-hub/vh-taylor-brooks.jpg";
 import {
   AmplifyChannel,
   AmplifySharePackDraft,
@@ -12,6 +19,8 @@ import {
   ShareCaption,
   SharePack,
   ShareVelocityPoint,
+  VideoSubmission,
+  VideoSubmissionStatus,
 } from "./amplifyTypes";
 
 const BRAND = "Duke Health";
@@ -194,6 +203,205 @@ export const demoSharePacks: SharePack[] = [
     ]),
     createdAt: "2026-07-08T16:20:00.000Z",
     createdByName: "Marcus Chen",
+  },
+];
+
+export const demoVideoSubmissionsByRequestId: Record<string, VideoSubmission[]> = {
+  "video-req-demo-marketing": [
+    {
+      id: "vsub-marketing-1",
+      name: "test",
+      email: "testnew@example.com",
+      jobTitle: "test",
+      location: "",
+      tags: ["test", "organise"],
+      thumbnailUrl: taylorThumb,
+      videoUrl: taylorThumb,
+      durationLabel: "00:05 min",
+      fileSizeLabel: "1.49 MB",
+      status: "pending",
+      uploadedAt: "2026-08-29T09:12:00.000Z",
+    },
+    {
+      id: "vsub-marketing-2",
+      name: "ram",
+      email: "sairam.chitturi@phenom.com",
+      jobTitle: "Product Manager",
+      location: "Remote",
+      tags: ["marketing"],
+      thumbnailUrl: jordanThumb,
+      videoUrl: jordanThumb,
+      durationLabel: "00:12 min",
+      fileSizeLabel: "2.84 MB",
+      status: "pending",
+      uploadedAt: "2026-08-29T11:40:00.000Z",
+    },
+    {
+      id: "vsub-marketing-3",
+      name: "Marcus Chen",
+      email: "marcus.chen@dukehealth.org",
+      jobTitle: "Marketing Coordinator",
+      location: "Durham, NC",
+      tags: ["Marketing", "Testimonials"],
+      thumbnailUrl: marcusVhThumb,
+      videoUrl: marcusVhThumb,
+      durationLabel: "00:48 min",
+      fileSizeLabel: "8.12 MB",
+      status: "pending",
+      uploadedAt: "2026-08-30T08:05:00.000Z",
+    },
+    {
+      id: "vsub-marketing-4",
+      name: "Aisha Rahman",
+      email: "aisha.rahman@dukehealth.org",
+      jobTitle: "Content Strategist",
+      location: "Raleigh, NC",
+      tags: ["Marketing"],
+      thumbnailUrl: aishaThumb,
+      videoUrl: aishaThumb,
+      durationLabel: "00:36 min",
+      fileSizeLabel: "5.67 MB",
+      status: "pending",
+      uploadedAt: "2026-08-30T14:22:00.000Z",
+    },
+    {
+      id: "vsub-marketing-5",
+      name: "Jordan Blake",
+      email: "jordan.blake@dukehealth.org",
+      jobTitle: "Employer Brand Lead",
+      location: "Durham, NC",
+      tags: ["Testimonials"],
+      thumbnailUrl: jordanThumb,
+      videoUrl: jordanThumb,
+      durationLabel: "00:44 min",
+      fileSizeLabel: "6.21 MB",
+      status: "pending",
+      uploadedAt: "2026-08-31T10:18:00.000Z",
+    },
+    {
+      id: "vsub-marketing-6",
+      name: "Priya Patel",
+      email: "priya.patel@dukehealth.org",
+      jobTitle: "Clinical Support Specialist",
+      location: "Chapel Hill, NC",
+      tags: ["Marketing", "Approved"],
+      thumbnailUrl: priyaThumb,
+      videoUrl: priyaThumb,
+      durationLabel: "00:56 min",
+      fileSizeLabel: "7.45 MB",
+      status: "approved",
+      uploadedAt: "2026-08-27T16:10:00.000Z",
+    },
+    {
+      id: "vsub-marketing-7",
+      name: "Elena Vasquez",
+      email: "elena.vasquez@dukehealth.org",
+      jobTitle: "Radiology Technologist",
+      location: "Durham, NC",
+      tags: ["Testimonials"],
+      thumbnailUrl: elenaThumb,
+      videoUrl: elenaThumb,
+      durationLabel: "00:39 min",
+      fileSizeLabel: "4.88 MB",
+      status: "approved",
+      uploadedAt: "2026-08-26T13:55:00.000Z",
+    },
+    {
+      id: "vsub-marketing-8",
+      name: "Sam Okonkwo",
+      email: "sam.okonkwo@dukehealth.org",
+      jobTitle: "Clinical Support",
+      location: "Durham, NC",
+      tags: [],
+      thumbnailUrl: samThumb,
+      videoUrl: samThumb,
+      durationLabel: "00:22 min",
+      fileSizeLabel: "3.02 MB",
+      status: "rejected",
+      uploadedAt: "2026-08-25T09:30:00.000Z",
+    },
+  ],
+};
+
+export const demoVideoRequests: SharePack[] = [
+  {
+    id: "video-req-demo-marketing",
+    title: "Marketing Testimonials",
+    subtitle: "1 minute · 16:9 (Landscape)",
+    status: "sent",
+    source: "Manual",
+    sourceLabel: "Video request",
+    audienceLabel: "Career Site",
+    audienceCount: 48,
+    channels: ["email"],
+    thumbnailUrl: marcusThumb,
+    mediaType: "video",
+    ctaLabel: "Nursing careers",
+    ctaDestination: "https://careers.dukehealth.org/nursing",
+    utmPreview: utm("video-request-marketing-testimonials"),
+    captions: [
+      {
+        id: "video-req-demo-marketing-prompt",
+        text: "Tell us about a project you are proud of and how your team made an impact.",
+      },
+    ],
+    createdAt: "2026-08-28T10:15:00.000Z",
+    createdByName: "Jordan Blake",
+    sentAt: "2026-08-28T10:16:00.000Z",
+    videoRequest: {
+      locale: "en-us",
+      persona: "external",
+      landingPageId: "nursing-careers",
+      landingPageLabel: "Nursing careers",
+      landingPageUrl: "https://careers.dukehealth.org/nursing",
+      introTitle: "Welcome to your Video Capture request!",
+      introDescription:
+        "We are looking for an authentic video. Remember to smile and have fun! Follow the instructions below to complete your video.",
+      videoPrompt: "Tell us about a project you are proud of and how your team made an impact.",
+      maximumVideoLengthSeconds: 60,
+      videoOrientation: "16:9",
+      tags: ["Marketing", "Testimonials"],
+      applyDefaultBranding: true,
+    },
+  },
+  {
+    id: "video-req-demo-nursing",
+    title: "Nursing Career Stories",
+    subtitle: "30 seconds · 9:16 (Portrait)",
+    status: "draft",
+    source: "Manual",
+    sourceLabel: "Video request",
+    audienceLabel: "Employee Experience",
+    audienceCount: 0,
+    channels: ["email"],
+    thumbnailUrl: rnJourneyThumb,
+    mediaType: "video",
+    ctaLabel: "Explore nursing roles",
+    ctaDestination: "https://careers.dukehealth.org/nursing",
+    utmPreview: utm("video-request-nursing-stories"),
+    captions: [
+      {
+        id: "video-req-demo-nursing-prompt",
+        text: "Share what made you choose nursing and one moment that keeps you motivated.",
+      },
+    ],
+    createdAt: "2026-09-02T14:40:00.000Z",
+    createdByName: "Aisha Rahman",
+    videoRequest: {
+      locale: "en-us",
+      persona: "internal",
+      landingPageId: "nursing-roles",
+      landingPageLabel: "Explore nursing roles",
+      landingPageUrl: "https://careers.dukehealth.org/nursing",
+      introTitle: "Welcome to your Video Capture request!",
+      introDescription:
+        "We are looking for an authentic video. Remember to smile and have fun! Follow the instructions below to complete your video.",
+      videoPrompt: "Share what made you choose nursing and one moment that keeps you motivated.",
+      maximumVideoLengthSeconds: 30,
+      videoOrientation: "9:16",
+      tags: ["Nursing", "Career Growth"],
+      applyDefaultBranding: false,
+    },
   },
 ];
 
@@ -1157,6 +1365,34 @@ export const statusLabel: Record<SharePack["status"], string> = {
   ready: "Ready",
   sent: "Sent",
   archived: "Archived",
+};
+
+export const isVideoRequest = (pack: SharePack) => Boolean(pack.videoRequest);
+
+export const getVideoRequestTableStatus = (pack: SharePack) => {
+  const classNameByStatus: Record<SharePack["status"], string> = {
+    draft: "draft",
+    needs_approval: "review",
+    ready: "published",
+    sent: "sent",
+    archived: "completed",
+  };
+  return {
+    label: statusLabel[pack.status],
+    className: classNameByStatus[pack.status],
+  };
+};
+
+export const getVideoSubmissions = (pack: SharePack): VideoSubmission[] => pack.submissions || [];
+
+export const countVideoSubmissionsByStatus = (submissions: VideoSubmission[], status: VideoSubmissionStatus) =>
+  submissions.filter((submission) => submission.status === status).length;
+
+export const withDemoVideoSubmissions = (pack: SharePack): SharePack => {
+  if (!pack.videoRequest || pack.submissions?.length) return pack;
+  const demoSubmissions = demoVideoSubmissionsByRequestId[pack.id];
+  if (!demoSubmissions?.length) return pack;
+  return { ...pack, submissions: demoSubmissions };
 };
 
 export const channelLabel: Record<AmplifyChannel, string> = {

@@ -32,6 +32,23 @@ export interface SharePackMetrics {
   emvUsd: number;
 }
 
+export type VideoSubmissionStatus = "pending" | "approved" | "rejected";
+
+export interface VideoSubmission {
+  id: string;
+  name: string;
+  email: string;
+  jobTitle: string;
+  location?: string;
+  tags: string[];
+  thumbnailUrl: string;
+  videoUrl: string;
+  durationLabel: string;
+  fileSizeLabel: string;
+  status: VideoSubmissionStatus;
+  uploadedAt: string;
+}
+
 export interface VideoRequestDetails {
   locale: string;
   persona: string;
@@ -71,6 +88,7 @@ export interface SharePack {
   sentAt?: string;
   employeeNote?: string;
   videoRequest?: VideoRequestDetails;
+  submissions?: VideoSubmission[];
 }
 
 export type DispatchTemplateIcon = "bolt" | "sparkle" | "award" | "calendar" | "user";

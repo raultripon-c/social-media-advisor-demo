@@ -6,10 +6,11 @@ import { getCampaignCreatorName } from "../campaignStudioData";
 import { getCampaignStudioPaths } from "../ContentBoard/CampaignStudioSubNav";
 import "../CampaignStudio.css";
 import "./Amplify.css";
-import { statusLabel } from "./amplifyData";
+import { isVideoRequest, statusLabel } from "./amplifyData";
 import { SharePack } from "./amplifyTypes";
 import { getSharePackById, updateSharePack } from "./sharePackStorage";
 import { downloadSharePackContentZip } from "./sharePackExport";
+import { VideoRequestDetailPage } from "./VideoRequestDetailPage";
 
 const EMV_PER_CLICK = 15.5;
 
@@ -132,6 +133,10 @@ export const SharePackDetailPage: React.FC = () => {
     await downloadSharePackContentZip(pack);
     setToast("Share pack content downloaded");
   };
+
+  if (pack && isVideoRequest(pack)) {
+    return <VideoRequestDetailPage pack={pack} onPackChange={setPack} />;
+  }
 
   return (
     <main className="campaign-studio">

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import enhanceIcon from "../../../assets/svg/enhanceIcon.svg";
 import generateIcon from "../../../assets/svg/arrow-up-plain.svg";
@@ -6,12 +6,13 @@ import { CampaignStudioSubNav, getCampaignStudioPaths } from "../ContentBoard/Ca
 import "../CampaignStudio.css";
 import "../ContentBoard/ContentBoard.css";
 import "./Amplify.css";
-import { dispatchTemplates } from "./amplifyData";
+import { dispatchTemplates, isVideoRequest } from "./amplifyData";
 import { AmplifyCampaignSeed, AmplifyMode, DispatchTemplate, SharePack } from "./amplifyTypes";
 import { DispatchWizard } from "./DispatchWizard";
 import { SharePackGenerating } from "./SharePackGenerating";
 import { SharePacksView } from "./SharePacksView";
 import { VideoRequestDrawer } from "./VideoRequestDrawer";
+import { VideoRequestsView } from "./VideoRequestsView";
 import { loadSharePacks, saveSharePacks } from "./sharePackStorage";
 
 const ENHANCE_SUFFIX =
@@ -81,6 +82,9 @@ export const AmplifyPage: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isPromptFocused, setIsPromptFocused] = useState(false);
   const [videoRequestOpen, setVideoRequestOpen] = useState(false);
+
+  const sharePacks = useMemo(() => packs.filter((pack) => !isVideoRequest(pack)), [packs]);
+  const videoRequests = useMemo(() => packs.filter(isVideoRequest), [packs]);
 
   useEffect(() => {
     saveSharePacks(packs);
@@ -216,6 +220,19 @@ export const AmplifyPage: React.FC = () => {
     showToast("Video request sent");
   };
 
+  const handleCreateSharePackFromRequest = (request: SharePack) => {
+    const details = request.videoRequest;
+    const brief = details
+      ? `Create an employee advocacy share pack from the "${request.title}" video request. Video prompt: ${details.videoPrompt}. Landing page: ${details.landingPageLabel}.`
+      : `Create a share pack from the "${request.title}" video request.`;
+    startDispatchFromBrief(brief);
+  };
+
+  const handleDeleteVideoRequest = (requestId: string) => {
+    setPacks((current) => current.filter((pack) => pack.id !== requestId));
+    showToast("Video request deleted");
+  };
+
   const isWizardFlow = isGenerating || mode === "dispatch";
   const wizardClassName = isGenerating ? "campaign-studio--wizard campaign-studio--generating-wizard" : "campaign-studio--wizard";
 
@@ -299,22 +316,15 @@ export const AmplifyPage: React.FC = () => {
             </div>
           </section>
 
-          <section className="amp-canvas amp-video-cta">
-            <div className="amp-video-cta__copy">
-              <h2>Source employee videos</h2>
-              <p>Ask employees to record a short video you can turn into a share pack.</p>
-            </div>
-            <button
-              type="button"
-              className="cs-btn cs-btn--secondary amp-video-cta__button"
-              onClick={() => setVideoRequestOpen(true)}
-            >
-              Request a video
-            </button>
-          </section>
+          <VideoRequestsView
+            requests={videoRequests}
+            onRequestVideo={() => setVideoRequestOpen(true)}
+            onCreateSharePack={handleCreateSharePackFromRequest}
+            onDelete={handleDeleteVideoRequest}
+          />
 
           <section className="amp-canvas">
-            <SharePacksView packs={packs} onSend={sendPacks} />
+            <SharePacksView packs={sharePacks} onSend={sendPacks} />
           </section>
         </>
       )}
