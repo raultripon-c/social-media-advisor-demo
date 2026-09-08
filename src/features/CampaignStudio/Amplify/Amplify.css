@@ -3131,9 +3131,24 @@
 }
 
 .amp-video-request-detail__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
   margin: 0 -24px;
   padding: 14px 24px 0;
   background: var(--Core-White, #fff);
+}
+
+.amp-video-request-detail__actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+}
+
+.amp-video-request-detail__actions .cs-btn--primary img {
+  filter: brightness(0) invert(1);
 }
 
 .amp-video-request-detail__title-block {
@@ -3378,5 +3393,160 @@
 
   .amp-video-submissions-grid {
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+
+  .amp-video-request-detail__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .amp-video-request-detail__actions {
+    justify-content: flex-end;
+  }
+}
+
+.amp-share-email-modal {
+  width: min(760px, calc(100vw - 40px));
+}
+
+.amp-share-email-modal__body .cs-field:first-child {
+  margin-top: 0;
+}
+
+.amp-share-email-modal__body .cs-field-help {
+  margin-top: 4px;
+  margin-bottom: 8px;
+}
+
+.amp-share-email-modal__from-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+}
+
+.amp-share-email-modal__from-grid input,
+.amp-share-email-modal__body textarea,
+.amp-share-email-modal__subject-wrap input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--neutrals-nn-75, #d1d5dc);
+  border-radius: 10px;
+  color: var(--neutrals-nn-500, #353b46);
+  font-family: var(--family-body, Poppins), system-ui, sans-serif;
+  font-size: var(--size-font-size-base, 14px);
+  line-height: var(--line-height-line-height-md, 20px);
+}
+
+.amp-share-email-modal__from-grid input[readonly] {
+  background: var(--grays-grgr-25, #f8f9fb);
+  color: var(--neutrals-nn-300, #637085);
+}
+
+.amp-share-email-modal__subject-wrap {
+  position: relative;
+}
+
+.amp-share-email-modal__subject-wrap input {
+  padding-right: 88px;
+}
+
+.amp-share-email-modal__counter {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  color: var(--neutrals-nn-300, #637085);
+  font-size: var(--size-font-size-sm, 12px);
+  line-height: 16px;
+}
+
+.amp-share-email-modal__editor {
+  border: 1px solid var(--neutrals-nn-75, #d1d5dc);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.amp-share-email-modal__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--neutrals-nn-50, #e8eaee);
+  background: var(--grays-grgr-25, #f8f9fb);
+}
+
+.amp-share-email-modal__tool {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--neutrals-nn-500, #353b46);
+  cursor: pointer;
+}
+
+.amp-share-email-modal__tool:hover:not(:disabled),
+.amp-share-email-modal__tool:focus-visible {
+  background: var(--neutrals-nn-50, #e8eaee);
+}
+
+.amp-share-email-modal__tool:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.amp-share-email-modal__unlink {
+  display: block;
+  width: 14px;
+  height: 14px;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-35deg);
+}
+
+.amp-share-email-modal__placeholders {
+  margin-left: auto;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--secondary-blue-bb-200, #4d3ee0);
+  font-family: var(--family-body, Poppins), system-ui, sans-serif;
+  font-size: var(--size-font-size-sm, 12px);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.amp-share-email-modal__placeholders:hover,
+.amp-share-email-modal__placeholders:focus-visible {
+  background: rgba(77, 62, 224, 0.08);
+}
+
+.amp-share-email-modal__message {
+  min-height: 220px;
+  max-height: 280px;
+  overflow: auto;
+  padding: 12px 14px;
+  color: var(--neutrals-nn-500, #353b46);
+  font-family: var(--family-body, Poppins), system-ui, sans-serif;
+  font-size: var(--size-font-size-base, 14px);
+  line-height: var(--line-height-line-height-md, 20px);
+}
+
+.amp-share-email-modal__message:focus {
+  outline: none;
+}
+
+.amp-share-email-modal__footer {
+  justify-content: flex-end;
+}
+
+@media (max-width: 700px) {
+  .amp-share-email-modal__from-grid {
+    grid-template-columns: 1fr;
   }
 }

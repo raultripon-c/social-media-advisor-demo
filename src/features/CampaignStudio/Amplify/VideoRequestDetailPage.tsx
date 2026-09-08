@@ -1,12 +1,19 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import copyIcon from "../../../assets/svg/copy.svg";
 import downloadIcon from "../../../assets/svg/download.svg";
 import editIcon from "../../../assets/svg/edit.svg";
-import { getCampaignStudioPaths } from "../ContentBoard/CampaignStudioSubNav";
+import envelopeIcon from "../../../assets/svg/envelope-16.svg";
+import linkIcon from "../../../assets/svg/link.svg";
+import trashIcon from "../../../assets/svg/trash-can.svg";
+import { getCampaignCreatorName } from "../campaignStudioData";
+import { getCampaignStudioPaths, getSharePackDetailPath } from "../ContentBoard/CampaignStudioSubNav";
+import "../CampaignStudio.css";
 import "../ContentBoard/ContentBoard.css";
 import { countVideoSubmissionsByStatus, getVideoSubmissions } from "./amplifyData";
 import { SharePack, VideoSubmission, VideoSubmissionStatus } from "./amplifyTypes";
-import { deleteVideoSubmission, updateSharePack, updateVideoSubmission } from "./sharePackStorage";
+import { deleteVideoSubmission, loadSharePacks, saveSharePacks, updateSharePack, updateVideoSubmission } from "./sharePackStorage";
+import { ShareViaEmailModal } from "./ShareViaEmailModal";
 import { VideoReviewModal } from "./VideoReviewModal";
 
 interface VideoRequestDetailPageProps {
@@ -54,9 +61,13 @@ export const VideoRequestDetailPage: React.FC<VideoRequestDetailPageProps> = ({ 
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [titleDraft, setTitleDraft] = useState(pack.title);
   const [toast, setToast] = useState<string | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [shareEmailOpen, setShareEmailOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const submissions = useMemo(() => getVideoSubmissions(pack), [pack]);
   const videoPrompt = pack.videoRequest?.videoPrompt || pack.captions[0]?.text || "";
+  const requestLink = `${window.location.origin}${getSharePackDetailPath(customerCode, refnum, pack.id)}`;
 
   const tabCounts = useMemo(
     () => ({
@@ -81,6 +92,18 @@ export const VideoRequestDetailPage: React.FC<VideoRequestDetailPageProps> = ({ 
     const timer = window.setTimeout(() => setToast(null), 2800);
     return () => window.clearTimeout(timer);
   }, [toast]);
+
+  useEffect(() => {
+    if (!isMenuOpen) return undefined;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!(event.target instanceof Node) || menuRef.current?.contains(event.target)) return;
+      setIsMenuOpen(false);
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, [isMenuOpen]);
 
   const persistSubmission = (submission: VideoSubmission) => {
     const next = updateVideoSubmission(pack.id, submission.id, () => submission);
@@ -119,6 +142,62 @@ export const VideoRequestDetailPage: React.FC<VideoRequestDetailPageProps> = ({ 
     const next = updateSharePack(pack.id, (current) => ({ ...current, title: trimmed }));
     if (next) onPackChange(next);
     setIsEditingTitle(false);
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(requestLink);
+      setToast("Request link copied");
+    } catch {
+      setToast("Unable to copy link");
+    }
+  };
+
+  const handleShareViaEmail = () => {
+    setIsMenuOpen(false);
+    setShareEmailOpen(true);
+  };
+
+  const handleSendShareEmail = ({ to }: { to: string; subject: string; message: string; fromName: string }) => {
+    const recipientCount = to.split(",").map((email) => email.trim()).filter(Boolean).length;
+    const next = updateSharePack(pack.id, (current) => ({
+      ...current,
+      audienceCount: Math.max(current.audienceCount, recipientCount),
+      status: current.status === "draft" ? "sent" : current.status,
+      sentAt: current.sentAt || new Date().toISOString(),
+    }));
+    if (next) onPackChange(next);
+    setShareEmailOpen(false);
+    setToast(`Email sent to ${recipientCount} recipient${recipientCount === 1 ? "" : "s"}`);
+  };
+
+  const handleEditRequest = () => {
+    setIsMenuOpen(false);
+    setIsEditingTitle(true);
+  };
+
+  const handleDuplicateRequest = () => {
+    setIsMenuOpen(false);
+    const now = new Date().toISOString();
+    const duplicate: SharePack = {
+      ...pack,
+      id: `video-req-${Date.now()}`,
+      title: `${pack.title} (Copy)`,
+      createdAt: now,
+      status: "draft",
+      sentAt: undefined,
+      audienceCount: 0,
+      submissions: [],
+    };
+    saveSharePacks([duplicate, ...loadSharePacks()]);
+    navigate(getSharePackDetailPath(customerCode, refnum, duplicate.id));
+    setToast("Video request duplicated");
+  };
+
+  const handleDeleteRequest = () => {
+    setIsMenuOpen(false);
+    saveSharePacks(loadSharePacks().filter((item) => item.id !== pack.id));
+    navigate(paths.employeeAdvocacy);
   };
 
   return (
@@ -162,6 +241,64 @@ export const VideoRequestDetailPage: React.FC<VideoRequestDetailPageProps> = ({ 
               </div>
             )}
             {videoPrompt && <p className="amp-video-request-detail__prompt">&ldquo;{videoPrompt}&rdquo;</p>}
+          </div>
+
+          <div className="amp-video-request-detail__actions">
+            <button type="button" className="cs-btn cs-btn--primary" onClick={handleCopyLink}>
+              <img src={linkIcon} alt="" width={16} height={16} />
+              Copy Link
+            </button>
+            <div className="cs-overview-more" ref={menuRef}>
+              <button
+                type="button"
+                className={`cs-more-button ${isMenuOpen ? "is-open" : ""}`}
+                aria-label="More request actions"
+                aria-expanded={isMenuOpen}
+                onClick={() => setIsMenuOpen((current) => !current)}
+              >
+                <span className="cs-more-button__dots" aria-hidden="true">
+                  <span />
+                  <span />
+                  <span />
+                </span>
+              </button>
+              {isMenuOpen && (
+                <div className="cs-menu cs-overview-more__menu">
+                  <button type="button" onClick={handleShareViaEmail}>
+                    <span
+                      className="cs-menu__icon"
+                      style={{ "--icon-url": `url(${envelopeIcon})` } as React.CSSProperties}
+                      aria-hidden="true"
+                    />
+                    Share via Email
+                  </button>
+                  <button type="button" onClick={handleEditRequest}>
+                    <span
+                      className="cs-menu__icon"
+                      style={{ "--icon-url": `url(${editIcon})` } as React.CSSProperties}
+                      aria-hidden="true"
+                    />
+                    Edit Request
+                  </button>
+                  <button type="button" onClick={handleDuplicateRequest}>
+                    <span
+                      className="cs-menu__icon"
+                      style={{ "--icon-url": `url(${copyIcon})` } as React.CSSProperties}
+                      aria-hidden="true"
+                    />
+                    Duplicate
+                  </button>
+                  <button type="button" onClick={handleDeleteRequest}>
+                    <span
+                      className="cs-menu__icon"
+                      style={{ "--icon-url": `url(${trashIcon})` } as React.CSSProperties}
+                      aria-hidden="true"
+                    />
+                    Delete
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -239,6 +376,15 @@ export const VideoRequestDetailPage: React.FC<VideoRequestDetailPageProps> = ({ 
           onDelete={handleDelete}
         />
       )}
+
+      <ShareViaEmailModal
+        open={shareEmailOpen}
+        onClose={() => setShareEmailOpen(false)}
+        onSend={handleSendShareEmail}
+        defaultFromName={pack.createdByName || getCampaignCreatorName()}
+        videoPrompt={videoPrompt}
+        requestLink={requestLink}
+      />
 
       {toast && (
         <div className="amp-toast" role="status" aria-live="polite">

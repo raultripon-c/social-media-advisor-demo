@@ -1383,7 +1383,10 @@ export const getVideoRequestTableStatus = (pack: SharePack) => {
   };
 };
 
-export const getVideoSubmissions = (pack: SharePack): VideoSubmission[] => pack.submissions || [];
+export const getVideoSubmissions = (pack: SharePack): VideoSubmission[] =>
+  withDemoVideoSubmissions(pack).submissions || [];
+
+export const getVideoResponseCount = (pack: SharePack) => getVideoSubmissions(pack).length;
 
 export const countVideoSubmissionsByStatus = (submissions: VideoSubmission[], status: VideoSubmissionStatus) =>
   submissions.filter((submission) => submission.status === status).length;

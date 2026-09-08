@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getSharePackDetailPath } from "../ContentBoard/CampaignStudioSubNav";
-import { getVideoRequestTableStatus } from "./amplifyData";
+import { getVideoRequestTableStatus, getVideoResponseCount } from "./amplifyData";
 import { SharePack } from "./amplifyTypes";
 
 const formatDate = (date: string) =>
@@ -59,6 +59,7 @@ export const VideoRequestsView: React.FC<VideoRequestsViewProps> = ({
             <col className="cs-col-name" />
             <col className="cs-col-status" />
             <col className="cs-col-metric" />
+            <col className="cs-col-metric" />
             <col className="cs-col-date" />
             <col className="cs-col-actions" />
           </colgroup>
@@ -67,6 +68,7 @@ export const VideoRequestsView: React.FC<VideoRequestsViewProps> = ({
               <th>Request Name</th>
               <th>Status</th>
               <th>Recipients</th>
+              <th>Responses</th>
               <th>Date Created</th>
               <th aria-label="More actions" />
             </tr>
@@ -74,7 +76,7 @@ export const VideoRequestsView: React.FC<VideoRequestsViewProps> = ({
           <tbody>
             {!requests.length ? (
               <tr className="cs-table-empty-row">
-                <td colSpan={5}>
+                <td colSpan={6}>
                   <div className="cs-table-empty-state">
                     <h3>No video requests yet</h3>
                     <p>Send a request to employees and it will appear in this table.</p>
@@ -84,6 +86,7 @@ export const VideoRequestsView: React.FC<VideoRequestsViewProps> = ({
             ) : (
               requests.map((request) => {
                 const tableStatus = getVideoRequestTableStatus(request);
+                const responseCount = getVideoResponseCount(request);
 
                 return (
                   <tr key={request.id}>
@@ -105,6 +108,11 @@ export const VideoRequestsView: React.FC<VideoRequestsViewProps> = ({
                     <td>
                       <span className="cs-table-text" title={`${request.audienceCount.toLocaleString()} recipients`}>
                         {request.audienceCount.toLocaleString()}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="cs-table-text" title={`${responseCount.toLocaleString()} responses`}>
+                        {responseCount.toLocaleString()}
                       </span>
                     </td>
                     <td>
