@@ -13,6 +13,8 @@ import { SharePackGenerating } from "./SharePackGenerating";
 import { SharePacksView } from "./SharePacksView";
 import { VideoRequestDrawer } from "./VideoRequestDrawer";
 import { VideoRequestsView } from "./VideoRequestsView";
+import { assignAdminSharePackToEmployeeWorkspace } from "../AdvocacyDemoShell/advocacyDemoBridge";
+import { EmployeeSuggestedPostsView } from "./EmployeeSuggestedPostsView";
 import { loadSharePacks, saveSharePacks } from "./sharePackStorage";
 
 const ENHANCE_SUFFIX =
@@ -124,6 +126,15 @@ export const AmplifyPage: React.FC = () => {
     }
     const eligibleIds = eligible.map((pack) => pack.id);
     const now = new Date().toISOString();
+    eligible.forEach((pack) => {
+      assignAdminSharePackToEmployeeWorkspace({
+        ...pack,
+        status: "sent",
+        sentAt: now,
+        metrics: pack.metrics || { shares: 12, clicks: 48, applications: 1, emvUsd: 900 },
+        channels: pack.channels.includes("email") ? pack.channels : [...pack.channels, "email"],
+      });
+    });
     setPacks((current) =>
       current.map((pack) => {
         if (!eligibleIds.includes(pack.id)) return pack;
@@ -199,6 +210,7 @@ export const AmplifyPage: React.FC = () => {
   };
 
   const handleDispatchSend = (pack: SharePack) => {
+    assignAdminSharePackToEmployeeWorkspace(pack);
     setPacks((current) => [pack, ...current]);
     leaveDispatch();
     setPrompt("");
@@ -315,6 +327,8 @@ export const AmplifyPage: React.FC = () => {
               ))}
             </div>
           </section>
+
+          <EmployeeSuggestedPostsView />
 
           <VideoRequestsView
             requests={videoRequests}

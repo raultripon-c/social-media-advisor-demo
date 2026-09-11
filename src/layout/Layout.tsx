@@ -1,9 +1,11 @@
 import { useKeycloak } from "phenom-auth-react-adapter";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { AppStore } from "store";
 import { GenericErrorBoundary } from "../remote-modules/ReactAppRenderer";
+import { CampaignStudioEmployeeFullscreen } from "../features/CampaignStudio/AdvocacyDemoShell/CampaignStudioAdvocacyDemoGate";
+import { useAdvocacyDemoView } from "../features/CampaignStudio/AdvocacyDemoShell/useAdvocacyDemoView";
 import Tenants from "../screens/tenants/Tenants";
 import AppLayout from "./AppLayout";
 import Header from "./header/Header";
@@ -14,8 +16,9 @@ import { fetchCrmTenants } from "../utils/api.service";
 import PhollySdkRoot from "../components/PhollySdkRoot";
 
 const Layout = () => {
-  
   const navigate = useNavigate();
+  const location = useLocation();
+  const { showEmployeeWorkspace } = useAdvocacyDemoView();
   const { keycloak, orgInfo } = useKeycloak();
   const userDetails = window?.keycloakInstance?.tokenParsed?.userDetails;
   const customerTenants = useSelector(
@@ -33,7 +36,7 @@ const Layout = () => {
   const sessionTrackerProjectKey = `${(window as any)._env_.SESSION_TRACKER_PROJECT_KEY || ""}`;
   const sessionTrackerIngestPoint = `${(window as any)._env_.SESSION_TRACKER_INGEST_POINT || ""}`;
   const userId = userDetails?.userName;
-  const currentPath = window.location.pathname.replace("/dashboard/dashboard", "/dashboard");
+  const currentPath = location.pathname.replace("/dashboard/dashboard", "/dashboard");
   const isLocalCampaignStudioPreview = currentPath.startsWith("/campaign-studio/");
 
   useEffect(()=>{
@@ -137,6 +140,11 @@ const Layout = () => {
           </div>
         );
   }
+
+  if (showEmployeeWorkspace) {
+    return <CampaignStudioEmployeeFullscreen />;
+  }
+
   return (
     <>
       {keycloakAvailable && (initialized || isLocalCampaignStudioPreview) && (

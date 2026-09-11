@@ -13,6 +13,7 @@ import CampaignStudioContentBoard from "../screens/CampaignStudioContentBoard/Ca
 import CampaignStudioAmplify from "../screens/CampaignStudioAmplify/CampaignStudioAmplify";
 import CampaignStudioAmplifyRedirect from "../screens/CampaignStudioAmplify/CampaignStudioAmplifyRedirect";
 import CampaignStudioSharePackDetail from "../screens/CampaignStudioSharePackDetail/CampaignStudioSharePackDetail";
+import CampaignStudioEngagement from "../screens/CampaignStudioEngagement/CampaignStudioEngagement";
 import { withDynamicScript } from "../layout/dynamicScripts/WithDynamicScript";
 
 export interface IRoute {
@@ -71,6 +72,11 @@ const campaignStudioNew = {
   component: CampaignStudioAllCampaigns,
 }
 
+const campaignStudioEngagement = {
+  path: "/:customerCode/:refnum/campaign-studio/engagement",
+  component: CampaignStudioEngagement,
+}
+
 const campaignStudioAllCampaigns = {
   path: "/:customerCode/:refnum/campaign-studio/campaigns",
   component: CampaignStudioAllCampaigns,
@@ -109,6 +115,11 @@ const campaignStudioAmplifyLegacy = {
 const campaignStudioSharePackDetail = {
   path: "/:customerCode/:refnum/campaign-studio/employee-advocacy/:packId",
   component: CampaignStudioSharePackDetail,
+}
+
+const localCampaignStudioEngagement = {
+  path: "/campaign-studio/engagement",
+  component: CampaignStudioEngagement,
 }
 
 const localCampaignStudioAllCampaigns = {
@@ -167,6 +178,7 @@ export const appRoutes = [
   clusterList,
   candidateJourneys,
   campaignStudioNew,
+  campaignStudioEngagement,
   campaignStudioAllCampaigns,
   campaignStudioNewCampaign,
   campaignStudioWorkspace,
@@ -175,6 +187,7 @@ export const appRoutes = [
   campaignStudioAmplify,
   campaignStudioAmplifyLegacy,
   campaignStudioSharePackDetail,
+  localCampaignStudioEngagement,
   localCampaignStudioAllCampaigns,
   localCampaignStudioNewCampaign,
   localCampaignStudioWorkspace,

@@ -1,4 +1,5 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 export type UiMultiSelectOption = {
   value: string;
@@ -103,8 +104,32 @@ export const UiMultiSelect: React.FC<UiMultiSelectProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [menuPosition, setMenuPosition] = useState<{
+    top: number;
+    left: number;
+    width: number;
+  } | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const updateMenuPosition = useCallback(() => {
+    const control = dropdownRef.current?.querySelector(".cs-role-select__control");
+    const menu = menuRef.current;
+    if (!(control instanceof HTMLElement)) return;
+
+    const rect = control.getBoundingClientRect();
+    const menuHeight = menu?.offsetHeight ?? 280;
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const openAbove = spaceBelow < menuHeight + 12 && rect.top > menuHeight + 12;
+    const top = openAbove ? rect.top - menuHeight - 6 : rect.bottom + 6;
+
+    setMenuPosition({
+      top: Math.max(8, top),
+      left: rect.left,
+      width: rect.width,
+    });
+  }, []);
 
   const selectedOptions = values
     .map((value) => options.find((option) => option.value === value))
@@ -136,7 +161,13 @@ export const UiMultiSelect: React.FC<UiMultiSelectProps> = ({
     if (!isOpen) return undefined;
 
     const handlePointerDown = (event: PointerEvent) => {
-      if (!(event.target instanceof Node) || dropdownRef.current?.contains(event.target)) return;
+      if (!(event.target instanceof Node)) return;
+      if (
+        dropdownRef.current?.contains(event.target) ||
+        menuRef.current?.contains(event.target)
+      ) {
+        return;
+      }
       setIsOpen(false);
     };
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -151,13 +182,31 @@ export const UiMultiSelect: React.FC<UiMultiSelectProps> = ({
     };
   }, [isOpen]);
 
+  useLayoutEffect(() => {
+    if (!isOpen) {
+      setMenuPosition(null);
+      return undefined;
+    }
+
+    updateMenuPosition();
+    const frame = window.requestAnimationFrame(() => {
+      updateMenuPosition();
+      searchInputRef.current?.focus();
+    });
+
+    window.addEventListener("resize", updateMenuPosition);
+    document.addEventListener("scroll", updateMenuPosition, true);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("resize", updateMenuPosition);
+      document.removeEventListener("scroll", updateMenuPosition, true);
+    };
+  }, [isOpen, filteredOptions.length, updateMenuPosition]);
+
   useEffect(() => {
     if (!isOpen) {
       setSearch("");
-      return;
     }
-    const frame = window.requestAnimationFrame(() => searchInputRef.current?.focus());
-    return () => window.cancelAnimationFrame(frame);
   }, [isOpen]);
 
   const toggleValue = (value: string) => {
@@ -235,62 +284,78 @@ export const UiMultiSelect: React.FC<UiMultiSelectProps> = ({
           </button>
         )}
       </div>
-      {isOpen && !disabled && (
-        <div className="cs-role-select__menu" role="listbox" aria-multiselectable="true">
-          <div className="cs-role-select__toolbar">
-            <button
-              type="button"
-              className={`cs-role-select__select-all${allFilteredSelected ? " is-selected" : ""}${
-                someFilteredSelected ? " is-partial" : ""
-              }`}
-              aria-label={allFilteredSelected ? "Deselect all visible options" : "Select all visible options"}
-              aria-pressed={allFilteredSelected}
-              disabled={!enabledFilteredValues.length}
-              onClick={(event) => {
-                event.stopPropagation();
-                toggleFilteredSelection();
-              }}
-            >
-              <span className="cs-role-select__checkbox" aria-hidden="true" />
-            </button>
-            <div className="cs-role-select__search">
-              <span aria-hidden="true" />
-              <input
-                ref={searchInputRef}
-                value={search}
-                placeholder={searchPlaceholder}
-                aria-label={searchPlaceholder}
-                onChange={(event) => setSearch(event.target.value)}
-                onClick={(event) => event.stopPropagation()}
-              />
+      {isOpen &&
+        !disabled &&
+        menuPosition &&
+        createPortal(
+          <div
+            ref={menuRef}
+            className="cs-role-select__menu cs-role-select__menu--portaled"
+            role="listbox"
+            aria-multiselectable="true"
+            style={{
+              position: "fixed",
+              top: menuPosition.top,
+              left: menuPosition.left,
+              width: menuPosition.width,
+              zIndex: 1100,
+            }}
+          >
+            <div className="cs-role-select__toolbar">
+              <button
+                type="button"
+                className={`cs-role-select__select-all${allFilteredSelected ? " is-selected" : ""}${
+                  someFilteredSelected ? " is-partial" : ""
+                }`}
+                aria-label={allFilteredSelected ? "Deselect all visible options" : "Select all visible options"}
+                aria-pressed={allFilteredSelected}
+                disabled={!enabledFilteredValues.length}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  toggleFilteredSelection();
+                }}
+              >
+                <span className="cs-role-select__checkbox" aria-hidden="true" />
+              </button>
+              <div className="cs-role-select__search">
+                <span aria-hidden="true" />
+                <input
+                  ref={searchInputRef}
+                  value={search}
+                  placeholder={searchPlaceholder}
+                  aria-label={searchPlaceholder}
+                  onChange={(event) => setSearch(event.target.value)}
+                  onClick={(event) => event.stopPropagation()}
+                />
+              </div>
             </div>
-          </div>
-          <div className="cs-role-select__options">
-            {filteredOptions.map((option) => {
-              const isSelected = values.includes(option.value);
-              return (
-                <button
-                  type="button"
-                  key={option.value}
-                  className={`${isSelected ? "is-selected" : ""}${option.disabled ? " is-option-disabled" : ""}`}
-                  role="option"
-                  aria-selected={isSelected}
-                  aria-disabled={option.disabled || undefined}
-                  disabled={option.disabled}
-                  onClick={() => toggleValue(option.value)}
-                >
-                  <span className="cs-role-select__checkbox" aria-hidden="true" />
-                  <span className="cs-role-select__option-copy">
-                    <span>{option.label}</span>
-                    {option.description ? <em>{option.description}</em> : null}
-                  </span>
-                </button>
-              );
-            })}
-            {!filteredOptions.length && <div className="cs-role-select__empty">No options found</div>}
-          </div>
-        </div>
-      )}
+            <div className="cs-role-select__options">
+              {filteredOptions.map((option) => {
+                const isSelected = values.includes(option.value);
+                return (
+                  <button
+                    type="button"
+                    key={option.value}
+                    className={`${isSelected ? "is-selected" : ""}${option.disabled ? " is-option-disabled" : ""}`}
+                    role="option"
+                    aria-selected={isSelected}
+                    aria-disabled={option.disabled || undefined}
+                    disabled={option.disabled}
+                    onClick={() => toggleValue(option.value)}
+                  >
+                    <span className="cs-role-select__checkbox" aria-hidden="true" />
+                    <span className="cs-role-select__option-copy">
+                      <span>{option.label}</span>
+                      {option.description ? <em>{option.description}</em> : null}
+                    </span>
+                  </button>
+                );
+              })}
+              {!filteredOptions.length && <div className="cs-role-select__empty">No options found</div>}
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 };

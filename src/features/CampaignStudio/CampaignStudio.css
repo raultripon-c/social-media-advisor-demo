@@ -2769,6 +2769,11 @@ body:has(.campaign-studio--wizard) {
   box-shadow: var(--components-input-overlay-shadow, 0 4px 12px rgba(0, 0, 0, 0.15));
 }
 
+.cs-role-select__menu--portaled {
+  right: auto;
+  left: auto;
+}
+
 .cs-role-select__toolbar {
   display: flex;
   align-items: center;
@@ -3128,6 +3133,11 @@ body:has(.campaign-studio--wizard) {
   border-radius: 8px;
   background: var(--Core-White, #fff);
   box-shadow: 0 4px 16px rgba(17, 24, 39, 0.14);
+}
+
+.cs-ds-dropdown__menu--portaled {
+  right: auto;
+  left: auto;
 }
 
 .cs-ds-dropdown__menu::-webkit-scrollbar {
