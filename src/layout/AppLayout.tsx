@@ -68,7 +68,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   const [rolesLoader, setRolesLoader] = useState(true);
   const [isAppsLoaded, setIsAppsLoaded] = useState(false);
   const isLoadingAppsRef = useRef(false);
-  const isLocalCampaignStudioPreview = window.location.pathname.startsWith("/campaign-studio/");
+  const isLocalCampaignStudioPreview = window.location.pathname.includes("/campaign-studio/");
   const userDetails =
     window?.keycloakInstance?.tokenParsed?.userDetails ||
     (isLocalCampaignStudioPreview

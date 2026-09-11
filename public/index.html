@@ -2,9 +2,26 @@
 <html lang="en" manifest="cache.appcache">
   <head>
     <meta charset="utf-8" />
-    <!-- <script src="/hrit/env-config.js"></script> -->
-     <script src="/env-config.js"></script>
-    <link rel="icon" href="/public/phenom-favicon.ico" />
+    <script type="text/javascript">
+      (function (locationRef) {
+        if (locationRef.search[1] === "/") {
+          var decoded = locationRef.search
+            .slice(1)
+            .split("&")
+            .map(function (segment) {
+              return segment.replace(/~and~/g, "&");
+            })
+            .join("?");
+          window.history.replaceState(
+            null,
+            null,
+            locationRef.pathname.slice(0, -1) + decoded + locationRef.hash
+          );
+        }
+      })(window.location);
+    </script>
+    <script src="env-config.js"></script>
+    <link rel="icon" href="public/phenom-favicon.ico" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -55,13 +72,17 @@
       document.head.appendChild(script);
   </script> -->
     <script>
-      const script = document.createElement("script");
-      script.src = `${window._env_.APP_API_URL.replace(/\/api$/, "")}/public/header/HeaderComponents.js`;
-      script.type = "module";
-      script.crossOrigin = "anonymous";
-      document.head.appendChild(script);
+      if (window._env_?.APP_API_URL) {
+        const script = document.createElement("script");
+        script.src = `${window._env_.APP_API_URL.replace(/\/api$/, "")}/public/header/HeaderComponents.js`;
+        script.type = "module";
+        script.crossOrigin = "anonymous";
+        document.head.appendChild(script);
+      }
+      if (window.location.hostname.endsWith("phenompro.com")) {
+        document.domain = "phenompro.com";
+      }
     </script>
-    <script type="text/javascript">document.domain = "phenompro.com"</script>
   </head>
 
   <body>
@@ -80,30 +101,32 @@
     -->
 
     <script>
-      (function (pendoHostUrl) {
-        (function (p, e, n, d, o) {
-          var v, w, x, y, z;
-          o = p[d] = p[d] || {};
-          o._q = [];
-          v = ["initialize", "identify", "updateOptions", "pageLoad", "track"];
-          for (w = 0, x = v.length; w < x; ++w)
-            (function (m) {
-              o[m] =
-                o[m] ||
-                function () {
-                  o._q[m === v[0] ? "unshift" : "push"](
-                    [m].concat([].slice.call(arguments, 0))
-                  );
-                };
-            })(v[w]);
-          y = e.createElement(n);
-          y.async = !0;
-          y.src = pendoHostUrl;
-          z = e.getElementsByTagName(n)[0];
-          z.parentNode.insertBefore(y, z);
-        })(window, document, "script", "pendo");
-        window.pendo = pendo;
-      })(window._env_.PENDO_HOST_URL);
+      if (window._env_?.PENDO_HOST_URL) {
+        (function (pendoHostUrl) {
+          (function (p, e, n, d, o) {
+            var v, w, x, y, z;
+            o = p[d] = p[d] || {};
+            o._q = [];
+            v = ["initialize", "identify", "updateOptions", "pageLoad", "track"];
+            for (w = 0, x = v.length; w < x; ++w)
+              (function (m) {
+                o[m] =
+                  o[m] ||
+                  function () {
+                    o._q[m === v[0] ? "unshift" : "push"](
+                      [m].concat([].slice.call(arguments, 0))
+                    );
+                  };
+              })(v[w]);
+            y = e.createElement(n);
+            y.async = !0;
+            y.src = pendoHostUrl;
+            z = e.getElementsByTagName(n)[0];
+            z.parentNode.insertBefore(y, z);
+          })(window, document, "script", "pendo");
+          window.pendo = pendo;
+        })(window._env_.PENDO_HOST_URL);
+      }
     </script>
   </body>
 </html>

@@ -14,7 +14,10 @@ import CampaignStudioAmplify from "../screens/CampaignStudioAmplify/CampaignStud
 import CampaignStudioAmplifyRedirect from "../screens/CampaignStudioAmplify/CampaignStudioAmplifyRedirect";
 import CampaignStudioSharePackDetail from "../screens/CampaignStudioSharePackDetail/CampaignStudioSharePackDetail";
 import CampaignStudioEngagement from "../screens/CampaignStudioEngagement/CampaignStudioEngagement";
+import CampaignStudioRootRedirect from "../screens/CampaignStudioRootRedirect/CampaignStudioRootRedirect";
 import { withDynamicScript } from "../layout/dynamicScripts/WithDynamicScript";
+
+const isGithubPagesBuild = Boolean(process.env.APP_BASE_PATH);
 
 export interface IRoute {
   path: string;
@@ -162,6 +165,11 @@ const localCampaignStudioSharePackDetail = {
   component: CampaignStudioSharePackDetail,
 }
 
+const campaignStudioRootRedirect = {
+  path: "/",
+  component: CampaignStudioRootRedirect,
+};
+
 const unmatchedRoutePage = {
   path: "*",
   component: UnmatchedRoutePage
@@ -196,5 +204,6 @@ export const appRoutes = [
   localCampaignStudioAmplify,
   localCampaignStudioAmplifyLegacy,
   localCampaignStudioSharePackDetail,
+  ...(isGithubPagesBuild ? [campaignStudioRootRedirect] : []),
   unmatchedRoutePage
 ];

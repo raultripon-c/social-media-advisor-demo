@@ -8,6 +8,8 @@ const deps = require("./package.json").dependencies;
 const isProd =
   process.argv.includes("--mode=production") ||
   process.env.NODE_ENV === "production";
+const appBasePath = process.env.APP_BASE_PATH || "/";
+const publicPath = appBasePath.endsWith("/") ? appBasePath : `${appBasePath}/`;
 
 module.exports = {
   entry: {
@@ -15,7 +17,7 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, "dist"),
-    publicPath: "auto",
+    publicPath,
     clean: isProd,
   },
   mode: isProd ? "production" : "development",
@@ -103,7 +105,10 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: "./public/index.html",
-      publicPath: "/",
+      publicPath,
+    }),
+    new webpack.DefinePlugin({
+      "process.env.APP_BASE_PATH": JSON.stringify(process.env.APP_BASE_PATH || ""),
     }),
     new webpack.ProvidePlugin({
       React: "react",

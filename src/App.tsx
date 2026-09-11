@@ -12,7 +12,7 @@ import { triggerRefreshToken } from "./utils/api";
 const autoGenerateCandidateJourneysOnSidebarNav = true;
 
 const App = (): JSX.Element => {
-  const isLocalCampaignStudioPreview = window.location.pathname.startsWith("/campaign-studio/");
+  const isLocalCampaignStudioPreview = window.location.pathname.includes("/campaign-studio/");
   const keyCloakConfig = {
     loginHost: (window as any)._env_.APP_KEYCLOAK_URL,
     clientId: (window as any)._env_.APP_CLIENT_ID,
