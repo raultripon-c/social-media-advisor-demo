@@ -109,6 +109,7 @@ module.exports = {
     }),
     new webpack.DefinePlugin({
       "process.env.APP_BASE_PATH": JSON.stringify(process.env.APP_BASE_PATH || ""),
+      "process.env.SMA_DEMO_ONLY": JSON.stringify(process.env.SMA_DEMO_ONLY || ""),
     }),
     new webpack.ProvidePlugin({
       React: "react",

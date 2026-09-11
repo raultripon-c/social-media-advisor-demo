@@ -35,6 +35,7 @@ import ToolsSideBar from "./sideBar/SideBar";
 import { AppSelectionOptions } from "interfaces/AppSelectionOptions";
 import { Loader } from "@phenom/react-ui-components";
 import { CommonConstants } from "../utils/common-constants";
+import { isCampaignStudioPreviewPath, isSmaDemoOnly } from "../utils/smaDemo";
 
 interface AppLayoutProps {
   allApps: any;
@@ -68,7 +69,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
   const [rolesLoader, setRolesLoader] = useState(true);
   const [isAppsLoaded, setIsAppsLoaded] = useState(false);
   const isLoadingAppsRef = useRef(false);
-  const isLocalCampaignStudioPreview = window.location.pathname.includes("/campaign-studio/");
+  const isLocalCampaignStudioPreview = isCampaignStudioPreviewPath(window.location.pathname);
   const userDetails =
     window?.keycloakInstance?.tokenParsed?.userDetails ||
     (isLocalCampaignStudioPreview
@@ -634,19 +635,21 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
               {<EmptyState text={"No apps Found"} />}
             </div>
           ) : (
-            <div className="service-tools-app-layout">
+            <div className={`service-tools-app-layout${isSmaDemoOnly ? " service-tools-app-layout--sma-demo" : ""}`}>
               <Toast />
               <div className="service-tools-app-body">
-                <ToolsSideBar
-                  showSidebarMenu={showSidebarMenu}
-                  toggleSidebarMenu={toggleSidebarMenu}
-                  categories={customerTenantApps}
-                  setCategories={setCustomerTenantApps}
-                  refNum={selectedTenant?.refNum}
-                  showSummaryNavigator={
-                    !window.location.pathname.includes("summary")
-                  }
-                />
+                {!isSmaDemoOnly && (
+                  <ToolsSideBar
+                    showSidebarMenu={showSidebarMenu}
+                    toggleSidebarMenu={toggleSidebarMenu}
+                    categories={customerTenantApps}
+                    setCategories={setCustomerTenantApps}
+                    refNum={selectedTenant?.refNum}
+                    showSummaryNavigator={
+                      !window.location.pathname.includes("summary")
+                    }
+                  />
+                )}
                 <div className="tools-body-container">
                   {showSidebarMenu && (
                     <div

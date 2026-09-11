@@ -75,3 +75,20 @@
     }
   }
 }
+
+.sma-demo-shell {
+  min-height: 100vh;
+  background: #f8f9fb;
+}
+
+.service-tools-app-layout--sma-demo {
+  width: 100%;
+  height: 100vh;
+
+  .service-tools-app-body,
+  .tools-body-container {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+  }
+}

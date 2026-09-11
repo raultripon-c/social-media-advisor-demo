@@ -14,6 +14,7 @@ import { Loader } from "@phenom/react-ui-components";
 import Tracker from '@openreplay/tracker';
 import { fetchCrmTenants } from "../utils/api.service";
 import PhollySdkRoot from "../components/PhollySdkRoot";
+import { isCampaignStudioPreviewPath, isSmaDemoOnly } from "../utils/smaDemo";
 
 const Layout = () => {
   const navigate = useNavigate();
@@ -37,7 +38,7 @@ const Layout = () => {
   const sessionTrackerIngestPoint = `${(window as any)._env_.SESSION_TRACKER_INGEST_POINT || ""}`;
   const userId = userDetails?.userName;
   const currentPath = location.pathname.replace("/dashboard/dashboard", "/dashboard");
-  const isLocalCampaignStudioPreview = currentPath.startsWith("/campaign-studio/");
+  const isLocalCampaignStudioPreview = isCampaignStudioPreviewPath(currentPath);
 
   useEffect(()=>{
     if (isLocalCampaignStudioPreview) {
@@ -143,6 +144,14 @@ const Layout = () => {
 
   if (showEmployeeWorkspace) {
     return <CampaignStudioEmployeeFullscreen />;
+  }
+
+  if (isSmaDemoOnly) {
+    return (
+      <div className="sma-demo-shell">
+        {keycloakAvailable && <AppLayout allApps={allApps} />}
+      </div>
+    );
   }
 
   return (

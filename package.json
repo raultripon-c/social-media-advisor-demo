@@ -70,7 +70,7 @@
     "start": "webpack serve --port 4200 --https",
     "start:module": "webpack serve --config ./webpack.config.js",
     "build": "webpack --mode=production",
-    "build:pages": "webpack --mode=production && node scripts/copy-spa-404.js",
+    "build:pages": "APP_BASE_PATH=/social-media-advisor-demo/ SMA_DEMO_ONLY=true webpack --mode=production && node scripts/copy-spa-404.js",
     "upload-sourcemaps": "node scripts/upload-sourcemaps.js"
   },
   "devServer": {

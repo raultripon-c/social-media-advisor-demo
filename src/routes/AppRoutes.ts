@@ -15,8 +15,10 @@ import CampaignStudioAmplifyRedirect from "../screens/CampaignStudioAmplify/Camp
 import CampaignStudioSharePackDetail from "../screens/CampaignStudioSharePackDetail/CampaignStudioSharePackDetail";
 import CampaignStudioEngagement from "../screens/CampaignStudioEngagement/CampaignStudioEngagement";
 import CampaignStudioRootRedirect from "../screens/CampaignStudioRootRedirect/CampaignStudioRootRedirect";
+import { campaignStudioDemoRoutes } from "./campaignStudioDemoRoutes";
 import { withDynamicScript } from "../layout/dynamicScripts/WithDynamicScript";
 
+const isSmaDemoOnlyBuild = process.env.SMA_DEMO_ONLY === "true";
 const isGithubPagesBuild = Boolean(process.env.APP_BASE_PATH);
 
 export interface IRoute {
@@ -175,7 +177,7 @@ const unmatchedRoutePage = {
   component: UnmatchedRoutePage
 }
 
-export const appRoutes = [
+const fullAppRoutes = [
   AssetManager,
   ContenthubComponent,
   BlogsManger,
@@ -205,5 +207,7 @@ export const appRoutes = [
   localCampaignStudioAmplifyLegacy,
   localCampaignStudioSharePackDetail,
   ...(isGithubPagesBuild ? [campaignStudioRootRedirect] : []),
-  unmatchedRoutePage
+  unmatchedRoutePage,
 ];
+
+export const appRoutes = isSmaDemoOnlyBuild ? campaignStudioDemoRoutes : fullAppRoutes;

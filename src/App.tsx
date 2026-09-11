@@ -7,12 +7,13 @@ import { InitialLoader } from "./layout/Loader";
 import { LocalPreviewKeycloakProvider } from "./layout/LocalPreviewKeycloakProvider";
 import { FeatureFlagsProvider } from "./context/FeatureFlagsContext";
 import { triggerRefreshToken } from "./utils/api";
+import { isCampaignStudioPreviewPath, isSmaDemoOnly } from "./utils/smaDemo";
 
 /** When true, opening Candidate Journeys from the sidebar runs the same flow as Generate Journeys */
 const autoGenerateCandidateJourneysOnSidebarNav = true;
 
 const App = (): JSX.Element => {
-  const isLocalCampaignStudioPreview = window.location.pathname.includes("/campaign-studio/");
+  const isLocalCampaignStudioPreview = isCampaignStudioPreviewPath(window.location.pathname);
   const keyCloakConfig = {
     loginHost: (window as any)._env_.APP_KEYCLOAK_URL,
     clientId: (window as any)._env_.APP_CLIENT_ID,
@@ -55,7 +56,7 @@ const App = (): JSX.Element => {
     </FeatureFlagsProvider>
   );
 
-  if (isLocalCampaignStudioPreview) {
+  if (isSmaDemoOnly || isLocalCampaignStudioPreview) {
     return <LocalPreviewKeycloakProvider>{appTree}</LocalPreviewKeycloakProvider>;
   }
 

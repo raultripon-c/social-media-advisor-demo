@@ -38,6 +38,7 @@ jobs:
         run: npm run build:pages
         env:
           APP_BASE_PATH: /social-media-advisor-demo/
+          SMA_DEMO_ONLY: "true"
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
