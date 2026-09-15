@@ -31,7 +31,7 @@ import linkedinLogo from "../../assets/svg/social/linkedin-logo.svg";
 import instagramLogo from "../../assets/svg/social/instagram-logo.svg";
 import facebookLogo from "../../assets/svg/social/facebook-logo.svg";
 import xLogo from "../../assets/svg/social/x-logo.svg";
-import oneHealthLogo from "../../assets/campaign-studio/one-health-logo-avatar.png";
+import { OneHealthLogoMark } from "./OneHealthLogoMark";
 import facebookLifestyleImage from "../../assets/campaign-studio/reference/facebook-nursing-lifestyle.png";
 import instagramLifestyleImage from "../../assets/campaign-studio/reference/instagram-nursing-lifestyle.png";
 import linkedinLifestyleImage from "../../assets/campaign-studio/reference/linkedin-nursing-lifestyle.png";
@@ -2244,7 +2244,10 @@ const PostPreview = ({
         {onEdit && <button className="cs-post__edit" onClick={() => onEdit(post)}>Edit</button>}
         {assetActions}
         <div className="cs-linkedin-post__header">
-          <img className="cs-linkedin-post__avatar" src={oneHealthLogo} alt={`${tenantName} logo`} />
+          <OneHealthLogoMark
+            className="cs-linkedin-post__avatar"
+            title={`${tenantName} logo`}
+          />
           <div>
             <strong>{tenantName}</strong>
             <small>2,223,144 followers</small>
@@ -2282,7 +2285,10 @@ const PostPreview = ({
         {onEdit && <button className="cs-post__edit" onClick={() => onEdit(post)}>Edit</button>}
         {assetActions}
         <div className="cs-instagram-post__header">
-          <img className="cs-instagram-post__avatar" src={oneHealthLogo} alt={`${tenantName} logo`} />
+          <OneHealthLogoMark
+            className="cs-instagram-post__avatar"
+            title={`${tenantName} logo`}
+          />
           <div>
             <strong>{instagramName}</strong>
             <small>{isVideoMedia ? "Reel · Sponsored" : "Sponsored campaign"}</small>
@@ -2315,7 +2321,10 @@ const PostPreview = ({
         {onEdit && <button className="cs-post__edit" onClick={() => onEdit(post)}>Edit</button>}
         {assetActions}
         <div className="cs-facebook-post__header">
-          <img className="cs-facebook-post__avatar" src={oneHealthLogo} alt={`${tenantName} logo`} />
+          <OneHealthLogoMark
+            className="cs-facebook-post__avatar"
+            title={`${tenantName} logo`}
+          />
           <div>
             <strong>{tenantName}</strong>
             <small>Sponsored · <span aria-hidden="true">🌐</span></small>
@@ -2326,7 +2335,7 @@ const PostPreview = ({
         {!isVideoMedia && (
           <div className="cs-facebook-post__link">
             <span className="cs-facebook-post__domain">
-              <img src={oneHealthLogo} alt="" />
+              <OneHealthLogoMark className="cs-facebook-post__domain-logo" />
               {new URL(post.ctaDestination).hostname.toUpperCase()}
             </span>
             <strong>Your next career move starts here.</strong>
@@ -2361,7 +2370,10 @@ const PostPreview = ({
         {onEdit && <button className="cs-post__edit" onClick={() => onEdit(post)}>Edit</button>}
         {assetActions}
         <div className="cs-x-post__header">
-          <img className="cs-x-post__avatar" src={oneHealthLogo} alt={`${tenantName} logo`} />
+          <OneHealthLogoMark
+            className="cs-x-post__avatar"
+            title={`${tenantName} logo`}
+          />
           <div>
             <strong>
               {tenantName}
@@ -2398,7 +2410,10 @@ const PostPreview = ({
       {onEdit && <button className="cs-post__edit" onClick={() => onEdit(post)}>Edit</button>}
       {assetActions}
       <div className="cs-post__head">
-        <img className="cs-post__avatar" src={oneHealthLogo} alt={`${tenantName} logo`} />
+        <OneHealthLogoMark
+          className="cs-post__avatar"
+          title={`${tenantName} logo`}
+        />
         <div>
           <strong>{tenantName}</strong>
           <small>{handle}</small>

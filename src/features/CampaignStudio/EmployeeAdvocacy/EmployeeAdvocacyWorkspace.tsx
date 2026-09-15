@@ -14,7 +14,7 @@ import linkIcon from "../../../assets/svg/link.svg";
 import copyIcon from "../../../assets/svg/copy.svg";
 import checkIcon from "../../../assets/svg/check.svg";
 import infoIcon from "../../../assets/svg/info.svg";
-import oneHealthLogo from "../../../assets/campaign-studio/one-health-logo-avatar.png";
+import { OneHealthLogoMark } from "../OneHealthLogoMark";
 import linkedinLogo from "../../../assets/svg/social/linkedin-logo.svg";
 import facebookLogo from "../../../assets/svg/social/facebook-logo.svg";
 import xLogo from "../../../assets/svg/social/x-logo.svg";
@@ -35,7 +35,8 @@ import {
 } from "../AdvocacyDemoShell/advocacyDemoBridge";
 import {
   employeeAdvocacyAdapter,
-  suggestionAssetOptions,
+  suggestionLibraryAssets,
+  SuggestionLibraryAsset,
   trackAdvocacyEvent,
 } from "./employeeAdvocacyData";
 import {
@@ -1867,7 +1868,59 @@ const SuggestionComposer = ({
   const [draft, setDraft] = useState<SuggestionDraft>(EMPTY_DRAFT);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [showAssetModal, setShowAssetModal] = useState(false);
+  const [pendingAssetId, setPendingAssetId] = useState("");
+  const [uploadedAssets, setUploadedAssets] = useState<SuggestionLibraryAsset[]>(
+    [],
+  );
+  const [uploadObjectUrls, setUploadObjectUrls] = useState<string[]>([]);
+  const uploadAssetInputRef = useRef<HTMLInputElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
+
+  const libraryAssets = useMemo(
+    () => [...uploadedAssets, ...suggestionLibraryAssets],
+    [uploadedAssets],
+  );
+
+  const selectedAsset = libraryAssets.find((asset) => asset.id === draft.assetId);
+  const pendingAsset =
+    libraryAssets.find((asset) => asset.id === pendingAssetId) ||
+    libraryAssets[0];
+
+  const applyUploadedAsset = (file: File) => {
+    if (!file.type.startsWith("image/")) return;
+    const nextUrl = URL.createObjectURL(file);
+    const baseName = file.name.replace(/\.[^.]+$/, "") || file.name;
+    const nextAsset: SuggestionLibraryAsset = {
+      id: `suggestion-upload-${Date.now()}`,
+      label: baseName,
+      src: nextUrl,
+      meta: "Uploaded · JPG",
+      assetName: file.name,
+    };
+    setUploadObjectUrls((current) => [...current, nextUrl]);
+    setUploadedAssets((current) => [nextAsset, ...current]);
+    setDraft((current) => ({
+      ...current,
+      assetId: nextAsset.id,
+      uploadedAssetName: file.name,
+      uploadedAssetSrc: nextUrl,
+    }));
+    setPendingAssetId(nextAsset.id);
+  };
+
+  const handleAssetUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) applyUploadedAsset(file);
+    event.target.value = "";
+  };
+
+  useEffect(
+    () => () => {
+      uploadObjectUrls.forEach((url) => URL.revokeObjectURL(url));
+    },
+    [uploadObjectUrls],
+  );
 
   const canSubmit =
     draft.title.trim().length > 0 &&
@@ -1875,14 +1928,36 @@ const SuggestionComposer = ({
     draft.platforms.length > 0 &&
     Boolean(draft.assetId);
 
+  const openAssetModal = () => {
+    setPendingAssetId(draft.assetId || libraryAssets[0]?.id || "");
+    setShowAssetModal(true);
+  };
+
+  const confirmAssetSelection = () => {
+    if (!pendingAsset) return;
+    const isUpload = pendingAsset.id.startsWith("suggestion-upload-");
+    setDraft((current) => ({
+      ...current,
+      assetId: pendingAsset.id,
+      uploadedAssetName: isUpload ? pendingAsset.assetName : undefined,
+      uploadedAssetSrc: isUpload ? pendingAsset.src : undefined,
+    }));
+    setShowAssetModal(false);
+  };
+
   useEffect(() => {
     titleRef.current?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && !submitting) onClose();
+      if (event.key !== "Escape" || submitting) return;
+      if (showAssetModal) {
+        setShowAssetModal(false);
+        return;
+      }
+      onClose();
     };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [onClose, submitting]);
+  }, [onClose, submitting, showAssetModal]);
 
   const submit = async () => {
     setSubmitting(true);
@@ -1897,137 +1972,353 @@ const SuggestionComposer = ({
     }
   };
 
+  const replaceIcon = (
+    <svg
+      className="cs-drawer__regen-icon"
+      viewBox="0 0 16 16"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        d="M13.2 8.2a5.2 5.2 0 0 1-8.9 3.7"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.6"
+      />
+      <path
+        d="M2.8 7.8a5.2 5.2 0 0 1 8.9-3.7"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.6"
+      />
+      <path
+        d="M11.8 1.9v2.5H9.3"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.6"
+      />
+      <path
+        d="M4.2 14.1v-2.5h2.5"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.6"
+      />
+    </svg>
+  );
+
   return (
-    <OverlayPortal>
-      <div className="eaw-overlay" role="presentation" onMouseDown={onClose}>
-        <section
-          className="eaw-share-modal"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="suggestion-title"
-          onMouseDown={(event) => event.stopPropagation()}
+    <>
+      <input
+        ref={uploadAssetInputRef}
+        type="file"
+        accept="image/*"
+        className="eaw-asset-upload-input"
+        onChange={handleAssetUpload}
+      />
+      <OverlayPortal>
+        <div
+          className="eaw-overlay eaw-overlay--side"
+          role="presentation"
+          onMouseDown={() => {
+            if (!showAssetModal) onClose();
+          }}
         >
-          <header className="eaw-share-modal__header">
-            <h2 id="suggestion-title" ref={titleRef} tabIndex={-1}>
-              New Suggestion
-            </h2>
-            <button
-              type="button"
-              className="eaw-share-modal__close"
-              onClick={onClose}
-              aria-label="Close"
-            >
-              ×
-            </button>
-          </header>
+          <section
+            className="eaw-drawer eaw-drawer--suggestion eaw-drawer--from-right"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="suggestion-dialog-title"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <header className="eaw-drawer__header">
+              <h2 id="suggestion-dialog-title" ref={titleRef} tabIndex={-1}>
+                New Suggestion
+              </h2>
+              <button
+                type="button"
+                className="eaw-drawer__icon-close"
+                onClick={onClose}
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </header>
 
-          <div className="eaw-share-modal__composer">
-            <Feedback
-              tone="info"
-              message="Suggestions are sent to a talent marketer administrator for review. They are not approved or available for sharing until the admin workflow is complete."
-            />
+            <div className="eaw-drawer__content eaw-drawer__content--suggestion">
+              <Feedback
+                tone="info"
+                message="Suggestions are sent to a talent marketer administrator for review. They are not approved or available for sharing until the admin workflow is complete."
+              />
 
-            <div className="eaw-suggestion-form">
-              <div className="eaw-field">
-                <label className="eaw-field__label" htmlFor="suggestion-title">
-                  Title
-                </label>
-                <Input
-                  id="suggestion-title"
-                  placeholder="Give your suggestion a short title"
-                  value={draft.title}
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                    setDraft((current) => ({
-                      ...current,
-                      title: event.target.value,
-                    }))
-                  }
-                />
+              <div className="eaw-suggestion-form">
+                <div className="eaw-field">
+                  <label
+                    className="eaw-field__label"
+                    htmlFor="suggestion-title-input"
+                  >
+                    Title
+                  </label>
+                  <Input
+                    id="suggestion-title-input"
+                    placeholder="Give your suggestion a short title"
+                    value={draft.title}
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                      setDraft((current) => ({
+                        ...current,
+                        title: event.target.value,
+                      }))
+                    }
+                  />
+                </div>
+                <div className="eaw-field">
+                  <label className="eaw-field__label" htmlFor="suggestion-text">
+                    Post text
+                  </label>
+                  <TextArea
+                    id="suggestion-text"
+                    placeholder="Describe the post you would like to suggest..."
+                    value={draft.text}
+                    onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) =>
+                      setDraft((current) => ({
+                        ...current,
+                        text: event.target.value,
+                      }))
+                    }
+                  />
+                </div>
+                <div className="eaw-field">
+                  <label
+                    className="eaw-field__label"
+                    htmlFor="suggestion-platforms"
+                  >
+                    Platforms
+                  </label>
+                  <UiMultiSelect
+                    className="eaw-field__control"
+                    values={draft.platforms}
+                    options={PLATFORM_SELECT_OPTIONS}
+                    onChange={(values) =>
+                      setDraft((current) => ({
+                        ...current,
+                        platforms: values.filter(
+                          (platform): platform is AdvocacyPlatform =>
+                            Boolean(PLATFORM_LABELS[platform as AdvocacyPlatform]),
+                        ),
+                      }))
+                    }
+                    placeholder="Select platforms"
+                    ariaLabel="Platforms"
+                  />
+                </div>
+                <div className="eaw-field">
+                  <span className="eaw-field__label" id="suggestion-image-asset">
+                    Image asset
+                  </span>
+                  {selectedAsset ? (
+                    <div
+                      className="cs-drawer__image-wrap"
+                      aria-labelledby="suggestion-image-asset"
+                    >
+                      <img
+                        className="cs-drawer__image"
+                        src={selectedAsset.src}
+                        alt={selectedAsset.label}
+                      />
+                      <button
+                        type="button"
+                        className="cs-btn cs-btn--secondary cs-drawer__regen"
+                        onClick={openAssetModal}
+                      >
+                        {replaceIcon}
+                        Replace image
+                      </button>
+                    </div>
+                  ) : (
+                    <div
+                      className="cs-drawer__image-wrap cs-drawer__image-wrap--empty"
+                      aria-labelledby="suggestion-image-asset"
+                    >
+                      <div className="eaw-asset-empty-actions">
+                        <button
+                          type="button"
+                          className="cs-btn cs-btn--secondary cs-drawer__regen"
+                          onClick={openAssetModal}
+                        >
+                          Select Asset
+                        </button>
+                        <button
+                          type="button"
+                          className="cs-btn cs-btn--secondary cs-drawer__regen"
+                          onClick={() => uploadAssetInputRef.current?.click()}
+                        >
+                          Upload Asset
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="eaw-field">
-                <label className="eaw-field__label" htmlFor="suggestion-text">
-                  Post text
-                </label>
-                <TextArea
-                  id="suggestion-text"
-                  placeholder="Describe the post you would like to suggest..."
-                  value={draft.text}
-                  onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) =>
-                    setDraft((current) => ({
-                      ...current,
-                      text: event.target.value,
-                    }))
-                  }
-                />
-                <p className="eaw-field__helper">
-                  Required. Share enough context for an administrator to review the idea.
-                </p>
-              </div>
-              <div className="eaw-field">
-                <label className="eaw-field__label" htmlFor="suggestion-platforms">
-                  Platforms
-                </label>
-                <UiMultiSelect
-                  className="eaw-field__control"
-                  values={draft.platforms}
-                  options={PLATFORM_SELECT_OPTIONS}
-                  onChange={(values) =>
-                    setDraft((current) => ({
-                      ...current,
-                      platforms: values.filter((platform): platform is AdvocacyPlatform =>
-                        Boolean(PLATFORM_LABELS[platform as AdvocacyPlatform]),
-                      ),
-                    }))
-                  }
-                  placeholder="Select platforms"
-                  ariaLabel="Platforms"
-                />
-                <p className="eaw-field__helper">
-                  Select one or more platforms for this suggestion.
-                </p>
-              </div>
-              <div className="eaw-field">
-                <label className="eaw-field__label" htmlFor="suggestion-asset">
-                  Asset
-                </label>
-                <UiDropdown
-                  className="eaw-field__control"
-                  value={draft.assetId}
-                  options={suggestionAssetOptions}
-                  onChange={(value) =>
-                    setDraft((current) => ({
-                      ...current,
-                      assetId: value || "",
-                    }))
-                  }
-                  placeholder="Select asset"
-                  ariaLabel="Asset"
-                />
-                <p className="eaw-field__helper">
-                  Choose an approved asset from the internal library.
-                </p>
-              </div>
+
+              {error && <Feedback tone="error" message={error} />}
             </div>
 
-            {error && <Feedback tone="error" message={error} />}
-          </div>
+            <footer className="eaw-drawer__footer eaw-drawer__footer--actions">
+              <DsButton
+                text="Cancel"
+                onClick={onClose}
+                buttonType="secondary"
+                disabled={submitting}
+              />
+              <DsButton
+                text={submitting ? "Submitting..." : "Submit for approval"}
+                onClick={submit}
+                disabled={submitting || !canSubmit}
+              />
+            </footer>
+          </section>
+        </div>
+      </OverlayPortal>
 
-          <footer className="eaw-share-modal__footer eaw-drawer__footer--actions">
-            <DsButton
-              text="Cancel"
-              onClick={onClose}
-              buttonType="secondary"
-              disabled={submitting}
-            />
-            <DsButton
-              text={submitting ? "Submitting..." : "Submit for approval"}
-              onClick={submit}
-              disabled={submitting || !canSubmit}
-            />
-          </footer>
-        </section>
-      </div>
-    </OverlayPortal>
+      {showAssetModal && (
+        <OverlayPortal>
+          <div
+            className="cs-modal-backdrop cs-replace-image-modal__backdrop eaw-asset-selection-modal__backdrop"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="suggestion-asset-selection-title"
+          >
+            <div className="cs-modal cs-modal--lg cs-replace-image-modal">
+              <div className="cs-modal__header">
+                <h2 id="suggestion-asset-selection-title">Asset Selection</h2>
+                <button
+                  type="button"
+                  className="cs-icon-button"
+                  onClick={() => setShowAssetModal(false)}
+                  aria-label="Close"
+                >
+                  ×
+                </button>
+              </div>
+              <div className="cs-modal__body cs-replace-image-modal__body">
+                <aside
+                  className="cs-replace-image-modal__filters"
+                  aria-label="Image asset filters"
+                >
+                  <div className="cs-replace-image-modal__filter-group">
+                    <strong>Upload date</strong>
+                    {[
+                      "Today",
+                      "Current week",
+                      "Current month",
+                      "Custom ranges",
+                    ].map((filter, index) => (
+                      <label key={`upload-${filter}`}>
+                        <span
+                          className={index === 0 ? "is-selected" : ""}
+                          aria-hidden="true"
+                        />
+                        {filter}
+                      </label>
+                    ))}
+                  </div>
+                  <div className="cs-replace-image-modal__filter-group">
+                    <strong>Last Modified</strong>
+                    {[
+                      "Today",
+                      "Current week",
+                      "Current month",
+                      "Custom ranges",
+                    ].map((filter, index) => (
+                      <label key={`modified-${filter}`}>
+                        <span
+                          className={index === 0 ? "is-selected" : ""}
+                          aria-hidden="true"
+                        />
+                        {filter}
+                      </label>
+                    ))}
+                  </div>
+                </aside>
+                <section className="cs-replace-image-modal__content">
+                  <div className="cs-replace-image-modal__toolbar">
+                    <div className="cs-replace-image-modal__search">
+                      <span aria-hidden="true" />
+                      <input
+                        placeholder="Search image"
+                        aria-label="Search image"
+                      />
+                    </div>
+                  </div>
+                  <div className="cs-replace-image-modal__content-header">
+                    <h3>Images ({libraryAssets.length})</h3>
+                  </div>
+                  <div className="cs-image-options">
+                    {libraryAssets.map((option) => (
+                      <button
+                        type="button"
+                        key={option.id}
+                        className={
+                          pendingAssetId === option.id ? "is-selected" : ""
+                        }
+                        onClick={() => setPendingAssetId(option.id)}
+                      >
+                        <span className="cs-image-options__preview">
+                          <img src={option.src} alt="" />
+                          {pendingAssetId === option.id && (
+                            <span
+                              className="cs-image-options__check"
+                              aria-hidden="true"
+                            >
+                              ✓
+                            </span>
+                          )}
+                        </span>
+                        <span className="cs-image-options__meta">
+                          <strong>{option.label}</strong>
+                          <small>{option.meta}</small>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              </div>
+              <div className="cs-modal__footer cs-replace-image-modal__footer amp-asset-modal__footer">
+                <button
+                  type="button"
+                  className="cs-btn cs-btn--ghost"
+                  onClick={() => setShowAssetModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="cs-btn cs-btn--secondary"
+                  onClick={() => uploadAssetInputRef.current?.click()}
+                >
+                  Upload Asset
+                </button>
+                <button
+                  type="button"
+                  className="cs-btn cs-btn--primary"
+                  onClick={confirmAssetSelection}
+                  disabled={!pendingAsset}
+                >
+                  Select Asset
+                </button>
+              </div>
+            </div>
+          </div>
+        </OverlayPortal>
+      )}
+    </>
   );
 };
 
@@ -2382,12 +2673,7 @@ export const EmployeeAdvocacyWorkspace: React.FC = () => {
       </a>
       <aside className="eaw-nav" aria-label="Employee advocacy navigation">
         <div className="eaw-brand">
-          <img
-            className="eaw-brand-logo"
-            src={oneHealthLogo}
-            alt=""
-            aria-hidden="true"
-          />
+          <OneHealthLogoMark className="eaw-brand-logo" />
           <div>
             <strong>One Health</strong>
             <span>Employee Advocacy</span>

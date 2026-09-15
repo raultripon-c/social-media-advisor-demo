@@ -78,7 +78,10 @@
   height: 24px;
   flex: 0 0 auto;
   display: block;
-  object-fit: contain;
+}
+
+.eaw-brand-logo.one-health-logo-mark {
+  border-radius: 999px;
 }
 
 .eaw-nav nav {
@@ -2322,6 +2325,36 @@
   background: rgba(18, 26, 28, 0.45);
 }
 
+.eaw-overlay--side {
+  align-items: stretch;
+  justify-content: flex-end;
+  padding: 0;
+}
+
+.eaw-asset-selection-modal__backdrop {
+  z-index: 1100;
+}
+
+.eaw-asset-upload-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.eaw-asset-empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
 .eaw-drawer {
   width: min(680px, calc(100vw - 48px));
   max-height: calc(100vh - 48px);
@@ -2334,7 +2367,33 @@
 }
 
 .eaw-drawer--suggestion {
-  width: min(600px, calc(100vw - 48px));
+  width: min(520px, 100vw);
+}
+
+.eaw-drawer--from-right {
+  max-height: none;
+  height: 100%;
+  border-radius: 0;
+  box-shadow: -8px 0 32px rgba(18, 26, 28, 0.12);
+  animation: eaw-drawer-slide-in 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes eaw-drawer-slide-in {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+.eaw-drawer--suggestion .eaw-drawer__header {
+  align-items: center;
+}
+
+.eaw-drawer__content--suggestion {
+  gap: var(--spacing-spacing-4xl, 24px);
 }
 
 .eaw-drawer__header {
@@ -2458,16 +2517,28 @@
 .eaw-suggestion-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-top: 16px;
+  gap: 24px;
   width: 100%;
+}
+
+.eaw-suggestion-form .eaw-field {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  margin: 0;
+  width: 100%;
+}
+
+.eaw-suggestion-form .eaw-field > * {
+  margin-block: 0;
 }
 
 .eaw-field {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 6px;
+  gap: var(--spacing-spacing-lg, 8px);
   width: 100%;
 }
 
@@ -2820,11 +2891,20 @@
   }
 
   .eaw-drawer,
-  .eaw-drawer--suggestion,
   .eaw-drawer--points-guide,
   .eaw-share-modal {
     width: calc(100vw - 32px);
     max-height: calc(100vh - 32px);
+  }
+
+  .eaw-drawer--suggestion.eaw-drawer--from-right {
+    width: 100vw;
+    max-height: none;
+    height: 100%;
+  }
+
+  .eaw-overlay--side {
+    padding: 0;
   }
 
   .eaw-share-modal__stats {
@@ -2859,5 +2939,9 @@
   .eaw-shell *::after {
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .eaw-drawer--from-right {
+    animation: none;
   }
 }

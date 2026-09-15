@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 
+import { isAdvocacyDemoSwitcherRoute } from "../../../utils/smaDemo";
+
 const STORAGE_KEY = "txe.advocacy-demo-view";
+export const ADVOCACY_DEMO_VIEW_EVENT = "txeAdvocacyDemoViewChange";
 
 export type AdvocacyDemoView = "employee" | "admin";
 
@@ -13,12 +16,27 @@ function readStoredView(): AdvocacyDemoView {
 
 export function useAdvocacyDemoView() {
   const location = useLocation();
-  const isCampaignStudio = location.pathname.includes("/campaign-studio/");
+  const isCampaignStudio = /\/campaign-studio/i.test(location.pathname);
   const [view, setView] = useState<AdvocacyDemoView>(readStoredView);
 
   const switchView = useCallback((next: AdvocacyDemoView) => {
     setView(next);
     sessionStorage.setItem(STORAGE_KEY, next);
+    window.dispatchEvent(
+      new CustomEvent(ADVOCACY_DEMO_VIEW_EVENT, { detail: next }),
+    );
+  }, []);
+
+  useEffect(() => {
+    const onViewChange = (event: Event) => {
+      const detail = (event as CustomEvent<AdvocacyDemoView>).detail;
+      if (detail === "admin" || detail === "employee") {
+        setView(detail);
+      }
+    };
+
+    window.addEventListener(ADVOCACY_DEMO_VIEW_EVENT, onViewChange);
+    return () => window.removeEventListener(ADVOCACY_DEMO_VIEW_EVENT, onViewChange);
   }, []);
 
   useEffect(() => {
@@ -40,12 +58,15 @@ export function useAdvocacyDemoView() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [switchView]);
 
-  const showEmployeeWorkspace = isCampaignStudio && view === "employee";
+  const isAdvocacyDemoRoute = isAdvocacyDemoSwitcherRoute(location.pathname);
+  const showEmployeeWorkspace = isAdvocacyDemoRoute && view === "employee";
+  const showSwitcher = isAdvocacyDemoRoute;
 
   return {
     view,
     isCampaignStudio,
     showEmployeeWorkspace,
+    showSwitcher,
     switchView,
   };
 }

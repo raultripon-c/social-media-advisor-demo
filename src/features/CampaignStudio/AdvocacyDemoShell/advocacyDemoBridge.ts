@@ -156,6 +156,51 @@ export const approveEmployeeSuggestion = (suggestionId: string) => {
   dispatchAdvocacyBridgeUpdate();
 };
 
+export const dismissEmployeeSuggestion = (suggestionId: string) => {
+  const workspace = loadEmployeeWorkspaceSync();
+  saveEmployeeWorkspaceSync({
+    ...workspace,
+    suggestions: workspace.suggestions.map((suggestion) =>
+      suggestion.id === suggestionId
+        ? {
+            ...suggestion,
+            status: "rejected",
+            feedback: "Dismissed by administrator.",
+          }
+        : suggestion,
+    ),
+  });
+  dispatchAdvocacyBridgeUpdate();
+};
+
+export const returnEmployeeSuggestionWithEdits = (
+  suggestionId: string,
+  updates: {
+    title: string;
+    text: string;
+    platforms: PostSuggestion["platforms"];
+    assetId?: string;
+    assetName?: string;
+  },
+) => {
+  const workspace = loadEmployeeWorkspaceSync();
+  saveEmployeeWorkspaceSync({
+    ...workspace,
+    suggestions: workspace.suggestions.map((suggestion) =>
+      suggestion.id === suggestionId
+        ? {
+            ...suggestion,
+            ...updates,
+            status: "changes_requested",
+            feedback:
+              "An administrator made edits and sent this suggestion back for your review.",
+          }
+        : suggestion,
+    ),
+  });
+  dispatchAdvocacyBridgeUpdate();
+};
+
 export const getEmployeeSuggestionById = (
   suggestionId: string,
 ): PostSuggestion | undefined =>

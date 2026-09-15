@@ -1,0 +1,48 @@
+.sma-demo-app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 56px;
+  padding: 8px 24px;
+  border-bottom: 1px solid var(--neutrals-nn-50, #e8eaee);
+  background: var(--Core-White, #fff);
+}
+
+.sma-demo-app-header__left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.sma-demo-app-header__tenant {
+  margin: 0;
+  color: var(--neutrals-nn-500, #353b46);
+  font-family: var(--family-body, Poppins), system-ui, sans-serif;
+  font-size: var(--size-font-size-base, 14px);
+  font-weight: var(--weight-medium, 500);
+  line-height: var(--line-height-line-height-md, 20px);
+  letter-spacing: 0.3px;
+}
+
+.sma-demo-shell--stacked {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.sma-demo-shell--stacked > .sma-demo-app-header {
+  flex: 0 0 auto;
+}
+
+.sma-demo-shell--stacked > .eaw-shell,
+.sma-demo-shell--stacked > .service-tools-app-layout--sma-demo {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.sma-demo-shell--stacked .eaw-shell {
+  min-height: 0;
+  height: 100%;
+}

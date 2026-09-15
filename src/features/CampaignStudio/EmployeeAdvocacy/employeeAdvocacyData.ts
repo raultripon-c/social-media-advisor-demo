@@ -319,6 +319,7 @@ const seedData: WorkspaceData = {
       assetName: "sustainability-week.jpg",
       status: "pending",
       submittedAt: "2026-09-08T17:05:00.000Z",
+      createdByName: "Ann Smith",
     },
     {
       id: "suggestion-2",
@@ -330,6 +331,7 @@ const seedData: WorkspaceData = {
       assetName: "marcus-five-year-story.jpg",
       status: "changes_requested",
       submittedAt: "2026-08-12T10:15:00.000Z",
+      createdByName: "Jeff Carey",
       feedback:
         "Please add the intended audience and confirm that participants have approved the quotes.",
     },
@@ -343,6 +345,7 @@ const seedData: WorkspaceData = {
       assetName: "engineering-team-sharepack.jpg",
       status: "approved",
       submittedAt: "2026-08-05T14:30:00.000Z",
+      createdByName: "Paul Campman",
     },
     {
       id: "suggestion-4",
@@ -354,6 +357,7 @@ const seedData: WorkspaceData = {
       assetName: "nursing-growth-story.jpg",
       status: "rejected",
       submittedAt: "2026-07-28T09:45:00.000Z",
+      createdByName: "James Wilson",
       feedback: "This topic is already covered in an active campaign.",
     },
   ],
@@ -363,6 +367,23 @@ export const suggestionAssetOptions = initialSharepacks.map((sharepack) => ({
   label: sharepack.assetName,
   value: sharepack.id,
 }));
+
+export type SuggestionLibraryAsset = {
+  id: string;
+  label: string;
+  src: string;
+  meta: string;
+  assetName: string;
+};
+
+export const suggestionLibraryAssets: SuggestionLibraryAsset[] =
+  initialSharepacks.map((sharepack) => ({
+    id: sharepack.id,
+    label: sharepack.campaignName,
+    src: sharepack.image,
+    meta: "Campaign image · JPG",
+    assetName: sharepack.assetName,
+  }));
 
 const cloneSeed = (): WorkspaceData => JSON.parse(JSON.stringify(seedData));
 
@@ -416,6 +437,10 @@ const mergeWorkspaceData = (parsed: Partial<WorkspaceData> | null): WorkspaceDat
             ...(seed || {}),
             ...suggestion,
             title: suggestion.title || seed?.title || "Untitled suggestion",
+            createdByName:
+              suggestion.createdByName ||
+              seed?.createdByName ||
+              seedData.profile.name,
             platforms:
               suggestion.platforms?.length
                 ? suggestion.platforms
@@ -459,18 +484,22 @@ export const employeeAdvocacyAdapter = {
   },
 
   createSuggestion(draft: SuggestionDraft): PostSuggestion {
+    const workspace = loadEmployeeWorkspaceSync();
     const asset = initialSharepacks.find(
       (sharepack) => sharepack.id === draft.assetId,
     );
+    const isUploadedAsset = draft.assetId.startsWith("suggestion-upload-");
     return {
       id: `suggestion-${Date.now()}`,
       title: draft.title.trim(),
       text: draft.text.trim(),
       platforms: draft.platforms,
       assetId: draft.assetId,
-      assetName: asset?.assetName,
+      assetName: asset?.assetName || draft.uploadedAssetName,
+      assetImageSrc: isUploadedAsset ? draft.uploadedAssetSrc : undefined,
       status: "pending",
       submittedAt: new Date().toISOString(),
+      createdByName: workspace.profile.name,
     };
   },
 };

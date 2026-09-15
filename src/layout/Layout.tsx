@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { AppStore } from "store";
 import { GenericErrorBoundary } from "../remote-modules/ReactAppRenderer";
 import { CampaignStudioEmployeeFullscreen } from "../features/CampaignStudio/AdvocacyDemoShell/CampaignStudioAdvocacyDemoGate";
+import { SmaDemoAppHeader } from "../features/CampaignStudio/AdvocacyDemoShell/SmaDemoAppHeader";
 import { useAdvocacyDemoView } from "../features/CampaignStudio/AdvocacyDemoShell/useAdvocacyDemoView";
 import Tenants from "../screens/tenants/Tenants";
 import AppLayout from "./AppLayout";
@@ -144,13 +145,24 @@ const Layout = () => {
   }
 
   if (showEmployeeWorkspace) {
-    return <CampaignStudioEmployeeFullscreen />;
+    return (
+      <div className="sma-demo-shell">
+        {keycloakAvailable && <CampaignStudioEmployeeFullscreen />}
+      </div>
+    );
   }
 
   if (isSmaDemoOnly) {
     return (
-      <div className="sma-demo-shell">
-        {keycloakAvailable && <AppLayout allApps={allApps} />}
+      <div className="sma-demo-shell sma-demo-shell--stacked">
+        {keycloakAvailable && (
+          <>
+            <SmaDemoAppHeader
+              tenantName={rebrandTenantName(selectedTenant?.tenantName ?? "One Health")}
+            />
+            <AppLayout allApps={allApps} />
+          </>
+        )}
       </div>
     );
   }

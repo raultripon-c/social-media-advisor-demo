@@ -1,0 +1,22 @@
+.advocacy-demo-view-switcher-overlay {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 1200;
+  pointer-events: none;
+}
+
+.advocacy-demo-view-switcher {
+  pointer-events: auto;
+  --cs-switch-radius: 8px;
+  border-radius: var(--cs-switch-radius);
+  box-shadow: 0 4px 14px rgba(53, 59, 70, 0.14);
+}
+
+.advocacy-demo-view-switcher.cs-switch-button button {
+  height: 32px;
+  padding: 0 12px;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.2px;
+}

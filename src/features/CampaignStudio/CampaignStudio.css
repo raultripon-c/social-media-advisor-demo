@@ -4464,11 +4464,29 @@ body:has(.campaign-studio--wizard) {
   text-transform: uppercase;
 }
 
-.cs-facebook-post__domain img {
+.cs-facebook-post__domain img,
+.cs-facebook-post__domain-logo {
   width: 12px;
   height: 12px;
+  flex: 0 0 12px;
   border-radius: 2px;
   object-fit: cover;
+}
+
+.one-health-logo-mark {
+  display: block;
+  flex-shrink: 0;
+}
+
+.cs-post__avatar.one-health-logo-mark,
+.cs-linkedin-post__avatar.one-health-logo-mark,
+.cs-instagram-post__avatar.one-health-logo-mark,
+.cs-facebook-post__avatar.one-health-logo-mark,
+.cs-x-post__avatar.one-health-logo-mark {
+  background: transparent;
+  clip-path: none;
+  box-shadow: none;
+  object-fit: unset;
 }
 
 .cs-facebook-post__link strong {
@@ -4901,6 +4919,31 @@ body:has(.campaign-studio--wizard) {
 
 .cs-drawer__image-wrap:hover .cs-drawer__regen {
   display: inline-flex;
+}
+
+.cs-drawer__image-wrap--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+  padding: 16px;
+  border: 1px solid var(--neutrals-nn-75, #d1d5dc);
+  background: var(--grays-grgr-25, #f8f9fb);
+}
+
+.cs-drawer__image-wrap--empty::after {
+  display: none;
+}
+
+.cs-drawer__image-wrap--empty .cs-drawer__regen {
+  position: static;
+  display: inline-flex;
+  transform: none;
+  box-shadow: none;
+}
+
+.cs-drawer__image-wrap--empty .cs-drawer__regen:active {
+  transform: none;
 }
 
 .cs-drawer__footer {

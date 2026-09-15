@@ -134,10 +134,12 @@ export interface PostSuggestion {
   platforms: AdvocacyPlatform[];
   assetId?: string;
   assetName?: string;
+  assetImageSrc?: string;
   destinationUrl?: string;
   context?: string;
   status: SuggestionStatus;
   submittedAt: string;
+  createdByName?: string;
   feedback?: string;
 }
 
@@ -146,6 +148,8 @@ export interface SuggestionDraft {
   text: string;
   platforms: AdvocacyPlatform[];
   assetId: string;
+  uploadedAssetName?: string;
+  uploadedAssetSrc?: string;
 }
 
 export type AdvocacyEventName =

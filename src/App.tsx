@@ -2,6 +2,7 @@ import ReactKeycloakProvider from "phenom-auth-react-adapter";
 import React, { useEffect } from "react";
 import "react-toastify/dist/ReactToastify.css";
 import "../index.scss";
+import { AdvocacyDemoViewSwitcher } from "./features/CampaignStudio/AdvocacyDemoShell/AdvocacyDemoViewSwitcher";
 import Layout from "./layout/Layout";
 import { InitialLoader } from "./layout/Loader";
 import { LocalPreviewKeycloakProvider } from "./layout/LocalPreviewKeycloakProvider";
@@ -53,6 +54,7 @@ const App = (): JSX.Element => {
       value={{ autoGenerateCandidateJourneysOnSidebarNav }}
     >
       <Layout />
+      <AdvocacyDemoViewSwitcher />
     </FeatureFlagsProvider>
   );
 
