@@ -656,7 +656,7 @@ export const DispatchWizard: React.FC<DispatchWizardProps> = ({
                 </button>
               </div>
               <div className="amp-post-preview__body">
-                <strong>Duke Health</strong>
+                <strong>One Health</strong>
                 <p>{selectedCaptionTexts[0]?.text || "Select captions to preview."}</p>
                 <a href={resolvedCtaDestination || "#"} target="_blank" rel="noreferrer">
                   {resolvedCtaLabel}
@@ -995,7 +995,7 @@ export const DispatchWizard: React.FC<DispatchWizardProps> = ({
               <div className="amp-email-preview__chrome">
                 <div className="amp-email-preview__meta-row">
                   <span>From</span>
-                  <strong>Talent Brand · Duke Health</strong>
+                  <strong>Talent Brand · One Health</strong>
                 </div>
                 <div className="amp-email-preview__meta-row">
                   <span>To</span>
@@ -1071,7 +1071,7 @@ export const DispatchWizard: React.FC<DispatchWizardProps> = ({
                 </div>
 
                 <p className="amp-email-preview__footer">
-                  Thanks for helping candidates discover careers at Duke Health. If you have questions, reply to this
+                  Thanks for helping candidates discover careers at One Health. If you have questions, reply to this
                   email.
                 </p>
               </div>

@@ -16,6 +16,7 @@ import HeaderDropdown from "../HeaderDropdown/HeaderDropdown";
 
 import { setAppDetails, setIsCMSFilterApiCompleted, setIsCRMFilterApiCompleted, setSidebarState } from "../../store/apps/actions";
 import { TENANT } from "../../utils/constants";
+import { rebrandTenantName } from "../../features/CampaignStudio/demoBrand";
 import "./Header.scss";
 
 declare global {
@@ -137,7 +138,7 @@ function Header({
         {selectedTenant?.customerName && app && app?.context !== "platform" && (
           <div className="tenant-selection">
             <p className="header-selected-customer">
-              {selectedTenant?.tenantName}
+              {rebrandTenantName(selectedTenant?.tenantName)}
             </p>
             {/* {customerTenants.length > 1 &&
               !window.location.pathname.includes("summary") && (

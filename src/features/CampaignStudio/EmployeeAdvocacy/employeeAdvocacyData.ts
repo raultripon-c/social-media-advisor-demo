@@ -3,6 +3,7 @@ import earthDayImage from "../../../assets/campaign-studio/amplify/amp-pack-eart
 import milestoneImage from "../../../assets/campaign-studio/amplify/amp-pack-marcus-5yr.jpg";
 import nursingImage from "../../../assets/campaign-studio/amplify/amp-pack-rn-journey.jpg";
 import hiringFairImage from "../../../assets/campaign-studio/amplify/amp-pack-sales-fair.jpg";
+import { rebrandDemoValue } from "../demoBrand";
 import {
   AdvocacyEventName,
   Advocate,
@@ -12,7 +13,7 @@ import {
   WorkspaceData,
 } from "./types";
 
-export const EMPLOYEE_WORKSPACE_STORAGE_KEY = "txe.employee-advocacy.workspace.v1";
+export const EMPLOYEE_WORKSPACE_STORAGE_KEY = "txe.employee-advocacy.workspace.v2";
 const STORAGE_KEY = EMPLOYEE_WORKSPACE_STORAGE_KEY;
 
 const withTracking = (destination: string, campaign: string, content: string) => {
@@ -34,9 +35,9 @@ const initialSharepacks: Sharepack[] = [
     caption:
       "The best technology starts with a meaningful problem. Our engineering teams build tools that help caregivers and patients every day. Explore open roles and share with someone who would thrive here.",
     destinationLabel: "Explore engineering roles",
-    destinationUrl: "https://careers.dukehealth.org/engineering",
+    destinationUrl: "https://careers.onehealth.org/engineering",
     utmUrl: withTracking(
-      "https://careers.dukehealth.org/engineering",
+      "https://careers.onehealth.org/engineering",
       "atlanta-engineering",
       "employee-workspace",
     ),
@@ -57,11 +58,11 @@ const initialSharepacks: Sharepack[] = [
     description:
       "Help experienced nurses discover a team where clinical excellence and career development go together.",
     caption:
-      "Growth looks different for every nurse. At Duke Health, it can mean deepening a specialty, mentoring teammates, or stepping into leadership. See where your nursing career could go next.",
+      "Growth looks different for every nurse. At One Health, it can mean deepening a specialty, mentoring teammates, or stepping into leadership. See where your nursing career could go next.",
     destinationLabel: "View nursing careers",
-    destinationUrl: "https://careers.dukehealth.org/nursing",
+    destinationUrl: "https://careers.onehealth.org/nursing",
     utmUrl: withTracking(
-      "https://careers.dukehealth.org/nursing",
+      "https://careers.onehealth.org/nursing",
       "nursing-career-stories",
       "employee-workspace",
     ),
@@ -84,9 +85,9 @@ const initialSharepacks: Sharepack[] = [
     caption:
       "Care for people includes care for the places we share. I’m proud of how our teams turned Sustainability Week into practical action for healthier communities.",
     destinationLabel: "Learn about our culture",
-    destinationUrl: "https://careers.dukehealth.org/benefits",
+    destinationUrl: "https://careers.onehealth.org/benefits",
     utmUrl: withTracking(
-      "https://careers.dukehealth.org/benefits",
+      "https://careers.onehealth.org/benefits",
       "sustainability-week",
       "employee-workspace",
     ),
@@ -107,13 +108,13 @@ const initialSharepacks: Sharepack[] = [
     title: "Fall event season",
     campaignName: "Industry Events",
     description:
-      "Share where Phenom is meeting talent leaders this fall and invite your network to connect with the team.",
+      "Share where One Health is meeting talent leaders this fall and invite your network to connect with the team.",
     caption:
-      "The fall schedule is set. NYC, DC, San Diego, Toronto, London, Las Vegas, Paris, Orlando, Hyderabad. Phenom is showing up everywhere talent leaders are gathering this season...",
+      "The fall schedule is set. NYC, DC, San Diego, Toronto, London, Las Vegas, Paris, Orlando, Hyderabad. One Health is showing up everywhere talent leaders are gathering this season...",
     destinationLabel: "View event calendar",
-    destinationUrl: "https://www.phenom.com/events",
+    destinationUrl: "https://careers.onehealth.org/events",
     utmUrl: withTracking(
-      "https://www.phenom.com/events",
+      "https://careers.onehealth.org/events",
       "fall-events",
       "employee-workspace",
     ),
@@ -137,10 +138,10 @@ const initialSharepacks: Sharepack[] = [
       "Share Marcus’s career story and celebrate the teammates who make long-term growth possible.",
     caption:
       "Five years in, and there are still new things to learn and new ways to make an impact. Stories like Marcus’s are a reminder that careers grow when people support one another.",
-    destinationLabel: "Explore life at Duke Health",
-    destinationUrl: "https://careers.dukehealth.org/",
+    destinationLabel: "Explore life at One Health",
+    destinationUrl: "https://careers.onehealth.org/",
     utmUrl: withTracking(
-      "https://careers.dukehealth.org/",
+      "https://careers.onehealth.org/",
       "employee-milestones",
       "employee-workspace",
     ),
@@ -163,9 +164,9 @@ const initialSharepacks: Sharepack[] = [
     caption:
       "Meet our team and learn about open roles at the upcoming hiring fair.",
     destinationLabel: "Hiring fair details",
-    destinationUrl: "https://careers.dukehealth.org/events",
+    destinationUrl: "https://careers.onehealth.org/events",
     utmUrl: withTracking(
-      "https://careers.dukehealth.org/events",
+      "https://careers.onehealth.org/events",
       "sales-hiring-fair",
       "employee-workspace",
     ),
@@ -347,7 +348,7 @@ const seedData: WorkspaceData = {
       id: "suggestion-4",
       title: "Nursing growth story",
       text:
-        "Growth looks different for every nurse. At Duke Health, it can mean deepening a specialty, mentoring teammates, or stepping into leadership.",
+        "Growth looks different for every nurse. At One Health, it can mean deepening a specialty, mentoring teammates, or stepping into leadership.",
       platforms: ["linkedin", "instagram"],
       assetId: "sp-nursing",
       assetName: "nursing-growth-story.jpg",
@@ -430,7 +431,7 @@ export const loadEmployeeWorkspaceSync = (): WorkspaceData => {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return cloneSeed();
-    return mergeWorkspaceData(JSON.parse(raw) as WorkspaceData);
+    return mergeWorkspaceData(rebrandDemoValue(JSON.parse(raw) as WorkspaceData));
   } catch {
     return cloneSeed();
   }
@@ -447,7 +448,7 @@ export const employeeAdvocacyAdapter = {
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY);
       if (!raw) return cloneSeed();
-      return mergeWorkspaceData(JSON.parse(raw) as WorkspaceData);
+      return mergeWorkspaceData(rebrandDemoValue(JSON.parse(raw) as WorkspaceData));
     } catch {
       return cloneSeed();
     }

@@ -23,7 +23,7 @@ import {
   VideoSubmissionStatus,
 } from "./amplifyTypes";
 
-const BRAND = "Duke Health";
+const BRAND = "One Health";
 
 const captions = (lines: string[]): ShareCaption[] =>
   lines.map((text, index) => ({ id: `cap-${index + 1}`, text }));
@@ -83,7 +83,7 @@ export const demoSharePacks: SharePack[] = [
     thumbnailUrl: atlEngineeringThumb,
     mediaType: "video",
     ctaLabel: "Explore engineering roles",
-    ctaDestination: "https://careers.dukehealth.org/engineering",
+    ctaDestination: "https://careers.onehealth.org/engineering",
     utmPreview: utm("atl-eng-hiring"),
     captions: captions([
       `We're hiring engineers in Atlanta who want to build tools that help caregivers. See open roles at ${BRAND}.`,
@@ -109,7 +109,7 @@ export const demoSharePacks: SharePack[] = [
     thumbnailUrl: rnJourneyThumb,
     mediaType: "video",
     ctaLabel: "View nursing careers",
-    ctaDestination: "https://careers.dukehealth.org/nursing",
+    ctaDestination: "https://careers.onehealth.org/nursing",
     utmPreview: utm("rn-journey"),
     captions: captions([
       `From first shift to charge nurse, growth stories like this are why I love ${BRAND}.`,
@@ -137,7 +137,7 @@ export const demoSharePacks: SharePack[] = [
     thumbnailUrl: earthDayThumb,
     mediaType: "image",
     ctaLabel: "Join our talent community",
-    ctaDestination: "https://careers.dukehealth.org/talent-community",
+    ctaDestination: "https://careers.onehealth.org/talent-community",
     utmPreview: utm("earth-day-culture"),
     captions: captions([
       `Earth Day at ${BRAND}: small actions, big care for our communities.`,
@@ -164,7 +164,7 @@ export const demoSharePacks: SharePack[] = [
     thumbnailUrl: salesFairThumb,
     mediaType: "image",
     ctaLabel: "RSVP / open sales roles",
-    ctaDestination: "https://careers.dukehealth.org/events/sales-fair",
+    ctaDestination: "https://careers.onehealth.org/events/sales-fair",
     utmPreview: utm("sales-hiring-fair"),
     captions: captions([
       `Sales hiring fair this week. Come meet the ${BRAND} team.`,
@@ -191,7 +191,7 @@ export const demoSharePacks: SharePack[] = [
     thumbnailUrl: marcusThumb,
     mediaType: "video",
     ctaLabel: "Explore nursing roles",
-    ctaDestination: "https://careers.dukehealth.org/nursing",
+    ctaDestination: "https://careers.onehealth.org/nursing",
     utmPreview: utm("5yr-marcus"),
     captions: captions([
       `Five years in and still growing. Proud of teammates like Marcus at ${BRAND}.`,
@@ -239,7 +239,7 @@ export const demoVideoSubmissionsByRequestId: Record<string, VideoSubmission[]> 
     {
       id: "vsub-marketing-3",
       name: "Marcus Chen",
-      email: "marcus.chen@dukehealth.org",
+      email: "marcus.chen@onehealth.org",
       jobTitle: "Marketing Coordinator",
       location: "Durham, NC",
       tags: ["Marketing", "Testimonials"],
@@ -253,7 +253,7 @@ export const demoVideoSubmissionsByRequestId: Record<string, VideoSubmission[]> 
     {
       id: "vsub-marketing-4",
       name: "Aisha Rahman",
-      email: "aisha.rahman@dukehealth.org",
+      email: "aisha.rahman@onehealth.org",
       jobTitle: "Content Strategist",
       location: "Raleigh, NC",
       tags: ["Marketing"],
@@ -267,7 +267,7 @@ export const demoVideoSubmissionsByRequestId: Record<string, VideoSubmission[]> 
     {
       id: "vsub-marketing-5",
       name: "Jordan Blake",
-      email: "jordan.blake@dukehealth.org",
+      email: "jordan.blake@onehealth.org",
       jobTitle: "Employer Brand Lead",
       location: "Durham, NC",
       tags: ["Testimonials"],
@@ -281,7 +281,7 @@ export const demoVideoSubmissionsByRequestId: Record<string, VideoSubmission[]> 
     {
       id: "vsub-marketing-6",
       name: "Priya Patel",
-      email: "priya.patel@dukehealth.org",
+      email: "priya.patel@onehealth.org",
       jobTitle: "Clinical Support Specialist",
       location: "Chapel Hill, NC",
       tags: ["Marketing", "Approved"],
@@ -295,7 +295,7 @@ export const demoVideoSubmissionsByRequestId: Record<string, VideoSubmission[]> 
     {
       id: "vsub-marketing-7",
       name: "Elena Vasquez",
-      email: "elena.vasquez@dukehealth.org",
+      email: "elena.vasquez@onehealth.org",
       jobTitle: "Radiology Technologist",
       location: "Durham, NC",
       tags: ["Testimonials"],
@@ -309,7 +309,7 @@ export const demoVideoSubmissionsByRequestId: Record<string, VideoSubmission[]> 
     {
       id: "vsub-marketing-8",
       name: "Sam Okonkwo",
-      email: "sam.okonkwo@dukehealth.org",
+      email: "sam.okonkwo@onehealth.org",
       jobTitle: "Clinical Support",
       location: "Durham, NC",
       tags: [],
@@ -337,7 +337,7 @@ export const demoVideoRequests: SharePack[] = [
     thumbnailUrl: marcusThumb,
     mediaType: "video",
     ctaLabel: "Nursing careers",
-    ctaDestination: "https://careers.dukehealth.org/nursing",
+    ctaDestination: "https://careers.onehealth.org/nursing",
     utmPreview: utm("video-request-marketing-testimonials"),
     captions: [
       {
@@ -353,7 +353,7 @@ export const demoVideoRequests: SharePack[] = [
       persona: "external",
       landingPageId: "nursing-careers",
       landingPageLabel: "Nursing careers",
-      landingPageUrl: "https://careers.dukehealth.org/nursing",
+      landingPageUrl: "https://careers.onehealth.org/nursing",
       introTitle: "Welcome to your Video Capture request!",
       introDescription:
         "We are looking for an authentic video. Remember to smile and have fun! Follow the instructions below to complete your video.",
@@ -377,7 +377,7 @@ export const demoVideoRequests: SharePack[] = [
     thumbnailUrl: rnJourneyThumb,
     mediaType: "video",
     ctaLabel: "Explore nursing roles",
-    ctaDestination: "https://careers.dukehealth.org/nursing",
+    ctaDestination: "https://careers.onehealth.org/nursing",
     utmPreview: utm("video-request-nursing-stories"),
     captions: [
       {
@@ -392,7 +392,7 @@ export const demoVideoRequests: SharePack[] = [
       persona: "internal",
       landingPageId: "nursing-roles",
       landingPageLabel: "Explore nursing roles",
-      landingPageUrl: "https://careers.dukehealth.org/nursing",
+      landingPageUrl: "https://careers.onehealth.org/nursing",
       introTitle: "Welcome to your Video Capture request!",
       introDescription:
         "We are looking for an authentic video. Remember to smile and have fun! Follow the instructions below to complete your video.",
@@ -445,39 +445,39 @@ export const dispatchTemplates: DispatchTemplate[] = [
 ];
 
 export const dispatchCaptionPool = captions([
-  `Proud to work at ${BRAND} — and we're hiring.\n\nIf you know someone who'd thrive in healthcare, this is worth sharing.\n\nLink in the pack below.\n\n#DukeHealth #HealthcareCareers #Hiring #EmployeeAdvocacy`,
-  `Real impact. Real teammates. Real growth.\n\nThat's why I share openings at ${BRAND} with my network.\n\nKnow someone looking? Pass this along.\n\n#DukeHealth #Careers #HealthcareJobs #WorkWithPurpose`,
-  `Not every job post gets a personal recommendation — this one does.\n\n${BRAND} is growing, and employee referrals matter here.\n\nShare if someone in your network is exploring.\n\n#DukeHealth #Referrals #Healthcare #NowHiring`,
-  `Culture isn't a slide deck. It's how people show up every day.\n\nGrateful to share what working at ${BRAND} actually feels like.\n\n#DukeHealth #CompanyCulture #Healthcare #TeamDuke`,
-  `Great care starts with great people — and we're looking for more of both.\n\nExplore open roles at ${BRAND} and share with someone who'd be a fit.\n\n#DukeHealth #HealthcareHeroes #Careers #JoinOurTeam`,
-  `I'd want someone to send me this if roles like these opened up.\n\nSharing ${BRAND} careers with my LinkedIn network today.\n\n#DukeHealth #OpenToWork #HealthcareCareers #EmployeeShare`,
-  `Mission-driven work, supportive teams, room to grow.\n\nIf healthcare is calling for someone you know, start here.\n\n#DukeHealth #PurposeDriven #HealthcareJobs #CareerGrowth`,
+  `Proud to work at ${BRAND} — and we're hiring.\n\nIf you know someone who'd thrive in healthcare, this is worth sharing.\n\nLink in the pack below.\n\n#OneHealth #HealthcareCareers #Hiring #EmployeeAdvocacy`,
+  `Real impact. Real teammates. Real growth.\n\nThat's why I share openings at ${BRAND} with my network.\n\nKnow someone looking? Pass this along.\n\n#OneHealth #Careers #HealthcareJobs #WorkWithPurpose`,
+  `Not every job post gets a personal recommendation — this one does.\n\n${BRAND} is growing, and employee referrals matter here.\n\nShare if someone in your network is exploring.\n\n#OneHealth #Referrals #Healthcare #NowHiring`,
+  `Culture isn't a slide deck. It's how people show up every day.\n\nGrateful to share what working at ${BRAND} actually feels like.\n\n#OneHealth #CompanyCulture #Healthcare #TeamOneHealth`,
+  `Great care starts with great people — and we're looking for more of both.\n\nExplore open roles at ${BRAND} and share with someone who'd be a fit.\n\n#OneHealth #HealthcareHeroes #Careers #JoinOurTeam`,
+  `I'd want someone to send me this if roles like these opened up.\n\nSharing ${BRAND} careers with my LinkedIn network today.\n\n#OneHealth #OpenToWork #HealthcareCareers #EmployeeShare`,
+  `Mission-driven work, supportive teams, room to grow.\n\nIf healthcare is calling for someone you know, start here.\n\n#OneHealth #PurposeDriven #HealthcareJobs #CareerGrowth`,
 ]);
 
 export const cmsDestinationPages = [
   {
-    label: "Duke Health homepage",
-    value: "https://www.dukehealth.org/",
+    label: "One Health homepage",
+    value: "https://www.onehealth.org/",
   },
   {
     label: "Careers homepage",
-    value: "https://careers.dukehealth.org/",
+    value: "https://careers.onehealth.org/",
   },
   {
     label: "Nursing careers",
-    value: "https://careers.dukehealth.org/nursing",
+    value: "https://careers.onehealth.org/nursing",
   },
   {
     label: "Engineering careers",
-    value: "https://careers.dukehealth.org/engineering",
+    value: "https://careers.onehealth.org/engineering",
   },
   {
     label: "Benefits and culture",
-    value: "https://careers.dukehealth.org/benefits",
+    value: "https://careers.onehealth.org/benefits",
   },
   {
     label: "All open jobs",
-    value: "https://careers.dukehealth.org/search-jobs",
+    value: "https://careers.onehealth.org/search-jobs",
   },
 ];
 
@@ -493,38 +493,38 @@ export const ctaPersonaOptions = [
 ];
 
 export const ctaJobOptions = [
-  { label: "Registered Nurse, PICU", value: "https://careers.dukehealth.org/job/durham/registered-nurse-picu/38342/64290942096" },
-  { label: "Nurse Practitioner", value: "https://careers.dukehealth.org/job/durham/nurse-practitioner/38342/64290942112" },
-  { label: "Medical Assistant", value: "https://careers.dukehealth.org/job/durham/medical-assistant/38342/64290942128" },
+  { label: "Registered Nurse, PICU", value: "https://careers.onehealth.org/job/durham/registered-nurse-picu/38342/64290942096" },
+  { label: "Nurse Practitioner", value: "https://careers.onehealth.org/job/durham/nurse-practitioner/38342/64290942112" },
+  { label: "Medical Assistant", value: "https://careers.onehealth.org/job/durham/medical-assistant/38342/64290942128" },
 ];
 
 export const ctaEventOptions = [
-  "Duke Health Nursing Hiring Event",
+  "One Health Nursing Hiring Event",
   "Clinical Careers Open House",
   "Virtual Nurse Recruitment Webinar",
   "Healthcare Career Fair",
   "Patient Care Networking Event",
 ].map((eventName) => ({
   label: eventName,
-  value: `https://careers.dukehealth.org/events/${eventName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`,
+  value: `https://careers.onehealth.org/events/${eventName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`,
 }));
 
 export const ctaBlogOptions = [
   {
-    label: "Life at Duke Health",
-    value: "https://careers.dukehealth.org/blog/life-at-duke-health",
+    label: "Life at One Health",
+    value: "https://careers.onehealth.org/blog/life-at-one-health",
   },
   {
     label: "Nursing career stories",
-    value: "https://careers.dukehealth.org/blog/nursing-career-stories",
+    value: "https://careers.onehealth.org/blog/nursing-career-stories",
   },
   {
-    label: "Why I joined Duke Health",
-    value: "https://careers.dukehealth.org/blog/why-i-joined-duke-health",
+    label: "Why I joined One Health",
+    value: "https://careers.onehealth.org/blog/why-i-joined-one-health",
   },
   {
     label: "Employee wellbeing spotlight",
-    value: "https://careers.dukehealth.org/blog/employee-wellbeing-spotlight",
+    value: "https://careers.onehealth.org/blog/employee-wellbeing-spotlight",
   },
 ];
 
@@ -631,16 +631,16 @@ export const formatCaptionForPicker = (text: string): string => {
 };
 
 const hashtagSets: Record<AmplifyBriefTheme, string> = {
-  nursing: "#DukeHealth #NursingCareers #RNJobs #HealthcareHeroes #NursingLife",
-  engineering: "#DukeHealth #TechCareers #HealthcareIT #EngineeringJobs #HealthTech",
-  sales: "#DukeHealth #SalesCareers #HealthcareSales #Hiring #CareerOpportunity",
-  erg: "#DukeHealth #WorkCulture #EmployeeResourceGroup #BelongingAtWork #Healthcare",
-  benefits: "#DukeHealth #EmployeeBenefits #WorkLifeBalance #HealthcareCareers #GreatPlaceToWork",
-  milestone: "#DukeHealth #EmployeeStory #CareerGrowth #Healthcare #TeamCelebration",
-  event: "#DukeHealth #HiringEvent #CareerFair #HealthcareJobs #Networking",
-  testimonial: "#DukeHealth #EmployeeVoice #HealthcareCareers #WorkCulture #ShareYourStory",
-  hiring: "#DukeHealth #NowHiring #HealthcareJobs #Careers #JoinOurTeam",
-  general: "#DukeHealth #HealthcareCareers #Hiring #EmployeeAdvocacy #WorkWithPurpose",
+  nursing: "#OneHealth #NursingCareers #RNJobs #HealthcareHeroes #NursingLife",
+  engineering: "#OneHealth #TechCareers #HealthcareIT #EngineeringJobs #HealthTech",
+  sales: "#OneHealth #SalesCareers #HealthcareSales #Hiring #CareerOpportunity",
+  erg: "#OneHealth #WorkCulture #EmployeeResourceGroup #BelongingAtWork #Healthcare",
+  benefits: "#OneHealth #EmployeeBenefits #WorkLifeBalance #HealthcareCareers #GreatPlaceToWork",
+  milestone: "#OneHealth #EmployeeStory #CareerGrowth #Healthcare #TeamCelebration",
+  event: "#OneHealth #HiringEvent #CareerFair #HealthcareJobs #Networking",
+  testimonial: "#OneHealth #EmployeeVoice #HealthcareCareers #WorkCulture #ShareYourStory",
+  hiring: "#OneHealth #NowHiring #HealthcareJobs #Careers #JoinOurTeam",
+  general: "#OneHealth #HealthcareCareers #Hiring #EmployeeAdvocacy #WorkWithPurpose",
 };
 
 const buildAiCaptions = (brief: string, theme: AmplifyBriefTheme, role: string): ShareCaption[] => {
@@ -651,12 +651,12 @@ const buildAiCaptions = (brief: string, theme: AmplifyBriefTheme, role: string):
     nursing: [
       formatSocialCaption(
         "Proud to work somewhere nurses actually grow into leaders.",
-        "From first shift to charge nurse — stories like this are why I stay at Duke Health.",
+        "From first shift to charge nurse — stories like this are why I stay at One Health.",
         "Know an RN looking for their next chapter? Worth sharing with your network.",
         tags,
       ),
       formatSocialCaption(
-        "Bedside care + real career pathways. That's the nursing story at Duke Health.",
+        "Bedside care + real career pathways. That's the nursing story at One Health.",
         "If you know a nurse who's ready for more than just another job posting, send this their way.",
         tags,
       ),
@@ -667,35 +667,35 @@ const buildAiCaptions = (brief: string, theme: AmplifyBriefTheme, role: string):
       ),
       formatSocialCaption(
         "The best referrals come from people who've lived the culture.",
-        "I'm sharing Duke Health nursing openings because I'd want someone to share them with me.",
+        "I'm sharing One Health nursing openings because I'd want someone to share them with me.",
         tags,
       ),
       formatSocialCaption(
-        "Healthcare needs great nurses. Duke Health is hiring.",
+        "Healthcare needs great nurses. One Health is hiring.",
         "Short version: meaningful work, supportive teams, and paths into leadership.",
         "Pass this to someone in your network who's exploring RN roles.",
         tags,
       ),
       formatSocialCaption(
         "Not every hospital invests in nurse development like this.",
-        "Proud to amplify nursing careers at Duke Health — link and captions in the pack.",
+        "Proud to amplify nursing careers at One Health — link and captions in the pack.",
         tags,
       ),
       formatSocialCaption(
-        "Thinking about nursing at Duke Health?",
+        "Thinking about nursing at One Health?",
         "Here's an easy share pack if you want to help someone in your network take the next step.",
         tags,
       ),
       formatSocialCaption(
         "Clinical excellence starts with the people behind the scrubs.",
-        "Sharing nursing opportunities at Duke Health — tag someone who should see this.",
+        "Sharing nursing opportunities at One Health — tag someone who should see this.",
         tags,
       ),
     ],
     engineering: [
       formatSocialCaption(
         `We're hiring engineers${place} who want their code to matter.`,
-        "At Duke Health, engineering work supports caregivers and patients — not just dashboards.",
+        "At One Health, engineering work supports caregivers and patients — not just dashboards.",
         "Know a builder who'd thrive here? Share this pack.",
         tags,
       ),
@@ -707,27 +707,27 @@ const buildAiCaptions = (brief: string, theme: AmplifyBriefTheme, role: string):
       ),
       formatSocialCaption(
         "Great engineers want impact, not just uptime.",
-        "Proud to share Duke Health engineering openings with my LinkedIn network.",
+        "Proud to share One Health engineering openings with my LinkedIn network.",
         tags,
       ),
       formatSocialCaption(
         "Modern stack. Mission-driven product. Real users on the front lines of care.",
-        "Duke Health is hiring engineers — help us reach the right people.",
+        "One Health is hiring engineers — help us reach the right people.",
         tags,
       ),
       formatSocialCaption(
         "If you love solving hard problems that actually help people, this one's for you.",
-        `Sharing ${role} engineering roles${place} at Duke Health.`,
+        `Sharing ${role} engineering roles${place} at One Health.`,
         tags,
       ),
       formatSocialCaption(
         "Referrals beat job boards every time.",
-        "Passing along Duke Health engineering careers to anyone exploring their next move.",
+        "Passing along One Health engineering careers to anyone exploring their next move.",
         tags,
       ),
       formatSocialCaption(
         "Building tools clinicians rely on is a different kind of product work.",
-        "Open engineering roles at Duke Health — share with your network.",
+        "Open engineering roles at One Health — share with your network.",
         tags,
       ),
       formatSocialCaption(
@@ -739,19 +739,19 @@ const buildAiCaptions = (brief: string, theme: AmplifyBriefTheme, role: string):
     sales: [
       formatSocialCaption(
         "Mission-led sales is a different conversation — and we're hiring.",
-        "Duke Health sales roles connect talent to care teams that need great people.",
+        "One Health sales roles connect talent to care teams that need great people.",
         "Share if you know a strong seller exploring healthcare.",
         tags,
       ),
       formatSocialCaption(
-        "Come meet the team at our next Duke Health hiring event.",
+        "Come meet the team at our next One Health hiring event.",
         "Real conversations, open roles, no cold-pitch energy.",
         "RSVP and share with someone who'd enjoy the room.",
         tags,
       ),
       formatSocialCaption(
         "Clear goals. Supportive leadership. Work that actually matters.",
-        "Sharing sales openings at Duke Health — link in the pack below.",
+        "Sharing sales openings at One Health — link in the pack below.",
         tags,
       ),
       formatSocialCaption(
@@ -761,7 +761,7 @@ const buildAiCaptions = (brief: string, theme: AmplifyBriefTheme, role: string):
       ),
       formatSocialCaption(
         "Healthcare sales with purpose > generic quota chasing.",
-        "Proud to amplify Duke Health sales careers today.",
+        "Proud to amplify One Health sales careers today.",
         tags,
       ),
       formatSocialCaption(
@@ -771,30 +771,30 @@ const buildAiCaptions = (brief: string, theme: AmplifyBriefTheme, role: string):
       ),
       formatSocialCaption(
         "Growing team, strong culture, roles worth talking about.",
-        "Duke Health sales is hiring — pass it on.",
+        "One Health sales is hiring — pass it on.",
         tags,
       ),
       formatSocialCaption(
         "Know a seller who cares about impact?",
-        "Point them to Duke Health — captions and assets ready to post.",
+        "Point them to One Health — captions and assets ready to post.",
         tags,
       ),
     ],
     erg: [
       formatSocialCaption(
         "Culture shows up in moments like this — not just on posters.",
-        "Proud of how our ERG community showed up this week at Duke Health.",
+        "Proud of how our ERG community showed up this week at One Health.",
         "Share if you're proud of where you work too.",
         tags,
       ),
       formatSocialCaption(
         "Belonging is built in public.",
-        "Celebrating our ERG and the people who make Duke Health feel like a community.",
+        "Celebrating our ERG and the people who make One Health feel like a community.",
         tags,
       ),
       formatSocialCaption(
         "Sustainability, inclusion, allyship — this is part of how we work.",
-        "Help us share what makes Duke Health culture real.",
+        "Help us share what makes One Health culture real.",
         tags,
       ),
       formatSocialCaption(
@@ -804,7 +804,7 @@ const buildAiCaptions = (brief: string, theme: AmplifyBriefTheme, role: string):
       ),
       formatSocialCaption(
         "Earth Day every day? That's the energy on our team.",
-        "Sharing a culture moment from Duke Health — tag a teammate.",
+        "Sharing a culture moment from One Health — tag a teammate.",
         tags,
       ),
       formatSocialCaption(
@@ -814,50 +814,50 @@ const buildAiCaptions = (brief: string, theme: AmplifyBriefTheme, role: string):
       ),
       formatSocialCaption(
         "Proud to work somewhere that invests in employee communities.",
-        "Share this Duke Health culture pack with your network.",
+        "Share this One Health culture pack with your network.",
         tags,
       ),
       formatSocialCaption(
         "When culture is authentic, employees become the best recruiters.",
-        "Pass along this ERG story from Duke Health.",
+        "Pass along this ERG story from One Health.",
         tags,
       ),
     ],
     benefits: [
       formatSocialCaption(
         "Benefits aren't a footnote — they're part of why people stay.",
-        "Sharing what total rewards actually look like at Duke Health.",
+        "Sharing what total rewards actually look like at One Health.",
         "Know someone comparing offers? This helps.",
         tags,
       ),
       formatSocialCaption(
         "Wellbeing, growth, flexibility — the full picture matters.",
-        "Proud to share Duke Health's benefits story with my network.",
+        "Proud to share One Health's benefits story with my network.",
         tags,
       ),
       formatSocialCaption(
         "Candidates ask what day-to-day life is really like.",
-        "Start with how Duke Health invests in employees — not just the shift.",
+        "Start with how One Health invests in employees — not just the shift.",
         tags,
       ),
       formatSocialCaption(
         "Great care for patients starts with care for our people.",
-        "Easy share pack on benefits and culture at Duke Health.",
+        "Easy share pack on benefits and culture at One Health.",
         tags,
       ),
       formatSocialCaption(
         "The perks slide never tells the whole story.",
-        "Here's a more honest share about working at Duke Health.",
+        "Here's a more honest share about working at One Health.",
         tags,
       ),
       formatSocialCaption(
         "If someone you know is weighing a move into healthcare, send this.",
-        "Benefits + culture pack from Duke Health.",
+        "Benefits + culture pack from One Health.",
         tags,
       ),
       formatSocialCaption(
         "Work-life balance isn't a buzzword on our team.",
-        "Sharing why Duke Health is worth a closer look.",
+        "Sharing why One Health is worth a closer look.",
         tags,
       ),
       formatSocialCaption(
@@ -868,7 +868,7 @@ const buildAiCaptions = (brief: string, theme: AmplifyBriefTheme, role: string):
     ],
     milestone: [
       formatSocialCaption(
-        "Another milestone on the team — grateful to grow at Duke Health.",
+        "Another milestone on the team — grateful to grow at One Health.",
         "From day one to year five, growth here is real.",
         "Share if you've had a similar journey.",
         tags,
@@ -880,17 +880,17 @@ const buildAiCaptions = (brief: string, theme: AmplifyBriefTheme, role: string):
       ),
       formatSocialCaption(
         "Tenure moments remind me why I stay.",
-        "Proud to amplify Duke Health career stories today.",
+        "Proud to amplify One Health career stories today.",
         tags,
       ),
       formatSocialCaption(
         "Mentorship + opportunity = stories worth sharing.",
-        "Pass this Duke Health pack to someone early in their career.",
+        "Pass this One Health pack to someone early in their career.",
         tags,
       ),
       formatSocialCaption(
         "This is what career growth looks like in healthcare.",
-        "Sharing a milestone moment from Duke Health.",
+        "Sharing a milestone moment from One Health.",
         tags,
       ),
       formatSocialCaption(
@@ -900,7 +900,7 @@ const buildAiCaptions = (brief: string, theme: AmplifyBriefTheme, role: string):
       ),
       formatSocialCaption(
         "Onboarding matters. So does what happens after.",
-        "Duke Health milestone story — worth a share.",
+        "One Health milestone story — worth a share.",
         tags,
       ),
       formatSocialCaption(
@@ -911,19 +911,19 @@ const buildAiCaptions = (brief: string, theme: AmplifyBriefTheme, role: string):
     ],
     event: [
       formatSocialCaption(
-        "Hiring event alert — Duke Health careers, live and in person.",
+        "Hiring event alert — One Health careers, live and in person.",
         "Bring a friend who's curious about healthcare roles.",
         "Details in the pack. Share to fill the room.",
         tags,
       ),
       formatSocialCaption(
         "Prefer meeting the team face-to-face?",
-        "Our next Duke Health recruiting event is coming up — RSVP and share.",
+        "Our next One Health recruiting event is coming up — RSVP and share.",
         tags,
       ),
       formatSocialCaption(
         "Open roles + real conversations + no awkward sales pitch.",
-        "Help us spread the word about this Duke Health event.",
+        "Help us spread the word about this One Health event.",
         tags,
       ),
       formatSocialCaption(
@@ -933,7 +933,7 @@ const buildAiCaptions = (brief: string, theme: AmplifyBriefTheme, role: string):
       ),
       formatSocialCaption(
         "Seats go fast for these sessions.",
-        "Pass this Duke Health hiring event to someone exploring options.",
+        "Pass this One Health hiring event to someone exploring options.",
         tags,
       ),
       formatSocialCaption(
@@ -943,19 +943,19 @@ const buildAiCaptions = (brief: string, theme: AmplifyBriefTheme, role: string):
       ),
       formatSocialCaption(
         "Meet recruiters, ask real questions, explore open roles.",
-        "Duke Health event pack ready to share.",
+        "One Health event pack ready to share.",
         tags,
       ),
       formatSocialCaption(
         "Know someone job searching in healthcare?",
-        "Point them to our upcoming Duke Health careers event.",
+        "Point them to our upcoming One Health careers event.",
         tags,
       ),
     ],
     testimonial: [
       formatSocialCaption(
         "Got 60 seconds?",
-        "Record a quick testimonial about life at Duke Health — your story helps candidates see the real us.",
+        "Record a quick testimonial about life at One Health — your story helps candidates see the real us.",
         tags,
       ),
       formatSocialCaption(
@@ -970,7 +970,7 @@ const buildAiCaptions = (brief: string, theme: AmplifyBriefTheme, role: string):
       ),
       formatSocialCaption(
         "Proud of your team? Capture it on camera.",
-        "Duke Health is collecting talent stories — easy ask in the pack.",
+        "One Health is collecting talent stories — easy ask in the pack.",
         tags,
       ),
       formatSocialCaption(
@@ -980,12 +980,12 @@ const buildAiCaptions = (brief: string, theme: AmplifyBriefTheme, role: string):
       ),
       formatSocialCaption(
         "Help the next hire feel at home before day one.",
-        "Record a short Duke Health story — link in the pack.",
+        "Record a short One Health story — link in the pack.",
         tags,
       ),
       formatSocialCaption(
         "Your perspective matters to candidates.",
-        "Share a video testimonial about working at Duke Health.",
+        "Share a video testimonial about working at One Health.",
         tags,
       ),
       formatSocialCaption(
@@ -996,7 +996,7 @@ const buildAiCaptions = (brief: string, theme: AmplifyBriefTheme, role: string):
     ],
     hiring: [
       formatSocialCaption(
-        `Proud to work at Duke Health — and we're hiring ${role}${place}.`,
+        `Proud to work at One Health — and we're hiring ${role}${place}.`,
         "Know someone looking for meaningful work? This pack makes it easy to share.",
         tags,
       ),
@@ -1007,12 +1007,12 @@ const buildAiCaptions = (brief: string, theme: AmplifyBriefTheme, role: string):
       ),
       formatSocialCaption(
         "Great roles. Real impact. Strong teammates.",
-        `Sharing Duke Health ${role} openings with my network today.`,
+        `Sharing One Health ${role} openings with my network today.`,
         tags,
       ),
       formatSocialCaption(
         "Not every opening gets a personal recommendation — this one does.",
-        `Exploring ${role} careers at Duke Health? Start here.`,
+        `Exploring ${role} careers at One Health? Start here.`,
         tags,
       ),
       formatSocialCaption(
@@ -1022,12 +1022,12 @@ const buildAiCaptions = (brief: string, theme: AmplifyBriefTheme, role: string):
       ),
       formatSocialCaption(
         "I'd want someone to send me this if I were job searching.",
-        `Duke Health ${role} roles${place} — captions ready to copy and post.`,
+        `One Health ${role} roles${place} — captions ready to copy and post.`,
         tags,
       ),
       formatSocialCaption(
         "Join a team that puts people first.",
-        `Sharing ${role} opportunities at Duke Health — link in the pack.`,
+        `Sharing ${role} opportunities at One Health — link in the pack.`,
         tags,
       ),
       formatSocialCaption(
@@ -1038,7 +1038,7 @@ const buildAiCaptions = (brief: string, theme: AmplifyBriefTheme, role: string):
     ],
     general: [
       formatSocialCaption(
-        "Proud to work at Duke Health — and we're hiring.",
+        "Proud to work at One Health — and we're hiring.",
         "If you know someone who'd thrive in healthcare, this is worth sharing.",
         tags,
       ),
@@ -1054,7 +1054,7 @@ const buildAiCaptions = (brief: string, theme: AmplifyBriefTheme, role: string):
       ),
       formatSocialCaption(
         "Culture shows up in how we talk about work.",
-        "Sharing Duke Health careers with my LinkedIn network today.",
+        "Sharing One Health careers with my LinkedIn network today.",
         tags,
       ),
       formatSocialCaption(
@@ -1064,7 +1064,7 @@ const buildAiCaptions = (brief: string, theme: AmplifyBriefTheme, role: string):
       ),
       formatSocialCaption(
         "Great roles, real impact.",
-        "Explore what's open at Duke Health and share with your network.",
+        "Explore what's open at One Health and share with your network.",
         tags,
       ),
       formatSocialCaption(
@@ -1074,7 +1074,7 @@ const buildAiCaptions = (brief: string, theme: AmplifyBriefTheme, role: string):
       ),
       formatSocialCaption(
         "I'm sharing this because I'd want someone to share it with me.",
-        "Duke Health careers — link below.",
+        "One Health careers — link below.",
         tags,
       ),
     ],
@@ -1223,18 +1223,18 @@ export const audienceSegmentOptions = [
 ];
 
 export const audienceEmployeeOptions = [
-  { name: "Marcus Chen", email: "marcus.chen@dukehealth.org", department: "Nursing" },
-  { name: "Aisha Rahman", email: "aisha.rahman@dukehealth.org", department: "Nursing" },
-  { name: "Jordan Blake", email: "jordan.blake@dukehealth.org", department: "Nursing" },
-  { name: "Priya Patel", email: "priya.patel@dukehealth.org", department: "Clinical Support" },
-  { name: "Sam Okonkwo", email: "sam.okonkwo@dukehealth.org", department: "Clinical Support" },
-  { name: "Elena Vasquez", email: "elena.vasquez@dukehealth.org", department: "Radiology" },
-  { name: "Chris Nguyen", email: "chris.nguyen@dukehealth.org", department: "Radiology" },
-  { name: "Taylor Brooks", email: "taylor.brooks@dukehealth.org", department: "Pharmacy" },
-  { name: "Morgan Ellis", email: "morgan.ellis@dukehealth.org", department: "Pharmacy" },
-  { name: "Riley Santos", email: "riley.santos@dukehealth.org", department: "IT & Digital" },
-  { name: "Casey Kim", email: "casey.kim@dukehealth.org", department: "IT & Digital" },
-  { name: "Harper Diaz", email: "harper.diaz@dukehealth.org", department: "HR & Talent" },
+  { name: "Marcus Chen", email: "marcus.chen@onehealth.org", department: "Nursing" },
+  { name: "Aisha Rahman", email: "aisha.rahman@onehealth.org", department: "Nursing" },
+  { name: "Jordan Blake", email: "jordan.blake@onehealth.org", department: "Nursing" },
+  { name: "Priya Patel", email: "priya.patel@onehealth.org", department: "Clinical Support" },
+  { name: "Sam Okonkwo", email: "sam.okonkwo@onehealth.org", department: "Clinical Support" },
+  { name: "Elena Vasquez", email: "elena.vasquez@onehealth.org", department: "Radiology" },
+  { name: "Chris Nguyen", email: "chris.nguyen@onehealth.org", department: "Radiology" },
+  { name: "Taylor Brooks", email: "taylor.brooks@onehealth.org", department: "Pharmacy" },
+  { name: "Morgan Ellis", email: "morgan.ellis@onehealth.org", department: "Pharmacy" },
+  { name: "Riley Santos", email: "riley.santos@onehealth.org", department: "IT & Digital" },
+  { name: "Casey Kim", email: "casey.kim@onehealth.org", department: "IT & Digital" },
+  { name: "Harper Diaz", email: "harper.diaz@onehealth.org", department: "HR & Talent" },
 ];
 
 export const channelOptions: { value: AmplifyChannel; label: string }[] = [

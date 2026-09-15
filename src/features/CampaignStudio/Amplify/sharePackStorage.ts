@@ -1,7 +1,9 @@
 import { demoSharePacks, demoVideoRequests, withDemoVideoSubmissions } from "./amplifyData";
 import { SharePack, VideoSubmission } from "./amplifyTypes";
 
-const STORAGE_KEY = "campaign-studio-share-packs";
+import { rebrandDemoValue } from "../demoBrand";
+
+const STORAGE_KEY = "campaign-studio-share-packs.v2";
 
 const hydrateVideoRequest = (pack: SharePack) => (pack.videoRequest ? withDemoVideoSubmissions(pack) : pack);
 
@@ -16,7 +18,7 @@ export const loadSharePacks = (): SharePack[] => {
   try {
     const raw = window.sessionStorage.getItem(STORAGE_KEY);
     if (!raw) return withDemoVideoRequests([...demoSharePacks]);
-    const parsed = JSON.parse(raw) as SharePack[];
+    const parsed = rebrandDemoValue(JSON.parse(raw) as SharePack[]);
     const packs = Array.isArray(parsed) && parsed.length > 0 ? parsed : [...demoSharePacks];
     return withDemoVideoRequests(packs);
   } catch {

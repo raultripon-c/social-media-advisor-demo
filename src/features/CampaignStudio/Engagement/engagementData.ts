@@ -114,14 +114,14 @@ export const adminEngagementSeed: AdminEngagementData = {
   topProfiles: [
     {
       id: "p1",
-      name: "Duke Health",
+      name: "One Health",
       platform: "linkedin",
       engagements: 13973,
       engagementRate: 6.65,
     },
     {
       id: "p2",
-      name: "Duke Health Careers",
+      name: "One Health Careers",
       platform: "instagram",
       engagements: 817,
       engagementRate: 5.55,
@@ -178,9 +178,9 @@ export const adminEngagementSeed: AdminEngagementData = {
   topCampaigns: [
     { id: "c1", name: "Nursing Career Stories", engagements: 10845, color: NETWORK_COLORS.LinkedIn },
     { id: "c2", name: "Atlanta Engineering Hiring", engagements: 8139, color: NETWORK_COLORS.Facebook },
-    { id: "c3", name: "Duke Health Nursing Hiring Event", engagements: 5193, color: NETWORK_COLORS.TikTok },
+    { id: "c3", name: "One Health Nursing Hiring Event", engagements: 5193, color: NETWORK_COLORS.TikTok },
     { id: "c4", name: "Employee Advocacy Share Pack", engagements: 4819, color: NETWORK_COLORS.Instagram },
-    { id: "c5", name: "Earth Day at Duke Health", engagements: 4414, color: NETWORK_COLORS.YouTube },
+    { id: "c5", name: "Earth Day at One Health", engagements: 4414, color: NETWORK_COLORS.YouTube },
     { id: "c6", name: "Clinical Excellence Week", engagements: 4009, color: "var(--secondary-orange-or-200, #ea580c)" },
     { id: "c7", name: "Sales & Service Career Fair", engagements: 3506, color: NETWORK_COLORS["X (Twitter)"] },
   ],

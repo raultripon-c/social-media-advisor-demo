@@ -4,8 +4,9 @@ import linkedinImage from "../../assets/campaign-studio/reference/linkedin-nursi
 import xImage from "../../assets/campaign-studio/reference/x-nursing-lifestyle.png";
 
 import { BriefDetails, Campaign, CampaignMetrics, CampaignPlatformName, CampaignStudioAdapter } from "./types";
+import { DEMO_EMPLOYER_NAME, rebrandDemoValue, rebrandTenantName } from "./demoBrand";
 
-const STORAGE_PREFIX = "txe.campaignStudio.campaigns.v2";
+const STORAGE_PREFIX = "txe.campaignStudio.campaigns.v3";
 
 export const channelOptions: CampaignPlatformName[] = ["LinkedIn", "Instagram", "Facebook", "X"];
 
@@ -21,25 +22,25 @@ export const templateCards = [
   {
     title: "Start Testimonial Campaign",
     prompt:
-      "Create an employee testimonial campaign for Duke Health. Feature authentic teammate stories that highlight growth, belonging, and patient impact. Target qualified candidates in Durham, NC with a warm, professional tone and invite them to explore open roles.",
+      "Create an employee testimonial campaign for One Health. Feature authentic teammate stories that highlight growth, belonging, and patient impact. Target qualified candidates in Durham, NC with a warm, professional tone and invite them to explore open roles.",
     icon: "user",
   },
   {
     title: "Showcase Your Culture",
     prompt:
-      "Create an employer brand campaign for Duke Health that showcases culture, community, and inclusive values. Highlight learning opportunities, team camaraderie, and why candidates should consider Duke Health before they start actively applying. Use a warm, professional tone.",
+      "Create an employer brand campaign for One Health that showcases culture, community, and inclusive values. Highlight learning opportunities, team camaraderie, and why candidates should consider One Health before they start actively applying. Use a warm, professional tone.",
     icon: "sparkle",
   },
   {
     title: "Promote Your Achievements",
     prompt:
-      "Create an employer brand campaign for Duke Health that promotes recent awards, recognition, and achievements. Emphasize excellence, pride, and why top talent should join the team. Target qualified candidates with a confident, professional tone and a clear call to explore open roles.",
+      "Create an employer brand campaign for One Health that promotes recent awards, recognition, and achievements. Emphasize excellence, pride, and why top talent should join the team. Target qualified candidates with a confident, professional tone and a clear call to explore open roles.",
     icon: "award",
   },
   {
     title: "Promote Your Event",
     prompt:
-      "Promote the Duke Health Nursing Hiring Event in Durham, NC. Drive RSVPs and attendance from experienced nurses with a direct, energetic tone that emphasizes meeting recruiters, learning about open roles, and next-step opportunities.",
+      "Promote the One Health Nursing Hiring Event in Durham, NC. Drive RSVPs and attendance from experienced nurses with a direct, energetic tone that emphasizes meeting recruiters, learning about open roles, and next-step opportunities.",
     icon: "calendar",
   },
   {
@@ -100,13 +101,15 @@ export const generationSteps = [
 export const getSelectedTenantName = () => {
   try {
     const selectedTenant = JSON.parse(localStorage.getItem("selectedTenant") || "{}");
-    return selectedTenant?.tenantName || selectedTenant?.customerName || "Phenom";
+    return rebrandTenantName(
+      selectedTenant?.tenantName || selectedTenant?.customerName || DEMO_EMPLOYER_NAME,
+    );
   } catch {
-    return "Phenom";
+    return DEMO_EMPLOYER_NAME;
   }
 };
 
-export const getSelectedTenantInitial = () => getSelectedTenantName().trim().charAt(0).toUpperCase() || "P";
+export const getSelectedTenantInitial = () => getSelectedTenantName().trim().charAt(0).toUpperCase() || "O";
 
 export const getRefNum = () => {
   try {
@@ -189,7 +192,7 @@ const platformSourceMap: Record<CampaignPlatformName, string> = {
 const toTrackingValue = (value: string) => value.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 
 export const buildChannelUtmLink = (destination: string, platform: CampaignPlatformName, campaignId: string) => {
-  const fallbackDestination = `https://careers.dukehealth.org/jobs?campaign=${encodeURIComponent(campaignId)}`;
+  const fallbackDestination = `https://careers.onehealth.org/jobs?campaign=${encodeURIComponent(campaignId)}`;
 
   try {
     const url = new URL(destination || fallbackDestination);
@@ -229,17 +232,17 @@ export const createCampaignFromBrief = (
   const details = parseBrief(brief, tone);
   const id = campaignId || `campaign-${Date.now()}`;
   const tenantName = getSelectedTenantName();
-  const employerName = tenantName === "Phenom" ? "Duke Health" : tenantName;
-  const ctaDestination = selectedCtaDestination || `https://careers.dukehealth.org/jobs?campaign=${id}`;
+  const employerName = /^(Phenom|One Health)$/i.test(tenantName) ? "One Health" : tenantName;
+  const ctaDestination = selectedCtaDestination || `https://careers.onehealth.org/jobs?campaign=${id}`;
   const mediaImages = options?.mediaImages?.filter(Boolean) || [];
 
   const platforms = selectedChannels.map((platform, index) => {
     const utmLink = buildChannelUtmLink(ctaDestination, platform, id);
     const copyByPlatform: Record<CampaignPlatformName, string> = {
       LinkedIn: `${employerName} is hiring ${details.role} in ${details.location}. Connect your experience with work that supports patients, families, and care teams every day. Learn more: ${utmLink}`,
-      Instagram: `Ready to bring your care skills to ${employerName}? 💙 Explore ${details.role} opportunities in ${details.location} and join a team built around patient impact. #DukeHealthCareers #NursingJobs #HealthcareCareers Learn more: ${utmLink}`,
+      Instagram: `Ready to bring your care skills to ${employerName}? 💙 Explore ${details.role} opportunities in ${details.location} and join a team built around patient impact. #OneHealthCareers #NursingJobs #HealthcareCareers Learn more: ${utmLink}`,
       Facebook: `Join ${employerName} and make an impact as part of our ${details.role} team in ${details.location}. We are reaching ${details.audience} with a ${details.tone.toLowerCase()} message. Learn more: ${utmLink}`,
-      X: `${employerName} is hiring ${details.role} in ${details.location}. Make a difference with a team focused on care, community, and growth. #DukeHealth #HealthcareJobs Learn more: ${utmLink}`,
+      X: `${employerName} is hiring ${details.role} in ${details.location}. Make a difference with a team focused on care, community, and growth. #OneHealth #HealthcareJobs Learn more: ${utmLink}`,
     };
     const copy = copyByPlatform[platform];
     const mediaImage = mediaImages[index % Math.max(mediaImages.length, 1)];
@@ -317,7 +320,7 @@ const demoCampaigns = (): Campaign[] => {
           "Healthcare Hiring Campaign",
           toneOptions[0],
           daysFromNow(0),
-          "https://careers.dukehealth.org/search-jobs/registered%20nurse",
+          "https://careers.onehealth.org/search-jobs/registered%20nurse",
           "demo-campaign-1",
           daysFromNow(-8)
         ),
@@ -337,7 +340,7 @@ const demoCampaigns = (): Campaign[] => {
           "Multi-Role Clinical Hiring Campaign",
           toneOptions[3],
           daysFromNow(5),
-          "https://careers.dukehealth.org/search-jobs/clinical",
+          "https://careers.onehealth.org/search-jobs/clinical",
           "demo-campaign-2",
           daysFromNow(-2)
         ),
@@ -352,16 +355,16 @@ const demoCampaigns = (): Campaign[] => {
     withPlatformMetrics(
       {
         ...createCampaignFromBrief(
-          "Promote the Duke Health Nursing Hiring Event in Durham, NC. Drive RSVPs and attendance with a direct and energetic tone.",
+          "Promote the One Health Nursing Hiring Event in Durham, NC. Drive RSVPs and attendance with a direct and energetic tone.",
           ["Instagram", "Facebook", "X"],
           "Nursing Event RSVP Campaign",
           toneOptions[2],
           daysFromNow(-7),
-          "https://careers.dukehealth.org/events/duke-health-nursing-hiring-event",
+          "https://careers.onehealth.org/events/one-health-nursing-hiring-event",
           "demo-campaign-3",
           daysFromNow(-20)
         ),
-        events: ["Duke Health Nursing Hiring Event", "Clinical Careers Open House", "Virtual Nurse Recruitment Webinar"],
+        events: ["One Health Nursing Hiring Event", "Clinical Careers Open House", "Virtual Nurse Recruitment Webinar"],
         status: "completed",
       },
       {
@@ -379,7 +382,7 @@ const demoCampaigns = (): Campaign[] => {
             "Patient Care Technician Launch",
             toneOptions[0],
             daysFromNow(3),
-            "https://careers.dukehealth.org/search-jobs/patient%20care%20technician",
+            "https://careers.onehealth.org/search-jobs/patient%20care%20technician",
             "demo-campaign-4",
             daysFromNow(0)
           ),
@@ -396,7 +399,7 @@ const demoCampaigns = (): Campaign[] => {
         "Pharmacy Technician Draft",
         toneOptions[1],
         daysFromNow(10),
-        "https://careers.dukehealth.org/search-jobs/pharmacy%20technician",
+        "https://careers.onehealth.org/search-jobs/pharmacy%20technician",
         "demo-campaign-5",
         daysFromNow(0)
       ),
@@ -408,7 +411,7 @@ const demoCampaigns = (): Campaign[] => {
         "Pharmacy Technician Draft",
         toneOptions[1],
         daysFromNow(10),
-        "https://careers.dukehealth.org/search-jobs/pharmacy%20technician",
+        "https://careers.onehealth.org/search-jobs/pharmacy%20technician",
         "demo-campaign-5",
         daysFromNow(0)
       ).platforms.map((platform) => ({ ...platform, metrics: { clicks: 0, applicationStarts: 0, applications: 0 } })),
@@ -424,7 +427,7 @@ const memoryCampaignStore: Record<string, Campaign[]> = {};
 const safeParseCampaigns = (value: string | null): Campaign[] => {
   if (!value) return [];
   try {
-    const parsed = JSON.parse(value);
+    const parsed = rebrandDemoValue(JSON.parse(value));
     return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];

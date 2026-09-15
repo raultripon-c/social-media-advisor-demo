@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import { reactKeycloakWebContext } from "phenom-auth-react-adapter";
+import { ensureDemoSelectedTenant } from "../features/CampaignStudio/demoBrand";
 
 const mockKeycloak = {
   authenticated: false,
@@ -57,6 +58,7 @@ export const LocalPreviewKeycloakProvider: React.FC<Props> = ({ children }) => {
     (window as any).keycloakInstance = mockKeycloak;
   }
   (window as any).orgInfo = value.orgInfo;
+  ensureDemoSelectedTenant();
 
   return (
     <reactKeycloakWebContext.Provider value={value as any}>

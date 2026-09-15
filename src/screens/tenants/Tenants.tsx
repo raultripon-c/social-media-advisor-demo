@@ -14,6 +14,16 @@ import { APIService } from "../../utils/api.service";
 import { apiUrl, loginSessionTimeIntervals } from "../../utils/constants";
 import "./Tenants.scss";
 import { handleDomainUrlForSite } from "../../utils/appUtils";
+import { DEMO_EMPLOYER_NAME, rebrandTenantName } from "../../features/CampaignStudio/demoBrand";
+
+const withDemoTenantName = (tenant: any) => {
+  if (!tenant || typeof tenant !== "object") return tenant;
+  return {
+    ...tenant,
+    tenantName: rebrandTenantName(tenant.tenantName),
+    customerName: rebrandTenantName(tenant.customerName || tenant.tenantName),
+  };
+};
 
 /**
  * The `Tenants` component is responsible for fetching and displaying a list of tenants.
@@ -92,7 +102,7 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
       .then((response: any) => {
         const result = response.data;
         if (response.status == 200 && result.status) {
-          const tenants = result.data;
+          const tenants = (result.data || []).map(withDemoTenantName);
           setTotalTenantsData(tenants);
           setFilteredData(
             tenants.sort((a: any, b: any) =>
@@ -114,7 +124,9 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
   };
 
   useEffect(() => {
-    let storedTenants = JSON.parse(sessionStorage.getItem("tenants") || "[]");
+    let storedTenants = (JSON.parse(sessionStorage.getItem("tenants") || "[]") as any[]).map(
+      withDemoTenantName
+    );
     if (storedTenants.length === 0) {
       if (!(userDetails?.userType === "PARTNER")) {
         APIService.getCustomerDetails(userDetails?.userOrg, dispatch);
@@ -123,6 +135,9 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
       }
     } else {
       dispatch(setAllTenants(storedTenants));
+      setTotalTenantsData(storedTenants);
+      setFilteredData(storedTenants);
+      sessionStorage.setItem("tenants", JSON.stringify(storedTenants));
       setIsLoading(false);
     }
   }, []);
@@ -161,30 +176,42 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
 
   useEffect(() => {
     if (customers?.length > 0) {
-      setTotalTenantsData(customers);
-      setFilteredData(customers);
+      const rebranded = customers.map(withDemoTenantName);
+      setTotalTenantsData(rebranded);
+      setFilteredData(rebranded);
     }
   }, [customers]);
 
   useEffect(() => {
     if (totalTenantsData?.length > 0) {
       setFilteredData(
-        totalTenantsData.sort((a: any, b: any) =>
-          a.tenantName.localeCompare(b.tenantName)
-        )
+        [...totalTenantsData]
+          .map(withDemoTenantName)
+          .sort((a: any, b: any) => a.tenantName.localeCompare(b.tenantName))
       );
     }
   }, [totalTenantsData]);
 
   const navigateToDashBoard = async (selectedTenant: any = {}) => {
-    const tenantsUrl = `${(window as any)._env_.APP_API_URL}/customers/tenants/${selectedTenant?.refNum}`;
+    const demoTenant = withDemoTenantName(selectedTenant);
+    const tenantsUrl = `${(window as any)._env_.APP_API_URL}/customers/tenants/${demoTenant?.refNum}`;
     APIService.getTenants(tenantsUrl, dispatch).then((response: any) => {
-      let customerCode = selectedTenant.customerCode;
-      let refNum = selectedTenant.refNum;
+      let customerCode = demoTenant.customerCode;
+      let refNum = demoTenant.refNum;
       if(response?.customerCode && response?.refNum) {
         customerCode = response.customerCode;
         refNum = response.refNum;
       }
+      const nextTenant = withDemoTenantName({
+        ...demoTenant,
+        ...(response || {}),
+        customerCode,
+        refNum,
+        tenantName: DEMO_EMPLOYER_NAME,
+        customerName: DEMO_EMPLOYER_NAME,
+      });
+      localStorage.setItem("selectedTenant", JSON.stringify(nextTenant));
+      dispatch(setSelectedTenant(nextTenant));
       setIsNavigationLoading(false);
       navigate(
       `/${customerCode}/${refNum}/summary`
@@ -233,7 +260,7 @@ const Tenants: React.FC<TenantsProps> = ({ allApps, setAllApps }) => {
                 await navigateToDashBoard(eachTenant);
               }}
             >
-              <span>{eachTenant.tenantName}</span>
+              <span>{rebrandTenantName(eachTenant.tenantName)}</span>
             </div>
           ))}
           {filteredData?.length === 0 && (

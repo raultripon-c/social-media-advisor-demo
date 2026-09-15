@@ -13,7 +13,7 @@ ${CAMPAIGN_QUESTION_TOKEN}`;
 const getDefaultFromEmail = () => {
   const userDetails = (window as { keycloakInstance?: { tokenParsed?: { userDetails?: { userName?: string; email?: string } } } })
     .keycloakInstance?.tokenParsed?.userDetails;
-  return userDetails?.userName || userDetails?.email || "local.preview@dukehealth.org";
+  return userDetails?.userName || userDetails?.email || "local.preview@onehealth.org";
 };
 
 interface ShareViaEmailModalProps {

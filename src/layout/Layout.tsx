@@ -15,6 +15,7 @@ import Tracker from '@openreplay/tracker';
 import { fetchCrmTenants } from "../utils/api.service";
 import PhollySdkRoot from "../components/PhollySdkRoot";
 import { isCampaignStudioPreviewPath, isSmaDemoOnly } from "../utils/smaDemo";
+import { rebrandTenantName } from "../features/CampaignStudio/demoBrand";
 
 const Layout = () => {
   const navigate = useNavigate();
@@ -162,8 +163,8 @@ const Layout = () => {
           <div className="service-tools-app-header">
             <Header
               allApps={allApps}
-              customerName={selectedTenant?.customerName ?? ""}
-              tenantName={selectedTenant?.tenantName ?? ""}
+              customerName={rebrandTenantName(selectedTenant?.customerName ?? "")}
+              tenantName={rebrandTenantName(selectedTenant?.tenantName ?? "")}
               customerTenants={customerTenants}
               isCustomerPage={
                 selectedTenant &&

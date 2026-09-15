@@ -14,7 +14,7 @@ import linkIcon from "../../../assets/svg/link.svg";
 import copyIcon from "../../../assets/svg/copy.svg";
 import checkIcon from "../../../assets/svg/check.svg";
 import infoIcon from "../../../assets/svg/info.svg";
-import phenomLogo from "../../../assets/images/phenom-logo.svg";
+import oneHealthLogo from "../../../assets/campaign-studio/one-health-logo-avatar.png";
 import linkedinLogo from "../../../assets/svg/social/linkedin-logo.svg";
 import facebookLogo from "../../../assets/svg/social/facebook-logo.svg";
 import xLogo from "../../../assets/svg/social/x-logo.svg";
@@ -1779,7 +1779,7 @@ const SharepackDetail = ({
           ) : (
             <Feedback
               tone="info"
-              message="Phenom prepares the approved content. Download or copy it here, then post it manually in the external social platform of your choice."
+              message="One Health prepares the approved content. Download or copy it here, then post it manually in the external social platform of your choice."
             />
           )}
 
@@ -1838,7 +1838,7 @@ const SharepackDetail = ({
 
         <footer className="eaw-drawer__footer">
           <p>
-            “Mark as shared” is self-reported. Phenom does not verify that the
+            “Mark as shared” is self-reported. One Health does not verify that the
             content was published externally.
           </p>
           <DsButton
@@ -2212,7 +2212,7 @@ export const EmployeeAdvocacyWorkspace: React.FC = () => {
         setFeedback({
           tone: "info",
           message:
-            "Marked as self-reported shared. Phenom has not verified an external publication.",
+            "Marked as self-reported shared. One Health has not verified an external publication.",
         });
       }
     } catch {
@@ -2327,7 +2327,7 @@ export const EmployeeAdvocacyWorkspace: React.FC = () => {
     setFeedback({
       tone: "info",
       message:
-        "Marked as self-reported shared. Phenom has not verified an external publication.",
+        "Marked as self-reported shared. One Health has not verified an external publication.",
     });
   };
 
@@ -2384,12 +2384,12 @@ export const EmployeeAdvocacyWorkspace: React.FC = () => {
         <div className="eaw-brand">
           <img
             className="eaw-brand-logo"
-            src={phenomLogo}
+            src={oneHealthLogo}
             alt=""
             aria-hidden="true"
           />
           <div>
-            <strong>Phenom</strong>
+            <strong>One Health</strong>
             <span>Employee Advocacy</span>
           </div>
         </div>

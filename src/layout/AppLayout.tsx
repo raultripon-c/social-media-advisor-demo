@@ -36,6 +36,7 @@ import { AppSelectionOptions } from "interfaces/AppSelectionOptions";
 import { Loader } from "@phenom/react-ui-components";
 import { CommonConstants } from "../utils/common-constants";
 import { isCampaignStudioPreviewPath, isSmaDemoOnly } from "../utils/smaDemo";
+import { ensureDemoSelectedTenant } from "../features/CampaignStudio/demoBrand";
 
 interface AppLayoutProps {
   allApps: any;
@@ -208,6 +209,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({}) => {
 
   useEffect(() => {
     if (isLocalCampaignStudioPreview) {
+      ensureDemoSelectedTenant();
       setAllRoutes(appRoutes);
       setIsAppsLoaded(true);
       setAppsLoader(false);
